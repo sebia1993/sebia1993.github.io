@@ -1,23 +1,218 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="현상일 무선 네트워크 운영 엔지니어 웹 이력서">
 <title>현상일 | 무선 네트워크 운영 엔지니어</title>
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<header><div class="shell topbar"><a class="brand" href="#top">현상일<b>.</b> 네트워크 이력서</a><nav class="nav"><a href="#experience">경력</a><a href="#skills">기술 스택</a><a href="#projects">프로젝트</a><a href="#certifications">자격증</a><button class="btn print-hide" onclick="window.print()">인쇄 / PDF 저장</button></nav></div></header>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="#top">현상일<b>.</b> 네트워크 이력서</a>
+    <nav class="nav">
+      <a href="#experience">경력</a><a href="#skills">기술 스택</a><a href="#projects">프로젝트</a><a href="#certifications">자격증</a>
+      <button class="btn print-hide" onclick="window.print()">인쇄 / PDF 저장</button>
+    </nav>
+  </div>
+</header>
+
 <main id="top">
-<section class="hero"><div class="shell"><div class="eyebrow">Wireless Network Operations Engineer</div><h1>현상일</h1><p class="subtitle">Enterprise WLAN · NAC · Campus Network · Network Automation</p><p>대규모 무선 네트워크를 직접 운영하고, 장애를 1차 판단·복구·검증하며 반복 운영을 자동화로 개선합니다. WLAN/NAC 운영을 중심으로 Campus Switching과 Network Automation까지 실무 범위를 넓혀가고 있습니다.</p><div class="contact"><a class="btn primary" href="mailto:sebia1993@gmail.com">sebia1993@gmail.com</a><a class="btn" href="https://github.com/sebia1993" target="_blank" rel="noreferrer">GitHub ↗</a><a class="btn" href="./projects.html">프로젝트 상세 ↗</a><a class="btn" href="./troubleshooting.html">장애분석 방식 ↗</a></div></div></section>
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">CAREER SUMMARY</div><h2>경력 요약</h2></div></div><div class="summary-grid"><article class="card"><div class="mini">경력</div><div class="metric">2024.01–</div><p>무선 네트워크 운영</p></article><article class="card"><div class="mini">운영 사업장</div><div class="metric">3</div><p>직접 운영</p></article><article class="card"><div class="mini">최대 사업장</div><div class="metric">2.5K+ AP</div><p>대규모 Campus</p></article><article class="card"><div class="mini">Access Layer</div><div class="metric">250+ Switch</div><p>주 사업장 규모</p></article><article class="card"><div class="mini">차별점</div><div class="metric">Automation</div><p>문제 정의 → 개선 → 도구화</p></article></div></div></section>
-<section id="experience"><div class="shell"><div class="section-head"><div><div class="eyebrow">PROFESSIONAL EXPERIENCE</div><h2>경력</h2></div></div><div class="timeline"><article class="job"><div class="job-head"><div><h3>무선 네트워크 운영 엔지니어</h3><div class="mini">대규모 Enterprise Campus 환경</div></div><div class="period">2024.01 – 현재</div></div></article></div><div class="split"><article class="card"><h3 class="box-title">주요 업무</h3><ul class="clean-list"><li>3개 사업장의 Enterprise WLAN/NAC 직접 운영</li><li>Aruba Controller/MM/AP 상태확인·설정변경·AP 등록/교체·장애조치·재분배</li><li>ClearPass Access Tracker, MAC 등록, 인증·정책 상태 확인</li><li>Access Switch VLAN/Trunk/Port 확인 및 필요 시 설정 변경·장애 복구</li><li>1차 장애 범위 판단, 임시 복구, 변경 후 정상 여부 검증</li><li>자체 영역 정상 근거 확보 후 Backbone/Firewall/Server 담당으로 이관</li></ul></article><article class="card"><h3 class="box-title">주요 기여</h3><ul class="clean-list"><li>반복 CLI 상태조회·세션조회를 자동 수집 방식으로 전환</li><li>여러 장비 결과를 HTML로 통합해 상태와 변경점을 한 화면에서 확인</li><li>작업 절차·점검항목을 문서화하고 반복 작업 개입 시간을 축소</li><li>자동화 도구를 실제 환경에서 검증해 현업 사용 가능한 수준으로 안정화</li><li>문제 정의·판정 기준·검증 시나리오를 직접 설계해 운영 개선에 반영</li></ul></article></div></div></section>
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">OPERATIONAL SCOPE</div><h2>운영 범위</h2></div><p>단순 모니터링이 아니라 분석·변경·복구·검증까지 수행합니다.</p></div><div class="scope-flow"><div class="scope-step"><b>모니터링</b><span>상태·세션·인증 확인</span></div><div class="scope-step"><b>분석</b><span>1차 원인범위 판단</span></div><div class="scope-step"><b>변경</b><span>운영범위 설정 변경</span></div><div class="scope-step"><b>복구</b><span>임시 우회·복구</span></div><div class="scope-step"><b>검증</b><span>변경 후 정상 확인</span></div><div class="scope-step"><b>이관</b><span>근거 기반 타부서 협업</span></div></div></div></section>
-<section id="skills"><div class="shell"><div class="section-head"><div><div class="eyebrow">TECHNICAL SKILLS</div><h2>기술 스택</h2></div></div><article class="card"><div class="skills"><b>Wireless / NAC</b><div class="chips"><span class="chip">Aruba WLAN</span><span class="chip">Controller / MM</span><span class="chip">ClearPass</span><span class="chip">802.1X</span><span class="chip">RADIUS</span><span class="chip">MAC Authentication</span><span class="chip">DFS</span></div></div><div class="skills"><b>Campus Network</b><div class="chips"><span class="chip">Aruba / HPE Switching</span><span class="chip">VLAN</span><span class="chip">Trunk</span><span class="chip">STP</span><span class="chip">LACP</span><span class="chip">ACL</span><span class="chip">PoE / SFP</span></div></div><div class="skills"><b>Troubleshooting</b><div class="chips"><span class="chip">Wireshark</span><span class="chip">Packet Analysis</span><span class="chip">Session Analysis</span><span class="chip">DHCP</span><span class="chip">DNS</span><span class="chip">ARP</span><span class="chip">TCP/IP</span></div></div><div class="skills"><b>Automation</b><div class="chips"><span class="chip">Python</span><span class="chip">C#</span><span class="chip">SSH</span><span class="chip">Parsing</span><span class="chip">HTML Reporting</span><span class="chip">Git</span><span class="chip">GitHub Actions</span></div></div></article></div></section>
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">OPERATIONAL AUTOMATION</div><h2>반복 운영을 자동화한 방식</h2></div><p>자동화 자체보다 운영 흐름이 어떻게 바뀌었는지를 보여줍니다.</p></div><div class="automation"><article class="automation-box"><span class="tag plan">기존</span><h3>수작업 중심</h3><p>장비별 접속 → 상태값·세션 조회 → 결과 복사 → 메모/Excel 정리 → 장비별 결과 비교</p></article><div class="arrow">→</div><article class="automation-box"><span class="tag prod">개선 후</span><h3>자동 수집 중심</h3><p>프로그램 실행 → 데이터 자동 수집·정리 → HTML에서 상태와 변경점 확인</p></article></div></div></section>
-<section id="projects"><div class="shell"><div class="section-head"><div><div class="eyebrow">SELECTED PROJECTS</div><h2>대표 프로젝트</h2></div><p>메인 이력서에는 업무 가치만 요약하고 상세 내용은 별도 페이지에서 확인할 수 있습니다.</p></div><div class="grid grid3"><article class="card project-card"><span class="tag prod">WLAN · OBSERVABILITY</span><h3>Aruba Cluster Health Dashboard</h3><p class="project-value">여러 Controller에 개별 접속해 상태를 대조하던 반복 점검을 한 번의 수집과 하나의 판단 화면으로 통합.</p><div class="project-meta">역할: 문제 정의 · 수집항목/판정기준/UI 요구 · 실제 환경 테스트/검증</div><a href="./projects.html#cluster">상세 보기 →</a></article><article class="card project-card"><span class="tag prod">PACKET · TROUBLESHOOTING</span><h3>WLAN Troubleshooter KO</h3><p class="project-value">802.11부터 TCP까지 패킷 근거를 연결해 관찰된 사실과 추정을 분리하는 장애분석 도구.</p><div class="project-meta">역할: 분석범위 · 실패/판단불가 기준 · UI 요구 · 실제 테스트/검증</div><a href="./projects.html#wlan">상세 보기 →</a></article><article class="card project-card"><span class="tag proj">CAMPUS · CHANGE</span><h3>HPE Comware Change Validator</h3><p class="project-value">작업 전후 L2/L3 상태를 자동 비교하고 위험 변화만 HTML로 정리해 수작업 비교를 축소.</p><div class="project-meta">역할: 수집명령 · 비교기준 · 위험판정 · HTML 구조 · 운영환경 검증</div><a href="./projects.html#validator">상세 보기 →</a></article></div></div></section>
-<section id="certifications"><div class="shell"><div class="section-head"><div><div class="eyebrow">CERTIFICATIONS</div><h2>네트워크 자격증</h2></div></div><div class="cert-grid"><article class="cert-card wm-cisco"><div class="wordmark"><span class="wm-main">CISCO</span><span class="wm-sub">NETWORKING</span></div><div class="cert-name"><strong>CCNA</strong><span>Cisco Certified Network Associate</span></div></article><article class="cert-card wm-juniper"><div class="wordmark"><span class="wm-main">JUNIPER</span><span class="wm-sub">NETWORKS</span></div><div class="cert-name"><strong>JNCIA-JUNOS</strong><span>Juniper Networks Certified Associate</span></div></article><article class="cert-card wm-hpe"><div class="wordmark"><span class="wm-main">HPE</span><span class="wm-sub">ARUBA NETWORKING</span></div><div class="cert-name"><strong>HPE Network Campus Access Associate</strong><span>Campus Access</span></div></article></div></div></section>
-<section id="education"><div class="shell"><div class="section-head"><div><div class="eyebrow">EDUCATION</div><h2>학력</h2></div></div><article class="card edu"><div><h3>한국방송통신대학교</h3><p>컴퓨터과학과 재학</p></div><span class="tag learn">Computer Science</span></article></div></section>
-<section><div class="shell"><div class="note"><b>한 줄 소개</b><br>대규모 Enterprise WLAN/NAC를 직접 운영하고 1차 장애 판단·복구·검증까지 수행하며, 반복 운영을 자동화로 개선하는 무선 네트워크 운영 엔지니어입니다.</div></div></section>
-</main><div class="footer"><div class="shell">현상일 · sebia1993@gmail.com · github.com/sebia1993</div></div>
-</body></html>
+<section class="hero">
+  <div class="shell">
+    <div class="eyebrow">Wireless Network Operations Engineer</div>
+    <h1>현상일</h1>
+    <p class="subtitle">Enterprise WLAN · NAC · Campus Network · Network Automation</p>
+    <p>
+      대규모 무선 네트워크를 직접 운영하고, 장애를 1차 판단·복구·검증하며 반복 운영을 자동화로 개선합니다.
+      WLAN/NAC 운영을 중심으로 Campus Switching과 Network Automation까지 실무 범위를 넓혀가고 있습니다.
+    </p>
+    <div class="contact">
+      <a class="btn primary" href="mailto:sebia1993@gmail.com">sebia1993@gmail.com</a>
+      <a class="btn" href="https://github.com/sebia1993" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <a class="btn" href="./projects.html">프로젝트 상세 ↗</a>
+      <a class="btn" href="./troubleshooting.html">장애분석 방식 ↗</a>
+      <a class="btn" href="./roadmap.html">학습 로드맵 ↗</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">CAREER SUMMARY</div><h2>경력 요약</h2></div></div>
+    <div class="summary-grid">
+      <article class="card"><div class="mini">경력</div><div class="metric">2024.01–</div><p>무선 네트워크 운영</p></article>
+      <article class="card"><div class="mini">운영 사업장</div><div class="metric">3</div><p>직접 운영</p></article>
+      <article class="card"><div class="mini">최대 사업장</div><div class="metric">2.5K+ AP</div><p>대규모 Campus</p></article>
+      <article class="card"><div class="mini">Access Layer</div><div class="metric">250+ Switch</div><p>주 사업장 규모</p></article>
+      <article class="card"><div class="mini">차별점</div><div class="metric">Automation</div><p>문제 정의 → 개선 → 도구화</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">PROFESSIONAL EXPERIENCE</div><h2>경력</h2></div></div>
+    <div class="timeline">
+      <article class="job">
+        <div class="job-head">
+          <div><h3>무선 네트워크 운영 엔지니어</h3><div class="mini">대규모 Enterprise Campus 환경</div></div>
+          <div class="period">2024.01 – 현재</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="split">
+      <article class="card">
+        <h3 class="box-title">주요 업무</h3>
+        <ul class="clean-list">
+          <li>3개 사업장의 Enterprise WLAN/NAC 직접 운영</li>
+          <li>Aruba Controller/MM/AP 상태확인·설정변경·AP 등록/교체·장애조치·재분배</li>
+          <li>ClearPass Access Tracker, MAC 등록, 인증·정책 상태 확인</li>
+          <li>Access Switch VLAN/Trunk/Port 확인 및 필요 시 설정 변경·장애 복구</li>
+          <li>1차 장애 범위 판단, 임시 복구, 변경 후 정상 여부 검증</li>
+          <li>자체 영역 정상 근거 확보 후 Backbone/Firewall/Server 담당으로 이관</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3 class="box-title">주요 기여</h3>
+        <ul class="clean-list">
+          <li>반복 CLI 상태조회·세션조회를 자동 수집 방식으로 전환</li>
+          <li>여러 장비 결과를 HTML로 통합해 상태와 변경점을 한 화면에서 확인</li>
+          <li>작업 절차·점검항목을 문서화하고 반복 작업 개입 시간을 축소</li>
+          <li>자동화 도구를 실제 환경에서 검증해 현업 사용 가능한 수준으로 안정화</li>
+          <li>문제 정의·판정 기준·검증 시나리오를 직접 설계해 운영 개선에 반영</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">OPERATIONAL SCOPE</div><h2>운영 범위</h2></div>
+      <p>단순 모니터링이 아니라 분석·변경·복구·검증까지 수행합니다.</p>
+    </div>
+    <div class="scope-flow">
+      <div class="scope-step"><b>모니터링</b><span>상태·세션·인증 확인</span></div>
+      <div class="scope-step"><b>분석</b><span>1차 원인범위 판단</span></div>
+      <div class="scope-step"><b>변경</b><span>운영범위 설정 변경</span></div>
+      <div class="scope-step"><b>복구</b><span>임시 우회·복구</span></div>
+      <div class="scope-step"><b>검증</b><span>변경 후 정상 확인</span></div>
+      <div class="scope-step"><b>이관</b><span>근거 기반 타부서 협업</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">TECHNICAL SKILLS</div><h2>기술 스택</h2></div></div>
+    <article class="card">
+      <div class="skills"><b>Wireless / NAC</b><div class="chips"><span class="chip">Aruba WLAN</span><span class="chip">Controller / MM</span><span class="chip">ClearPass</span><span class="chip">802.1X</span><span class="chip">RADIUS</span><span class="chip">MAC Authentication</span><span class="chip">DFS</span></div></div>
+      <div class="skills"><b>Campus Network</b><div class="chips"><span class="chip">Aruba / HPE Switching</span><span class="chip">VLAN</span><span class="chip">Trunk</span><span class="chip">STP</span><span class="chip">LACP</span><span class="chip">ACL</span><span class="chip">PoE / SFP</span></div></div>
+      <div class="skills"><b>Troubleshooting</b><div class="chips"><span class="chip">Wireshark</span><span class="chip">Packet Analysis</span><span class="chip">Session Analysis</span><span class="chip">DHCP</span><span class="chip">DNS</span><span class="chip">ARP</span><span class="chip">TCP/IP</span></div></div>
+      <div class="skills"><b>Automation</b><div class="chips"><span class="chip">Python</span><span class="chip">C#</span><span class="chip">SSH</span><span class="chip">Parsing</span><span class="chip">HTML Reporting</span><span class="chip">Git</span><span class="chip">GitHub Actions</span></div></div>
+    </article>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">OPERATIONAL AUTOMATION</div><h2>반복 운영을 자동화한 방식</h2></div>
+      <p>자동화 자체보다 운영 흐름이 어떻게 바뀌었는지를 보여줍니다.</p>
+    </div>
+    <div class="automation">
+      <article class="automation-box">
+        <span class="tag plan">기존</span>
+        <h3>수작업 중심</h3>
+        <p>장비별 접속 → 상태값·세션 조회 → 결과 복사 → 메모/Excel 정리 → 장비별 결과 비교</p>
+      </article>
+      <div class="arrow">→</div>
+      <article class="automation-box">
+        <span class="tag prod">개선 후</span>
+        <h3>자동 수집 중심</h3>
+        <p>프로그램 실행 → 데이터 자동 수집·정리 → HTML에서 상태와 변경점 확인</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">SELECTED PROJECTS</div><h2>대표 프로젝트</h2></div>
+      <p>메인 이력서에는 업무 가치만 요약하고 상세 내용은 별도 페이지에서 확인할 수 있습니다.</p>
+    </div>
+    <div class="grid grid3">
+      <article class="card project-card">
+        <span class="tag prod">WLAN · OBSERVABILITY</span>
+        <h3>Aruba Cluster Health Dashboard</h3>
+        <p class="project-value">여러 Controller에 개별 접속해 상태를 대조하던 반복 점검을 한 번의 수집과 하나의 판단 화면으로 통합.</p>
+        <div class="project-meta">역할: 문제 정의 · 수집항목/판정기준/UI 요구 · 실제 환경 테스트/검증</div>
+        <a href="./projects.html#cluster">상세 보기 →</a>
+      </article>
+      <article class="card project-card">
+        <span class="tag prod">PACKET · TROUBLESHOOTING</span>
+        <h3>WLAN Troubleshooter KO</h3>
+        <p class="project-value">802.11부터 TCP까지 패킷 근거를 연결해 관찰된 사실과 추정을 분리하는 장애분석 도구.</p>
+        <div class="project-meta">역할: 분석범위 · 실패/판단불가 기준 · UI 요구 · 실제 테스트/검증</div>
+        <a href="./projects.html#wlan">상세 보기 →</a>
+      </article>
+      <article class="card project-card">
+        <span class="tag proj">CAMPUS · CHANGE</span>
+        <h3>HPE Comware Change Validator</h3>
+        <p class="project-value">작업 전후 L2/L3 상태를 자동 비교하고 위험 변화만 HTML로 정리해 수작업 비교를 축소.</p>
+        <div class="project-meta">역할: 수집명령 · 비교기준 · 위험판정 · HTML 구조 · 운영환경 검증</div>
+        <a href="./projects.html#validator">상세 보기 →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">CERTIFICATIONS</div><h2>네트워크 자격증</h2></div></div>
+    <div class="cert-grid">
+      <article class="cert-card wm-cisco">
+        <div class="wordmark"><span class="wm-main">CISCO</span><span class="wm-sub">NETWORKING</span></div>
+        <div class="cert-name"><strong>CCNA</strong><span>Cisco Certified Network Associate</span></div>
+      </article>
+      <article class="cert-card wm-juniper">
+        <div class="wordmark"><span class="wm-main">JUNIPER</span><span class="wm-sub">NETWORKS</span></div>
+        <div class="cert-name"><strong>JNCIA-JUNOS</strong><span>Juniper Networks Certified Associate</span></div>
+      </article>
+      <article class="cert-card wm-hpe">
+        <div class="wordmark"><span class="wm-main">HPE</span><span class="wm-sub">ARUBA NETWORKING</span></div>
+        <div class="cert-name"><strong>HPE Network Campus Access Associate</strong><span>Campus Access</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">EDUCATION</div><h2>학력</h2></div></div>
+    <article class="card edu">
+      <div><h3>한국방송통신대학교</h3><p>컴퓨터과학과</p></div>
+      <span class="tag learn">Computer Science</span>
+    </article>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="note">
+      <b>한 줄 소개</b><br>
+      대규모 Enterprise WLAN/NAC를 직접 운영하고 1차 장애 판단·복구·검증까지 수행하며,
+      반복 운영을 자동화로 개선하는 무선 네트워크 운영 엔지니어입니다.
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="footer"><div class="shell">현상일 · sebia1993@gmail.com · github.com/sebia1993</div></div>
+</body>
+</html>
