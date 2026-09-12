@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ARP와 Default Gateway 학습 기록">
+<title>ARP / Default Gateway | 학습 기록</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.lab-hero{padding:76px 0 36px}.lab-hero p{max-width:880px;color:var(--muted)}
+.statusbar{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 0}.status{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel3);font-size:.82rem}.status.ready{color:var(--amber);border-color:#8e6837}
+.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.metricbox{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.metricbox b{font-size:1.35rem;display:block}.metricbox span{font-size:.78rem;color:var(--muted)}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{padding:20px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(16,34,54,.97),rgba(13,27,42,.97));box-shadow:var(--shadow)}.panel h3{margin:4px 0 10px}.panel ul{margin:0;padding-left:18px}.panel li{margin:7px 0;color:#d4dfeb}
+.topology{display:grid;place-items:center;padding:26px;border:1px solid var(--line);border-radius:16px;background:var(--panel3);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;text-align:left;overflow:auto}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.check{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:#d5e1ed}.check::before{content:"○";margin-right:8px;color:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.flow div{padding:13px;border:1px solid var(--line);border-radius:12px;text-align:center;background:var(--panel3)}.flow b{display:block}.flow span{font-size:.76rem;color:var(--muted)}
+.log{border-left:2px solid var(--blue);padding-left:18px}.log-item{margin:0 0 18px}.log-item b{display:block}.log-item span{font-size:.82rem;color:var(--muted)}
+.warning{padding:15px 17px;border:1px solid #765f38;background:rgba(255,191,105,.07);border-radius:12px;color:#e8d8b8}
+.links{display:flex;gap:10px;flex-wrap:wrap}.links a{color:var(--blue);font-weight:800;text-decoration:none}
+@media(max-width:960px){.metrics{grid-template-columns:repeat(3,1fr)}.flow{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.lab-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.checks{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><div class="nav"><a href="#goal">목표</a><a href="#lab">Lab</a><a href="#faults">장애 실험</a><a href="#evidence">Evidence</a></div></div></header>
+<main>
+<section class="lab-hero"><div class="shell"><div class="eyebrow">FOUNDATION · LEARNING EVIDENCE</div><h1>ARP / <em>Default Gateway</em></h1><p>다른 Subnet으로 Packet을 보낼 때 ARP와 Default Gateway가 어떤 역할을 하는지, Frame과 Packet이 실제로 어떻게 전달되는지 직접 구성·캡처·장애재현으로 확인하는 첫 번째 학습 기록입니다.</p><div class="statusbar"><span class="status ready">상태: 실습 준비</span><span class="status">실제 Lab: 0</span><span class="status">장애 재현: 0</span><span class="status">Packet Capture: 0</span><span class="status">복구 검증: 0</span></div></div></section>
+
+<section><div class="shell"><div class="warning"><b>현재 상태</b><br>학습 구조와 실험 계획만 준비된 상태입니다. 아래 항목은 실제로 수행한 뒤에만 완료 표시와 Evidence 수치를 올립니다.</div></div></section>
+
+<section><div class="shell"><div class="section-head"><div><div class="eyebrow">EVIDENCE METRICS</div><h2>현재 누적 증거</h2></div></div><div class="metrics"><div class="metricbox"><b>0</b><span>직접 구성한 Lab</span></div><div class="metricbox"><b>0</b><span>장애 시나리오</span></div><div class="metricbox"><b>0</b><span>Packet Capture</span></div><div class="metricbox"><b>0</b><span>복구 검증</span></div><div class="metricbox"><b>0</b><span>설명 노트</span></div><div class="metricbox"><b>0</b><span>Automation</span></div></div></div></section>
+
+<section id="goal"><div class="shell"><div class="section-head"><div><div class="eyebrow">01 · GOAL</div><h2>학습 목표</h2></div></div><div class="lab-grid"><article class="panel"><h3>설명할 수 있어야 하는 것</h3><ul><li>ARP가 필요한 이유</li><li>ARP Request가 Broadcast인 이유</li><li>같은 Subnet과 다른 Subnet 통신의 차이</li><li>Destination IP와 Destination MAC의 차이</li><li>Default Gateway가 필요한 이유</li><li>Switch와 Router의 Forwarding 기준 차이</li></ul></article><article class="panel"><h3>실습 후 답할 질문</h3><ul><li>다른 Subnet으로 갈 때 Destination IP가 Gateway IP로 바뀌는가?</li><li>왜 PC는 최종 목적지 MAC이 아니라 Gateway MAC을 찾는가?</li><li>ARP Cache를 삭제하면 첫 Packet 전에 무엇이 발생하는가?</li><li>Gateway가 틀리면 Wireshark에서 어떤 증거가 보이는가?</li></ul></article></div></div></section>
+
+<section id="lab"><div class="shell"><div class="section-head"><div><div class="eyebrow">02 · LAB DESIGN</div><h2>실험 구성</h2></div></div><div class="topology">PC1 192.168.10.10/24
+GW  192.168.10.1
+        │
+       SW1
+        │
+R1 192.168.10.1/24
+        │
+R1 192.168.20.1/24
+        │
+       SW2
+        │
+PC2 192.168.20.10/24</div><div style="height:16px"></div><div class="lab-grid"><article class="panel"><h3>정상 동작 테스트</h3><ul><li>같은 Subnet 통신 전후 ARP Cache 비교</li><li>다른 Subnet Ping 전 Gateway ARP 확인</li><li>ARP Cache 삭제 후 Packet 순서 캡처</li><li>MAC Table과 실제 Ethernet Destination 비교</li></ul></article><article class="panel"><h3>관찰할 명령·패킷</h3><ul><li><code>arp -a</code></li><li><code>ping</code></li><li><code>show mac-address-table</code></li><li>ARP Request / ARP Reply</li><li>ICMP Echo Request / Reply</li><li>Ethernet Src/Dst MAC과 IP Src/Dst 비교</li></ul></article></div></div></section>
+
+<section id="faults"><div class="shell"><div class="section-head"><div><div class="eyebrow">03 · BREAK & TROUBLESHOOT</div><h2>의도적으로 만들 장애</h2></div></div><div class="grid grid3"><article class="card"><span class="tag learn">Fault 1</span><h3>Wrong Default Gateway</h3><p>존재하지 않거나 잘못된 Gateway를 설정하고 ARP/ICMP 증상을 확인합니다.</p></article><article class="card"><span class="tag learn">Fault 2</span><h3>Wrong Subnet Mask</h3><p>같은 IP를 Local로 볼지 Gateway로 보낼지 판단이 어떻게 달라지는지 확인합니다.</p></article><article class="card"><span class="tag learn">Fault 3</span><h3>Gateway Interface Down</h3><p>ARP 요청과 응답 부재, 통신 실패의 관계를 확인합니다.</p></article></div></div></section>
+
+<section><div class="shell"><div class="section-head"><div><div class="eyebrow">04 · METHOD</div><h2>한 실험을 남기는 방식</h2></div></div><div class="flow"><div><b>예상</b><span>먼저 결과를 예측</span></div><div><b>구성</b><span>직접 Lab 구성</span></div><div><b>관찰</b><span>CLI / Packet 확인</span></div><div><b>장애</b><span>의도적으로 실패</span></div><div><b>복구</b><span>원인 제거 후 검증</span></div><div><b>설명</b><span>내 말로 정리</span></div></div></div></section>
+
+<section id="evidence"><div class="shell"><div class="section-head"><div><div class="eyebrow">05 · EVIDENCE</div><h2>완료 판정 체크리스트</h2></div></div><div class="checks"><div class="check">개념을 내 말로 설명</div><div class="check">정상 Lab 직접 구성</div><div class="check">ARP/ICMP Packet Capture</div><div class="check">Wrong Gateway 장애 재현</div><div class="check">Wrong Subnet Mask 장애 재현</div><div class="check">원인 확인 후 복구 검증</div><div class="check">명령 출력·PCAP·이미지 저장</div><div class="check">면접 질문 형태로 최종 설명</div></div><div style="height:18px"></div><div class="links"><a href="https://github.com/sebia1993/sebia1993.github.io/tree/main/learning/foundations/arp-default-gateway" target="_blank" rel="noreferrer">GitHub Evidence Folder ↗</a><a href="https://github.com/sebia1993/sebia1993.github.io/blob/main/learning/foundations/arp-default-gateway/README.md" target="_blank" rel="noreferrer">원본 학습 기록 ↗</a></div></div></section>
+
+<section><div class="shell"><div class="section-head"><div><div class="eyebrow">LEARNING LOG</div><h2>진행 기록</h2></div></div><div class="log"><div class="log-item"><b>2026-09-13 · 학습 구조 준비</b><span>학습 목표, 정상 Lab, 장애 시나리오, Evidence 저장 규칙을 정의했습니다. 실제 Lab 수행 전이므로 기술 Evidence 수치는 아직 0입니다.</span></div></div></div></section>
+</main>
+<div class="footer"><div class="shell">현상일 · Enterprise Network Learning Evidence</div></div>
+</body>
+</html>
