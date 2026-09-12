@@ -2,82 +2,64 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="현상일 네트워크 엔지니어 학습 로드맵">
+<meta name="description" content="현상일 네트워크 엔지니어 Evidence 기반 학습 로드맵">
 <title>현상일 | 네트워크 엔지니어 학습 로드맵</title>
 <link rel="stylesheet" href="./styles.css">
 <style>
-.roadmap-hero{padding:82px 0 40px}
-.roadmap-hero p{max-width:900px;color:var(--muted);font-size:1.04rem}
-.focus{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
-.focus-main{padding:22px;border-radius:18px;border:1px solid #355d82;background:linear-gradient(135deg,#0d2034,#10283c)}
-.focus-main h2{margin:7px 0 8px}
-.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.principle{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}
-.principle b{display:block;margin:8px 0 5px}.principle p{font-size:.9rem}
-.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.phase{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(16,34,54,.97),rgba(13,27,42,.97));box-shadow:var(--shadow)}
-.phase h3{margin:0}.phase ul{margin:0;padding-left:18px}.phase li{margin:5px 0;color:#d1deeb}
-.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.detail{padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}
-.detail b{display:block;margin-bottom:6px}.detail p{font-size:.9rem}
-.pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
-.pipe{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}
-.pipe b{display:block;margin:7px 0 4px}.pipe span{font-size:.82rem;color:var(--muted)}
-.sprint{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.week{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}
-.week h3{margin:8px 0}.week ul{margin:0;padding-left:18px}.week li{margin:5px 0;color:#d1deeb}
-@media(max-width:980px){.focus{grid-template-columns:1fr}.principles,.phases,.detail-grid,.sprint{grid-template-columns:1fr 1fr}.pipeline{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:620px){.principles,.phases,.detail-grid,.sprint,.pipeline{grid-template-columns:1fr}}
+.roadmap-hero{padding:82px 0 36px}.roadmap-hero p{max-width:930px;color:var(--muted);font-size:1.04rem}
+.metric-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:9px}.metric-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.metric-card b{display:block;font-size:1.45rem}.metric-card span{font-size:.76rem;color:var(--muted)}
+.focus{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.focus-main{padding:22px;border-radius:18px;border:1px solid #355d82;background:linear-gradient(135deg,#0d2034,#10283c)}.focus-main h2{margin:7px 0 8px}
+.topic-groups{display:grid;gap:24px}.topic-group h3{margin:0 0 12px}.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.topic{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(16,34,54,.97),rgba(13,27,42,.97));box-shadow:var(--shadow)}.topic.clickable{transition:.18s ease}.topic.clickable:hover{transform:translateY(-2px);border-color:#3e6a91}.topic h4{font-size:1.04rem;margin:0}.topic p{margin:0;color:var(--muted);font-size:.9rem}.topic-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.tiny{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel3)}.tiny b{display:block;font-size:.9rem}.tiny span{font-size:.68rem;color:var(--muted)}.topic-link{margin-top:auto;color:var(--blue);font-weight:800;text-decoration:none}.disabled{color:#6f8298;font-size:.83rem;margin-top:auto}
+.badge{display:inline-flex;width:max-content;padding:5px 9px;border-radius:999px;border:1px solid;font-size:.72rem;font-weight:850}.badge.ready{color:var(--amber);border-color:#8f6a38;background:rgba(255,191,105,.07)}.badge.planned{color:#a8b6c6;border-color:#42566d;background:rgba(159,178,201,.05)}.badge.completed{color:var(--mint);border-color:#347968;background:rgba(126,224,194,.07)}
+.activity{border-left:2px solid var(--blue);padding-left:18px}.activity-item{margin-bottom:17px}.activity-item b{display:block}.activity-item span{font-size:.84rem;color:var(--muted)}
+.method{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}.step{padding:12px 8px;border:1px solid var(--line);border-radius:11px;text-align:center;background:var(--panel3)}.step b{display:block;font-size:.82rem}.step span{font-size:.69rem;color:var(--muted)}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.phase{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.phase h3{margin:7px 0}.phase p{font-size:.88rem}.error{padding:16px;border:1px solid #7b4f4f;border-radius:12px;background:rgba(180,80,80,.08);color:#efc9c9}
+@media(max-width:1100px){.metric-grid{grid-template-columns:repeat(4,1fr)}.topics{grid-template-columns:1fr 1fr}.method{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){.focus,.topics,.phases{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr 1fr}.method{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<header><div class="shell topbar"><a class="brand" href="./index.html">← 이력서</a><div class="nav"><a href="#focus">현재 집중</a><a href="#roadmap">확장 순서</a><a href="#evidence">증거 기준</a></div></div></header>
+<header><div class="shell topbar"><a class="brand" href="./index.html">← 이력서</a><div class="nav"><a href="#evidence-summary">누적 Evidence</a><a href="#topics">학습 주제</a><a href="#method">학습 방식</a></div></div></header>
 <main>
-<section class="roadmap-hero"><div class="shell"><div class="eyebrow">LEARNING ROADMAP</div><h1>현재의 WLAN/NAC 운영 경험에서<br><em>전체 Enterprise Network를 보는 엔지니어</em>로 확장합니다.</h1><p>학습 목표는 기술 이름을 많이 아는 것이 아니라, 직접 구성하고 장애를 분석하며 왜 그렇게 동작하는지 설명할 수 있는 수준까지 깊이를 만드는 것입니다. 현재 강점인 Troubleshooting과 Network Automation은 새로운 기술을 익힐 때도 계속 결합합니다.</p></div></section>
+<section class="roadmap-hero"><div class="shell"><div class="eyebrow">LEARNING JOURNEY</div><h1>계획보다 <em>학습 과정과 증거</em>를 남깁니다.</h1><p>단순히 “OSPF를 공부했다”라고 표시하지 않습니다. 직접 구성한 Lab, 의도적으로 만든 장애, Packet Capture, 원인 분석, 복구 검증, 설명 노트를 쌓아 어떤 방식으로 공부했고 어느 수준까지 파고들었는지 공개합니다.</p></div></section>
 
-<section id="focus"><div class="shell focus">
-  <article class="focus-main"><span class="tag prod">현재 집중 영역</span><h2>Campus L2 + OSPF</h2><p>이미 실무에서 접점이 있는 VLAN, STP, LACP, Access Switch 운영 경험을 이론·Lab·장애재현으로 보강하고, 그 위에 OSPF를 직접 구성·분석할 수 있는 수준으로 끌어올립니다.</p></article>
-  <article class="card"><div class="eyebrow">목표</div><h3>Enterprise Network Engineer</h3><p>Campus LAN/WLAN, Dynamic Routing, Network Security 기본, Network Automation을 함께 다루며 문제 구간을 End-to-End로 판단할 수 있는 엔지니어를 목표로 합니다.</p></article>
-</div></section>
+<section id="evidence-summary"><div class="shell"><div class="section-head"><div><div class="eyebrow">CUMULATIVE EVIDENCE</div><h2>누적 학습 증거</h2></div><p>실제로 수행한 자료가 생길 때만 숫자를 올립니다.</p></div><div id="summaryMetrics" class="metric-grid"><div class="metric-card"><b>—</b><span>불러오는 중</span></div></div></div></section>
 
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">학습 원칙</div><h2>깊이를 만드는 방식</h2></div></div><div class="principles">
-  <article class="principle"><span class="tag learn">01</span><b>기술 이름보다 동작 원리</b><p>명령어 암기보다 왜 필요한지, 어떤 상태 변화가 생기는지 설명하는 것을 우선합니다.</p></article>
-  <article class="principle"><span class="tag p0">02</span><b>정상보다 장애 재현</b><p>정상 구성을 만든 뒤 일부러 실패 상황을 만들어 근거를 따라 원인을 좁힙니다.</p></article>
-  <article class="principle"><span class="tag proj">03</span><b>학습을 Evidence로</b><p>Topology, Config, CLI, Packet Capture, 자동화 결과를 GitHub에 남겨 재현 가능한 증거로 만듭니다.</p></article>
-</div></div></section>
+<section><div class="shell focus"><article class="focus-main"><span class="badge ready">현재 시작점</span><h2>Foundation → Campus L2 → OSPF</h2><p>첫 주제는 <b>ARP / Default Gateway</b>입니다. Packet이 다른 Subnet으로 이동할 때 L2/L3가 어떻게 연결되는지 Frame/Packet 수준에서 확인한 뒤 VLAN/Trunk, STP, LACP, OSPF로 확장합니다.</p><div style="height:10px"></div><a class="btn primary" href="./labs/arp-default-gateway.html">첫 학습 상세 보기 →</a></article><article class="card"><div class="eyebrow">완료 기준</div><h3>구성만 되면 끝이 아닙니다.</h3><p>설명 → 구성 → 정상 확인 → 장애 재현 → 근거 수집 → 복구 검증까지 남긴 뒤 완료로 표시합니다.</p></article></div></section>
 
-<section id="roadmap"><div class="shell"><div class="section-head"><div><div class="eyebrow">성장 순서</div><h2>기술 확장 로드맵</h2></div><p>앞 단계의 이해가 다음 단계의 전제가 되도록 순서를 고정합니다.</p></div><div class="phases">
-  <article class="phase"><span class="tag p0">1단계 · 현재</span><h3>Campus L2 + OSPF</h3><ul><li>VLAN / 802.1Q / SVI</li><li>STP / RSTP / MSTP</li><li>LACP / Port-Channel</li><li>OSPF Neighbor / Area / LSA</li><li>Cost / ECMP / Convergence</li></ul></article>
-  <article class="phase"><span class="tag learn">2단계 · 다음</span><h3>BGP + VRF / FHRP</h3><ul><li>eBGP / iBGP</li><li>AS_PATH / NEXT_HOP</li><li>LOCAL_PREF / MED</li><li>Prefix Filtering</li><li>VRF / Redistribution</li><li>VRRP / HSRP</li></ul></article>
-  <article class="phase"><span class="tag proj">3단계 · 중기</span><h3>Edge / WAN</h3><ul><li>Stateful Firewall</li><li>ACL / NAT / Session</li><li>IPsec VPN</li><li>Dual ISP / Internet Edge</li><li>DHCP Relay / DNS / NTP / IPAM</li><li>SD-WAN 기본</li></ul></article>
-  <article class="phase"><span class="tag plan">4단계 · 장기</span><h3>Hybrid Cloud / Data Center</h3><ul><li>AWS VPC / Route Table</li><li>TGW / VPN / Direct Connect</li><li>Leaf-Spine</li><li>Underlay / Overlay</li><li>VXLAN / EVPN / MP-BGP</li></ul></article>
-</div></div></section>
+<section id="topics"><div class="shell"><div class="section-head"><div><div class="eyebrow">CLICKABLE ROADMAP</div><h2>학습 주제와 Evidence</h2></div><p>상세 페이지가 있는 항목은 클릭해 실제 학습 계획·실험·원본 자료까지 확인할 수 있습니다.</p></div><div id="topicGroups" class="topic-groups"></div></div></section>
 
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">첫 번째 스프린트</div><h2>첫 4주 계획</h2></div></div><div class="sprint">
-  <article class="week"><span class="tag p0">Week 1</span><h3>Campus L2</h3><ul><li>STP Root/Port Role 설명</li><li>LACP Member 장애 재현</li><li>Allowed/Native VLAN 오류 분석</li></ul></article>
-  <article class="week"><span class="tag p0">Week 2</span><h3>OSPF 정상 구성</h3><ul><li>4-Router Topology</li><li>Neighbor / Area / Cost 확인</li><li>Wireshark로 Hello/LSA 흐름 확인</li></ul></article>
-  <article class="week"><span class="tag p0">Week 3</span><h3>OSPF 장애·복구</h3><ul><li>Area mismatch</li><li>Link Down / Convergence</li><li>Cost 변경 / Best Path</li></ul></article>
-  <article class="week"><span class="tag proj">Week 4</span><h3>Evidence 정리</h3><ul><li>Topology / Config / CLI 문서화</li><li>Neighbor/RIB 자동 Snapshot</li><li>면접 질문을 말로 설명</li></ul></article>
-</div></div></section>
+<section><div class="shell"><div class="section-head"><div><div class="eyebrow">ACTIVITY LOG</div><h2>최근 학습 활동</h2></div></div><div class="activity"><div class="activity-item"><b>2026-09-13 · Evidence 기반 학습 구조 시작</b><span>누적 지표, 클릭형 상세 페이지, GitHub 원본 Evidence 폴더를 만들었습니다. 기술 Lab은 아직 시작 전이므로 실제 Evidence 수치는 0에서 시작합니다.</span></div><div class="activity-item"><b>다음 활동 · ARP / Default Gateway Lab</b><span>정상 ARP/ICMP 흐름 확인 → Wrong Gateway / Wrong Subnet Mask / Gateway Down 장애 재현 → 복구 검증 순서로 진행합니다.</span></div></div></div></section>
 
-<section id="evidence"><div class="shell"><div class="section-head"><div><div class="eyebrow">완료 기준</div><h2>“공부했다”를 “쓸 수 있다”로 바꾸는 기준</h2></div></div><div class="detail-grid">
-  <article class="detail"><span class="tag learn">1</span><b>설명</b><p>왜 필요한지와 내부 동작을 기술적 근거로 설명할 수 있음.</p></article>
-  <article class="detail"><span class="tag p0">2</span><b>구성</b><p>직접 Lab을 구성하고 정상 상태를 확인할 수 있음.</p></article>
-  <article class="detail"><span class="tag p0">3</span><b>장애분석</b><p>의도적으로 장애를 만들고 CLI/Packet 근거로 원인을 좁힐 수 있음.</p></article>
-  <article class="detail"><span class="tag proj">4</span><b>자동화·문서화</b><p>반복 확인을 자동화하고 다른 사람도 재현할 수 있게 문서화함.</p></article>
-</div></div></section>
+<section id="method"><div class="shell"><div class="section-head"><div><div class="eyebrow">LEARNING METHOD</div><h2>한 주제를 공부하는 방식</h2></div></div><div class="method"><div class="step"><b>Learn</b><span>원리 이해</span></div><div class="step"><b>Configure</b><span>직접 구성</span></div><div class="step"><b>Verify</b><span>정상 확인</span></div><div class="step"><b>Break</b><span>장애 재현</span></div><div class="step"><b>Troubleshoot</b><span>근거로 분석</span></div><div class="step"><b>Recover</b><span>복구 검증</span></div><div class="step"><b>Explain</b><span>내 말로 설명</span></div><div class="step"><b>Automate</b><span>반복 확인 도구화</span></div></div></div></section>
 
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">EVIDENCE PIPELINE</div><h2>학습을 GitHub 증거로 남기는 흐름</h2></div></div><div class="pipeline">
-  <article class="pipe"><span class="tag learn">1</span><b>Learn</b><span>개념·정상동작</span></article>
-  <article class="pipe"><span class="tag learn">2</span><b>Configure</b><span>직접 구성</span></article>
-  <article class="pipe"><span class="tag p0">3</span><b>Break</b><span>의도적 장애</span></article>
-  <article class="pipe"><span class="tag p0">4</span><b>Troubleshoot</b><span>원인 범위 축소</span></article>
-  <article class="pipe"><span class="tag proj">5</span><b>Automate</b><span>반복 확인 자동화</span></article>
-  <article class="pipe"><span class="tag prod">6</span><b>Explain</b><span>면접·문서 설명</span></article>
-</div></div></section>
+<section><div class="shell"><div class="section-head"><div><div class="eyebrow">LONG-TERM PATH</div><h2>기술 확장 방향</h2></div></div><div class="phases"><article class="phase"><span class="badge ready">1단계</span><h3>Foundation / Campus</h3><p>ARP, Ethernet, VLAN/Trunk, STP/RSTP, LACP를 Packet과 장애 관점에서 다시 다집니다.</p></article><article class="phase"><span class="badge planned">2단계</span><h3>OSPF / Routing</h3><p>Neighbor, LSA/LSDB, Cost, Area, Convergence, 장애 원인을 직접 구성·분석합니다.</p></article><article class="phase"><span class="badge planned">3단계</span><h3>BGP / VRF / FHRP</h3><p>경로 정책, 네트워크 분리, Gateway 이중화와 Redistribution으로 확장합니다.</p></article><article class="phase"><span class="badge planned">4단계</span><h3>Edge / Cloud / DC</h3><p>Firewall, NAT/VPN, WAN, AWS Network, Leaf-Spine, VXLAN/EVPN으로 이어갑니다.</p></article></div></div></section>
 
-<section><div class="shell"><div class="note"><b>장기 방향:</b> WLAN/NAC라는 현재 전문성을 유지하면서 Campus L2/L3, Routing, Edge/WAN, Cloud/DC로 범위를 넓히고, 제조사가 제공하지 않는 운영 기능은 직접 요구사항을 정의해 도구로 구현·검증할 수 있는 네트워크 엔지니어를 목표로 합니다.</div></div></section>
+<section><div class="shell"><div class="note"><b>공개 원칙:</b> 학습 Evidence에는 개인 Lab용 주소와 가상/테스트 장비만 사용합니다. 회사의 실제 IP, Hostname, VLAN ID, SSID, 구성도, 로그는 공개하지 않습니다.</div></div></section>
 </main>
-<div class="footer"><div class="shell">현상일 · 네트워크 엔지니어 학습 로드맵</div></div>
+<div class="footer"><div class="shell">현상일 · Enterprise Network Learning Journey</div></div>
+<script>
+const metricLabels={completedTopics:'완료 주제',labs:'직접 구성한 Lab',faultScenarios:'장애 재현',packetCaptures:'Packet Capture',recoveryValidations:'복구 검증',explainNotes:'설명 노트',automations:'Automation'};
+const metricShort={labs:'Lab',faultScenarios:'장애',packetCaptures:'PCAP',recoveryValidations:'복구',explainNotes:'설명',automations:'Auto'};
+function esc(v){return String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+fetch('./learning-data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('data');return r.json();}).then(data=>{
+  const summary=document.getElementById('summaryMetrics');
+  summary.innerHTML=Object.entries(metricLabels).map(([k,label])=>`<div class="metric-card"><b>${Number(data.summary[k]||0)}</b><span>${label}</span></div>`).join('');
+  const groups={};(data.topics||[]).forEach(t=>(groups[t.category]??=[]).push(t));
+  const root=document.getElementById('topicGroups');root.innerHTML='';
+  Object.entries(groups).forEach(([category,topics])=>{
+    const group=document.createElement('section');group.className='topic-group';
+    group.innerHTML=`<h3>${esc(category)}</h3><div class="topics"></div>`;
+    const grid=group.querySelector('.topics');
+    topics.forEach(t=>{
+      const card=document.createElement('article');card.className='topic'+(t.detailUrl?' clickable':'');
+      const metrics=['labs','faultScenarios','packetCaptures','recoveryValidations','explainNotes','automations'].map(k=>`<div class="tiny"><b>${Number(t[k]||0)}</b><span>${metricShort[k]}</span></div>`).join('');
+      const statusClass=t.status==='completed'?'completed':t.status==='ready'?'ready':'planned';
+      card.innerHTML=`<span class="badge ${statusClass}">${esc(t.statusLabel)}</span><h4>${esc(t.title)}</h4><p>${esc(t.summary)}</p><div class="topic-metrics">${metrics}</div>${t.detailUrl?`<a class="topic-link" href="${esc(t.detailUrl)}">학습 상세 / Evidence 보기 →</a>`:'<span class="disabled">앞 단계 완료 후 상세 페이지를 엽니다.</span>'}`;
+      grid.appendChild(card);
+    });root.appendChild(group);
+  });
+}).catch(()=>{document.getElementById('summaryMetrics').innerHTML='<div class="error">학습 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</div>';});
+</script>
 </body>
 </html>
