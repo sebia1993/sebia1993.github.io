@@ -1,0 +1,1288 @@
+{
+  "tests": {
+    "Source MAC Learning": true,
+    "ARP Broadcast Flooding": true,
+    "Known Unicast Forwarding": true,
+    "Unknown Unicast Flooding": true,
+    "MAC Re-learning": true,
+    "ARP/FDB Separation": true,
+    "Packet Capture": true,
+    "Actual Accelerated Aging": true
+  },
+  "counts": {
+    "01-arp-first-contact": {
+      "pc1": {
+        "frames": 11,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 4
+      },
+      "pc2": {
+        "frames": 15,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 1
+      },
+      "pc3": {
+        "frames": 4,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 4
+      }
+    },
+    "02-known-unicast": {
+      "pc1": {
+        "frames": 7,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 0,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 0
+      }
+    },
+    "03-broadcast": {
+      "pc1": {
+        "frames": 8,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      },
+      "pc2": {
+        "frames": 1,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      },
+      "pc3": {
+        "frames": 8,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      }
+    },
+    "04-unknown-unicast": {
+      "pc1": {
+        "frames": 2,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 3,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 1,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      }
+    },
+    "05-mac-relearning": {
+      "pc1": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 0,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 0
+      }
+    }
+  },
+  "pcaps": {
+    "01-arp-first-contact-pc1.pcap": {
+      "file": "pc1-sw1.pcap",
+      "bytes": 1108,
+      "sha256": "34b3eefcd526325f4fbe0ce1abf6425f5faf9dac6f1a6921369a5dbe223090fe",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304773.701254,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 2,
+          "time": 1789304774.701666,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 3,
+          "time": 1789304775.702257,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 4,
+          "time": 1789304781.327576,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 5,
+          "time": 1789304781.328635,
+          "length": 64,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x806",
+          "sha256": "85b43c126888efeb1a719539ec28b2e48624f3e7f93b6ac1822666d46276147d",
+          "protocol": "ARP",
+          "op": 2,
+          "sender_ip": "192.168.10.20",
+          "target_ip": "192.168.10.10"
+        },
+        {
+          "frame": 6,
+          "time": 1789304781.330093,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "c8d27b262da0c073ac91c18f045de1e3f50012f9c9b16d49c4b41897cf6bf9a9",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52639,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 7,
+          "time": 1789304781.331102,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "83b92674ffc7da12e09bf0f51690b4dd8f7cdcfda8e2f961a7a2ee3bddf17d0d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52639,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 8,
+          "time": 1789304781.83253,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "d7506da5d8d20d1d2dbb80191514e4de1009b9807d88a99afd72fb7e53f5b507",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52639,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 9,
+          "time": 1789304781.833333,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "d7ce1f89fa49aa54a6c57ba7959c5e9c0810e20464db41ef6f7a96214714462d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52639,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 10,
+          "time": 1789304782.334117,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "560ad5140126aca56cadca421d24d6a96516e51778dfbf606b0bb6b134cd0704",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52895,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 11,
+          "time": 1789304782.334935,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "b909b61c68316f9e6ad58068ec05d0a7cbfc2e868d265ecb9e679142ecf57e32",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52895,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "01-arp-first-contact-pc2.pcap": {
+      "file": "pc2-sw1.pcap",
+      "bytes": 1566,
+      "sha256": "3c7bf227136f6d58a5b098286b5ff67521ae4eec0fc4dcf5f41b1610327e133e",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304780.143243,
+          "length": 90,
+          "dst": "33:33:00:00:00:16",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "4aa242516af98c6d3909d5bcd4466f9535a581ba44eace7552ab8bdf24d2270a"
+        },
+        {
+          "frame": 2,
+          "time": 1789304780.359292,
+          "length": 86,
+          "dst": "33:33:ff:a3:43:01",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "32e884f9d268e292d08bd375608ecae83eb8822539703fd044417157876e3e49"
+        },
+        {
+          "frame": 3,
+          "time": 1789304781.014327,
+          "length": 90,
+          "dst": "33:33:00:00:00:16",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "4aa242516af98c6d3909d5bcd4466f9535a581ba44eace7552ab8bdf24d2270a"
+        },
+        {
+          "frame": 4,
+          "time": 1789304781.327897,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 5,
+          "time": 1789304781.328402,
+          "length": 64,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x806",
+          "sha256": "85b43c126888efeb1a719539ec28b2e48624f3e7f93b6ac1822666d46276147d",
+          "protocol": "ARP",
+          "op": 2,
+          "sender_ip": "192.168.10.20",
+          "target_ip": "192.168.10.10"
+        },
+        {
+          "frame": 6,
+          "time": 1789304781.33046,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "c8d27b262da0c073ac91c18f045de1e3f50012f9c9b16d49c4b41897cf6bf9a9",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52639,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 7,
+          "time": 1789304781.3308,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "83b92674ffc7da12e09bf0f51690b4dd8f7cdcfda8e2f961a7a2ee3bddf17d0d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52639,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 8,
+          "time": 1789304781.398198,
+          "length": 90,
+          "dst": "33:33:00:00:00:16",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "3f595091996a427e6303d8cbb2573e428b481b0bcf1dc6c2ebd1129ce874b172"
+        },
+        {
+          "frame": 9,
+          "time": 1789304781.398248,
+          "length": 70,
+          "dst": "33:33:00:00:00:02",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "59580000eac01985f902c49232fa6293d2240c3816f4469fe194b9e57cb220bb"
+        },
+        {
+          "frame": 10,
+          "time": 1789304781.678172,
+          "length": 90,
+          "dst": "33:33:00:00:00:16",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "3f595091996a427e6303d8cbb2573e428b481b0bcf1dc6c2ebd1129ce874b172"
+        },
+        {
+          "frame": 11,
+          "time": 1789304781.832767,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "d7506da5d8d20d1d2dbb80191514e4de1009b9807d88a99afd72fb7e53f5b507",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52639,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 12,
+          "time": 1789304781.833104,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "d7ce1f89fa49aa54a6c57ba7959c5e9c0810e20464db41ef6f7a96214714462d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52639,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 13,
+          "time": 1789304782.334376,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "560ad5140126aca56cadca421d24d6a96516e51778dfbf606b0bb6b134cd0704",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 52895,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 14,
+          "time": 1789304782.334676,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "b909b61c68316f9e6ad58068ec05d0a7cbfc2e868d265ecb9e679142ecf57e32",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 52895,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 15,
+          "time": 1789304785.366267,
+          "length": 70,
+          "dst": "33:33:00:00:00:02",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "59580000eac01985f902c49232fa6293d2240c3816f4469fe194b9e57cb220bb"
+        }
+      ]
+    },
+    "01-arp-first-contact-pc3.pcap": {
+      "file": "pc3-sw1.pcap",
+      "bytes": 344,
+      "sha256": "18d1a7f79237f80912651b667df83164a559331bb23d234607e1af5f2996df87",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304773.70155,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 2,
+          "time": 1789304774.701924,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 3,
+          "time": 1789304775.7026,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        },
+        {
+          "frame": 4,
+          "time": 1789304781.327973,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "34b6d3a4819d9c475a125a326ab6aca5595541a078b56a51c493462cc8b167fc",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.20"
+        }
+      ]
+    },
+    "02-known-unicast-pc1.pcap": {
+      "file": "pc1-sw1.pcap",
+      "bytes": 794,
+      "sha256": "d032602ee7e5136e4ce5e089b82564722fb18af0ba47a213ae2b1fc887c986e9",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304885.486779,
+          "length": 70,
+          "dst": "33:33:00:00:00:02",
+          "src": "02:42:1c:a3:43:00",
+          "type": "0x86dd",
+          "sha256": "7d1b339e92b48212f2486e5562d3535164a9e0339c26d34bd94ba6da09e700a8"
+        },
+        {
+          "frame": 2,
+          "time": 1789304887.367163,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "e54af22abbb7f34a73fcde625db9d157c1695adcebbd7784ec51263bc5f1ba8f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14240,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 3,
+          "time": 1789304887.367949,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "5623ae34430c51e8bf4cf8a508b9c88573513f0382685504d27b69ad4ba9c362",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14240,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 4,
+          "time": 1789304887.869905,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "db169f9dbc5b42f98d6b84c0971a41ec692c6bde95ab1567495183812a578447",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14240,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 5,
+          "time": 1789304887.871028,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "cb19c2e6169c8e5ce2c526b7bde622b3946c5553de760bf513fe2214006a4dae",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14240,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 6,
+          "time": 1789304888.372229,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "bf89369606eda71389aeec9fb50e39d5a7a86ff1a217cd0010424a5164c4ebf6",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14496,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 7,
+          "time": 1789304888.373055,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "d7d6cf2130aa638effced918811375702ff693e7fcee609475e4dac8708d5157",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14496,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "02-known-unicast-pc2.pcap": {
+      "file": "pc2-sw1.pcap",
+      "bytes": 708,
+      "sha256": "65365914f20bf9a18cb73481b98a120ef3509758453b972ebf90f1e8224151fe",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304887.367448,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "e54af22abbb7f34a73fcde625db9d157c1695adcebbd7784ec51263bc5f1ba8f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14240,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 2,
+          "time": 1789304887.367766,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "5623ae34430c51e8bf4cf8a508b9c88573513f0382685504d27b69ad4ba9c362",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14240,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 3,
+          "time": 1789304887.870334,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "db169f9dbc5b42f98d6b84c0971a41ec692c6bde95ab1567495183812a578447",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14240,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 4,
+          "time": 1789304887.870749,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "cb19c2e6169c8e5ce2c526b7bde622b3946c5553de760bf513fe2214006a4dae",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14240,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 5,
+          "time": 1789304888.372547,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "bf89369606eda71389aeec9fb50e39d5a7a86ff1a217cd0010424a5164c4ebf6",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 14496,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 6,
+          "time": 1789304888.372836,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "d7d6cf2130aa638effced918811375702ff693e7fcee609475e4dac8708d5157",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 14496,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "02-known-unicast-pc3.pcap": {
+      "file": "pc3-sw1.pcap",
+      "bytes": 24,
+      "sha256": "acc530668c8bc60b2d229281130b1899bfc81d70fdada5c34b3236c628f739c8",
+      "packets": []
+    },
+    "03-broadcast-pc1.pcap": {
+      "file": "pc1-sw1.pcap",
+      "bytes": 868,
+      "sha256": "e12d2baa30b0275cee543fde4b107ea60df7bc14c63dce8b02818f378068b731",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304897.173257,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "d1f06e15e15741378b9d30611660ad682465b208349f98b442b33e198865a4ef",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.30"
+        },
+        {
+          "frame": 2,
+          "time": 1789304897.174065,
+          "length": 64,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x806",
+          "sha256": "e41b1b73b26654f1e581c0c23287af0edea1dc0a3a158aca9fde95679f7c5659",
+          "protocol": "ARP",
+          "op": 2,
+          "sender_ip": "192.168.10.30",
+          "target_ip": "192.168.10.10"
+        },
+        {
+          "frame": 3,
+          "time": 1789304897.174299,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "f6afdf506114129e07425e4e535ce2c1e64a44824ba17f2f078e5a9a3aa80396",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 16800,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 4,
+          "time": 1789304897.174877,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "2c8f9b12422390d35177fed71008ce089e23311b6c940e78780f2336d7ebc20d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 16800,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 5,
+          "time": 1789304897.675812,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "b1446068998f8ebeefff454d59f4c3a39d22adaccbc2ab6b37eb3ac9a7766000",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 16800,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 6,
+          "time": 1789304897.676898,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "9d32df6139b405b3f34d6ffadbd0856201f187ee0986f13b5bb37bd9a914d97f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 16800,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 7,
+          "time": 1789304898.178211,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "9562014eebdb3b88812b5947eab5d83e1f5b3949d7056c14a38af95e35ee3cf4",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 17056,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 8,
+          "time": 1789304898.179082,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "b4b609a0c3ad7ea4728905f7d659624e362afa57d9abb5b7ddd4d661284220cc",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 17056,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "03-broadcast-pc2.pcap": {
+      "file": "pc2-sw1.pcap",
+      "bytes": 104,
+      "sha256": "afd0ff39593fa319fe5a692fa7dd2ea905b763662b7694bc4a943e27a946f660",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304897.173625,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "d1f06e15e15741378b9d30611660ad682465b208349f98b442b33e198865a4ef",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.30"
+        }
+      ]
+    },
+    "03-broadcast-pc3.pcap": {
+      "file": "pc3-sw1.pcap",
+      "bytes": 868,
+      "sha256": "41d08044fc9506a6347cb055d6b0d1df9344a8644d224771a34ab2e00e4d8864",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304897.173553,
+          "length": 64,
+          "dst": "ff:ff:ff:ff:ff:ff",
+          "src": "00:50:79:66:68:00",
+          "type": "0x806",
+          "sha256": "d1f06e15e15741378b9d30611660ad682465b208349f98b442b33e198865a4ef",
+          "protocol": "ARP",
+          "op": 1,
+          "sender_ip": "192.168.10.10",
+          "target_ip": "192.168.10.30"
+        },
+        {
+          "frame": 2,
+          "time": 1789304897.173858,
+          "length": 64,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x806",
+          "sha256": "e41b1b73b26654f1e581c0c23287af0edea1dc0a3a158aca9fde95679f7c5659",
+          "protocol": "ARP",
+          "op": 2,
+          "sender_ip": "192.168.10.30",
+          "target_ip": "192.168.10.10"
+        },
+        {
+          "frame": 3,
+          "time": 1789304897.17446,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "f6afdf506114129e07425e4e535ce2c1e64a44824ba17f2f078e5a9a3aa80396",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 16800,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 4,
+          "time": 1789304897.174703,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "2c8f9b12422390d35177fed71008ce089e23311b6c940e78780f2336d7ebc20d",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 16800,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 5,
+          "time": 1789304897.676122,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "b1446068998f8ebeefff454d59f4c3a39d22adaccbc2ab6b37eb3ac9a7766000",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 16800,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 6,
+          "time": 1789304897.676725,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "9d32df6139b405b3f34d6ffadbd0856201f187ee0986f13b5bb37bd9a914d97f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 16800,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 7,
+          "time": 1789304898.178468,
+          "length": 98,
+          "dst": "00:50:79:66:68:02",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "9562014eebdb3b88812b5947eab5d83e1f5b3949d7056c14a38af95e35ee3cf4",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.30",
+          "icmp_type": 8,
+          "icmp_id": 17056,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 8,
+          "time": 1789304898.178776,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:02",
+          "type": "0x800",
+          "sha256": "b4b609a0c3ad7ea4728905f7d659624e362afa57d9abb5b7ddd4d661284220cc",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.30",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 17056,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "04-unknown-unicast-pc1.pcap": {
+      "file": "pc1-sw1.pcap",
+      "bytes": 252,
+      "sha256": "7ef37ce24694d5309464392855dcb8d6c4ebcefbc15f67ec535503132818eac4",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304915.790061,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "72292d367cb6fd36157ae094899452ec82a4702db569b2c439b174eb8e8e2407",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 21408,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 2,
+          "time": 1789304915.790751,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "17e1c3f8068edd4cdc43d2c0ab39054866346a8bd6470fd2c1d024db466f71f1",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 21408,
+          "icmp_seq": 1
+        }
+      ]
+    },
+    "04-unknown-unicast-pc2.pcap": {
+      "file": "pc2-sw1.pcap",
+      "bytes": 338,
+      "sha256": "256ebba9f644222eeb8c64a701be8cf0b9d6e6e6c8b3ac489c1bd8b49fd6f440",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304914.158716,
+          "length": 70,
+          "dst": "33:33:00:00:00:02",
+          "src": "02:42:1c:a3:43:01",
+          "type": "0x86dd",
+          "sha256": "59580000eac01985f902c49232fa6293d2240c3816f4469fe194b9e57cb220bb"
+        },
+        {
+          "frame": 2,
+          "time": 1789304915.790356,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "72292d367cb6fd36157ae094899452ec82a4702db569b2c439b174eb8e8e2407",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 21408,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 3,
+          "time": 1789304915.790547,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "17e1c3f8068edd4cdc43d2c0ab39054866346a8bd6470fd2c1d024db466f71f1",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 21408,
+          "icmp_seq": 1
+        }
+      ]
+    },
+    "04-unknown-unicast-pc3.pcap": {
+      "file": "pc3-sw1.pcap",
+      "bytes": 138,
+      "sha256": "7197584da9f1f8c38a802c06a44d9b7affa0a1a055490608b65f092586910840",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304915.79034,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "72292d367cb6fd36157ae094899452ec82a4702db569b2c439b174eb8e8e2407",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 21408,
+          "icmp_seq": 1
+        }
+      ]
+    },
+    "05-mac-relearning-pc1.pcap": {
+      "file": "pc1-sw1.pcap",
+      "bytes": 708,
+      "sha256": "b1a45f41e3c963bbef3d5c8cffe4543a5663d6ae7d388d3888b93c2c397cd172",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304925.127505,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "19066f39c46fac9dc19877e2db6fd4e2608f457b17621d7f3341055486e8785f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 23968,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 2,
+          "time": 1789304925.12817,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "47be3068dcfb08ef5d063662e6acaf9790b751d9866eed3762c5fea6967117e6",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 23968,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 3,
+          "time": 1789304925.628895,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "aa001a892ef9838753852a8a8786f29a552c8cc8008537fdbbec403b64b75c03",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 23968,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 4,
+          "time": 1789304925.629874,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "5f7769f7f6b18e9f421c72a7e800fa94c7c5c006e6e950eb5579f3eb51c46aea",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 23968,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 5,
+          "time": 1789304926.131589,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "15e337d25cfd87224428b1b398bcebf109477c9052d497dbcd93fb9fb0032c9e",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 24224,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 6,
+          "time": 1789304926.132304,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "eda15fe92dc7c90032a97f2ba58d3fbccb8c4a083f42c303bcb28086dbe80443",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 24224,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "05-mac-relearning-pc2.pcap": {
+      "file": "pc2-sw1.pcap",
+      "bytes": 708,
+      "sha256": "1de3108d11da44a505850f6516838effca7542e39bc18159e783af53f850769b",
+      "packets": [
+        {
+          "frame": 1,
+          "time": 1789304925.127715,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "19066f39c46fac9dc19877e2db6fd4e2608f457b17621d7f3341055486e8785f",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 23968,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 2,
+          "time": 1789304925.128009,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "47be3068dcfb08ef5d063662e6acaf9790b751d9866eed3762c5fea6967117e6",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 23968,
+          "icmp_seq": 1
+        },
+        {
+          "frame": 3,
+          "time": 1789304925.629231,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "aa001a892ef9838753852a8a8786f29a552c8cc8008537fdbbec403b64b75c03",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 23968,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 4,
+          "time": 1789304925.629549,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "5f7769f7f6b18e9f421c72a7e800fa94c7c5c006e6e950eb5579f3eb51c46aea",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 23968,
+          "icmp_seq": 2
+        },
+        {
+          "frame": 5,
+          "time": 1789304926.131857,
+          "length": 98,
+          "dst": "00:50:79:66:68:01",
+          "src": "00:50:79:66:68:00",
+          "type": "0x800",
+          "sha256": "15e337d25cfd87224428b1b398bcebf109477c9052d497dbcd93fb9fb0032c9e",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.10",
+          "dst_ip": "192.168.10.20",
+          "icmp_type": 8,
+          "icmp_id": 24224,
+          "icmp_seq": 3
+        },
+        {
+          "frame": 6,
+          "time": 1789304926.132128,
+          "length": 98,
+          "dst": "00:50:79:66:68:00",
+          "src": "00:50:79:66:68:01",
+          "type": "0x800",
+          "sha256": "eda15fe92dc7c90032a97f2ba58d3fbccb8c4a083f42c303bcb28086dbe80443",
+          "protocol": "ICMP",
+          "src_ip": "192.168.10.20",
+          "dst_ip": "192.168.10.10",
+          "icmp_type": 0,
+          "icmp_id": 24224,
+          "icmp_seq": 3
+        }
+      ]
+    },
+    "05-mac-relearning-pc3.pcap": {
+      "file": "pc3-sw1.pcap",
+      "bytes": 24,
+      "sha256": "acc530668c8bc60b2d229281130b1899bfc81d70fdada5c34b3236c628f739c8",
+      "packets": []
+    }
+  }
+}

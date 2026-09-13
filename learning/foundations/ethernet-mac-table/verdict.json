@@ -1,0 +1,99 @@
+{
+  "tests": {
+    "Source MAC Learning": true,
+    "ARP Broadcast Flooding": true,
+    "Known Unicast Forwarding": true,
+    "Unknown Unicast Flooding": true,
+    "MAC Re-learning": true,
+    "ARP/FDB Separation": true,
+    "Packet Capture": true,
+    "Actual Accelerated Aging": true
+  },
+  "counts": {
+    "01-arp-first-contact": {
+      "pc1": {
+        "frames": 11,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 4
+      },
+      "pc2": {
+        "frames": 15,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 1
+      },
+      "pc3": {
+        "frames": 4,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 4
+      }
+    },
+    "02-known-unicast": {
+      "pc1": {
+        "frames": 7,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 0,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 0
+      }
+    },
+    "03-broadcast": {
+      "pc1": {
+        "frames": 8,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      },
+      "pc2": {
+        "frames": 1,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      },
+      "pc3": {
+        "frames": 8,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 1
+      }
+    },
+    "04-unknown-unicast": {
+      "pc1": {
+        "frames": 2,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 3,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 1,
+        "pc1_to_pc2_echo": 1,
+        "broadcast_arp": 0
+      }
+    },
+    "05-mac-relearning": {
+      "pc1": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc2": {
+        "frames": 6,
+        "pc1_to_pc2_echo": 3,
+        "broadcast_arp": 0
+      },
+      "pc3": {
+        "frames": 0,
+        "pc1_to_pc2_echo": 0,
+        "broadcast_arp": 0
+      }
+    }
+  }
+}

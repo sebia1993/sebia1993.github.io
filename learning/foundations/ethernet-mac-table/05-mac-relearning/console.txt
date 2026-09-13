@@ -1,0 +1,38 @@
+[SW1] brctl showmacs br0
+brctl showmacs br0
+port no	mac addr		is local?	ageing timer
+  1	00:50:79:66:68:00	no		   8.24
+  2	00:50:79:66:68:01	no		   8.24
+  3	00:50:79:66:68:02	no		  25.86
+  1	02:42:1c:a3:43:00	yes		   0.00
+  1	02:42:1c:a3:43:00	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+/ # 
+/ # 
+
+[PC1] ping 192.168.10.20 -c 3 -i 500 -w 1000
+ping 192.168.10.20 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.826 ms
+84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.306 ms
+84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.051 ms
+
+VPCS> 
+
+[SW1] brctl showmacs br0
+brctl showmacs br0
+port no	mac addr		is local?	ageing timer
+  1	00:50:79:66:68:00	no		   3.79
+  2	00:50:79:66:68:01	no		   3.79
+  3	00:50:79:66:68:02	no		  31.74
+  1	02:42:1c:a3:43:00	yes		   0.00
+  1	02:42:1c:a3:43:00	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+/ # 
+/ # 
