@@ -1,26 +1,379 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ethernet / MAC Table — 실습 결과</title><meta name="description" content="Linux Bridge와 VPCS로 Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging을 검증한 실제 PCAP 기반 학습 기록."><link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><link rel="stylesheet" href="../ethernet-guide.css"></head><body>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#results">검증 결과</a><a href="#packets">패킷 분석</a><a href="#evidence">원본 자료</a></nav></div></header><main>
-<section class="preview-hero"><div class="shell"><div class="eyebrow">FOUNDATION · VERIFIED LAB</div><h1>Ethernet / <em>MAC Table</em></h1><p>PC1은 PC2의 MAC을 아는데, 스위치는 PC2의 위치를 모르면?<br>ARP와 FDB를 따로 조작하고 세 링크의 실제 패킷으로 확인했습니다.</p><div class="status-row"><span class="tag prod">구성·검증 완료</span><span class="tag learn">설명 연습 진행 · 일부 개념 복습 필요</span><span class="tag proj">Codex 대행 실행 · 2026.09.13</span></div><div class="result-metrics"><article><strong>7 / 7</strong><span>핵심 검증 항목 통과</span></article><article><strong>5 + 1</strong><span>패킷 실험 5건 + 실제 Aging</span></article><article><strong>15</strong><span>원본 PCAP · 실험 5건 × 3지점</span></article><article><strong>1</strong><span>저장한 GNS3 Lab</span></article></div><p class="method-note">구성·실행·판정은 Codex가 대행했습니다. 아래 질문의 근거 답안은 준비했으며, 문답에서 기본 전달 동작 일부를 확인했습니다. Broadcast와 Flooding의 구분 및 Aging 이후 재학습 순서는 복습이 필요하며, 독립적인 종합 설명 완료로 판단하지 않았습니다.</p></div></section>
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">01 · TOPOLOGY</div><h2>세 PC, 하나의 Broadcast Domain</h2></div><p>VPCS 3대 · Linux Bridge 1대<br>Gateway·NAT·외부 네트워크 연결 없음.</p></div><div class="filter-bar" role="group" aria-label="요청 프레임 경로 선택" id="path-controls"><button type="button" data-path="known" aria-pressed="true">포트를 아는 유니캐스트<br><small>Known Unicast</small></button><button type="button" data-path="unknown" aria-pressed="false">포트를 모르는 유니캐스트<br><small>Unknown Unicast</small></button><button type="button" data-path="broadcast" aria-pressed="false">같은 LAN으로 전달<br><small>Broadcast</small></button></div><p class="method-note">먼저 <b>프레임에 적힌 목적지</b>와 <b>스위치가 선택하는 출력 포트</b>를 따로 보세요. 같은 그림에서 세 동작을 비교할 수 있습니다.</p><div class="path-facts" aria-live="polite" aria-atomic="true"><article><span>① 받은 프레임</span><h3 id="frame-destination">목적지 MAC: PC2</h3><p id="frame-source">출발지 MAC: PC1 · PC2행 ICMP 요청</p></article><article><span>② 스위치 MAC 테이블</span><h3 id="table-state">PC2 MAC → 2번 포트</h3><p id="source-learning">수신한 출발지 PC1 MAC → 1번 포트 학습·갱신</p></article><article><span>③ 출력 결정</span><h3 id="forward-state">2번 포트로만 전달</h3><p id="copy-state">목적지 MAC은 PC2 그대로</p></article></div><div class="path-scroll"><div class="path-diagram"><img class="result-topology" src="../ethernet-topology.svg" alt="PC1 .10은 eth0, PC2 .20은 eth1, PC3 .30은 eth2에 연결된 Linux Bridge 구성"><svg class="path-overlay" viewBox="0 0 1400 620" aria-hidden="true"><defs><marker id="request-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#b45309"/></marker></defs><g><rect x="445" y="142" width="540" height="55" rx="10" fill="#fff" stroke="#b45309" stroke-width="2"/><text id="diagram-destination" x="715" y="178" text-anchor="middle" fill="#172b43" font-family="sans-serif" font-size="23" font-weight="bold">목적지 MAC: PC2 · 변경 없음</text></g><g fill="none" stroke="#b45309" stroke-width="5" stroke-dasharray="10 5" marker-end="url(#request-arrow)"><path id="path-pc1" d="M316 225H465V294H635"/><path id="path-pc2" d="M641 326H465V416H322"/><path id="path-pc3" d="M765 309H1040" visibility="hidden"/></g></svg></div></div><div class="path-observer"><b id="observer-state">PC3 링크: 이 요청을 전달하지 않음</b><p id="scope-state">PC1 → PC2 통신 · 근거 실험 02</p></div><div id="learning-steps" hidden><p><b>Unknown Unicast 이후를 한 단계씩 보기</b> · 자동 재생 없이 선택합니다.</p><div class="filter-bar" role="group" aria-label="재학습 단계"><button type="button" data-step="request" aria-pressed="true">1. 요청 복사</button><button type="button" data-step="reply" aria-pressed="false">2. PC2 응답과 학습</button><button type="button" data-step="next" aria-pressed="false">3. 다음 요청 전달</button></div></div><div class="path-caption" aria-live="polite" aria-atomic="true"><h3 id="path-title">Known Unicast · PC2 포트로만 전달</h3><p id="path-detail">PC1 → SW1 eth0 / port 1 수신 → eth1 / port 2 송신. 목적지 MAC: 00:50:79:66:68:01. PC2 FDB가 있으며, PC3 링크의 Echo Request는 0개입니다.</p><a id="path-evidence" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc2-sw1">PC2 전달 패킷 확인 →</a> <a id="path-compare" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 미전달 비교 →</a></div><p class="method-note">갈색 점선 화살표는 선택한 프레임의 이동 방향입니다. 기본 화면은 요청 방향이며, Unknown의 2단계에서는 응답 방향을 표시합니다. 실제 캡처에 근거한 설명 그림이며 실시간 재생이 아닙니다. 작은 화면에서는 구성도를 좌우로 스크롤할 수 있습니다.</p><noscript><p>경로 전환에는 JavaScript가 필요합니다. 기본 그림은 Known Unicast이며, 아래 비교 표에서 나머지 결과를 확인할 수 있습니다.</p></noscript><p class="method-note">GNS3 2.2.61 · 기존 Alpine 3.23 이미지 · BusyBox brctl. 실제 노드 표시명은 SW1-Linux-Bridge입니다. 구성도는 실제 연결·주소 기록으로 그린 그림이며 GNS3 화면 캡처가 아닙니다.</p></div></section>
-<section><div class="shell"><div class="test-guide"><h3>Broadcast는 목적지 주소, Flooding은 전달 동작입니다.</h3><p><b>Unknown Unicast:</b> 목적지 MAC은 PC2입니다. 스위치가 출력 포트를 몰라 같은 프레임을 복사합니다. 새 ARP나 Broadcast 프레임을 만드는 것이 아닙니다.</p><p><b>Broadcast:</b> 처음부터 목적지 MAC이 ff:ff:ff:ff:ff:ff입니다. 이번 예시는 PC3의 IP에 대한 ARP Request이며, 모든 Broadcast가 ARP인 것은 아닙니다.</p><p>이 Lab에서는 같은 LAN의 전달 가능한 포트 중 수신 포트를 제외하고 Flooding합니다. 물리 연결선은 녹색, 선택한 프레임의 이동은 갈색 점선 화살표입니다.</p><details><summary>실제 주소와 포트 이름 보기</summary><p>PC1: 00:50:79:66:68:00 · 1번 포트 (eth0)<br>PC2: 00:50:79:66:68:01 · 2번 포트 (eth1)<br>PC3: 00:50:79:66:68:02 · 3번 포트 (eth2)</p></details><h3>Aging은 학습과 다릅니다.</h3><p>Aging은 오래 갱신되지 않은 동적 MAC 정보를 지우는 것입니다. 정보가 지워진 뒤 그 PC로 가는 프레임은 먼저 Flooding됩니다. 이후 그 PC가 보낸 프레임이 들어오면 출발지 MAC과 수신 포트를 다시 학습합니다. 보내지 않으면 그 PC의 위치를 새로 배우지 못합니다.</p></div></div></section><section id="fdb-timeline"><div class="shell"><div class="section-head"><div><div class="eyebrow">FDB · BEFORE / AFTER</div><h2>프레임이 들어온 포트에 Source MAC을 기록합니다.</h2></div></div><p>01번 실험의 <code>brctl showmacs br0</code> 기록에서 PC의 동적 엔트리만 추렸습니다. Bridge 자체의 <code>is local? yes</code> 항목은 생략했습니다.</p><div class="table-scroll"><table><thead><tr><th>관찰 시점</th><th>MAC → 포트 · 유형</th><th>원본 기록 키</th></tr></thead><tbody><tr><th scope="row">① 초기화 직후</th><td>PC 동적 엔트리 없음</td><td><code>flush-initial</code></td></tr><tr><th scope="row">② PC1 ARP Request 후 · PC2 응답 차단</th><td><code>00:50:79:66:68:00</code> → port 1 / eth0 · 동적</td><td><code>source-pc1-only</code></td></tr><tr><th scope="row">③ PC2 응답 후</th><td><code>00:50:79:66:68:00</code> → port 1 / eth0 · 동적<br><code>00:50:79:66:68:01</code> → port 2 / eth1 · 동적</td><td><code>source-both-learned</code></td></tr></tbody></table></div><p class="method-note">PC1: 00:50:79:66:68:00 · PC2: 00:50:79:66:68:01. ③은 응답 이후 명령으로 조회한 상태이며, 프레임 수신 순간의 동시 스냅샷은 아닙니다.</p><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">01번 콘솔에서 전후 상태 대조하기 →</a><div class="test-guide"><b>04 → 05번: 지웠다가 다시 배우는 과정</b><p>PC2 포트 FDB 제거 → PC1 ARP는 유지 → PC2 목적지 Unicast를 Flooding → PC2 응답 수신 → PC2 MAC이 port 2에 다시 등록 → 다음 요청은 PC3로 전달되지 않음.</p><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">삭제 직후와 응답 후 FDB 확인 →</a></div></div></section><section id="results"><div class="shell"><div class="section-head"><div><div class="eyebrow">02 · LEARN / FORWARD / RELEARN</div><h2>무엇을 비웠는지가 결과를 바꿉니다.</h2></div><p>ping 성공뿐 아니라 ARP·FDB의 전후 상태와<br>각 포트에 전달된 프레임을 함께 확인했습니다.</p></div><div class="filter-bar" role="group" aria-label="실험 종류 필터"><button type="button" data-filter="all" aria-pressed="true">전체 6</button><button type="button" data-filter="learning" aria-pressed="false">학습·재학습 2</button><button type="button" data-filter="forward" aria-pressed="false">전달·Flooding 3</button><button type="button" data-filter="aging" aria-pressed="false">Aging 1</button></div><div class="test-guide"><b>표 읽는 순서: 조건 만들기 → 명령 실행 → FDB·패킷으로 확인</b><p>ping은 모두 <strong>PC1에서</strong> 실행했습니다. PC2는 <strong>192.168.10.20</strong>, PC3는 <strong>192.168.10.30</strong>입니다. 모두 /24로 같은 서브넷에 있습니다.</p><p>01번은 PC2 응답을 잠시 막아 PC1만 학습되는 순간을 분리했습니다. 04번은 <strong>PC1 ARP를 유지한 채 SW1의 PC2 FDB만 지운</strong> 조건입니다. 모든 실험에서 ARP를 지운 것은 아닙니다.</p></div><div class="table-scroll scenario-table"><table><thead><tr><th>번호</th><th>조건 변경 / 확인 목적</th><th>변경 후 수행한 테스트</th><th>관찰 결과 / 판정</th><th>근거</th></tr></thead><tbody><tr data-kind="learning"><td>01</td><td><b>Source MAC Learning</b><div class="fault-description">ARP·FDB 초기화 후 PC2 포트를 일시 down. PC1이 보내는 프레임만 관찰한 뒤 PC2 포트를 up.</div><p class="test-purpose">PC2 응답을 막아 학습 시점을 분리</p></td><td class="test-action"><strong>PC1 → PC2 ping, 이어서 FDB 확인</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>PC1&gt; clear arp
-SW1# ip link set eth1 down
-PC1&gt; ping 192.168.10.20 -c 1 -i 500 -w 1000
-SW1# brctl showmacs br0
-SW1# ip link set eth1 up
-PC1&gt; ping 192.168.10.20 -c 3 -i 500 -w 1000</pre></details></td><td>PC1만 port 1에 학습. PC2 응답 후 PC2 MAC이 port 2에 추가.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">터미널·FDB 보기 ↗</a><a href="../ethernet-viewer.html?mode=packets&amp;scenario=01-arp-first-contact&amp;point=pc3-sw1">PC3 패킷 보기 ↗</a></td></tr><tr data-kind="forward"><td>02</td><td><b>Known Unicast</b><div class="fault-description">SW1 FDB에서 PC2 MAC → port 2를 확인.</div><p class="test-purpose">PC2의 위치를 알고 있는 상태</p></td><td class="test-action"><strong>PC1 → PC2 ping 3회 + 세 링크 비교</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>SW1# brctl showmacs br0
-PC1&gt; ping 192.168.10.20 -c 3 -i 500 -w 1000</pre></details></td><td>같은 요청 3개가 PC1·PC2 링크에만 존재. PC3는 0개.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=02-known-unicast">터미널·FDB 보기 ↗</a><a href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 패킷 보기 ↗</a></td></tr><tr data-kind="forward"><td>03</td><td><b>Broadcast</b><div class="fault-description">PC1의 ARP 캐시를 비우고 PC3를 찾도록 통신.</div><p class="test-purpose">PC1이 PC3의 MAC을 모르는 상태</p></td><td class="test-action"><strong>PC1 → PC3 ping + PC2 링크 관찰</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>PC1&gt; clear arp
-PC1&gt; ping 192.168.10.30 -c 3 -i 500 -w 1000</pre></details></td><td>목적지 MAC ff:ff:ff:ff:ff:ff인 ARP Request가 PC2·PC3에 동일하게 전달.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=03-broadcast">터미널·FDB 보기 ↗</a><a href="../ethernet-viewer.html?mode=packets&amp;scenario=03-broadcast&amp;point=pc3-sw1">PC3 패킷 보기 ↗</a></td></tr><tr data-kind="forward"><td>04</td><td><b>Unknown Unicast</b><div class="fault-description">SW1의 eth1만 분리·재등록해 해당 포트 FDB 삭제. PC1의 ARP는 남아 있음을 확인.</div><p class="test-purpose">ARP는 유지하고 PC2 FDB만 제거</p></td><td class="test-action"><strong>PC1 → PC2 ping 1회 + PC3 링크 관찰</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>PC1&gt; show arp
-SW1# brctl delif br0 eth1
-SW1# brctl addif br0 eth1
-SW1# brctl showmacs br0
-PC1&gt; show arp
-PC1&gt; ping 192.168.10.20 -c 1 -i 500 -w 1000</pre></details></td><td>ARP 없이 PC2 MAC으로 보낸 Unicast 요청이 PC3에서도 동일한 바이트로 관찰.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">터미널·FDB 보기 ↗</a><a href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">PC3 패킷 보기 ↗</a></td></tr><tr data-kind="learning"><td>05</td><td><b>MAC 재학습</b><div class="fault-description">04번의 응답 후 PC2 MAC → port 2가 복구됐는지 확인.</div><p class="test-purpose">PC2 응답으로 위치를 다시 알게 된 상태</p></td><td class="test-action"><strong>PC1 → PC2 ping 3회 재실행</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>SW1# brctl showmacs br0
-PC1&gt; ping 192.168.10.20 -c 3 -i 500 -w 1000</pre></details></td><td>PC1·PC2에 같은 요청 3개, PC3에 0개. Unknown Unicast Flooding 종료.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">터미널·FDB 보기 ↗</a><a href="../ethernet-viewer.html?mode=packets&amp;scenario=05-mac-relearning&amp;point=pc3-sw1">PC3 패킷 보기 ↗</a></td></tr><tr data-kind="aging"><td>06</td><td><b>실제 Aging</b><div class="fault-description">기본 300초를 확인하고 5초로 변경. 동적 엔트리 확인 후 8초 추가 대기.</div><p class="test-purpose">새 Bridge의 타이머만 5초로 조정</p></td><td class="test-action"><strong>FDB 전후 비교 후 300초 복원</strong><details class="test-commands"><summary>실제 테스트 명령</summary><pre>SW1# brctl setageing br0 5
-SW1# brctl showmacs br0
-# 8초 추가 대기
-SW1# brctl showmacs br0
-SW1# brctl setageing br0 300</pre></details></td><td>PC1·PC2 동적 엔트리가 시간 경과로 사라짐. 수동 삭제와 별개로 실제 Aging 관찰.<div class="pass result-pass">✓ 실험·근거 검증 통과</div></td><td class="evidence-links"><a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">터미널·FDB 보기 ↗</a></td></tr></tbody></table></div><p class="method-note">06번은 콘솔/FDB 기록으로 검증하며 PCAP은 별도 저장하지 않았습니다. 타이머를 5초로 조정한 실제 Aging이며, 기본 300초를 기다린 시험은 아닙니다. 실험 후 300초로 복원했습니다.</p></div></section>
-<section id="packets"><div class="shell"><div class="section-head"><div><div class="eyebrow">03 · PACKET EVIDENCE</div><h2>목적지 MAC은 같은데, 전달 포트는 달라집니다.</h2></div><p>PC1 → PC2 요청의 Ethernet 바이트를<br>PC1·PC2·PC3 링크에서 대조했습니다.</p></div><div class="packet-grid"><article class="packet-card"><span class="eyebrow">KNOWN · PC2 위치를 알고 있음</span><h3>PC2 포트로만 전달</h3><dl><dt>PC1 ARP</dt><dd class="unchanged">192.168.10.20 → PC2 MAC</dd><dt>SW1 FDB</dt><dd class="unchanged">PC2 MAC → port 2</dd><dt>목적지 MAC</dt><dd>00:50:79:66:68:01 · PC2</dd><dt>PC2 링크</dt><dd>Echo Request 3개</dd><dt>PC3 링크</dt><dd class="unchanged">0개 · Flooding 없음</dd></dl><a class="btn" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">Known · PC3 캡처 보기 ↗</a></article><article class="packet-card"><span class="eyebrow">UNKNOWN · PC2 FDB만 없음</span><h3>PC3에도 Unicast가 전달</h3><dl><dt>PC1 ARP</dt><dd class="unchanged">192.168.10.20 → PC2 MAC</dd><dt>SW1 FDB</dt><dd class="changed">PC2 MAC 없음</dd><dt>목적지 MAC</dt><dd>00:50:79:66:68:01 · PC2</dd><dt>PC2 링크</dt><dd>Echo Request 1개</dd><dt>PC3 링크</dt><dd class="changed">같은 Echo Request 1개</dd></dl><a class="btn primary" href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">Unknown · 실제 프레임 보기 ↗</a></article></div><div style="height:18px"></div><div class="note">Broadcast의 목적지 MAC은 ff:ff:ff:ff:ff:ff입니다. 여기서 PC3에 보인 Unknown Unicast는 PC2의 실제 MAC을 목적지로 사용합니다. “Unknown”은 PC1이 아니라 Switch의 FDB 관점입니다.</div></div></section>
-<section><div class="shell"><div class="test-guide" id="capture-meaning"><h3>PC3 링크에 보였다는 것과 PC3가 응답했다는 것은 다릅니다.</h3><p>04번의 GNS3 링크 캡처에는 <b>목적지 MAC이 PC2인 요청 프레임 1개</b>가 있습니다. 이는 SW1이 PC3 쪽 링크에도 복제·전달했다는 근거입니다. 목적지가 PC3로 바뀌거나 Broadcast로 변환된 것은 아닙니다.</p><p>일반적인 호스트 수신 필터링에서는 자기 MAC이 아닌 Unicast를 자기 IP 통신으로 처리하지 않습니다. 다만 이 실험은 PC3 내부의 NIC 필터나 IP 스택을 추적하지 않았으므로, <b>캡처만으로 PC3 내부의 처리·폐기 위치를 판정하지 않습니다.</b> PC3 링크의 해당 캡처에는 요청 1개만 있고 응답 프레임은 없습니다.</p></div></div></section><section><div class="shell"><div class="section-head"><div><div class="eyebrow">04 · TWO TABLES, DIFFERENT ROLES</div><h2>ARP가 남아 있어도 Switch는 모를 수 있습니다.</h2></div></div><div class="grid grid3"><article class="card"><span class="tag learn">ARP · IP → MAC</span><h3>누구에게 보낼 프레임인가?</h3><p>PC1은 .20이 00:50:79:66:68:01임을 알고 있었습니다. 캐시가 남아 새 ARP 없이 바로 Unicast를 만들었습니다.</p></article><article class="card"><span class="tag learn">FDB · MAC → PORT</span><h3>어느 포트로 내보낼 것인가?</h3><p>SW1에서 PC2 포트의 학습 항목만 지웠습니다. 목적지 위치가 없어 요청이 PC2뿐 아니라 PC3 포트에도 전달됐습니다.</p></article><article class="card"><span class="tag prod">Source MAC Learning</span><h3>응답이 돌아오면 다시 배웁니다.</h3><p>PC2의 응답을 port 2에서 받고 PC2 MAC을 재학습했습니다. 다음 요청 3개는 PC3로 Flooding되지 않았습니다.</p></article></div><p class="method-note">이번 FDB 삭제는 새 Bridge의 eth1을 잠깐 분리·재등록한 방식입니다. 실제 Aging 관찰은 06번에서 별도로 수행했습니다. 물리 스위치나 모든 VLAN 정책의 동작을 검증한 것은 아닙니다.</p></div></section>
-<section id="evidence"><div class="shell"><div class="section-head"><div><div class="eyebrow">05 · ORIGINAL EVIDENCE</div><h2>설명에서 원본 프레임까지 따라가세요.</h2></div><p>콘솔·FDB·PCAP·재판정 도구를 함께 제공합니다.</p></div><div class="download-grid"><article class="card"><span class="eyebrow">REPORT</span><h3>전체 실험 보고서</h3><p>초기 상태, 학습 시점, 조건별 결과와 검증 한계를 자세히 정리했습니다.</p><a class="btn" href="../learning/foundations/ethernet-mac-table/report.html">전체 보고서 읽기 ↗</a></article><article class="card"><span class="eyebrow">GNS3 PROJECT</span><h3>Lab 프로젝트 백업</h3><p>VPCS 주소와 Linux Bridge 시작 명령을 포함합니다. Alpine 3.23 이미지는 대상 Compute에 별도로 준비해야 합니다.</p><a class="btn primary" download href="../learning/foundations/ethernet-mac-table/Ethernet-MAC-Table-Lab.gns3project">프로젝트 다운로드 ↓</a></article><article class="card"><span class="eyebrow">PACKETS &amp; VALIDATION</span><h3>PCAP 15개와 검증 자료</h3><p>5개 실험의 세 링크 패킷, 콘솔·FDB 기록, 해시 및 읽기 전용 재판정 코드를 제공합니다.</p><a class="btn" download href="../learning/foundations/ethernet-mac-table/ethernet-evidence.zip">전체 자료 ZIP ↓</a></article></div><p class="method-note">필수 7개 판정 PASS + 추가 Aging PASS. 세 캡처의 원본 프레임 바이트를 대조했으며, PC3의 빈 캡처도 정상 PCAP 헤더와 다른 실험의 수집 성공을 함께 확인했습니다.</p></div></section>
-<section id="verification-map"><div class="shell"><div class="eyebrow">VALIDATION MAP</div><h2>실험 6개와 핵심 판정 7개는 세는 기준이 다릅니다.</h2><p>01~05번 패킷 실험을 7개 기준으로 판정하고, 06번 Aging은 추가 판정으로 따로 확인했습니다. 하나의 실험이 여러 기준을 검증할 수 있습니다.</p><div class="table-scroll"><table><thead><tr><th>핵심 판정 · 모두 PASS</th><th>실험 번호</th><th>확인한 근거</th></tr></thead><tbody><tr><th scope="row">Source MAC Learning</th><td>01</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">source-pc1-only → source-both-learned →</a></td></tr><tr><th scope="row">ARP Broadcast Flooding</th><td>03</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=03-broadcast">ARP Request가 PC2·PC3 링크에 전달 →</a></td></tr><tr><th scope="row">Known Unicast Forwarding</th><td>02</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=02-known-unicast">요청 3개 · PC3 0개 →</a></td></tr><tr><th scope="row">Unknown Unicast Flooding</th><td>04</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">동일 Unicast 요청이 세 링크에 존재 →</a></td></tr><tr><th scope="row">MAC Re-learning</th><td>05</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">PC2 FDB 복구 후 PC3 요청 0개 →</a></td></tr><tr><th scope="row">ARP/FDB Separation</th><td>04</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">PC1 ARP 유지 + PC2 FDB 없음 →</a></td></tr><tr><th scope="row">Packet Capture</th><td>01~05</td><td><a href="../learning/foundations/ethernet-mac-table/verdict.json">5개 실험 × 3지점 = 15개 원본 PCAP →</a></td></tr></tbody></table></div><p class="method-note"><b>추가 PASS · 06 Actual Accelerated Aging:</b> 타이머 5초 설정, 동적 엔트리 소멸 관찰, 300초 복원. 별도 PCAP 없음. <a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">Aging 콘솔 보기 →</a> · <a href="../learning/foundations/ethernet-mac-table/verdict.json">전체 판정 원본 →</a></p></div></section><section id="explanation"><div class="shell"><div class="section-head"><div><div class="eyebrow">06 · EXPLAIN IN MY OWN WORDS</div><h2>이제 결과를 자신의 말로 설명해 보세요.</h2></div><span class="tag learn">설명 연습 진행 · 일부 개념 복습 필요</span></div><p class="method-note">먼저 답을 말해 본 뒤 근거를 펼쳐 비교하세요. 아래 내용은 Codex가 실험 증거로 작성한 참고 답안이며, 사용자 답변으로 기록하지 않았습니다. 다음 연습은 그림 설명 후 최대 3문항으로 마치고, 남은 부분은 복습 항목으로 정리합니다.</p><div class="learning-checks"><article class="card"><h3>Switch는 어느 MAC으로 학습하는가?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>Source MAC입니다. PC2 응답을 막았을 때 FDB에 PC1만 생겼고, PC2의 ARP Reply를 받은 뒤 PC2가 추가됐습니다.</p></details></article><article class="card"><h3>Destination MAC을 모르면 어디로 보내는가?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>이번 동일 Bridge에서 수신 포트를 제외한 나머지 포트로 Flooding했습니다. PC2로 가는 요청이 PC3에서도 같은 바이트로 잡혔습니다.</p></details></article><article class="card"><h3>Known Unicast는 어떻게 전달되는가?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>FDB에 기록된 목적지 포트로 보냅니다. PC1→PC2 요청 3개가 PC2 링크에만 나가고 PC3에는 없었습니다.</p></details></article><article class="card"><h3>Broadcast와 Unknown Unicast의 차이는?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>둘 다 Flooding됐지만 Broadcast는 ff:ff:ff:ff:ff:ff, Unknown Unicast는 PC2의 실제 MAC 00:50:79:66:68:01을 목적지로 사용했습니다.</p></details></article><article class="card"><h3>MAC Entry가 지워지면 통신이 끊기는가?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>반드시 그렇지는 않습니다. 이번에는 Flooding된 요청이 PC2에 도달하고 응답으로 FDB가 재학습돼 ping이 성공했습니다.</p></details></article><article class="card"><h3>ARP에는 있고 FDB에는 없으면?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>PC1은 새 ARP 없이 Unicast 프레임을 만듭니다. Switch는 위치를 몰라 Flooding합니다. ARP의 IP→MAC과 FDB의 MAC→Port는 별개입니다.</p></details></article><article class="card"><h3>PC1과 PC2는 각각 언제 학습되는가?</h3><details class="test-commands"><summary>실험 근거와 대조하기</summary><p>PC1 ARP Request를 수신할 때 PC1→port 1, PC2 ARP Reply를 수신할 때 PC2→port 2가 학습됐습니다.</p></details></article></div><p class="method-note">다음 주제: VLAN / Access / 802.1Q Trunk. 본인 설명 확인 전까지 이 주제를 학습 완료로 표시하지 않습니다.</p><a class="btn" download href="../learning/foundations/ethernet-mac-table/explanation-note.md">설명 연습 노트 다운로드 ↓</a></div></section></main><footer class="footer"><div class="shell">현상일 · Enterprise Network Learning Evidence</div></footer><script>document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));document.querySelectorAll('tr[data-kind]').forEach(row=>row.hidden=button.dataset.filter!=='all'&&row.dataset.kind!==button.dataset.filter);}));</script><script src="../ethernet-guide.js"></script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ethernet / MAC Table — 초급자 실습 가이드</title>
+<meta name="description" content="초급 네트워크 엔지니어를 위한 Ethernet MAC Table 학습 페이지. Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging을 실제 GNS3·FDB·PCAP으로 검증합니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<link rel="stylesheet" href="../ethernet-guide.css">
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#beginner-first">처음 읽기</a>
+      <a href="#topology">동작 그림</a>
+      <a href="#results">실험 결과</a>
+      <a href="#evidence">원본 자료</a>
+    </nav>
+  </div>
+</header>
+<main>
+
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">FOUNDATION · BEGINNER FIRST · VERIFIED LAB</div>
+    <h1>Ethernet / <em>MAC Table</em></h1>
+    <p>이 Lab의 목표는 하나입니다.<br><b>스위치가 MAC 주소를 어떻게 배우고, 프레임을 어느 포트로 보낼지 어떻게 결정하는지</b> 이해하는 것입니다.</p>
+    <div class="status-row">
+      <span class="tag prod">구성·검증 완료</span>
+      <span class="tag learn">초급자 설명 우선</span>
+      <span class="tag proj">GNS3 · 실제 PCAP 근거</span>
+    </div>
+    <div class="result-metrics">
+      <article><strong>6</strong><span>전체 실험 · 패킷 5 + Aging 1</span></article>
+      <article><strong>15</strong><span>원본 PCAP · 5개 실험 × 3지점</span></article>
+      <article><strong>7 / 7</strong><span>핵심 동작 검증 통과</span></article>
+      <article><strong>1</strong><span>저장된 GNS3 Lab</span></article>
+    </div>
+    <p class="method-note"><b>처음부터 PCAP이나 FDB 명령을 해석할 필요는 없습니다.</b> 바로 아래 <b>00 · 처음 읽기</b>부터 보고, 그다음 실험은 “정말 그렇게 동작했는지 확인하는 증거”로 보면 됩니다.</p>
+  </div>
+</section>
+
+<section id="beginner-first">
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">00 · 처음 읽기 · BEGINNER FIRST</div>
+        <h2>실험보다 먼저, 이것만 이해하세요.</h2>
+      </div>
+      <p>처음에는 용어를 외우지 말고<br><b>스위치가 프레임 하나를 처리하는 순서</b>만 따라가면 됩니다.</p>
+    </div>
+
+    <div class="test-guide">
+      <h3>30초 요약 · 딱 두 문장</h3>
+      <p><b>① Source MAC(출발지 MAC) = 스위치가 “이 장비가 어느 포트에 있는지” 학습할 때 봅니다.</b></p>
+      <p><b>② Destination MAC(목적지 MAC) = 스위치가 “이 프레임을 어느 포트로 내보낼지” 결정할 때 봅니다.</b></p>
+      <p>한 줄로 줄이면 <b>출발지를 보고 학습하고, 목적지를 보고 전달합니다.</b></p>
+    </div>
+
+    <div class="path-facts">
+      <article>
+        <span>① 프레임이 들어옴</span>
+        <h3>Source MAC을 봅니다.</h3>
+        <p>PC1 프레임이 1번 포트로 들어왔다면 스위치는 <b>PC1 MAC → 1번 포트</b>라고 기억합니다.</p>
+      </article>
+      <article>
+        <span>② 목적지를 찾음</span>
+        <h3>Destination MAC을 조회합니다.</h3>
+        <p>목적지가 PC2라면 MAC Table에서 <b>PC2 MAC이 어느 포트인지</b> 찾아봅니다.</p>
+      </article>
+      <article>
+        <span>③ 내보낼 곳을 결정</span>
+        <h3>알면 한 곳, 모르면 여러 곳</h3>
+        <p>PC2 위치를 알면 그 포트로만 보냅니다. 모르면 같은 LAN의 다른 포트들로 <b>Flooding</b>합니다.</p>
+      </article>
+    </div>
+
+    <div class="note">
+      <b>가장 중요한 오개념:</b> 스위치는 <b>목적지 MAC을 배우려고 Flooding하는 것이 아닙니다.</b><br>
+      Flooding은 목적지 MAC이 어느 포트에 있는지 모를 때 프레임을 여러 포트로 전달하는 동작입니다. 스위치가 PC2의 위치를 배우는 순간은 <b>PC2가 보낸 프레임이 들어왔을 때</b>입니다. 그때 Source MAC이 PC2이므로 <b>PC2 MAC → 들어온 포트</b>를 학습합니다.
+    </div>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">KNOWN · UNKNOWN · BROADCAST</div>
+        <h2>세 가지는 이렇게 구별하세요.</h2>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>상황</th><th>목적지 MAC</th><th>스위치 상태</th><th>동작</th><th>쉽게 말하면</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Known Unicast</th>
+            <td>PC2의 실제 MAC</td>
+            <td>PC2 MAC → 2번 포트를 알고 있음</td>
+            <td><b>2번 포트로만 전달</b></td>
+            <td>“PC2가 어디 있는지 안다.”</td>
+          </tr>
+          <tr>
+            <th scope="row">Unknown Unicast</th>
+            <td>PC2의 실제 MAC</td>
+            <td>PC2가 어느 포트인지 모름</td>
+            <td>수신 포트를 제외한 같은 LAN의 포트로 <b>Flooding</b></td>
+            <td>“PC2에게 가는 건 맞는데 어느 문인지 모른다.”</td>
+          </tr>
+          <tr>
+            <th scope="row">Broadcast</th>
+            <td><code>ff:ff:ff:ff:ff:ff</code></td>
+            <td>특정 한 장비의 포트를 찾는 상황이 아님</td>
+            <td>수신 포트를 제외한 같은 LAN의 포트로 전달</td>
+            <td>“처음부터 같은 LAN 모두에게 보내는 주소다.”</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="method-note"><b>Unknown Unicast ≠ Broadcast</b>입니다. 둘 다 여러 포트로 나갈 수 있지만, Unknown Unicast의 Destination MAC은 여전히 <b>PC2의 실제 MAC</b>입니다. Broadcast만 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">FIRST PING · FULL FLOW</div>
+        <h2>처음 Ping할 때 실제로는 어떤 순서일까요?</h2>
+      </div>
+      <p>PC1과 PC2가 같은 서브넷이고<br>ARP Cache와 MAC Table이 비어 있다고 가정합니다.</p>
+    </div>
+    <div class="grid grid3">
+      <article class="card">
+        <span class="tag learn">STEP 1</span>
+        <h3>PC1이 PC2의 MAC을 모릅니다.</h3>
+        <p>PC1은 먼저 <b>ARP Request</b>로 “192.168.10.20의 MAC 주소가 뭐야?”라고 묻습니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag learn">STEP 2</span>
+        <h3>ARP Request가 Switch에 들어옵니다.</h3>
+        <p>Source MAC은 PC1입니다. 스위치는 먼저 <b>PC1 MAC → 들어온 포트</b>를 학습합니다. ARP Request는 Broadcast이므로 다른 포트에도 전달합니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag learn">STEP 3</span>
+        <h3>PC2가 ARP Reply를 보냅니다.</h3>
+        <p>이번에는 Source MAC이 PC2입니다. 스위치는 <b>PC2 MAC → 들어온 포트</b>를 학습합니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag prod">STEP 4</span>
+        <h3>이제 Ping은 Known Unicast가 됩니다.</h3>
+        <p>PC1은 PC2의 MAC을 알고, 스위치는 PC2의 포트를 압니다. 따라서 ICMP Echo Request는 <b>PC2 포트로만</b> 전달됩니다.</p>
+      </article>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">ARP TABLE vs MAC TABLE</div>
+        <h2>PC가 아는 정보와 Switch가 아는 정보는 다릅니다.</h2>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>표</th><th>주로 누가 보유?</th><th>기억하는 관계</th><th>쉬운 질문</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">ARP Cache / ARP Table</th><td>PC, Router 등</td><td><b>IP → MAC</b></td><td>“192.168.10.20의 MAC이 뭐지?”</td></tr>
+          <tr><th scope="row">MAC Table / FDB</th><td>Switch / Bridge</td><td><b>MAC → Port</b></td><td>“이 MAC은 어느 포트 쪽에 있지?”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="test-guide">
+      <h3>그래서 ARP에는 있는데 MAC Table에는 없을 수도 있습니다.</h3>
+      <p>PC1이 <b>PC2의 MAC 주소</b>를 알아도, 스위치가 <b>PC2가 어느 포트에 있는지</b> 모를 수 있습니다. 아래 04번 Unknown Unicast 실험이 바로 이 상태를 일부러 만든 것입니다.</p>
+    </div>
+
+    <details class="test-commands">
+      <summary>용어가 헷갈리면 여기만 펼쳐보세요</summary>
+      <p><b>MAC Table = FDB(Forwarding Database)</b> · 이 페이지에서는 같은 의미로 봐도 됩니다.</p>
+      <p><b>Learning</b> · 들어온 프레임의 Source MAC과 수신 포트를 기록하는 것.</p>
+      <p><b>Forwarding</b> · Destination MAC을 보고 적절한 출력 포트로 프레임을 보내는 것.</p>
+      <p><b>Flooding</b> · 출력 포트를 하나로 정할 수 없거나 Broadcast일 때 같은 LAN의 여러 포트로 프레임을 전달하는 것.</p>
+      <p><b>Aging</b> · 일정 시간 동안 갱신되지 않은 동적 MAC Table 항목을 지우는 것.</p>
+    </details>
+    <p class="method-note">여기까지 읽었다면 아래부터는 새 개념이라기보다 <b>위 설명이 실제로 맞는지 GNS3·FDB·PCAP으로 확인하는 구간</b>입니다. 한 번에 전부 이해할 필요 없습니다.</p>
+  </div>
+</section>
+
+<section id="topology">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">01 · 그림으로 확인</div><h2>세 PC, 하나의 Broadcast Domain</h2></div>
+      <p>VPCS 3대 · Linux Bridge 1대<br>Gateway·NAT·외부 네트워크 연결 없음.</p>
+    </div>
+    <div class="filter-bar" role="group" aria-label="요청 프레임 경로 선택" id="path-controls">
+      <button type="button" data-path="known" aria-pressed="true">포트를 아는 유니캐스트<br><small>Known Unicast</small></button>
+      <button type="button" data-path="unknown" aria-pressed="false">포트를 모르는 유니캐스트<br><small>Unknown Unicast</small></button>
+      <button type="button" data-path="broadcast" aria-pressed="false">모두에게 보내는 주소<br><small>Broadcast</small></button>
+    </div>
+    <p class="method-note"><b>보는 순서:</b> 받은 프레임의 Source/Destination MAC → MAC Table 상태 → 스위치의 출력 결정.</p>
+
+    <div class="path-facts" aria-live="polite" aria-atomic="true">
+      <article><span>① 받은 프레임</span><h3 id="frame-destination">목적지 MAC: PC2</h3><p id="frame-source">출발지 MAC: PC1 · PC2행 ICMP 요청</p></article>
+      <article><span>② 스위치 MAC Table</span><h3 id="table-state">PC2 MAC → 2번 포트</h3><p id="source-learning">수신한 출발지 PC1 MAC → 1번 포트 학습·갱신</p></article>
+      <article><span>③ 출력 결정</span><h3 id="forward-state">2번 포트로만 전달</h3><p id="copy-state">목적지 MAC은 PC2 그대로</p></article>
+    </div>
+
+    <div class="path-scroll">
+      <div class="path-diagram">
+        <img class="result-topology" src="../ethernet-topology.svg" alt="PC1 .10은 eth0, PC2 .20은 eth1, PC3 .30은 eth2에 연결된 Linux Bridge 구성">
+        <svg class="path-overlay" viewBox="0 0 1400 620" aria-hidden="true">
+          <defs><marker id="request-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#b45309"/></marker></defs>
+          <g><rect x="445" y="142" width="540" height="55" rx="10" fill="#fff" stroke="#b45309" stroke-width="2"/><text id="diagram-destination" x="715" y="178" text-anchor="middle" fill="#172b43" font-family="sans-serif" font-size="23" font-weight="bold">목적지 MAC: PC2 · 변경 없음</text></g>
+          <g fill="none" stroke="#b45309" stroke-width="5" stroke-dasharray="10 5" marker-end="url(#request-arrow)"><path id="path-pc1" d="M316 225H465V294H635"/><path id="path-pc2" d="M641 326H465V416H322"/><path id="path-pc3" d="M765 309H1040" visibility="hidden"/></g>
+        </svg>
+      </div>
+    </div>
+    <div class="path-observer"><b id="observer-state">PC3 링크: 이 요청을 전달하지 않음</b><p id="scope-state">PC1 → PC2 통신 · 근거 실험 02</p></div>
+    <div id="learning-steps" hidden>
+      <p><b>Unknown Unicast 이후를 한 단계씩 보기</b></p>
+      <div class="filter-bar" role="group" aria-label="재학습 단계">
+        <button type="button" data-step="request" aria-pressed="true">1. 요청 Flooding</button>
+        <button type="button" data-step="reply" aria-pressed="false">2. PC2 응답과 학습</button>
+        <button type="button" data-step="next" aria-pressed="false">3. 다음 요청</button>
+      </div>
+    </div>
+    <div class="path-caption" aria-live="polite" aria-atomic="true">
+      <h3 id="path-title">Known Unicast · PC2 포트로만 전달</h3>
+      <p id="path-detail">PC1 → SW1 eth0 / port 1 수신 → eth1 / port 2 송신. 목적지 MAC: 00:50:79:66:68:01.</p>
+      <a id="path-evidence" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc2-sw1">PC2 전달 패킷 확인 →</a>
+      <a id="path-compare" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 미전달 비교 →</a>
+    </div>
+    <p class="method-note">갈색 점선은 선택한 프레임의 이동 방향입니다. 실제 PCAP에 근거한 설명 그림이며 실시간 애니메이션은 아닙니다.</p>
+  </div>
+</section>
+
+<section id="fdb-timeline">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">FDB · BEFORE / AFTER</div><h2>실제로 Source MAC이 학습되는 순간</h2></div></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>관찰 시점</th><th>MAC Table 상태</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">① 초기화 직후</th><td>PC 동적 엔트리 없음</td><td>아직 PC 위치를 모름</td></tr>
+          <tr><th scope="row">② PC1 ARP Request 수신</th><td><code>PC1 MAC → port 1</code></td><td>PC1이 보낸 프레임을 받아 PC1 위치 학습</td></tr>
+          <tr><th scope="row">③ PC2 ARP Reply 수신</th><td><code>PC1 MAC → port 1</code><br><code>PC2 MAC → port 2</code></td><td>PC2가 보낸 응답을 받아 PC2 위치도 학습</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>핵심:</b> PC2를 찾기 위해 Flooding했다고 PC2 위치를 자동으로 배우는 것이 아닙니다. <b>PC2가 응답을 보내고 그 프레임이 들어와야</b> PC2의 Source MAC과 수신 포트를 학습합니다.</div>
+    <p><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">01번 실제 FDB·콘솔 기록 보기 →</a></p>
+  </div>
+</section>
+
+<section id="results">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">02 · 실제 실험</div><h2>이제 설명이 실제로 맞는지 확인합니다.</h2></div>
+      <p>처음에는 번호 · 확인 목적 · 결과만 보세요.<br>명령과 PCAP은 필요할 때 펼쳐보면 됩니다.</p>
+    </div>
+    <div class="filter-bar" role="group" aria-label="실험 종류 필터">
+      <button type="button" data-filter="all" aria-pressed="true">전체 6</button>
+      <button type="button" data-filter="learning" aria-pressed="false">학습·재학습 2</button>
+      <button type="button" data-filter="forward" aria-pressed="false">전달·Flooding 3</button>
+      <button type="button" data-filter="aging" aria-pressed="false">Aging 1</button>
+    </div>
+    <div class="table-scroll scenario-table">
+      <table>
+        <thead><tr><th>번호</th><th>무엇을 확인?</th><th>쉽게 말하면</th><th>실제 결과</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr data-kind="learning">
+            <td>01</td><td><b>Source MAC Learning</b></td><td>스위치는 누구의 MAC을 보고 배우나?</td><td>PC1 프레임을 받자 PC1→port1 학습. PC2 응답을 받은 뒤 PC2→port2 추가.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">FDB·콘솔 ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>02</td><td><b>Known Unicast</b></td><td>PC2 위치를 알고 있으면?</td><td>PC2 포트로만 요청 전달. PC3 링크에는 요청 0개.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>03</td><td><b>Broadcast</b></td><td>ARP Request처럼 처음부터 모두에게 보내면?</td><td>목적지 MAC <code>ff:ff:ff:ff:ff:ff</code>인 ARP Request가 PC2·PC3 링크에 전달.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=03-broadcast&amp;point=pc3-sw1">Broadcast PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>04</td><td><b>Unknown Unicast</b></td><td>PC1은 PC2 MAC을 아는데 스위치만 PC2 포트를 모르면?</td><td>목적지 MAC은 PC2 그대로지만 PC2와 PC3 포트 모두로 Flooding.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">PC3의 Unicast PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="learning">
+            <td>05</td><td><b>MAC Re-learning</b></td><td>PC2가 응답하면 다시 배울까?</td><td>PC2 응답의 Source MAC으로 PC2→port2 재학습. 다음 요청은 PC3로 가지 않음.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">재학습 기록 ↗</a></td>
+          </tr>
+          <tr data-kind="aging">
+            <td>06</td><td><b>Aging</b></td><td>오래 통신하지 않으면 MAC Table은?</td><td>실험용 Aging 시간을 5초로 낮추자 동적 MAC 엔트리가 시간 경과 후 사라짐.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">Aging 콘솔 ↗</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="packets">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · 제일 중요한 비교</div><h2>Known과 Unknown은 목적지 MAC이 같습니다.</h2></div></div>
+    <div class="packet-grid">
+      <article class="packet-card">
+        <span class="eyebrow">KNOWN UNICAST</span>
+        <h3>PC2 위치를 알고 있음</h3>
+        <dl><dt>목적지 MAC</dt><dd>PC2 실제 MAC</dd><dt>SW1 FDB</dt><dd class="unchanged">PC2 MAC → port 2 있음</dd><dt>결과</dt><dd>PC2 포트로만 전달</dd><dt>PC3</dt><dd class="unchanged">요청 0개</dd></dl>
+        <a class="btn" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">Known 실제 PCAP ↗</a>
+      </article>
+      <article class="packet-card">
+        <span class="eyebrow">UNKNOWN UNICAST</span>
+        <h3>PC2 위치를 모름</h3>
+        <dl><dt>목적지 MAC</dt><dd>PC2 실제 MAC · <b>그대로</b></dd><dt>SW1 FDB</dt><dd class="changed">PC2 MAC 없음</dd><dt>결과</dt><dd>PC2·PC3 포트로 Flooding</dd><dt>PC3</dt><dd class="changed">PC2 목적지 Unicast가 보임</dd></dl>
+        <a class="btn primary" href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">Unknown 실제 PCAP ↗</a>
+      </article>
+    </div>
+    <div style="height:18px"></div>
+    <div class="note"><b>Unknown은 “목적지 MAC을 모른다”는 뜻이 아닙니다.</b> 정확히는 스위치의 FDB에 <b>그 목적지 MAC이 어느 포트에 있는지 정보가 없다</b>는 뜻입니다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · ARP와 FDB 분리</div><h2>ARP가 남아 있어도 Switch는 모를 수 있습니다.</h2></div></div>
+    <div class="grid grid3">
+      <article class="card"><span class="tag learn">ARP · IP → MAC</span><h3>PC1이 알고 있는 정보</h3><p>“192.168.10.20은 PC2 MAC을 사용한다.” 그래서 새 ARP 없이 PC2 목적지 Unicast 프레임을 만들 수 있습니다.</p></article>
+      <article class="card"><span class="tag learn">FDB · MAC → PORT</span><h3>Switch가 알고 있는 정보</h3><p>“PC2 MAC은 2번 포트에 있다.” 이 정보가 없으면 목적지 프레임을 어느 한 포트로 보낼지 결정할 수 없습니다.</p></article>
+      <article class="card"><span class="tag prod">04번 실험</span><h3>ARP만 남기고 FDB를 삭제</h3><p>PC1은 PC2 MAC을 알고 있지만 SW1은 PC2 포트를 모르는 상태를 만들어 Unknown Unicast Flooding을 직접 확인했습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · ORIGINAL EVIDENCE</div><h2>이해한 뒤 필요하면 원본까지 확인하세요.</h2></div><p>설명을 믿는 데서 끝내지 않고<br>실제 콘솔·FDB·PCAP으로 다시 확인할 수 있습니다.</p></div>
+    <div class="download-grid">
+      <article class="card"><span class="eyebrow">REPORT</span><h3>전체 실험 보고서</h3><p>초기 상태, 조건 변경, 결과, 검증 한계를 정리한 상세 보고서입니다.</p><a class="btn" href="../learning/foundations/ethernet-mac-table/report.html">전체 보고서 읽기 ↗</a></article>
+      <article class="card"><span class="eyebrow">GNS3 PROJECT</span><h3>Lab 프로젝트 백업</h3><p>동일한 토폴로지를 다시 열어 직접 재현할 수 있는 프로젝트입니다.</p><a class="btn primary" download href="../learning/foundations/ethernet-mac-table/Ethernet-MAC-Table-Lab.gns3project">프로젝트 다운로드 ↓</a></article>
+      <article class="card"><span class="eyebrow">PACKETS & VALIDATION</span><h3>PCAP 15개와 검증 자료</h3><p>5개 패킷 실험 × 3개 캡처 지점의 원본 PCAP과 판정 자료입니다.</p><a class="btn" download href="../learning/foundations/ethernet-mac-table/ethernet-evidence.zip">전체 자료 ZIP ↓</a></article>
+    </div>
+  </div>
+</section>
+
+<section id="verification-map">
+  <div class="shell">
+    <div class="eyebrow">VALIDATION MAP</div>
+    <h2>무엇을 어떤 실험으로 검증했는가?</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>핵심 개념</th><th>실험</th><th>검증 근거</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Source MAC Learning</th><td>01</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">PC1만 학습 → PC2 응답 후 PC2 추가 ↗</a></td></tr>
+          <tr><th scope="row">Known Unicast</th><td>02</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=02-known-unicast">PC3 요청 0개 ↗</a></td></tr>
+          <tr><th scope="row">Broadcast</th><td>03</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=03-broadcast">ARP Request가 PC2·PC3에 전달 ↗</a></td></tr>
+          <tr><th scope="row">Unknown Unicast</th><td>04</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">PC2 목적지 Unicast가 PC3 링크에도 존재 ↗</a></td></tr>
+          <tr><th scope="row">MAC Re-learning</th><td>05</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">PC2 재학습 후 Flooding 종료 ↗</a></td></tr>
+          <tr><th scope="row">Aging</th><td>06</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">동적 엔트리 시간 경과 소멸 ↗</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="explanation">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">06 · 이해 확인</div><h2>이 네 문장을 자신의 말로 설명할 수 있으면 됩니다.</h2></div><span class="tag learn">초급 핵심</span></div>
+    <div class="learning-checks">
+      <article class="card"><h3>1. Switch는 어느 MAC을 보고 학습하나요?</h3><details class="test-commands"><summary>답 확인</summary><p><b>Source MAC</b>입니다. 그리고 그 프레임이 들어온 포트를 함께 기록합니다.</p></details></article>
+      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>같은 VLAN/LAN의 전달 가능한 다른 포트로 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
+      <article class="card"><h3>3. Unknown Unicast와 Broadcast는 같은가요?</h3><details class="test-commands"><summary>답 확인</summary><p>아닙니다. Unknown Unicast의 목적지 MAC은 특정 장비의 실제 MAC이고, Broadcast는 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p></details></article>
+      <article class="card"><h3>4. ARP Table과 MAC Table의 차이는?</h3><details class="test-commands"><summary>답 확인</summary><p>ARP는 <b>IP → MAC</b>, Switch MAC Table/FDB는 <b>MAC → Port</b>를 기억합니다.</p></details></article>
+    </div>
+    <p class="method-note">이 네 가지가 아직 헷갈리면 아래 주제로 넘어가지 않아도 됩니다. 이 페이지의 목표는 용어 암기가 아니라 <b>프레임이 왜 그 포트로 이동하는지 설명할 수 있게 되는 것</b>입니다.</p>
+  </div>
+</section>
+
+</main>
+<footer class="footer"><div class="shell">현상일 · Enterprise Network Learning Evidence</div></footer>
+<script>
+document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+  document.querySelectorAll('tr[data-kind]').forEach(row=>row.hidden=button.dataset.filter!=='all'&&row.dataset.kind!==button.dataset.filter);
+}));
+</script>
+<script src="../ethernet-guide.js"></script>
+</body>
+</html>
