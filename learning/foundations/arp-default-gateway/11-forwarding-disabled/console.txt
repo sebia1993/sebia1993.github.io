@@ -1,0 +1,124 @@
+[baseline-router] 2026-09-13T14:23:01.555180+00:00
+R2> ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; ip -4 addr; ip route; sysctl net.ipv4.ip_forward
+ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; i
+p -4 addr; ip route; sysctl net.ipv4.ip_forward
+net.ipv4.ip_forward = 1
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    inet 192.168.10.1/24 scope global eth0
+       valid_lft forever preferred_lft forever
+19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    inet 192.168.20.1/24 scope global eth1
+       valid_lft forever preferred_lft forever
+192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 
+192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 
+net.ipv4.ip_forward = 1
+/ # 
+/ # 
+
+[baseline-pc2] 2026-09-13T14:23:03.551256+00:00
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+ping 192.168.20.10 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.160 ms
+84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.035 ms
+84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.174 ms
+
+VPCS> 
+
+[baseline-pc3] 2026-09-13T14:23:05.548097+00:00
+PC1> ping 192.168.10.20 -c 3 -i 500 -w 1000
+ping 192.168.10.20 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.897 ms
+84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=0.786 ms
+84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=0.894 ms
+
+VPCS> 
+
+[fault-forwarding-off] 2026-09-13T14:23:06.007470+00:00
+R2> sysctl -w net.ipv4.ip_forward=0; sysctl net.ipv4.ip_forward; ip link show eth0; ip link show eth1
+sysctl -w net.ipv4.ip_forward=0; sysctl net.ipv4.ip_forward; ip link show et
+h0; ip link show eth1
+net.ipv4.ip_forward = 0
+net.ipv4.ip_forward = 0
+18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:00 brd ff:ff:ff:ff:ff:ff
+19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:01 brd ff:ff:ff:ff:ff:ff
+/ # 
+/ # 
+
+[clear-arp] 2026-09-13T14:23:06.463445+00:00
+PC1> clear arp
+clear arp
+
+VPCS> 
+
+[cache-before] 2026-09-13T14:23:06.921285+00:00
+PC1> show arp
+show arp
+
+arp table is empty
+
+VPCS> 
+
+[fault-pc2] 2026-09-13T14:23:12.347162+00:00
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+ping 192.168.20.10 -c 3 -i 500 -w 1000
+
+192.168.20.10 icmp_seq=1 timeout
+192.168.20.10 icmp_seq=2 timeout
+192.168.20.10 icmp_seq=3 timeout
+
+VPCS> 
+
+[cache-after-fault] 2026-09-13T14:23:12.804459+00:00
+PC1> show arp
+show arp
+
+02:42:d4:39:68:00  192.168.10.1 expires in 115 seconds 
+
+VPCS> 
+
+[recovery-router] 2026-09-13T14:23:13.266913+00:00
+R2> ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; ip -4 addr; ip route; sysctl net.ipv4.ip_forward
+ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; i
+p -4 addr; ip route; sysctl net.ipv4.ip_forward
+net.ipv4.ip_forward = 1
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    inet 192.168.10.1/24 scope global eth0
+       valid_lft forever preferred_lft forever
+19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    inet 192.168.20.1/24 scope global eth1
+       valid_lft forever preferred_lft forever
+192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 
+192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 
+net.ipv4.ip_forward = 1
+/ # 
+/ # 
+
+[recovery-pc2] 2026-09-13T14:23:15.101912+00:00
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+ping 192.168.20.10 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.325 ms
+84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.408 ms
+84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.468 ms
+
+VPCS> 
+
+[recovery-pc3] 2026-09-13T14:23:17.097019+00:00
+PC1> ping 192.168.10.20 -c 3 -i 500 -w 1000
+ping 192.168.10.20 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.652 ms
+84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.196 ms
+84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.020 ms
+
+VPCS> 
