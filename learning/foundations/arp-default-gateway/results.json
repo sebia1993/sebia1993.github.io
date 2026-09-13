@@ -61,5 +61,21 @@
     "expected_success": true,
     "echo_replies": 3,
     "passed": true
+  },
+  {
+    "scenario": "10-arp-cache-gateway-down",
+    "target": "192.168.20.10",
+    "expected_success": false,
+    "echo_replies": 0,
+    "recovery_echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "11-forwarding-disabled",
+    "target": "192.168.20.10",
+    "expected_success": false,
+    "echo_replies": 0,
+    "recovery_echo_replies": 3,
+    "passed": true
   }
 ]

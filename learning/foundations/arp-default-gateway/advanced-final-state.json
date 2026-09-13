@@ -1,0 +1,26 @@
+{
+  "final-router": {
+    "started_epoch": 1789309397.690589,
+    "finished_epoch": 1789309398.1474402,
+    "time_utc": "2026-09-13T14:23:18.147447+00:00",
+    "node": "R2",
+    "command": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; ip -4 addr; ip route; sysctl net.ipv4.ip_forward",
+    "output": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; i\np -4 addr; ip route; sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 1\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\n    inet 127.0.0.1/8 scope host lo\n       valid_lft forever preferred_lft forever\n18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.10.1/24 scope global eth0\n       valid_lft forever preferred_lft forever\n19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.20.1/24 scope global eth1\n       valid_lft forever preferred_lft forever\n192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 \n192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 \nnet.ipv4.ip_forward = 1\n/ # \n/ # "
+  },
+  "final-pc2": {
+    "started_epoch": 1789309398.148221,
+    "finished_epoch": 1789309399.9845629,
+    "time_utc": "2026-09-13T14:23:19.984567+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.20.10 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.20.10 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.182 ms\n84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.243 ms\n84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.462 ms\n\nVPCS> "
+  },
+  "final-pc3": {
+    "started_epoch": 1789309399.985157,
+    "finished_epoch": 1789309401.823935,
+    "time_utc": "2026-09-13T14:23:21.823939+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.843 ms\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=0.994 ms\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=0.847 ms\n\nVPCS> "
+  }
+}

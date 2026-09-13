@@ -10,7 +10,7 @@ def request(rows,ip):return [r for r in rows if r['arp.opcode']=='1' and r['arp.
 def echoes(rows):return [r for r in rows if r['icmp.type']=='8' and r['ip.src']=='192.168.10.10' and r['ip.dst']=='192.168.20.10']
 allrows={};summary={}
 for d in sorted(root.iterdir()):
- if not d.is_dir():continue
+ if not d.is_dir() or not d.name[:2].isdigit() or not 1 <= int(d.name[:2]) <= 9:continue
  pcaps=list(d.glob('*.pcap'))
  if not pcaps:continue
  allrows[d.name]={p.stem:load(p) for p in pcaps}

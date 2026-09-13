@@ -3,9 +3,9 @@
   "summary": {
     "completedTopics": 1,
     "labs": 2,
-    "faultScenarios": 3,
-    "packetCaptures": 14,
-    "recoveryValidations": 3,
+    "faultScenarios": 5,
+    "packetCaptures": 16,
+    "recoveryValidations": 5,
     "explainNotes": 1,
     "automations": 2
   },
@@ -16,11 +16,11 @@
       "title": "ARP / Default Gateway",
       "status": "completed",
       "statusLabel": "검증·설명 확인 완료",
-      "summary": "대행 구성·검증 9개 실험과 사용자 핵심 답변 4개를 확인했습니다. 진단 한계를 보완한 설명 노트와 원본 PCAP 27개를 보관했습니다.",
+      "summary": "대행 구성·검증 11개 실험과 원본 PCAP 33개를 보관했습니다. 기존 핵심 답변 4개 확인 완료, 신규 심화 10·11은 실제 검증 완료·본인 설명 확인 대기입니다.",
       "labs": 1,
-      "faultScenarios": 3,
-      "packetCaptures": 9,
-      "recoveryValidations": 3,
+      "faultScenarios": 5,
+      "packetCaptures": 11,
+      "recoveryValidations": 5,
       "explainNotes": 1,
       "automations": 1,
       "detailUrl": "./labs/arp-default-gateway.html"

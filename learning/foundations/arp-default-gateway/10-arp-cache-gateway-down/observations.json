@@ -1,0 +1,108 @@
+{
+  "initial-PC1": {
+    "time_utc": "2026-09-13T14:22:08.639671+00:00",
+    "node": "PC1",
+    "command": "show",
+    "output": "show\n\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\nVPCS1  192.168.10.10/24     192.168.10.1      00:50:79:66:68:00  20022  127.0.0.1:20023\n       fe80::250:79ff:fe66:6800/64\n\nVPCS> "
+  },
+  "initial-PC3": {
+    "time_utc": "2026-09-13T14:22:09.100735+00:00",
+    "node": "PC3",
+    "command": "show",
+    "output": "show\n\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\nVPCS1  192.168.10.20/24     192.168.10.1      00:50:79:66:68:01  20024  127.0.0.1:20025\n       fe80::250:79ff:fe66:6801/64\n\nVPCS> "
+  },
+  "initial-R2": {
+    "time_utc": "2026-09-13T14:22:09.564686+00:00",
+    "node": "R2",
+    "command": "ip -4 addr; ip link; ip route; sysctl net.ipv4.ip_forward",
+    "output": "ip -4 addr; ip link; ip route; sysctl net.ipv4.ip_forward\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\n    inet 127.0.0.1/8 scope host lo\n       valid_lft forever preferred_lft forever\n18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.10.1/24 scope global eth0\n       valid_lft forever preferred_lft forever\n19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.20.1/24 scope global eth1\n       valid_lft forever preferred_lft forever\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\n    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00\n18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    link/ether 02:42:d4:39:68:00 brd ff:ff:ff:ff:ff:ff\n19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    link/ether 02:42:d4:39:68:01 brd ff:ff:ff:ff:ff:ff\n192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 \n192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 \nnet.ipv4.ip_forward = 1\n/ # \n/ # "
+  },
+  "initial-PC2": {
+    "time_utc": "2026-09-13T14:22:10.022384+00:00",
+    "node": "PC2",
+    "command": "show",
+    "output": "show\n\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\nVPCS1  192.168.20.10/24     192.168.20.1      00:50:79:66:68:02  20026  127.0.0.1:20027\n       fe80::250:79ff:fe66:6802/64\n\nVPCS> "
+  },
+  "baseline-router": {
+    "time_utc": "2026-09-13T14:22:10.484159+00:00",
+    "node": "R2",
+    "command": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; ip -4 addr; ip route; sysctl net.ipv4.ip_forward",
+    "output": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; i\np -4 addr; ip route; sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 1\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\n    inet 127.0.0.1/8 scope host lo\n       valid_lft forever preferred_lft forever\n18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.10.1/24 scope global eth0\n       valid_lft forever preferred_lft forever\n19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.20.1/24 scope global eth1\n       valid_lft forever preferred_lft forever\n192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 \n192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 \nnet.ipv4.ip_forward = 1\n/ # \n/ # "
+  },
+  "baseline-pc2": {
+    "time_utc": "2026-09-13T14:22:12.482181+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.20.10 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.20.10 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.561 ms\n84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.519 ms\n84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.430 ms\n\nVPCS> "
+  },
+  "baseline-pc3": {
+    "time_utc": "2026-09-13T14:22:14.324072+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.985 ms\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.135 ms\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=0.932 ms\n\nVPCS> "
+  },
+  "warm-cache-pc2": {
+    "started_epoch": 1789309367.366674,
+    "finished_epoch": 1789309369.362293,
+    "time_utc": "2026-09-13T14:22:49.362315+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.20.10 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.20.10 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.442 ms\n84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.504 ms\n84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.414 ms\n\nVPCS> "
+  },
+  "cache-before": {
+    "started_epoch": 1789309369.363256,
+    "finished_epoch": 1789309369.8242261,
+    "time_utc": "2026-09-13T14:22:49.824231+00:00",
+    "node": "PC1",
+    "command": "show arp",
+    "output": "show arp\n\n02:42:d4:39:68:00  192.168.10.1 expires in 85 seconds \n00:50:79:66:68:01  192.168.10.20 expires in 81 seconds \n\nVPCS> "
+  },
+  "fault-router-down": {
+    "started_epoch": 1789309369.889876,
+    "finished_epoch": 1789309370.346695,
+    "time_utc": "2026-09-13T14:22:50.346705+00:00",
+    "node": "R2",
+    "command": "ip link set eth0 down; ip link show eth0",
+    "output": "ip link set eth0 down; ip link show eth0\n18: eth0: <BROADCAST,MULTICAST> mtu 1500 qdisc fq_codel state DOWN qlen 1000\n    link/ether 02:42:d4:39:68:00 brd ff:ff:ff:ff:ff:ff\n/ # \n/ # "
+  },
+  "fault-pc2": {
+    "started_epoch": 1789309370.347494,
+    "finished_epoch": 1789309375.58935,
+    "time_utc": "2026-09-13T14:22:55.589352+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.20.10 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.20.10 -c 3 -i 500 -w 1000\n\n192.168.20.10 icmp_seq=1 timeout\n192.168.20.10 icmp_seq=2 timeout\n192.168.20.10 icmp_seq=3 timeout\n\nVPCS> "
+  },
+  "cache-after-fault": {
+    "started_epoch": 1789309375.589616,
+    "finished_epoch": 1789309376.048652,
+    "time_utc": "2026-09-13T14:22:56.048658+00:00",
+    "node": "PC1",
+    "command": "show arp",
+    "output": "show arp\n\n02:42:d4:39:68:00  192.168.10.1 expires in 79 seconds \n00:50:79:66:68:01  192.168.10.20 expires in 75 seconds \n\nVPCS> "
+  },
+  "recovery-router": {
+    "started_epoch": 1789309376.049515,
+    "finished_epoch": 1789309376.511879,
+    "time_utc": "2026-09-13T14:22:56.511883+00:00",
+    "node": "R2",
+    "command": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; ip -4 addr; ip route; sysctl net.ipv4.ip_forward",
+    "output": "ip link set eth0 up; ip link set eth1 up; sysctl -w net.ipv4.ip_forward=1; i\np -4 addr; ip route; sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 1\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\n    inet 127.0.0.1/8 scope host lo\n       valid_lft forever preferred_lft forever\n18: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.10.1/24 scope global eth0\n       valid_lft forever preferred_lft forever\n19: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000\n    inet 192.168.20.1/24 scope global eth1\n       valid_lft forever preferred_lft forever\n192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 \n192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 \nnet.ipv4.ip_forward = 1\n/ # \n/ # "
+  },
+  "recovery-pc2": {
+    "started_epoch": 1789309376.512415,
+    "finished_epoch": 1789309378.496588,
+    "time_utc": "2026-09-13T14:22:58.496595+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.20.10 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.20.10 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.20.10 icmp_seq=1 ttl=63 time=1.731 ms\n84 bytes from 192.168.20.10 icmp_seq=2 ttl=63 time=1.308 ms\n84 bytes from 192.168.20.10 icmp_seq=3 ttl=63 time=1.298 ms\n\nVPCS> "
+  },
+  "recovery-pc3": {
+    "started_epoch": 1789309378.497321,
+    "finished_epoch": 1789309380.493408,
+    "time_utc": "2026-09-13T14:23:00.493412+00:00",
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\n\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.868 ms\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=0.889 ms\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.181 ms\n\nVPCS> "
+  }
+}

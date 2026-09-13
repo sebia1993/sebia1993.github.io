@@ -1,5 +1,7 @@
 # ARP / Default Gateway — 구성 및 검증 결과
 
+현재 합계: **11/11 시나리오·33 PCAP**. 아래 최초 기록 뒤에 심화 10·11의 실제 검증 결과를 추가했습니다.
+
 2026-09-13, GNS3 2.2.61 / GNS3 VM에서 실제 실행했다. **정상·장애·복구·재시작 9개 시나리오가 모두 통과했고, 27개 PCAP의 패킷 검증도 통과했다.** 기존 `01-Basic-ARP-ICMP` 프로젝트는 수정하지 않았다.
 
 ## 열기
@@ -28,7 +30,7 @@ R2는 Alpine Linux의 IP forwarding을 사용하는 라우터다. SW1/SW2는 GNS
 
 R2 시작 명령에 인터페이스 주소와 forwarding 설정을 저장했고, VPCS 3대는 정상 IP 설정을 `save`로 저장했다. 노드 stop/start 후에도 별도 재설정 없이 통신 성공을 확인했다. 전체 Windows 재부팅 검증은 이번에 수행하지 않았다.
 
-## 검증 결과
+## 기존 01~09 검증 결과
 
 | 번호 / 폴더 | 변경·실험 | 실제 결과 |
 |---|---|---|
@@ -65,7 +67,7 @@ R2 시작 명령에 인터페이스 주소와 forwarding 설정을 저장했고,
 - 게이트웨이 eth0 down: 올바른 `192.168.10.1`을 ARP로 찾았지만 응답이 없었다.
 - 세 장애 모두 PC3와의 같은 대역 통신은 계속 성공했다.
 
-매 시나리오 시작 전에 PC들의 ARP 캐시와 R2 neighbor 캐시를 비웠다. 따라서 게이트웨이 down 실험은 **캐시가 비어 있는 조건**이다. 캐시가 남아 있는 즉시 장애 상황에서는 기존 MAC으로 ICMP를 먼저 전송할 수 있으므로 이번 관찰을 모든 상황에 일반화하지 않는다.
+기존 01~09 시나리오 시작 전에 PC들의 ARP 캐시와 R2 neighbor 캐시를 비웠다. 따라서 게이트웨이 down 실험은 **캐시가 비어 있는 조건**이다. 캐시가 남아 있는 즉시 장애 상황에서는 기존 MAC으로 ICMP를 먼저 전송할 수 있으므로 이번 관찰을 모든 상황에 일반화하지 않는다.
 
 ## 증거 읽기
 
@@ -117,8 +119,82 @@ ip neigh
 
 참고: [GNS3 공식 Docker 문서](https://docs.gns3.com/docs/emulators/docker-support-in-gns3), [기존 학습 계획](https://sebia1993.github.io/labs/arp-default-gateway.html).
 
-최종 상태: 정상 설정 저장 후 Lab을 닫고 서버·VM을 종료했다. 검증 후 서버·VM이 종료된 것을 확인했다.
+최초 01~09 검증 당시 최종 상태: 정상 설정 저장 후 Lab을 닫고 서버·VM을 종료했다. 검증 후 서버·VM이 종료된 것을 확인했다.
 
 ## 본인 설명 확인 완료
 
 사용자 핵심 답변에 적용 조건과 진단 한계를 보완했다. 설명 노트: [explanation-note.md](explanation-note.md). 로드맵에는 완료 주제 1개·설명 노트 1개로 반영했다.
+
+
+## 심화 실험 10·11 — 실제 검증 추가 (2026-09-13)
+
+기존 01~09 시나리오의 원본 PCAP 27개와 콘솔, 프로젝트 백업은 바이트 그대로 보존했습니다. 신규 6개를 추가해 총 33개 PCAP, 11/11 시나리오가 통과했습니다. 장애 조건 5건과 복구 5건을 확인했으며, 신규 10·11은 각각 하나의 시나리오 안에 장애와 복구가 있습니다. 사용자 설명 확인 완료 표시는 기존 핵심 답변 4개에 한정되며 신규 심화 답변은 아직 받지 않았습니다.
+
+### 실행 전 확인
+
+기존 02-ARP-Default-Gateway를 다시 열었습니다. PC1 .10.10/24 GW .10.1, PC3 .10.20/24 GW .10.1, PC2 .20.10/24 GW .20.1을 확인했습니다. R2 eth0 .10.1/24, eth1 .20.1/24 및 ip_forward=1, 두 연결망 경로를 확인했습니다. PC1→PC2 및 PC1→PC3 ping은 각각 3/3 성공했습니다. 다른 프로젝트에는 변경을 가하지 않았습니다.
+
+### 10. ARP 캐시 유지 + Gateway Down
+
+목적: 캐시에 남은 MAC이 경로 생존을 보장하지 않음을 확인.
+
+```text
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+PC1> show arp
+# PC1 ARP를 지우지 않음
+R2# ip link set eth0 down
+R2# ip link show eth0
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+PC1> show arp
+R2# ip link set eth0 up
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+```
+
+실제 결과: Gateway MAC이 캐시에 남은 채 기존 MAC으로 Echo Request 3개 전송. 장애 구간에서 PC1의 새 ARP는 0개, PC2 응답 0개, 라우터 출력 링크의 대상 요청 0개. eth0 복구 후 3/3 응답.
+
+Gateway MAC은 `02:42:d4:39:68:00`이며, 장애 전 캐시 잔여 85초, 장애 후 79초였습니다. 장애 PC1 캡처 frame 1~3은 모두 기존 MAC으로 향하는 ICMP 요청입니다. PC1이 새로 보낸 ARP는 없었습니다. R2 오른쪽의 frame 1~2는 R2가 PC2를 확인한 ARP 요청·응답이며 PC1의 ICMP 전달과 구분해야 합니다. 복구된 PC1 요청은 frame 7, 11, 15, R2 오른쪽은 frame 3, 5, 7입니다.
+
+복구: R2 eth0/eth1 UP, ip_forward=1을 확인했습니다. PC1→PC2와 PC1→PC3는 각각 3/3 응답했습니다. 세 링크에서 복구 PC2 요청·응답 각 3개를 확인했고, 라우터 양쪽 요청의 ICMP 바이트 동일성과 TTL 64→63을 확인했습니다.
+
+[콘솔](10-arp-cache-gateway-down/console.txt) · [PC1 PCAP](10-arp-cache-gateway-down/pc1-sw1.pcap) · [R2 입력 PCAP](10-arp-cache-gateway-down/sw1-r1.pcap) · [R2 출력 PCAP](10-arp-cache-gateway-down/r1-sw2.pcap)
+
+### 11. ARP 성공 + IP Forwarding 비활성
+
+목적: Next-hop ARP와 IP Forwarding의 성공 조건을 분리.
+
+```text
+R2# sysctl -w net.ipv4.ip_forward=0
+R2# sysctl net.ipv4.ip_forward
+PC1> clear arp
+PC1> show arp
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+PC1> show arp
+R2# sysctl -w net.ipv4.ip_forward=1
+PC1> ping 192.168.20.10 -c 3 -i 500 -w 1000
+```
+
+실제 결과: Gateway ARP Request/Reply 각 1개 성공 후 Echo Request 3개가 R2 입력 링크에 도착. 장애 구간에서 R2 출력 링크의 대상 요청 0개, PC2 응답 0개. forwarding 복구 후 3/3 응답.
+
+ARP 캐시가 비어 있음을 확인하고 실행했습니다. PC1 frame 1은 192.168.10.1을 묻는 ARP, frame 2는 Gateway Reply, frame 3~5는 목적지 IP 192.168.20.10 / 목적지 MAC 02:42:d4:39:68:00인 요청입니다. 장애 중 R2 오른쪽에는 프레임이 없었습니다. 복구된 PC1 요청은 frame 7, 9, 11, R2 오른쪽은 frame 1, 3, 5입니다.
+
+복구: R2 eth0/eth1 UP, ip_forward=1을 확인했습니다. PC1→PC2와 PC1→PC3는 각각 3/3 응답했습니다. 세 링크에서 복구 PC2 요청·응답 각 3개를 확인했고, 라우터 양쪽 요청의 ICMP 바이트 동일성과 TTL 64→63을 확인했습니다.
+
+[콘솔](11-forwarding-disabled/console.txt) · [PC1 PCAP](11-forwarding-disabled/pc1-sw1.pcap) · [R2 입력 PCAP](11-forwarding-disabled/sw1-r1.pcap) · [R2 출력 PCAP](11-forwarding-disabled/r1-sw2.pcap)
+
+### 시간 구간과 해석 범위
+
+장애와 복구를 동일 PCAP에 저장했습니다. `observations.json`의 복구 명령 시작 시각과 두 ping의 순서를 이용해 구간을 나누고, `advanced-validation.json`에 각 구간의 frame 번호를 기록했습니다. 캡처는 동일 GNS3 VM 시계이며 콘솔 시각은 Mac에서 기록했습니다. 정밀한 장비 간 지연 측정 용도로 사용하지 않습니다. 뷰어의 시간은 각 파일 첫 프레임 기준입니다.
+
+두 장애 구간 모두 PC1→PC2 응답과 ICMP 오류 메시지는 관찰되지 않았습니다. 10번은 짧은 3회 ping 동안의 캐시 재사용을 확인했으며 캐시 만료 이후 동작은 미검증입니다. 11번의 결과는 해당 Linux 라우터와 설정의 관찰이며 모든 운영체제의 오류 응답 동작으로 일반화하지 않습니다. 10·11에서 PC3 통신은 장애 전과 복구 후에 확인했고 장애 중에는 별도 시험하지 않았습니다.
+
+### 재판정과 최종 상태
+
+`python3 verify-advanced.py`는 Python 표준 라이브러리만으로 신규 6개 원본 PCAP과 콘솔을 읽어 다시 판정합니다. 원본을 수정하거나 장비에 접속하지 않습니다. `verify-packets.py`는 기존 01~09의 TShark 판정을 유지합니다. 신규 뷰어 계층 필드는 Windows 호스트의 TShark 4.6.8로 해석했으며, PCAP 바이트와 독립 Python 분석 결과를 대조했습니다.
+
+최종 R2 eth0/eth1 UP, ip_forward=1, PC1→PC2 및 PC1→PC3 각각 3/3 성공. 이번 추가 검증 후에는 정상 Lab을 실행 상태로 두었습니다. GNS3 프로젝트 내보내기 파일은 기존 정상 설정 백업을 그대로 보존했습니다. 새 Windows 재부팅·프로젝트 재가져오기 검증은 수행하지 않았습니다.
+
+### 실제 결과로 정리한 결론
+
+1. 정상 02번은 경로가 선택한 Gateway를 ARP하고 최종 목적지 IP를 유지한 채 라우팅되는 것을 보여 줍니다.
+2. 10번은 Gateway MAC 캐시가 남아 있어도 Gateway 인터페이스나 전체 경로가 정상이라는 뜻이 아님을 보여 줍니다.
+3. 11번은 ARP 성공 후에도 IP Forwarding이 중지되면 end-to-end 통신이 실패함을 보여 줍니다. ACL/Firewall은 이번에 직접 시험하지 않았습니다.
