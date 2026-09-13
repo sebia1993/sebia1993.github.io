@@ -1,0 +1,8 @@
+[PC2] ping 192.168.10.10 -c 3
+ping 192.168.10.10 -c 3
+
+84 bytes from 192.168.10.10 icmp_seq=1 ttl=63 time=1.211 ms
+84 bytes from 192.168.10.10 icmp_seq=2 ttl=63 time=1.099 ms
+84 bytes from 192.168.10.10 icmp_seq=3 ttl=63 time=1.714 ms
+
+VPCS> 

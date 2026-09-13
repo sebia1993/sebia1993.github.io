@@ -1,0 +1,77 @@
+[PC1] ip 192.168.10.10/24 192.168.10.254
+ip 192.168.10.10/24 192.168.10.254
+Checking for duplicate address...
+VPCS : 192.168.10.10 255.255.255.0 gateway 192.168.10.254
+
+VPCS> 
+[PC1] clear arp
+clear arp
+
+VPCS> 
+[PC2] clear arp
+clear arp
+
+VPCS> 
+[PC3] clear arp
+clear arp
+
+VPCS> 
+192.168.20.10 dev eth1 lladdr 00:50:79:66:68:02 ref 1 used 0/0/0 probes 4 REACHABLE
+192.168.10.10 dev eth0 lladdr 00:50:79:66:68:00 ref 1 used 0/0/0 probes 1 REACHABLE
+
+*** Round 1, deleting 2 entries ***
+*** Flush is complete after 1 round(s) ***
+
+[PC1] ping 192.168.20.10 -c 3
+ping 192.168.20.10 -c 3
+
+host (192.168.10.254) not reachable
+
+VPCS> 
+[PC1] ping 192.168.10.20 -c 3
+ping 192.168.10.20 -c 3
+
+84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.713 ms
+84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=0.919 ms
+84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=0.986 ms
+
+VPCS> 
+[PC1] show arp
+show arp
+
+00:50:79:66:68:01  192.168.10.20 expires in 117 seconds 
+
+VPCS> 
+[PC1] show ip
+show ip
+
+NAME        : VPCS[1]
+IP/MASK     : 192.168.10.10/24
+GATEWAY     : 192.168.10.254
+DNS         : 
+MAC         : 00:50:79:66:68:00
+LPORT       : 20010
+RHOST:PORT  : 127.0.0.1:20011
+MTU         : 1500
+
+VPCS> 
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+6: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:00 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.10.1/24 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:d4ff:fe39:6800/64 scope link 
+       valid_lft forever preferred_lft forever
+7: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:01 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.20.1/24 scope global eth1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:d4ff:fe39:6801/64 scope link 
+       valid_lft forever preferred_lft forever
+192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 
+192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 

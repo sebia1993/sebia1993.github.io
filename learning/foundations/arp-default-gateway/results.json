@@ -1,0 +1,65 @@
+[
+  {
+    "scenario": "01-same-subnet",
+    "target": "192.168.10.20",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "02-routed",
+    "target": "192.168.20.10",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "03-wrong-gateway",
+    "target": "192.168.20.10",
+    "expected_success": false,
+    "echo_replies": 0,
+    "passed": true
+  },
+  {
+    "scenario": "04-gateway-recovered",
+    "target": "192.168.20.10",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "05-wrong-mask",
+    "target": "192.168.20.10",
+    "expected_success": false,
+    "echo_replies": 0,
+    "passed": true
+  },
+  {
+    "scenario": "06-mask-recovered",
+    "target": "192.168.20.10",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "07-gateway-down",
+    "target": "192.168.20.10",
+    "expected_success": false,
+    "echo_replies": 0,
+    "passed": true
+  },
+  {
+    "scenario": "08-interface-recovered",
+    "target": "192.168.20.10",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  },
+  {
+    "scenario": "09-restart-persistence",
+    "target": "192.168.20.10",
+    "expected_success": true,
+    "echo_replies": 3,
+    "passed": true
+  }
+]

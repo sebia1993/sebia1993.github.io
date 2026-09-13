@@ -1,28 +1,28 @@
 {
   "updated": "2026-09-13",
   "summary": {
-    "completedTopics": 0,
-    "labs": 0,
-    "faultScenarios": 0,
-    "packetCaptures": 0,
-    "recoveryValidations": 0,
-    "explainNotes": 0,
-    "automations": 0
+    "completedTopics": 1,
+    "labs": 1,
+    "faultScenarios": 3,
+    "packetCaptures": 9,
+    "recoveryValidations": 3,
+    "explainNotes": 1,
+    "automations": 1
   },
   "topics": [
     {
       "id": "arp-default-gateway",
       "category": "Foundation",
       "title": "ARP / Default Gateway",
-      "status": "ready",
-      "statusLabel": "실습 준비",
-      "summary": "다른 Subnet으로 Packet을 보낼 때 ARP와 Default Gateway가 어떤 역할을 하는지 Frame/Packet 수준에서 검증합니다.",
-      "labs": 0,
-      "faultScenarios": 0,
-      "packetCaptures": 0,
-      "recoveryValidations": 0,
-      "explainNotes": 0,
-      "automations": 0,
+      "status": "completed",
+      "statusLabel": "검증·설명 확인 완료",
+      "summary": "대행 구성·검증 9개 실험과 사용자 핵심 답변 4개를 확인했습니다. 진단 한계를 보완한 설명 노트와 원본 PCAP 27개를 보관했습니다.",
+      "labs": 1,
+      "faultScenarios": 3,
+      "packetCaptures": 9,
+      "recoveryValidations": 3,
+      "explainNotes": 1,
+      "automations": 1,
       "detailUrl": "./labs/arp-default-gateway.html"
     },
     {

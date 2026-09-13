@@ -1,0 +1,58 @@
+[PC1] ip 192.168.10.10/24 192.168.10.1
+ip 192.168.10.10/24 192.168.10.1
+Checking for duplicate address...
+VPCS : 192.168.10.10 255.255.255.0 gateway 192.168.10.1
+
+VPCS> 
+[PC1] save
+save
+Saving startup configuration to startup.vpc
+.  done
+
+VPCS> 
+[PC3] ip 192.168.10.20/24 192.168.10.1
+ip 192.168.10.20/24 192.168.10.1
+Checking for duplicate address...
+VPCS : 192.168.10.20 255.255.255.0 gateway 192.168.10.1
+
+VPCS> 
+[PC3] save
+save
+Saving startup configuration to startup.vpc
+.  done
+
+VPCS> 
+[PC2] ip 192.168.20.10/24 192.168.20.1
+ip 192.168.20.10/24 192.168.20.1
+Checking for duplicate address...
+VPCS : 192.168.20.10 255.255.255.0 gateway 192.168.20.1
+
+VPCS> 
+[PC2] save
+save
+Saving startup configuration to startup.vpc
+.  done
+
+VPCS> 
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+6: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:00 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.10.1/24 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:d4ff:fe39:6800/64 scope link 
+       valid_lft forever preferred_lft forever
+7: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN qlen 1000
+    link/ether 02:42:d4:39:68:01 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.20.1/24 scope global eth1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:d4ff:fe39:6801/64 scope link 
+       valid_lft forever preferred_lft forever
+192.168.10.0/24 dev eth0 scope link  src 192.168.10.1 
+192.168.20.0/24 dev eth1 scope link  src 192.168.20.1 
+net.ipv4.ip_forward = 1
+net.ipv4.conf.eth0.proxy_arp = 0

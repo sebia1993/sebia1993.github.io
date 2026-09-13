@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "counts": {
+    "01-same-subnet": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "02-routed": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "03-wrong-gateway": {
+      "arp_requests": 4,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "04-gateway-recovered": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "05-wrong-mask": {
+      "arp_requests": 4,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "06-mask-recovered": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "07-gateway-down": {
+      "arp_requests": 4,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "08-interface-recovered": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    },
+    "09-restart-persistence": {
+      "arp_requests": 1,
+      "arp_replies": 1,
+      "icmp_requests": 3,
+      "icmp_replies": 3
+    }
+  },
+  "routed_packets": [
+    {
+      "ip_src": "192.168.10.10",
+      "ip_dst": "192.168.20.10",
+      "before_mac_src": "00:50:79:66:68:00",
+      "before_mac_dst": "02:42:d4:39:68:00",
+      "after_mac_src": "02:42:d4:39:68:01",
+      "after_mac_dst": "00:50:79:66:68:02",
+      "ttl_before": "64",
+      "ttl_after": "63",
+      "icmp_seq": "1"
+    },
+    {
+      "ip_src": "192.168.10.10",
+      "ip_dst": "192.168.20.10",
+      "before_mac_src": "00:50:79:66:68:00",
+      "before_mac_dst": "02:42:d4:39:68:00",
+      "after_mac_src": "02:42:d4:39:68:01",
+      "after_mac_dst": "00:50:79:66:68:02",
+      "ttl_before": "64",
+      "ttl_after": "63",
+      "icmp_seq": "2"
+    },
+    {
+      "ip_src": "192.168.10.10",
+      "ip_dst": "192.168.20.10",
+      "before_mac_src": "00:50:79:66:68:00",
+      "before_mac_dst": "02:42:d4:39:68:00",
+      "after_mac_src": "02:42:d4:39:68:01",
+      "after_mac_dst": "00:50:79:66:68:02",
+      "ttl_before": "64",
+      "ttl_after": "63",
+      "icmp_seq": "3"
+    }
+  ]
+}
