@@ -2,12 +2,12 @@
   "updated": "2026-09-13",
   "summary": {
     "completedTopics": 1,
-    "labs": 1,
+    "labs": 2,
     "faultScenarios": 3,
-    "packetCaptures": 9,
+    "packetCaptures": 14,
     "recoveryValidations": 3,
     "explainNotes": 1,
-    "automations": 1
+    "automations": 2
   },
   "topics": [
     {
@@ -29,16 +29,16 @@
       "id": "ethernet-mac-table",
       "category": "Foundation",
       "title": "Ethernet / MAC Table",
-      "status": "planned",
-      "statusLabel": "예정",
-      "summary": "L2 Forwarding, MAC Learning, Flooding/Unicast 동작을 직접 확인합니다.",
-      "labs": 0,
+      "status": "ready",
+      "statusLabel": "구성·검증 완료 · 설명 확인 대기",
+      "summary": "MAC Learning, Broadcast/Unknown Unicast Flooding, Known Unicast와 Aging을 검증했습니다. 캡처 실험 5건과 원본 PCAP 15개를 보관했으며, 본인 설명 확인은 대기 중입니다.",
+      "labs": 1,
       "faultScenarios": 0,
-      "packetCaptures": 0,
+      "packetCaptures": 5,
       "recoveryValidations": 0,
       "explainNotes": 0,
-      "automations": 0,
-      "detailUrl": null
+      "automations": 1,
+      "detailUrl": "./labs/ethernet-mac-table.html"
     },
     {
       "id": "vlan-trunk",
