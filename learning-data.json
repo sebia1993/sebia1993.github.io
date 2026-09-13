@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-13",
+  "updated": "2026-09-14",
   "summary": {
     "completedTopics": 1,
     "labs": 2,
@@ -30,8 +30,8 @@
       "category": "Foundation",
       "title": "Ethernet / MAC Table",
       "status": "ready",
-      "statusLabel": "구성·검증 완료 · 설명 확인 대기",
-      "summary": "MAC Learning, Broadcast/Unknown Unicast Flooding, Known Unicast와 Aging을 검증했습니다. 캡처 실험 5건과 원본 PCAP 15개를 보관했으며, 본인 설명 확인은 대기 중입니다.",
+      "statusLabel": "설명 연습 진행 · 일부 개념 복습 필요",
+      "summary": "구성·검증 완료. 문답에서 기본 전달 동작 일부를 확인했으며, Broadcast/Flooding 구분과 Aging 이후 재학습 순서는 복습 중입니다. 캡처 실험 5건·PCAP 15개를 보관했습니다.",
       "labs": 1,
       "faultScenarios": 0,
       "packetCaptures": 5,
