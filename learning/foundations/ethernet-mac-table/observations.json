@@ -1,0 +1,212 @@
+{
+  "PC1-initial": {
+    "node": "PC1",
+    "command": "show",
+    "output": "show\r\n\r\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\r\nVPCS1  192.168.10.10/24     0.0.0.0           00:50:79:66:68:00  20006  127.0.0.1:20007\r\n       fe80::250:79ff:fe66:6800/64\r\n\r\n\rVPCS> "
+  },
+  "PC1-initial-arp": {
+    "node": "PC1",
+    "command": "show arp",
+    "output": "show arp\r\n\r\narp table is empty\r\n\r\n\rVPCS> "
+  },
+  "PC1-save": {
+    "node": "PC1",
+    "command": "save",
+    "output": "save\r\nSaving startup configuration to startup.vpc\r\n.  done\r\n\r\n\rVPCS> "
+  },
+  "PC2-initial": {
+    "node": "PC2",
+    "command": "show",
+    "output": "show\r\n\r\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\r\nVPCS1  192.168.10.20/24     0.0.0.0           00:50:79:66:68:01  20008  127.0.0.1:20009\r\n       fe80::250:79ff:fe66:6801/64\r\n\r\n\rVPCS> "
+  },
+  "PC2-initial-arp": {
+    "node": "PC2",
+    "command": "show arp",
+    "output": "show arp\r\n\r\narp table is empty\r\n\r\n\rVPCS> "
+  },
+  "PC2-save": {
+    "node": "PC2",
+    "command": "save",
+    "output": "save\r\nSaving startup configuration to startup.vpc\r\n.  done\r\n\r\n\rVPCS> "
+  },
+  "PC3-initial": {
+    "node": "PC3",
+    "command": "show",
+    "output": "show\r\n\r\nNAME   IP/MASK              GATEWAY           MAC                LPORT  RHOST:PORT\r\nVPCS1  192.168.10.30/24     0.0.0.0           00:50:79:66:68:02  20010  127.0.0.1:20011\r\n       fe80::250:79ff:fe66:6802/64\r\n\r\n\rVPCS> "
+  },
+  "PC3-initial-arp": {
+    "node": "PC3",
+    "command": "show arp",
+    "output": "show arp\r\n\r\narp table is empty\r\n\r\n\rVPCS> "
+  },
+  "PC3-save": {
+    "node": "PC3",
+    "command": "save",
+    "output": "save\r\nSaving startup configuration to startup.vpc\r\n.  done\r\n\r\n\rVPCS> "
+  },
+  "switch-initial": {
+    "node": "SW1",
+    "command": "brctl show; ip link; brctl showmacs br0; cat /sys/class/net/br0/bridge/ageing_time",
+    "output": "brctl show; ip link; brctl showmacs br0; cat /sys/class/net/br0/bridge/agein\r\r\ng_time\r\nbridge name\tbridge id\t\tSTP enabled\tinterfaces\r\nbr0\t\t8000.02421ca34300\tno\t\teth0\r\n\t\t\t\t\t\t\teth1\r\n\t\t\t\t\t\t\teth2\r\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000\r\n    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00\r\n2: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP qlen 1000\r\n    link/ether 02:42:1c:a3:43:00 brd ff:ff:ff:ff:ff:ff\r\n6: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UNKNOWN qlen 1000\r\n    link/ether 02:42:1c:a3:43:00 brd ff:ff:ff:ff:ff:ff\r\n7: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UNKNOWN qlen 1000\r\n    link/ether 02:42:1c:a3:43:01 brd ff:ff:ff:ff:ff:ff\r\n8: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UNKNOWN qlen 1000\r\n    link/ether 02:42:1c:a3:43:02 brd ff:ff:ff:ff:ff:ff\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t  98.23\r\n  2\t00:50:79:66:68:01\tno\t\t  97.08\r\n  3\t00:50:79:66:68:02\tno\t\t  95.92\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n30000\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "PC1-clear-arp": {
+    "node": "PC1",
+    "command": "clear arp",
+    "output": "clear arp\r\n\r\n\rVPCS> "
+  },
+  "PC2-clear-arp": {
+    "node": "PC2",
+    "command": "clear arp",
+    "output": "clear arp\r\n\r\n\rVPCS> "
+  },
+  "PC3-clear-arp": {
+    "node": "PC3",
+    "command": "clear arp",
+    "output": "clear arp\r\n\r\n\rVPCS> "
+  },
+  "flush-initial": {
+    "node": "SW1",
+    "command": "for p in eth0 eth1 eth2; do brctl delif br0 $p; brctl addif br0 $p; done; brctl showmacs br0",
+    "output": "for p in eth0 eth1 eth2; do brctl delif br0 $p; brctl addif br0 $p; done; br\r\r\nctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "pc2-port-down": {
+    "node": "SW1",
+    "command": "ip link set eth1 down",
+    "output": "ip link set eth1 down\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "first-arp-no-response": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 1 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 1 -i 500 -w 1000\r\n\r\nhost (192.168.10.20) not reachable\r\n\r\n\rVPCS> "
+  },
+  "source-pc1-only": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   3.22\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "pc2-port-up": {
+    "node": "SW1",
+    "command": "ip link set eth1 up",
+    "output": "ip link set eth1 up\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "first-contact": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=1.436 ms\r\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.083 ms\r\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.155 ms\r\n\r\n\rVPCS> "
+  },
+  "source-both-learned": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   4.22\r\n  2\t00:50:79:66:68:01\tno\t\t   4.22\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "known-before": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t 100.11\r\n  2\t00:50:79:66:68:01\tno\t\t 100.11\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "known-ping": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=1.166 ms\r\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.448 ms\r\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.063 ms\r\n\r\n\rVPCS> "
+  },
+  "known-after": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   4.22\r\n  2\t00:50:79:66:68:01\tno\t\t   4.22\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "broadcast-clear-arp": {
+    "node": "PC1",
+    "command": "clear arp",
+    "output": "clear arp\r\n\r\n\rVPCS> "
+  },
+  "broadcast-ping": {
+    "node": "PC1",
+    "command": "ping 192.168.10.30 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.30 -c 3 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.30 icmp_seq=1 ttl=64 time=0.758 ms\r\n84 bytes from 192.168.10.30 icmp_seq=2 ttl=64 time=1.462 ms\r\n84 bytes from 192.168.10.30 icmp_seq=3 ttl=64 time=1.126 ms\r\n\r\n\rVPCS> "
+  },
+  "broadcast-after": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   4.22\r\n  2\t00:50:79:66:68:01\tno\t\t  14.02\r\n  3\t00:50:79:66:68:02\tno\t\t   4.22\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "warm-pc2-arp": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 1 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 1 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=1.000 ms\r\n\r\n\rVPCS> "
+  },
+  "unknown-arp-before": {
+    "node": "PC1",
+    "command": "show arp",
+    "output": "show arp\r\n\r\n00:50:79:66:68:02  192.168.10.30 expires in 108 seconds \r\n00:50:79:66:68:01  192.168.10.20 expires in 115 seconds \r\n\r\n\rVPCS> "
+  },
+  "remove-pc2-fdb": {
+    "node": "SW1",
+    "command": "brctl delif br0 eth1; brctl addif br0 eth1; brctl showmacs br0",
+    "output": "brctl delif br0 eth1; brctl addif br0 eth1; brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   6.43\r\n  3\t00:50:79:66:68:02\tno\t\t  12.95\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "unknown-arp-retained": {
+    "node": "PC1",
+    "command": "show arp",
+    "output": "show arp\r\n\r\n00:50:79:66:68:02  192.168.10.30 expires in 105 seconds \r\n00:50:79:66:68:01  192.168.10.20 expires in 112 seconds \r\n\r\n\rVPCS> "
+  },
+  "unknown-before": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   9.91\r\n  3\t00:50:79:66:68:02\tno\t\t  16.43\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "unknown-ping": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 1 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 1 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.973 ms\r\n\r\n\rVPCS> "
+  },
+  "unknown-after-reply": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   5.16\r\n  2\t00:50:79:66:68:01\tno\t\t   5.16\r\n  3\t00:50:79:66:68:02\tno\t\t  22.77\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "relearn-before": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   8.24\r\n  2\t00:50:79:66:68:01\tno\t\t   8.24\r\n  3\t00:50:79:66:68:02\tno\t\t  25.86\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "relearn-known-ping": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 3 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 3 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.826 ms\r\n84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.306 ms\r\n84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.051 ms\r\n\r\n\rVPCS> "
+  },
+  "relearn-after": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   3.79\r\n  2\t00:50:79:66:68:01\tno\t\t   3.79\r\n  3\t00:50:79:66:68:02\tno\t\t  31.74\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "ageing-original": {
+    "node": "SW1",
+    "command": "cat /sys/class/net/br0/bridge/ageing_time",
+    "output": "cat /sys/class/net/br0/bridge/ageing_time\r\n30000\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "ageing-set-5s": {
+    "node": "SW1",
+    "command": "brctl setageing br0 5; cat /sys/class/net/br0/bridge/ageing_time",
+    "output": "brctl setageing br0 5; cat /sys/class/net/br0/bridge/ageing_time\r\n500\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "ageing-warm": {
+    "node": "PC1",
+    "command": "ping 192.168.10.20 -c 1 -i 500 -w 1000",
+    "output": "ping 192.168.10.20 -c 1 -i 500 -w 1000\r\n\r\n84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=0.995 ms\r\n\r\n\rVPCS> "
+  },
+  "ageing-before": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t00:50:79:66:68:00\tno\t\t   4.79\r\n  2\t00:50:79:66:68:01\tno\t\t   4.79\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "ageing-after-8s": {
+    "node": "SW1",
+    "command": "brctl showmacs br0",
+    "output": "brctl showmacs br0\r\nport no\tmac addr\t\tis local?\tageing timer\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  1\t02:42:1c:a3:43:00\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  2\t02:42:1c:a3:43:01\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n  3\t02:42:1c:a3:43:02\tyes\t\t   0.00\r\n/ # \r\n/ # \u001b[6n"
+  },
+  "ageing-restore": {
+    "node": "SW1",
+    "command": "brctl setageing br0 300; cat /sys/class/net/br0/bridge/ageing_time",
+    "output": "brctl setageing br0 300; cat /sys/class/net/br0/bridge/ageing_time\r\n30000\r\n/ # \r\n/ # \u001b[6n"
+  }
+}

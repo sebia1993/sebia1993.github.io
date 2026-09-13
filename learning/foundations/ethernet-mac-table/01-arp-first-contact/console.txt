@@ -1,0 +1,65 @@
+[SW1] for p in eth0 eth1 eth2; do brctl delif br0 $p; brctl addif br0 $p; done; brctl showmacs br0
+for p in eth0 eth1 eth2; do brctl delif br0 $p; brctl addif br0 $p; done; br
+ctl showmacs br0
+port no	mac addr		is local?	ageing timer
+  1	02:42:1c:a3:43:00	yes		   0.00
+  1	02:42:1c:a3:43:00	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+/ # 
+/ # 
+
+[SW1] ip link set eth1 down
+ip link set eth1 down
+/ # 
+/ # 
+
+[PC1] ping 192.168.10.20 -c 1 -i 500 -w 1000
+ping 192.168.10.20 -c 1 -i 500 -w 1000
+
+host (192.168.10.20) not reachable
+
+VPCS> 
+
+[SW1] brctl showmacs br0
+brctl showmacs br0
+port no	mac addr		is local?	ageing timer
+  1	00:50:79:66:68:00	no		   3.22
+  1	02:42:1c:a3:43:00	yes		   0.00
+  1	02:42:1c:a3:43:00	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+/ # 
+/ # 
+
+[SW1] ip link set eth1 up
+ip link set eth1 up
+/ # 
+/ # 
+
+[PC1] ping 192.168.10.20 -c 3 -i 500 -w 1000
+ping 192.168.10.20 -c 3 -i 500 -w 1000
+
+84 bytes from 192.168.10.20 icmp_seq=1 ttl=64 time=1.436 ms
+84 bytes from 192.168.10.20 icmp_seq=2 ttl=64 time=1.083 ms
+84 bytes from 192.168.10.20 icmp_seq=3 ttl=64 time=1.155 ms
+
+VPCS> 
+
+[SW1] brctl showmacs br0
+brctl showmacs br0
+port no	mac addr		is local?	ageing timer
+  1	00:50:79:66:68:00	no		   4.22
+  2	00:50:79:66:68:01	no		   4.22
+  1	02:42:1c:a3:43:00	yes		   0.00
+  1	02:42:1c:a3:43:00	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  2	02:42:1c:a3:43:01	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+  3	02:42:1c:a3:43:02	yes		   0.00
+/ # 
+/ # 
