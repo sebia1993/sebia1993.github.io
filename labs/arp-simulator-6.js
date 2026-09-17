@@ -75,17 +75,18 @@ $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.targe
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
+  const version="20260917-mobile2";
   const css=document.createElement("link");
   css.rel="stylesheet";
-  css.href="arp-simulator-mobile.css";
+  css.href=`arp-simulator-mobile.css?v=${version}`;
   document.head.appendChild(css);
 
   const js=document.createElement("script");
-  js.src="arp-simulator-mobile.js";
+  js.src=`arp-simulator-mobile.js?v=${version}`;
   js.async=false;
   js.onload=()=>{
     const polish=document.createElement("script");
-    polish.src="arp-simulator-mobile-polish.js";
+    polish.src=`arp-simulator-mobile-polish.js?v=${version}`;
     polish.async=false;
     document.body.appendChild(polish);
   };
