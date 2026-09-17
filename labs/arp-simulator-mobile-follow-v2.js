@@ -31,8 +31,8 @@
 
   const status = control.querySelector("#mobileFollowStatus");
   const toggle = control.querySelector("#mobileFollowToggle");
-  const eventTitle = document.querySelector("#mtEventTitle");
-  const eventDetail = document.querySelector("#mtEventDetail");
+  const eventTitle = document.querySelector("#liveEventTitle") || document.querySelector("#mtEventTitle");
+  const eventDetail = document.querySelector("#liveEventDetail") || document.querySelector("#mtEventDetail");
   const liveStrip = document.querySelector("#liveEventStrip");
   const pingBtn = document.querySelector("#pingBtn");
 
