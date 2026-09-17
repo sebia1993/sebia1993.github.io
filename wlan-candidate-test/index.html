@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>무선 네트워크 운영자 신입 사전 테스트</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --text: #18212f;
+      --muted: #667085;
+      --line: #dfe4ea;
+      --accent: #1f5eff;
+      --accent-dark: #1746bf;
+      --danger: #b42318;
+      --success: #067647;
+      --warning-bg: #fff7e6;
+      --warning-text: #7a4b00;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .wrap {
+      width: min(920px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+
+    .hero, .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.05);
+    }
+
+    .hero { padding: 28px; margin-bottom: 18px; }
+    .card { padding: 24px; margin-bottom: 16px; }
+
+    h1 { margin: 0 0 10px; font-size: clamp(24px, 5vw, 34px); line-height: 1.25; }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    p { margin: 8px 0; }
+
+    .muted { color: var(--muted); }
+
+    .notice {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-weight: 700; font-size: 14px; }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 13px;
+      font: inherit;
+      color: inherit;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(31, 94, 255, 0.12);
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .question-text {
+      white-space: pre-line;
+      margin-bottom: 14px;
+    }
+
+    .meta-row {
+      margin-top: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .count.over { color: var(--danger); font-weight: 700; }
+
+    .actions {
+      position: sticky;
+      bottom: 12px;
+      margin-top: 18px;
+      padding: 14px;
+      background: rgba(245, 247, 250, 0.94);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 11px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button:hover:not(:disabled) { background: var(--accent-dark); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .status {
+      margin-top: 10px;
+      min-height: 22px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--success); font-weight: 700; }
+
+    .submitted {
+      display: none;
+      padding: 36px 24px;
+      text-align: center;
+    }
+
+    .submitted h2 { color: var(--success); font-size: 28px; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 700px) {
+      .wrap { width: min(100% - 20px, 920px); margin-top: 14px; }
+      .hero, .card { border-radius: 12px; }
+      .hero { padding: 20px; }
+      .card { padding: 18px; }
+      .grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      textarea { min-height: 180px; }
+      .actions { bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>무선 네트워크 운영자 신입 사전 테스트</h1>
+      <p class="muted">전 문항 주관식입니다. 전문용어 사용보다 문제를 어떤 순서로 확인하고 판단하는지를 중요하게 봅니다.</p>
+      <div class="notice">
+        스마트폰에서도 응시할 수 있지만, 긴 주관식 입력이 있으므로 가능하면 PC 또는 키보드 사용을 권장합니다.<br>
+        붙여넣기는 차단하지 않으며, 문항별 붙여넣기 횟수만 평가 참고정보로 기록됩니다.
+      </div>
+    </section>
+
+    <form id="examForm" novalidate>
+      <section class="card">
+        <h2>응시자 정보</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="name">지원자명 *</label>
+            <input id="name" name="name" maxlength="60" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="email">지원자 이메일 *</label>
+            <input id="email" name="email" type="email" maxlength="120" autocomplete="email" required>
+          </div>
+          <div class="field full">
+            <label for="applicantId">응시번호 <span class="muted">(있는 경우 입력)</span></label>
+            <input id="applicantId" name="applicantId" maxlength="60" autocomplete="off">
+          </div>
+        </div>
+      </section>
+
+      <section class="card question" data-question="1">
+        <h2>1. 장애 상황 확인</h2>
+        <p class="question-text">사용자 한 명이 다음과 같이 요청했습니다.
+
+“회사 Wi-Fi가 안 됩니다. 확인해 주세요.”
+
+현재 알고 있는 정보는 이것뿐입니다.
+담당자라면 문제를 확인하기 위해 사용자에게 어떤 내용을 먼저 물어보겠습니까?
+생각나는 질문을 우선순위대로 작성하고, 그 질문을 하는 이유도 간단하게 작성하세요.</p>
+        <textarea id="q1" maxlength="600" required placeholder="답변을 입력하세요."></textarea>
+        <div class="meta-row"><span>최대 600자</span><span class="count" id="q1Count">0 / 600자</span></div>
+      </section>
+
+      <section class="card question" data-question="2">
+        <h2>2. 한 명만 문제가 발생한 경우</h2>
+        <p class="question-text">같은 사무실에 직원 10명이 있습니다.
+그중 한 명만 Wi-Fi를 사용할 수 없고 나머지 9명은 정상적으로 사용하고 있습니다.
+
+본인이 담당자라면 어디에 문제가 있을 가능성이 높다고 생각하겠습니까?
+그리고 문제를 확인하기 위해 무엇부터 확인할지 순서대로 작성하세요.
+정확한 장비명이나 전문용어를 몰라도 괜찮습니다.</p>
+        <textarea id="q2" maxlength="600" required placeholder="답변을 입력하세요."></textarea>
+        <div class="meta-row"><span>최대 600자</span><span class="count" id="q2Count">0 / 600자</span></div>
+      </section>
+
+      <section class="card question" data-question="3">
+        <h2>3. 특정 장소에서만 발생하는 문제</h2>
+        <p class="question-text">다음과 같은 상황이 발생했습니다.
+
+- 자리에서는 Wi-Fi가 정상적으로 동작함
+- 회의실로 이동하면 여러 사람이 Wi-Fi 사용에 문제가 발생함
+- 회의실에서 나와 원래 자리로 돌아오면 다시 정상적으로 사용됨
+
+이 정보를 보고 어떤 부분에 문제가 있을 가능성이 있다고 생각하는지 작성하세요.
+그리고 담당자라면 문제를 확인하기 위해 가장 먼저 확인할 것 2~3가지를 작성하세요.</p>
+        <textarea id="q3" maxlength="600" required placeholder="답변을 입력하세요."></textarea>
+        <div class="meta-row"><span>최대 600자</span><span class="count" id="q3Count">0 / 600자</span></div>
+      </section>
+
+      <section class="card question" data-question="4">
+        <h2>4. 장애 처리 방법</h2>
+        <p class="question-text">무선 네트워크 장애가 발생했습니다.
+옆의 담당자가 다음과 같이 이야기합니다.
+
+“원인은 잘 모르겠지만 일단 무선 장비를 껐다가 다시 켜보죠.”
+
+본인이 담당자라면 어떻게 하겠습니까?
+그렇게 판단한 이유와, 장비를 재시작해야 한다면 그 전에 무엇을 확인하거나 기록해야 한다고 생각하는지 작성하세요.</p>
+        <textarea id="q4" maxlength="600" required placeholder="답변을 입력하세요."></textarea>
+        <div class="meta-row"><span>최대 600자</span><span class="count" id="q4Count">0 / 600자</span></div>
+      </section>
+
+      <div class="actions" id="actions">
+        <button id="submitBtn" type="submit">최종 제출</button>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+    </form>
+
+    <section class="card submitted" id="submittedView">
+      <h2>제출이 완료되었습니다.</h2>
+      <p>응답이 저장되었습니다. 제출 후 답변은 수정할 수 없습니다.</p>
+      <p class="muted">붙여넣기 기록은 평가 참고정보일 뿐, 단독으로 AI 사용 여부나 부정행위를 판정하는 자료가 아닙니다.</p>
+    </section>
+  </main>
+
+  <iframe id="submissionFrame" name="submissionFrame" title="제출 처리" class="hidden" aria-hidden="true"></iframe>
+
+  <script>
+    (() => {
+      const MAX_LEN = 600;
+      // Google Apps Script를 웹 앱으로 배포한 뒤 /exec URL로 교체하세요.
+      const BACKEND_URL = 'PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+      const BACKEND_MESSAGE_SOURCE = 'wlan-candidate-test-backend';
+
+      const pageOpenedAt = new Date();
+      const firstInputAt = [null, null, null, null];
+      const pasteCounts = [0, 0, 0, 0];
+      let submitted = false;
+      let submissionTimeout = null;
+
+      const form = document.getElementById('examForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const statusEl = document.getElementById('status');
+      const submittedView = document.getElementById('submittedView');
+      const textareas = [1, 2, 3, 4].map(n => document.getElementById('q' + n));
+
+      textareas.forEach((textarea, index) => {
+        const countEl = document.getElementById('q' + (index + 1) + 'Count');
+
+        const updateCount = () => {
+          const len = textarea.value.length;
+          countEl.textContent = len + ' / ' + MAX_LEN + '자';
+          countEl.classList.toggle('over', len > MAX_LEN);
+        };
+
+        textarea.addEventListener('input', () => {
+          if (!firstInputAt[index] && textarea.value.length > 0) {
+            firstInputAt[index] = new Date();
+          }
+          updateCount();
+        });
+
+        textarea.addEventListener('paste', () => {
+          pasteCounts[index] += 1;
+        });
+
+        updateCount();
+      });
+
+      window.addEventListener('message', (event) => {
+        const isGoogleOrigin = event.origin === 'https://script.google.com' ||
+          event.origin.endsWith('.googleusercontent.com');
+        const data = event.data;
+
+        if (!isGoogleOrigin || !data || data.source !== BACKEND_MESSAGE_SOURCE) return;
+        if (submissionTimeout) {
+          clearTimeout(submissionTimeout);
+          submissionTimeout = null;
+        }
+
+        const result = data.result || {};
+        if (result.ok) {
+          submitted = true;
+          localStorage.setItem('wlanCandidateTestSubmitted', '1');
+          lockForm();
+          form.classList.add('hidden');
+          submittedView.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = '최종 제출';
+        setStatus(result.message || '제출하지 못했습니다. 입력값을 확인해 주세요.', 'error');
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (submitted) return;
+
+        setStatus('', '');
+
+        if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(BACKEND_URL)) {
+          return setStatus('제출 시스템 연결이 아직 완료되지 않았습니다. 관리자에게 문의해 주세요.', 'error');
+        }
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const applicantId = document.getElementById('applicantId').value.trim();
+        const answers = textareas.map(t => t.value.trim());
+
+        if (!name) return setStatus('지원자명을 입력해 주세요.', 'error');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return setStatus('지원자 이메일 형식을 확인해 주세요.', 'error');
+        }
+
+        for (let i = 0; i < answers.length; i++) {
+          if (!answers[i]) {
+            textareas[i].focus();
+            return setStatus((i + 1) + '번 문항에 답변을 입력해 주세요.', 'error');
+          }
+          if (answers[i].length > MAX_LEN) {
+            textareas[i].focus();
+            return setStatus((i + 1) + '번 문항이 최대 글자 수를 초과했습니다.', 'error');
+          }
+        }
+
+        const submittedAt = new Date();
+        const payload = {
+          name,
+          email,
+          applicantId,
+          pageOpenedAt: pageOpenedAt.toISOString(),
+          submittedAt: submittedAt.toISOString(),
+          totalElapsedSeconds: Math.round((submittedAt.getTime() - pageOpenedAt.getTime()) / 1000),
+          answers: answers.map((text, i) => ({
+            text,
+            firstInputAt: firstInputAt[i] ? firstInputAt[i].toISOString() : null,
+            pasteCount: pasteCounts[i],
+          })),
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '제출 중...';
+        setStatus('응답을 저장하고 있습니다.', '');
+
+        submitViaHiddenPost(payload);
+
+        submissionTimeout = setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '최종 제출';
+          setStatus('제출 응답을 확인하지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'error');
+        }, 25000);
+      });
+
+      function submitViaHiddenPost(payload) {
+        const postForm = document.createElement('form');
+        postForm.method = 'POST';
+        postForm.action = BACKEND_URL;
+        postForm.target = 'submissionFrame';
+        postForm.className = 'hidden';
+
+        const fields = {
+          action: 'submit',
+          origin: window.location.origin,
+          payload: JSON.stringify(payload),
+        };
+
+        Object.entries(fields).forEach(([name, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value;
+          postForm.appendChild(input);
+        });
+
+        document.body.appendChild(postForm);
+        postForm.submit();
+        postForm.remove();
+      }
+
+      function lockForm() {
+        form.querySelectorAll('input, textarea, button').forEach(el => {
+          el.disabled = true;
+          el.setAttribute('aria-disabled', 'true');
+        });
+      }
+
+      function setStatus(message, type) {
+        statusEl.textContent = message || '';
+        statusEl.className = 'status' + (type ? ' ' + type : '');
+      }
+    })();
+  </script>
+</body>
+</html>
