@@ -75,7 +75,7 @@ $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.targe
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260917-mobile3";
+  const version="20260917-mobile4";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
@@ -95,7 +95,7 @@ configureLesson(0);
     polish.async=false;
     polish.onload=()=>{
       const follow=document.createElement("script");
-      follow.src=`arp-simulator-mobile-follow.js?v=${version}`;
+      follow.src=`arp-simulator-mobile-follow-v2.js?v=${version}`;
       follow.async=false;
       document.body.appendChild(follow);
     };
