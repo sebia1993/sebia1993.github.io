@@ -79,8 +79,15 @@ configureLesson(0);
   css.rel="stylesheet";
   css.href="arp-simulator-mobile.css";
   document.head.appendChild(css);
+
   const js=document.createElement("script");
   js.src="arp-simulator-mobile.js";
-  js.defer=true;
+  js.async=false;
+  js.onload=()=>{
+    const polish=document.createElement("script");
+    polish.src="arp-simulator-mobile-polish.js";
+    polish.async=false;
+    document.body.appendChild(polish);
+  };
   document.body.appendChild(js);
 })();
