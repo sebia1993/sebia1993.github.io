@@ -73,3 +73,14 @@ $("#clearArpBtn").onclick=()=>{state.arp={};renderArp();log("ARP cache cleared")
 $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.target.value="";runCmd(v)}};
 
 configureLesson(0);
+
+(function loadMobileSimulatorLayer(){
+  const css=document.createElement("link");
+  css.rel="stylesheet";
+  css.href="arp-simulator-mobile.css";
+  document.head.appendChild(css);
+  const js=document.createElement("script");
+  js.src="arp-simulator-mobile.js";
+  js.defer=true;
+  document.body.appendChild(js);
+})();
