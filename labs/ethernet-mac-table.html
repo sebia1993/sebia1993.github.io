@@ -18,6 +18,7 @@
       <a href="#topology">동작 그림</a>
       <a href="#results">실험 결과</a>
       <a href="#practical-extension">실무 확장</a>
+      <a href="#operator-drills">실전 문제</a>
       <a href="#evidence">원본 자료</a>
     </nav>
   </div>
@@ -509,6 +510,157 @@
     </div>
 
     <div class="note"><b>운영 관점:</b> MAC Table은 단순 주소 목록이 아니라 <b>“이 Source MAC이 어느 L2 경로에서 관찰되고 있는가”</b>를 보여주는 상태 정보입니다. 장애 분석에서는 VLAN, 포트 역할, STP 상태, 연결 토폴로지, 시간에 따른 MAC 이동을 함께 봐야 합니다.</div>
+  </div>
+</section>
+
+<section id="operator-drills">
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">OPERATOR DRILLS · TROUBLESHOOTING</div>
+        <h2>MAC Table을 보고 먼저 무엇을 판단해야 할까요?</h2>
+      </div>
+      <p>정답보다 중요한 것은 <b>근거 없이 단정하지 않는 것</b>입니다.<br>각 상황에서 가장 먼저 할 판단을 골라보세요.</p>
+    </div>
+
+    <div class="drill-summary">
+      <div>
+        <small>진행 현황</small>
+        <strong><span id="drill-answered">0</span> / 5</strong>
+      </div>
+      <div>
+        <small>정답</small>
+        <strong><span id="drill-correct">0</span> / 5</strong>
+      </div>
+      <button type="button" id="drill-reset">전체 다시 풀기</button>
+    </div>
+
+    <div class="operator-drills">
+
+      <article class="drill-card" data-drill="1">
+        <div class="drill-head">
+          <span class="drill-number">01</span>
+          <div><small>MAC FLAPPING</small><h3>같은 MAC이 두 포트를 계속 왕복합니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>VLAN 20 · AA:AA:AA:AA:AA:01 → port 12</code>
+          <code>2초 후 → port 18</code>
+          <code>1초 후 → port 12</code>
+          <code>다시 → port 18</code>
+        </div>
+        <p class="drill-question">이 정보만 보고 가장 적절한 1차 판단은?</p>
+        <div class="drill-options" role="group" aria-label="문제 1 선택지">
+          <button type="button" data-choice="a">A. L2 Loop가 확실하므로 즉시 port 18을 Shutdown한다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. 비정상 가능성이 높지만 원인을 단정하지 말고 두 포트의 연결 대상·로그·STP·Bonding/Bridge 구조를 확인한다.</button>
+          <button type="button" data-choice="c">C. MAC Table은 원래 계속 바뀌므로 확인할 필요가 없다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 짧은 시간에 동일 VLAN의 같은 MAC이 포트 사이를 반복 이동하면 MAC Flapping으로 볼 수 있습니다. 하지만 원인은 L2 Loop뿐 아니라 이중 연결, NIC Teaming/Bonding, 가상화 Bridge, 특수한 무선·유선 구조 등도 가능합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> port 12/18의 LLDP·연결 장비, STP 상태/Topology Change, 인터페이스 로그, MAC Move 로그, 해당 단말의 이중 연결 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="2">
+        <div class="drill-head">
+          <span class="drill-number">02</span>
+          <div><small>UPLINK / TRUNK</small><h3>한 포트에 MAC 주소가 200개 보입니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>port 48 · trunk/uplink</code>
+          <code>learned dynamic MACs: 200+</code>
+          <code>downstream: access switch</code>
+        </div>
+        <p class="drill-question">가장 적절한 판단은?</p>
+        <div class="drill-options" role="group" aria-label="문제 2 선택지">
+          <button type="button" data-choice="a">A. 한 물리 포트에는 MAC 하나만 있어야 하므로 장애다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. 하위 스위치의 Uplink라면 여러 단말 MAC이 같은 포트 방향으로 학습되는 것이 정상일 수 있다.</button>
+          <button type="button" data-choice="c">C. 모든 MAC을 Static으로 변경해야 한다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 스위치는 Source MAC이 들어온 방향을 학습합니다. 하위 Access Switch, AP, Hypervisor 같은 집선 장비가 뒤에 있다면 많은 단말 MAC이 하나의 Uplink 방향으로 보이는 것은 자연스럽습니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 해당 포트의 역할(Access/Trunk/Uplink), LLDP Neighbor, 허용 VLAN, 하위 장비 종류, 평소 MAC 개수와 급격한 증감 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="3">
+        <div class="drill-head">
+          <span class="drill-number">03</span>
+          <div><small>ARP EXISTS · FDB MISSING</small><h3>PC는 목적지 MAC을 아는데 Switch에는 없습니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>PC1 ARP: 192.168.10.20 → PC2 MAC</code>
+          <code>SW1 FDB: PC2 MAC 없음</code>
+          <code>PC1 → PC2 Unicast 전송 시작</code>
+        </div>
+        <p class="drill-question">첫 Unicast Frame을 받은 SW1의 동작은?</p>
+        <div class="drill-options" role="group" aria-label="문제 3 선택지">
+          <button type="button" data-choice="a">A. PC1도 목적지를 모르므로 새 ARP Request로 바꿔서 보낸다.</button>
+          <button type="button" data-choice="b">B. Destination MAC을 Broadcast 주소로 변경한다.</button>
+          <button type="button" data-choice="c" data-correct="true">C. Destination MAC은 그대로 두고 동일 VLAN의 전달 가능한 다른 포트로 Unknown Unicast Flooding한다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> PC의 ARP Cache와 스위치의 FDB는 별개입니다. PC1은 이미 PC2 MAC을 알고 있으므로 Unicast Frame을 만듭니다. SW1은 그 Destination MAC의 출력 포트를 모르기 때문에 MAC을 변경하지 않고 Flooding합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> PC2가 응답하면 Source MAC으로 다시 학습되는지, 이후 동일 통신이 Known Unicast로 바뀌는지 확인.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="4">
+        <div class="drill-head">
+          <span class="drill-number">04</span>
+          <div><small>AGING</small><h3>통신이 한동안 없은 뒤 FDB 엔트리만 사라졌습니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>PC1 ARP Cache: PC2 항목 유지</code>
+          <code>SW1 FDB: PC2 dynamic entry aged out</code>
+          <code>PC1이 다시 PC2로 패킷 전송</code>
+        </div>
+        <p class="drill-question">가장 가능성 높은 첫 L2 동작은?</p>
+        <div class="drill-options" role="group" aria-label="문제 4 선택지">
+          <button type="button" data-choice="a" data-correct="true">A. PC2 목적지 Unicast를 Unknown Unicast로 Flooding하고, PC2가 프레임을 보내면 다시 학습한다.</button>
+          <button type="button" data-choice="b">B. FDB가 Aging되면 PC1의 ARP Cache도 스위치가 함께 삭제한다.</button>
+          <button type="button" data-choice="c">C. Aging된 MAC은 재부팅 전까지 다시 학습하지 않는다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 동적 FDB Aging은 스위치가 MAC → Port 위치 정보를 잊는 동작입니다. PC의 ARP Cache가 아직 남아 있다면 새 ARP 없이 목적지 MAC을 그대로 사용한 Unicast가 생성될 수 있고, 스위치는 그 MAC의 포트를 모르면 Flooding합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 실제 FDB Aging Timer, ARP Cache 유효 상태, 대상의 응답 여부, 응답 후 FDB 재학습 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="5">
+        <div class="drill-head">
+          <span class="drill-number">05</span>
+          <div><small>VLAN + MAC</small><h3>같은 MAC이 서로 다른 VLAN에서 보입니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>VLAN 10 · BB:BB:BB:BB:BB:01 → port 5</code>
+          <code>VLAN 20 · BB:BB:BB:BB:BB:01 → port 24</code>
+        </div>
+        <p class="drill-question">MAC Table 관점에서 먼저 기억해야 할 것은?</p>
+        <div class="drill-options" role="group" aria-label="문제 5 선택지">
+          <button type="button" data-choice="a">A. 같은 MAC은 스위치 전체에서 반드시 하나의 포트에만 존재해야 한다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. FDB는 VLAN/Forwarding Domain의 문맥을 함께 봐야 하므로 서로 다른 VLAN의 동일 MAC을 같은 엔트리로 단순 비교하면 안 된다.</button>
+          <button type="button" data-choice="c">C. VLAN은 MAC Learning과 무관하므로 VLAN 번호는 볼 필요가 없다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 실무에서는 단순한 전역 <code>MAC → Port</code>가 아니라 <b>VLAN(Forwarding Domain) + MAC → Port</b>의 문맥이 중요합니다. 장비 구현과 네트워크 설계에 따라 같은 MAC이 서로 다른 VLAN에서 관찰되는 상황이 있을 수 있으므로 VLAN을 빼고 바로 중복 장애로 단정하면 안 됩니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 각 VLAN의 목적과 경로, 해당 MAC을 사용하는 장비/가상 인터페이스, Trunk 허용 VLAN, 예상된 설계인지 여부.</p>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="drill-finish" id="drill-finish" hidden aria-live="polite">
+      <span class="eyebrow">REVIEW</span>
+      <h3 id="drill-finish-title">5문항을 모두 확인했습니다.</h3>
+      <p id="drill-finish-copy"></p>
+    </div>
+
+    <div class="note"><b>실무 판단 원칙:</b> MAC Table은 강력한 단서지만 단독으로 원인을 확정하는 자료는 아닙니다. <b>VLAN + Port 역할 + 시간 변화 + STP/인터페이스 로그 + 실제 연결 토폴로지</b>를 함께 확인해야 오판을 줄일 수 있습니다.</div>
   </div>
 </section>
 
