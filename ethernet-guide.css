@@ -64,3 +64,66 @@
  .frame-field:last-child{border-bottom:0}
  .mobile-flow-branches{grid-template-columns:1fr}
 }
+
+
+/* First ping timeline + practical extension */
+.first-ping-lab{margin:22px 0 28px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.first-ping-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end}
+.first-ping-head h3{margin:6px 0 0}
+.timeline-actions{display:flex;gap:8px;flex-wrap:wrap}
+.timeline-actions button,.timeline-steps button{border:1px solid var(--line);background:transparent;color:inherit;border-radius:10px;cursor:pointer;font:inherit}
+.timeline-actions button{padding:10px 14px;font-weight:700}
+.timeline-actions button:hover,.timeline-steps button:hover{border-color:var(--mint)}
+.timeline-actions button:focus-visible,.timeline-steps button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.timeline-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0 10px}
+.timeline-steps button{display:flex;align-items:center;gap:8px;padding:10px 12px;text-align:left}
+.timeline-steps button span{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);font-weight:800}
+.timeline-steps button[aria-pressed="true"]{border-color:var(--mint);background:rgba(107,224,192,.06)}
+.timeline-steps button[aria-pressed="true"] span{border-color:var(--mint)}
+.timeline-progress{height:4px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:0 2px 18px}
+.timeline-progress span{display:block;width:0;height:100%;background:var(--mint);transition:width .35s ease}
+.timeline-scene{display:grid;gap:12px}
+.timeline-event{padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.timeline-event small{color:var(--mint);font-weight:800;letter-spacing:.04em}
+.timeline-event h4{margin:7px 0 8px;font-size:1.08rem}
+.timeline-event p{margin:0;color:var(--muted);line-height:1.75}
+.timeline-frame{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);border-radius:10px;font-family:Consolas,monospace;overflow-wrap:anywhere}
+.timeline-state-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.timeline-state-grid article{padding:16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.018)}
+.timeline-state-grid small{display:block;color:var(--muted);font-size:.75rem;letter-spacing:.05em}
+.timeline-state-grid strong{display:block;margin:7px 0;overflow-wrap:anywhere}
+.timeline-state-grid p{margin:0;color:var(--muted);line-height:1.65;font-size:.9rem}
+
+.practical-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.practical-card{padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.practical-card h3{margin:10px 0}
+.practical-card>p{color:var(--muted);line-height:1.78}
+.practical-fdb{display:grid;gap:8px;margin:14px 0;padding:14px;border:1px dashed var(--line);border-radius:10px}
+.practical-fdb code{overflow-wrap:anywhere}
+.practical-fdb span{font-size:.82rem;color:var(--muted)}
+.flap-flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0;padding:16px;border:1px dashed var(--line);border-radius:10px}
+.flap-flow b{color:var(--amber);font-size:1.15rem}
+.trunk-visual{display:grid;gap:10px;margin:14px 0;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+.trunk-visual>div{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.trunk-visual span{padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:.82rem}
+.trunk-visual b{color:var(--muted);font-size:.9rem}
+.practical-table table{width:100%;min-width:700px;border-collapse:collapse}
+.practical-table th,.practical-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);line-height:1.7}
+
+@media(max-width:900px){
+ .timeline-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .timeline-state-grid{grid-template-columns:1fr}
+ .practical-grid{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+ .first-ping-lab{padding:15px}
+ .first-ping-head{display:block}
+ .timeline-actions{margin-top:12px}
+ .timeline-actions button{flex:1}
+ .timeline-steps{grid-template-columns:1fr 1fr}
+ .timeline-steps button:last-child{grid-column:1/-1}
+}
+@media(max-width:420px){
+ .timeline-steps{grid-template-columns:1fr}
+ .timeline-steps button:last-child{grid-column:auto}
+}
