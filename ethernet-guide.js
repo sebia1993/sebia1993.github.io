@@ -164,6 +164,88 @@
  if(pingReset) pingReset.addEventListener('click',()=>{stopPingAutoplay();renderPing(0);});
  renderPing(0);
 
+
+ const drillState=new Map();
+
+ function updateDrillSummary(){
+  const answered=drillState.size;
+  const correct=Array.from(drillState.values()).filter(Boolean).length;
+  const answeredEl=$('drill-answered');
+  const correctEl=$('drill-correct');
+  if(answeredEl) answeredEl.textContent=String(answered);
+  if(correctEl) correctEl.textContent=String(correct);
+
+  const finish=$('drill-finish');
+  if(!finish) return;
+  if(answered<5){
+   finish.hidden=true;
+   return;
+  }
+
+  finish.hidden=false;
+  const title=$('drill-finish-title');
+  const copy=$('drill-finish-copy');
+  if(title) title.textContent='5문항을 모두 확인했습니다. · '+correct+'/5';
+  if(copy){
+   if(correct===5){
+    copy.innerHTML='모든 상황에서 핵심 구분을 잡았습니다. 이제 중요한 것은 실제 장비에서 <b>VLAN·포트 역할·시간 변화·로그·토폴로지</b>를 근거로 같은 판단 과정을 반복하는 것입니다.';
+   }else if(correct>=3){
+    copy.innerHTML='핵심 흐름은 잡혀 있습니다. 틀린 문제에서는 정답 자체보다 <b>왜 MAC Table 한 줄만으로 원인을 확정하면 안 되는지</b>와 “다음 확인” 항목을 다시 보세요.';
+   }else{
+    copy.innerHTML='먼저 <b>Source MAC Learning / Destination MAC Lookup / VLAN + MAC / ARP와 FDB의 분리</b>를 다시 확인한 뒤 이 문제를 다시 풀면 연결이 더 잘 됩니다.';
+   }
+  }
+ }
+
+ document.querySelectorAll('.drill-card').forEach(card=>{
+  const drillId=card.dataset.drill;
+  const buttons=Array.from(card.querySelectorAll('[data-choice]'));
+  const feedback=card.querySelector('.drill-feedback');
+  const result=card.querySelector('.drill-result');
+
+  buttons.forEach(button=>button.addEventListener('click',()=>{
+   if(drillState.has(drillId)) return;
+
+   const isCorrect=button.dataset.correct==='true';
+   drillState.set(drillId,isCorrect);
+
+   buttons.forEach(choice=>{
+    const correctChoice=choice.dataset.correct==='true';
+    choice.disabled=true;
+    choice.setAttribute('aria-pressed',String(choice===button));
+    if(choice===button) choice.classList.add(isCorrect?'selected-correct':'selected-wrong');
+    if(correctChoice) choice.classList.add('answer-correct');
+   });
+
+   card.dataset.result=isCorrect?'correct':'review';
+   if(feedback) feedback.hidden=false;
+   if(result){
+    result.textContent=isCorrect?'✓ 정답입니다.':'다시 확인해보세요. 정답과 이유는 아래와 같습니다.';
+    result.dataset.state=isCorrect?'correct':'review';
+   }
+   updateDrillSummary();
+  }));
+ });
+
+ const drillReset=$('drill-reset');
+ if(drillReset) drillReset.addEventListener('click',()=>{
+  drillState.clear();
+  document.querySelectorAll('.drill-card').forEach(card=>{
+   delete card.dataset.result;
+   card.querySelectorAll('[data-choice]').forEach(choice=>{
+    choice.disabled=false;
+    choice.setAttribute('aria-pressed','false');
+    choice.classList.remove('selected-correct','selected-wrong','answer-correct');
+   });
+   const feedback=card.querySelector('.drill-feedback');
+   if(feedback) feedback.hidden=true;
+  });
+  updateDrillSummary();
+  const first=document.querySelector('.drill-card');
+  if(first) first.scrollIntoView({behavior:'smooth',block:'center'});
+ });
+ updateDrillSummary();
+
  document.querySelectorAll('[data-prediction]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('[data-prediction]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
   const result=$('prediction-result');
