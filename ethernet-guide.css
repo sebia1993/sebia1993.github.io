@@ -127,3 +127,50 @@
  .timeline-steps{grid-template-columns:1fr}
  .timeline-steps button:last-child{grid-column:auto}
 }
+
+
+/* Operator troubleshooting drills */
+.drill-summary{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:stretch;margin:18px 0}
+.drill-summary>div,.drill-summary>button{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.drill-summary small{display:block;color:var(--muted);font-size:.76rem;letter-spacing:.05em}
+.drill-summary strong{display:block;margin-top:4px;font-size:1.05rem}
+.drill-summary>button{justify-self:end;color:inherit;cursor:pointer;font:inherit;font-weight:700}
+.drill-summary>button:hover{border-color:var(--mint)}
+.drill-summary>button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+
+.operator-drills{display:grid;gap:14px}
+.drill-card{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);transition:border-color .2s ease,box-shadow .2s ease}
+.drill-card[data-result="correct"]{border-color:rgba(107,224,192,.55)}
+.drill-card[data-result="review"]{border-color:rgba(180,83,9,.55)}
+.drill-head{display:flex;gap:12px;align-items:flex-start}
+.drill-number{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;font-weight:800}
+.drill-head small{color:var(--mint);font-size:.76rem;letter-spacing:.06em;font-weight:800}
+.drill-head h3{margin:5px 0 0}
+.drill-console{display:grid;gap:5px;margin:15px 0;padding:14px 16px;border:1px dashed var(--line);border-radius:10px;background:rgba(0,0,0,.08)}
+.drill-console code{white-space:normal;overflow-wrap:anywhere}
+.drill-question{margin:14px 0 10px;font-weight:700}
+.drill-options{display:grid;gap:8px}
+.drill-options button{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;text-align:left;line-height:1.6;cursor:pointer;font:inherit}
+.drill-options button:hover:not(:disabled){border-color:var(--mint)}
+.drill-options button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.drill-options button:disabled{cursor:default;opacity:.78}
+.drill-options button.answer-correct{border-color:rgba(107,224,192,.65)}
+.drill-options button.selected-correct{background:rgba(107,224,192,.09);opacity:1}
+.drill-options button.selected-wrong{border-color:rgba(180,83,9,.72);background:rgba(180,83,9,.08);opacity:1}
+.drill-feedback{margin-top:14px;padding:15px 16px;border-left:3px solid var(--line);border-radius:0 10px 10px 0;background:rgba(255,255,255,.025)}
+.drill-feedback p{margin:8px 0 0;line-height:1.75}
+.drill-feedback .drill-check{color:var(--muted)}
+.drill-result{display:block}
+.drill-result[data-state="correct"]{color:var(--mint)}
+.drill-result[data-state="review"]{color:var(--amber)}
+.drill-finish{margin:18px 0;padding:18px;border:1px solid var(--mint);border-radius:14px;background:rgba(107,224,192,.05)}
+.drill-finish h3{margin:7px 0}
+.drill-finish p{margin:0;color:var(--muted);line-height:1.75}
+
+@media(max-width:700px){
+ .drill-summary{grid-template-columns:1fr 1fr}
+ .drill-summary>button{grid-column:1/-1;justify-self:stretch}
+ .drill-card{padding:15px}
+ .drill-head{gap:10px}
+ .drill-number{flex-basis:36px;width:36px;height:36px;font-size:.9rem}
+}
