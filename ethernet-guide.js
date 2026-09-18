@@ -45,6 +45,125 @@
  document.querySelectorAll('[data-path]').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.path;document.querySelectorAll('[data-path]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();}));
  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>render(b.dataset.step)));
 
+
+ const pingStates=[
+  {
+   phase:'READY · BEFORE TRAFFIC',
+   title:'ARP Cache와 FDB가 비어 있습니다.',
+   description:'PC1은 PC2의 MAC 주소를 모르고, SW1도 PC1·PC2의 위치를 아직 학습하지 않은 상태에서 시작합니다.',
+   frame:'아직 전송된 프레임 없음',
+   arp:'PC2 항목 없음',
+   arpDetail:'192.168.10.20의 MAC을 아직 모름',
+   fdb:'동적 PC 엔트리 없음',
+   fdbDetail:'PC1·PC2가 어느 포트인지 아직 모름',
+   forward:'대기',
+   forwardDetail:'프레임이 들어오면 Source 학습 후 Destination을 판단'
+  },
+  {
+   phase:'STEP 1 · ARP REQUEST · BROADCAST',
+   title:'PC1이 “PC2의 MAC이 뭐야?”라고 묻습니다.',
+   description:'PC1이 ARP Request를 Broadcast로 전송합니다. SW1은 먼저 Source MAC인 PC1을 port 1에 학습한 뒤 Broadcast를 다른 전달 가능 포트로 내보냅니다.',
+   frame:'DST ff:ff:ff:ff:ff:ff · SRC PC1 · EtherType ARP',
+   arp:'PC2 항목 없음',
+   arpDetail:'질문을 보냈지만 아직 ARP Reply를 받기 전',
+   fdb:'PC1 MAC → port 1',
+   fdbDetail:'ARP Request의 Source MAC으로 PC1 위치 학습',
+   forward:'Broadcast Flooding',
+   forwardDetail:'수신 port 1 제외 → 동일 VLAN의 port 2·3으로 전달'
+  },
+  {
+   phase:'STEP 2 · ARP REPLY · UNICAST',
+   title:'PC2의 응답으로 PC와 Switch의 표가 각각 채워집니다.',
+   description:'PC2가 ARP Reply를 보내면 SW1은 Source MAC인 PC2를 port 2에 학습합니다. PC1은 Reply를 받아 PC2의 IP → MAC 정보를 ARP Cache에 저장합니다.',
+   frame:'DST PC1 MAC · SRC PC2 · EtherType ARP',
+   arp:'192.168.10.20 → PC2 MAC',
+   arpDetail:'PC1이 PC2의 MAC 주소를 알게 됨',
+   fdb:'PC1 → port 1 · PC2 → port 2',
+   fdbDetail:'SW1이 양쪽 단말의 L2 위치를 모두 학습',
+   forward:'Known Unicast → port 1',
+   forwardDetail:'PC1 MAC의 위치를 이미 알고 있으므로 port 1로만 전달'
+  },
+  {
+   phase:'STEP 3 · ICMP ECHO REQUEST · KNOWN UNICAST',
+   title:'이제 실제 Ping 요청은 PC2 포트로만 갑니다.',
+   description:'PC1은 ARP Cache에서 PC2 MAC을 사용해 ICMP Echo Request를 Ethernet Frame에 담습니다. SW1도 PC2의 위치를 알고 있어 port 2로만 전달합니다.',
+   frame:'DST PC2 MAC · SRC PC1 · EtherType IPv4 · ICMP Echo Request',
+   arp:'192.168.10.20 → PC2 MAC',
+   arpDetail:'새 ARP 없이 바로 Ethernet Frame 생성 가능',
+   fdb:'PC1 → port 1 · PC2 → port 2',
+   fdbDetail:'Source PC1 항목은 다시 학습·갱신될 수 있음',
+   forward:'Known Unicast → port 2',
+   forwardDetail:'PC3 링크에는 이 요청을 전달하지 않음'
+  },
+  {
+   phase:'STEP 4 · ICMP ECHO REPLY · KNOWN UNICAST',
+   title:'PC2의 Ping 응답도 PC1 포트로만 돌아옵니다.',
+   description:'PC2가 ICMP Echo Reply를 보내면 Source MAC은 PC2, Destination MAC은 PC1입니다. SW1은 이미 PC1의 위치를 알고 있어 port 1로만 전달합니다.',
+   frame:'DST PC1 MAC · SRC PC2 · EtherType IPv4 · ICMP Echo Reply',
+   arp:'192.168.10.20 → PC2 MAC',
+   arpDetail:'PC1의 ARP Cache는 그대로 유지',
+   fdb:'PC1 → port 1 · PC2 → port 2',
+   fdbDetail:'양쪽 Source MAC 관찰로 동적 엔트리 타이머가 갱신될 수 있음',
+   forward:'Known Unicast → port 1',
+   forwardDetail:'첫 Ping 왕복의 L2 전달 흐름 완료'
+  }
+ ];
+ let pingStep=0;
+ let pingTimer=null;
+
+ function renderPing(step){
+  const state=pingStates[step];
+  if(!state) return;
+  pingStep=step;
+  document.querySelectorAll('[data-ping-step]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.pingStep)===step)));
+  const values={
+   'ping-phase':state.phase,
+   'ping-title':state.title,
+   'ping-description':state.description,
+   'ping-arp-state':state.arp,
+   'ping-arp-detail':state.arpDetail,
+   'ping-fdb-state':state.fdb,
+   'ping-fdb-detail':state.fdbDetail,
+   'ping-forward-state':state.forward,
+   'ping-forward-detail':state.forwardDetail
+  };
+  for(const [id,value] of Object.entries(values)){
+   const el=$(id);
+   if(el) el.textContent=value;
+  }
+  const frame=$('ping-frame');
+  if(frame) frame.innerHTML='<span>'+state.frame+'</span>';
+  const progress=$('ping-progress');
+  if(progress) progress.style.width=(step/(pingStates.length-1)*100)+'%';
+ }
+
+ function stopPingAutoplay(){
+  if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
+  const auto=$('ping-autoplay');
+  if(auto){auto.textContent='▶ 자동 재생';auto.setAttribute('aria-pressed','false');}
+ }
+
+ function startPingAutoplay(){
+  stopPingAutoplay();
+  renderPing(0);
+  const auto=$('ping-autoplay');
+  if(auto){auto.textContent='■ 재생 중';auto.setAttribute('aria-pressed','true');}
+  pingTimer=setInterval(()=>{
+   if(pingStep>=pingStates.length-1){stopPingAutoplay();return;}
+   renderPing(pingStep+1);
+  },1400);
+ }
+
+ document.querySelectorAll('[data-ping-step]').forEach(button=>button.addEventListener('click',()=>{
+  stopPingAutoplay();
+  renderPing(Number(button.dataset.pingStep));
+ }));
+ const pingAuto=$('ping-autoplay');
+ if(pingAuto) pingAuto.addEventListener('click',()=>pingTimer?stopPingAutoplay():startPingAutoplay());
+ const pingReset=$('ping-reset');
+ if(pingReset) pingReset.addEventListener('click',()=>{stopPingAutoplay();renderPing(0);});
+ renderPing(0);
+
  document.querySelectorAll('[data-prediction]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('[data-prediction]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
   const result=$('prediction-result');
