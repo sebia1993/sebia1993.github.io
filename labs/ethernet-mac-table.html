@@ -19,6 +19,7 @@
       <a href="#results">실험 결과</a>
       <a href="#practical-extension">실무 확장</a>
       <a href="#operator-drills">실전 문제</a>
+      <a href="#cli-workflow">CLI 흐름</a>
       <a href="#evidence">원본 자료</a>
     </nav>
   </div>
@@ -661,6 +662,129 @@
     </div>
 
     <div class="note"><b>실무 판단 원칙:</b> MAC Table은 강력한 단서지만 단독으로 원인을 확정하는 자료는 아닙니다. <b>VLAN + Port 역할 + 시간 변화 + STP/인터페이스 로그 + 실제 연결 토폴로지</b>를 함께 확인해야 오판을 줄일 수 있습니다.</div>
+  </div>
+</section>
+
+<section id="cli-workflow">
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">CLI WORKFLOW · EVIDENCE FIRST</div>
+        <h2>MAC Table에서 시작해 어디까지 확인해야 할까요?</h2>
+      </div>
+      <p>명령어 암기가 아니라<br><b>증거를 좁혀가는 순서</b>를 연습합니다.</p>
+    </div>
+
+    <div class="cli-scenario">
+      <span class="tag prod">학습용 상황</span>
+      <h3>“단말 MAC이 port 12와 port 18 사이를 반복 이동한다.”</h3>
+      <p>바로 Loop라고 결론내리지 않고, 아래 순서대로 <b>MAC → Port → VLAN → Neighbor → STP → Log/Error → 종합 판단</b>을 확인합니다.</p>
+    </div>
+
+    <div class="cli-workflow-layout">
+      <nav class="cli-stepper" aria-label="MAC 장애분석 확인 단계">
+        <button type="button" data-cli-step="0" aria-pressed="true"><span>1</span><b>MAC 위치</b><small>어디서 학습?</small></button>
+        <button type="button" data-cli-step="1" aria-pressed="false"><span>2</span><b>포트 상태</b><small>Link·속도·에러</small></button>
+        <button type="button" data-cli-step="2" aria-pressed="false"><span>3</span><b>VLAN</b><small>같은 L2 문맥?</small></button>
+        <button type="button" data-cli-step="3" aria-pressed="false"><span>4</span><b>Neighbor</b><small>무엇이 연결?</small></button>
+        <button type="button" data-cli-step="4" aria-pressed="false"><span>5</span><b>STP</b><small>Loop 단서?</small></button>
+        <button type="button" data-cli-step="5" aria-pressed="false"><span>6</span><b>Log / Error</b><small>시간 변화?</small></button>
+        <button type="button" data-cli-step="6" aria-pressed="false"><span>7</span><b>종합 판단</b><small>조치 결정</small></button>
+      </nav>
+
+      <div class="cli-panel" aria-live="polite" aria-atomic="true">
+        <div class="cli-panel-head">
+          <div>
+            <small id="cli-kicker">STEP 1 · MAC LOCATION</small>
+            <h3 id="cli-title">먼저 MAC이 현재 어느 포트에서 학습되는지 확인합니다.</h3>
+          </div>
+          <div class="cli-progress"><span id="cli-progress-bar"></span></div>
+        </div>
+
+        <div class="cli-evidence-grid">
+          <article>
+            <small>확인 목적</small>
+            <strong id="cli-goal">현상이 실제 MAC Move인지 확인</strong>
+            <p id="cli-goal-detail">VLAN과 포트를 함께 보고 시간에 따라 위치가 바뀌는지 확인합니다.</p>
+          </article>
+          <article>
+            <small>예시 관찰</small>
+            <strong id="cli-observation">VLAN 20 · AA:AA → port 12 ↔ port 18</strong>
+            <p id="cli-observation-detail">한 번의 이동인지 반복 이동인지 구분합니다.</p>
+          </article>
+        </div>
+
+        <div class="cli-command-area">
+          <div class="cli-command-tabs" role="group" aria-label="명령어 벤더 선택">
+            <button type="button" data-cli-vendor="aruba" aria-pressed="true">Aruba AOS-Switch</button>
+            <button type="button" data-cli-vendor="cisco" aria-pressed="false">Cisco IOS XE</button>
+          </div>
+          <div class="cli-command-card">
+            <div>
+              <small id="cli-vendor-label">ARUBA AOS-SWITCH · 예시</small>
+              <code id="cli-command">show mac-address</code>
+            </div>
+            <button type="button" id="cli-copy-command">명령 복사</button>
+          </div>
+          <p class="cli-command-note" id="cli-command-note">출력에서 대상 MAC의 VLAN과 Port를 확인합니다. 필요하면 장비 버전에 맞는 필터를 추가합니다.</p>
+        </div>
+
+        <div class="cli-sim-output">
+          <div class="cli-terminal-head"><span></span><span></span><span></span><b>학습용 예시 출력</b></div>
+          <pre id="cli-output">MAC Address         Port   VLAN
+AA:AA:AA:AA:AA:01  12     20
+
+잠시 후 다시 확인:
+AA:AA:AA:AA:AA:01  18     20</pre>
+        </div>
+
+        <div class="cli-judgement">
+          <article>
+            <small>여기서 말할 수 있는 것</small>
+            <p id="cli-can-say"><b>같은 VLAN의 동일 MAC 위치가 시간에 따라 바뀌고 있다</b>는 사실입니다.</p>
+          </article>
+          <article>
+            <small>아직 말하면 안 되는 것</small>
+            <p id="cli-cannot-say"><b>“L2 Loop가 확실하다”</b>고 단정할 단계는 아닙니다.</p>
+          </article>
+          <article>
+            <small>다음 확인</small>
+            <p id="cli-next">port 12와 18의 상태와 역할을 확인합니다.</p>
+          </article>
+        </div>
+
+        <div class="cli-navigation">
+          <button type="button" id="cli-prev" disabled>← 이전</button>
+          <span><b id="cli-step-count">1</b> / 7</span>
+          <button type="button" id="cli-next">다음 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-decision-map">
+      <div><b>MAC</b><span>현재 위치·이동 여부</span></div>
+      <i>→</i>
+      <div><b>PORT</b><span>Link·Error·역할</span></div>
+      <i>→</i>
+      <div><b>VLAN</b><span>같은 Forwarding Domain</span></div>
+      <i>→</i>
+      <div><b>LLDP</b><span>연결 대상</span></div>
+      <i>→</i>
+      <div><b>STP</b><span>Role·State·변화</span></div>
+      <i>→</i>
+      <div><b>LOG</b><span>시간 상관관계</span></div>
+      <i>→</i>
+      <div><b>DECIDE</b><span>근거 기반 조치</span></div>
+    </div>
+
+    <details class="test-commands cli-reference">
+      <summary>명령어 참고 기준</summary>
+      <p><b>Aruba AOS-Switch:</b> 2930F/3810M 계열에서 사용하는 AOS-Switch 16.x 계열 명령 흐름을 기준으로 작성했습니다. <code>show mac-address</code>, <code>show interfaces brief</code>, <code>show vlan ports &lt;PORT&gt; detail</code>, <code>show lldp info remote-device</code>, <code>show spanning-tree</code>, <code>show logging</code> 등을 사용합니다.</p>
+      <p><b>Cisco IOS XE:</b> <code>show mac address-table</code>, <code>show interfaces</code>, <code>show lldp neighbors detail</code>, <code>show spanning-tree</code>, <code>show logging</code> 계열을 예시로 사용합니다.</p>
+      <p><b>주의:</b> 명령 구문과 지원 옵션은 모델·소프트웨어 릴리스마다 다를 수 있으므로 실제 장비에서는 <code>?</code>와 해당 버전 Command Guide로 최종 확인하세요.</p>
+    </details>
+
+    <div class="note"><b>운영 핵심:</b> 장애분석은 명령을 많이 치는 것이 아니라 <b>현재 가설을 검증하기 위해 다음에 어떤 증거가 필요한지 결정하는 과정</b>입니다. MAC Table은 출발점이고, 조치는 포트/VLAN/Neighbor/STP/로그의 증거가 서로 일치할 때 결정하는 편이 안전합니다.</div>
   </div>
 </section>
 
