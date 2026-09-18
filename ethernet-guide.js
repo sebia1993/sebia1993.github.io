@@ -246,6 +246,241 @@
  });
  updateDrillSummary();
 
+
+ const cliStates=[
+  {
+   kicker:'STEP 1 · MAC LOCATION',
+   title:'먼저 MAC이 현재 어느 포트에서 학습되는지 확인합니다.',
+   goal:'현상이 실제 MAC Move인지 확인',
+   goalDetail:'VLAN과 포트를 함께 보고 시간에 따라 위치가 바뀌는지 확인합니다.',
+   observation:'VLAN 20 · AA:AA → port 12 ↔ port 18',
+   observationDetail:'한 번의 이동인지 반복 이동인지 구분합니다.',
+   commands:{
+    aruba:'show mac-address',
+    cisco:'show mac address-table address aaaa.aaaa.aa01 vlan 20'
+   },
+   notes:{
+    aruba:'출력에서 대상 MAC의 VLAN과 Port를 확인합니다. 필요하면 장비 버전에 맞는 필터를 추가합니다.',
+    cisco:'대상 MAC과 VLAN을 지정해 현재 학습 포트를 확인합니다.'
+   },
+   output:'MAC Address         Port   VLAN\nAA:AA:AA:AA:AA:01  12     20\n\n잠시 후 다시 확인:\nAA:AA:AA:AA:AA:01  18     20',
+   canSay:'<b>같은 VLAN의 동일 MAC 위치가 시간에 따라 바뀌고 있다</b>는 사실입니다.',
+   cannotSay:'<b>“L2 Loop가 확실하다”</b>고 단정할 단계는 아닙니다.',
+   next:'port 12와 18의 상태와 역할을 확인합니다.'
+  },
+  {
+   kicker:'STEP 2 · PORT STATUS',
+   title:'MAC이 관찰된 두 포트의 물리·논리 상태를 봅니다.',
+   goal:'포트가 정상 Link인지, 오류나 비정상 변화가 있는지 확인',
+   goalDetail:'Link Up/Down, 속도, Duplex, Error/Discard, 포트 이름과 역할을 함께 봅니다.',
+   observation:'port 12 = Access? · port 18 = Uplink?',
+   observationDetail:'두 포트의 역할이 다르면 MAC 이동의 의미도 달라집니다.',
+   commands:{
+    aruba:'show interfaces brief\nshow interfaces 12,18',
+    cisco:'show interfaces status\nshow interfaces GigabitEthernet1/0/12\nshow interfaces GigabitEthernet1/0/18'
+   },
+   notes:{
+    aruba:'show interfaces brief로 전체 상태를 보고, 관련 포트를 상세 확인합니다.',
+    cisco:'상태 요약 후 관련 인터페이스의 카운터·에러·상태를 상세 확인합니다.'
+   },
+   output:'Port  Type       Enabled  Status   Mode\n12    1000T      Yes      Up       1000FDx\n18    1000T      Yes      Up       1000FDx\n\n관찰: 두 포트 모두 Up · 역할 확인 필요',
+   canSay:'두 포트 모두 실제 Forwarding 경로 후보라는 점과 <b>물리 상태의 즉시 이상 유무</b>를 볼 수 있습니다.',
+   cannotSay:'Link가 Up이라는 이유만으로 <b>토폴로지가 정상</b>이라고 볼 수는 없습니다.',
+   next:'각 포트가 어느 VLAN에 어떻게 참여하는지 확인합니다.'
+  },
+  {
+   kicker:'STEP 3 · VLAN CONTEXT',
+   title:'두 포트가 같은 VLAN/Forwarding Domain에 속하는지 확인합니다.',
+   goal:'MAC Move 비교가 같은 L2 문맥에서 일어난 것인지 확인',
+   goalDetail:'Tagged/Untagged와 VLAN 20의 포트 멤버십을 확인합니다.',
+   observation:'port 12와 18 모두 VLAN 20 전달 가능',
+   observationDetail:'같은 MAC이라도 VLAN이 다르면 같은 FDB 엔트리로 단순 비교하면 안 됩니다.',
+   commands:{
+    aruba:'show vlan ports 12,18 detail\nshow vlans',
+    cisco:'show interfaces GigabitEthernet1/0/12 switchport\nshow interfaces GigabitEthernet1/0/18 switchport'
+   },
+   notes:{
+    aruba:'포트별 VLAN membership과 Tagged/Untagged 상태를 확인합니다.',
+    cisco:'각 포트의 access/trunk 상태와 허용 VLAN을 확인합니다.'
+   },
+   output:'Port 12 : VLAN 20 Untagged\nPort 18 : VLAN 10,20,30 Tagged\n\n관찰: VLAN 20은 두 포트 모두에서 전달 가능',
+   canSay:'MAC 이동이 <b>동일 VLAN 20 안에서 관찰되는 현상</b>임을 확인할 수 있습니다.',
+   cannotSay:'같은 VLAN이 두 포트에 있다는 것 자체는 <b>Loop의 증거가 아닙니다.</b>',
+   next:'두 포트 뒤에 실제로 어떤 장비가 연결되어 있는지 확인합니다.'
+  },
+  {
+   kicker:'STEP 4 · LLDP / NEIGHBOR',
+   title:'포트 번호를 실제 토폴로지의 장비와 연결합니다.',
+   goal:'port 12와 18 뒤에 무엇이 있는지 확인',
+   goalDetail:'Switch, AP, Phone, Hypervisor 등 연결 대상에 따라 정상적인 MAC 이동 가능성을 해석합니다.',
+   observation:'port 12 = Access Switch B · port 18 = Access Switch C',
+   observationDetail:'두 포트가 모두 다른 스위치로 향한다면 경로 구조를 더 확인해야 합니다.',
+   commands:{
+    aruba:'show lldp info remote-device 12\nshow lldp info remote-device 18',
+    cisco:'show lldp neighbors detail'
+   },
+   notes:{
+    aruba:'LLDP Remote Device 정보로 각 로컬 포트의 이웃 장비와 원격 포트를 확인합니다.',
+    cisco:'LLDP Neighbor Detail에서 Local/Port ID/System Name을 확인합니다.'
+   },
+   output:'Local Port 12 → SW-B / uplink 48\nLocal Port 18 → SW-C / uplink 48\n\n관찰: 동일 단말 MAC이 서로 다른 하위 스위치 경로에서 올라옴',
+   canSay:'문제가 단말 한 포트 내부가 아니라 <b>두 L2 경로 사이에서 나타난다</b>는 방향성을 얻습니다.',
+   cannotSay:'이웃 장비가 두 대라는 사실만으로 <b>어느 장비가 잘못됐는지</b>는 알 수 없습니다.',
+   next:'STP가 이 이중 경로를 어떻게 제어하고 있는지 확인합니다.'
+  },
+  {
+   kicker:'STEP 5 · SPANNING TREE',
+   title:'L2 이중 경로가 STP에 의해 정상적으로 제어되는지 봅니다.',
+   goal:'Port Role/State와 Topology Change 단서 확인',
+   goalDetail:'Forwarding/Blocking 상태, Root 방향, 최근 topology 변화가 현상과 연관되는지 봅니다.',
+   observation:'두 경로가 모두 Forwarding인지, 변화가 반복되는지 확인',
+   observationDetail:'STP 정보는 Loop 가능성을 좁히는 핵심 근거 중 하나입니다.',
+   commands:{
+    aruba:'show spanning-tree',
+    cisco:'show spanning-tree vlan 20'
+   },
+   notes:{
+    aruba:'전체 STP 상태에서 관련 포트의 Role/State와 토폴로지 변화를 확인합니다.',
+    cisco:'VLAN 20의 Root, Role, State 및 관련 포트를 확인합니다.'
+   },
+   output:'VLAN / Instance 20\nport 12 : Forwarding\nport 18 : Forwarding\nTopology changes : 증가 중\n\n관찰: 추가 조사 가치가 높은 상태',
+   canSay:'MAC Flapping과 함께 <b>STP Topology Change가 같은 시간대에 증가</b>한다면 Loop/경로 불안정 가설이 강해집니다.',
+   cannotSay:'STP 출력 한 번만으로 <b>원인 장비나 케이블 위치</b>까지 확정할 수는 없습니다.',
+   next:'로그와 인터페이스 오류를 시간축으로 대조합니다.'
+  },
+  {
+   kicker:'STEP 6 · LOG / ERROR CORRELATION',
+   title:'MAC 이동, STP 변화, Link 이벤트가 같은 시간에 발생했는지 확인합니다.',
+   goal:'현상의 시간 상관관계를 확보',
+   goalDetail:'로그와 인터페이스 카운터를 통해 반복 패턴과 선후관계를 확인합니다.',
+   observation:'MAC move + topology change + link event 시간 비교',
+   observationDetail:'여러 독립 증거가 같은 시점을 가리키는지 봅니다.',
+   commands:{
+    aruba:'show logging\nshow interfaces 12,18',
+    cisco:'show logging\nshow interfaces GigabitEthernet1/0/12\nshow interfaces GigabitEthernet1/0/18'
+   },
+   notes:{
+    aruba:'Event Log와 포트 상태/카운터를 함께 보고 MAC 이동 시간과 대조합니다.',
+    cisco:'Syslog와 인터페이스 카운터에서 flap, protocol event, error를 시간순으로 확인합니다.'
+   },
+   output:'10:31:04  STP topology change\n10:31:05  MAC AA:AA moved 12 → 18\n10:31:07  MAC AA:AA moved 18 → 12\n10:31:08  STP topology change\n\n관찰: 이벤트 시간대가 강하게 겹침',
+   canSay:'서로 다른 증거가 같은 시간대를 가리키므로 <b>L2 경로 불안정 가설에 근거가 쌓였다</b>고 말할 수 있습니다.',
+   cannotSay:'여전히 <b>무조건 임의 포트를 Shutdown</b>할 단계는 아닙니다. 영향 범위와 실제 배선을 확인해야 합니다.',
+   next:'토폴로지와 서비스 영향도를 포함해 조치 여부를 결정합니다.'
+  },
+  {
+   kicker:'STEP 7 · EVIDENCE-BASED DECISION',
+   title:'수집한 증거를 한 문장으로 연결한 뒤 조치를 결정합니다.',
+   goal:'가설·근거·영향·조치를 분리해서 판단',
+   goalDetail:'“무엇을 봤기 때문에 무엇을 의심하고, 어떤 추가 확인/조치를 할 것인지”를 명확하게 정리합니다.',
+   observation:'MAC Move + 두 L2 경로 + STP 변화 + 동일 시간대 로그',
+   observationDetail:'단일 명령이 아니라 여러 증거가 같은 방향을 가리킵니다.',
+   commands:{
+    aruba:'# 추가 명령보다 수집한 증거를 종합',
+    cisco:'# 추가 명령보다 수집한 증거를 종합'
+   },
+   notes:{
+    aruba:'실제 조치 전 하위 SW-B/SW-C 배선과 영향도를 확인하고 필요하면 한 경로를 통제된 방식으로 격리합니다.',
+    cisco:'실제 조치 전 하위 스위치 배선과 영향도를 확인하고 필요하면 한 경로를 통제된 방식으로 격리합니다.'
+   },
+   output:'가설: VLAN 20의 L2 경로가 불안정하거나 Loop 가능성 있음\n근거: MAC 이동 + 두 이웃 경로 + STP 변화 + 동시간대 로그\n추가 확인: SW-B/SW-C 하위 배선·이중 연결·포트채널/Bonding\n조치: 영향도 확인 후 원인 경로를 통제된 방식으로 격리',
+   canSay:'이제 <b>Loop/이중 경로 계열 문제를 우선 가설로 두고 현장 토폴로지를 확인할 충분한 근거</b>가 있습니다.',
+   cannotSay:'증거 없이 “특정 포트가 범인”이라고 단정하거나 <b>업링크를 즉시 차단</b>하면 서비스 영향이 커질 수 있습니다.',
+   next:'조치 후 MAC 위치, STP 상태, 로그가 안정화되는지 다시 검증합니다.'
+  }
+ ];
+ let cliStep=0;
+ let cliVendor='aruba';
+
+ function renderCli(){
+  const state=cliStates[cliStep];
+  if(!state) return;
+
+  document.querySelectorAll('[data-cli-step]').forEach(button=>{
+   button.setAttribute('aria-pressed',String(Number(button.dataset.cliStep)===cliStep));
+  });
+  document.querySelectorAll('[data-cli-vendor]').forEach(button=>{
+   button.setAttribute('aria-pressed',String(button.dataset.cliVendor===cliVendor));
+  });
+
+  const textValues={
+   'cli-kicker':state.kicker,
+   'cli-title':state.title,
+   'cli-goal':state.goal,
+   'cli-goal-detail':state.goalDetail,
+   'cli-observation':state.observation,
+   'cli-observation-detail':state.observationDetail,
+   'cli-command':state.commands[cliVendor],
+   'cli-command-note':state.notes[cliVendor],
+   'cli-output':state.output,
+   'cli-next':state.next,
+   'cli-step-count':String(cliStep+1),
+   'cli-vendor-label':cliVendor==='aruba'?'ARUBA AOS-SWITCH · 예시':'CISCO IOS XE · 예시'
+  };
+  for(const [id,value] of Object.entries(textValues)){
+   const el=$(id);
+   if(el) el.textContent=value;
+  }
+
+  const canSay=$('cli-can-say');
+  const cannotSay=$('cli-cannot-say');
+  if(canSay) canSay.innerHTML=state.canSay;
+  if(cannotSay) cannotSay.innerHTML=state.cannotSay;
+
+  const progress=$('cli-progress-bar');
+  if(progress) progress.style.width=((cliStep+1)/cliStates.length*100)+'%';
+
+  const prev=$('cli-prev');
+  const next=$('cli-next');
+  if(prev) prev.disabled=cliStep===0;
+  if(next){
+   next.disabled=cliStep===cliStates.length-1;
+   next.textContent=cliStep===cliStates.length-1?'완료':'다음 →';
+  }
+ }
+
+ document.querySelectorAll('[data-cli-step]').forEach(button=>button.addEventListener('click',()=>{
+  cliStep=Number(button.dataset.cliStep);
+  renderCli();
+ }));
+
+ document.querySelectorAll('[data-cli-vendor]').forEach(button=>button.addEventListener('click',()=>{
+  cliVendor=button.dataset.cliVendor;
+  renderCli();
+ }));
+
+ const cliPrev=$('cli-prev');
+ if(cliPrev) cliPrev.addEventListener('click',()=>{
+  if(cliStep>0){cliStep--;renderCli();}
+ });
+ const cliNextButton=$('cli-next');
+ if(cliNextButton) cliNextButton.addEventListener('click',()=>{
+  if(cliStep<cliStates.length-1){cliStep++;renderCli();}
+ });
+
+ const cliCopy=$('cli-copy-command');
+ if(cliCopy) cliCopy.addEventListener('click',async()=>{
+  const command=cliStates[cliStep]?.commands?.[cliVendor]||'';
+  if(!command) return;
+  const original=cliCopy.textContent;
+  try{
+   await navigator.clipboard.writeText(command);
+   cliCopy.textContent='복사됨 ✓';
+  }catch(error){
+   const area=document.createElement('textarea');
+   area.value=command;
+   area.style.position='fixed';
+   area.style.opacity='0';
+   document.body.appendChild(area);
+   area.select();
+   document.execCommand('copy');
+   area.remove();
+   cliCopy.textContent='복사됨 ✓';
+  }
+  setTimeout(()=>{cliCopy.textContent=original;},1200);
+ });
+ renderCli();
+
  document.querySelectorAll('[data-prediction]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('[data-prediction]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
   const result=$('prediction-result');
