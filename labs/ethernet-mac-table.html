@@ -36,7 +36,7 @@
     <div class="result-metrics">
       <article><strong>6</strong><span>전체 실험 · 패킷 5 + Aging 1</span></article>
       <article><strong>15</strong><span>원본 PCAP · 5개 실험 × 3지점</span></article>
-      <article><strong>7 / 7</strong><span>핵심 동작 검증 통과</span></article>
+      <article><strong>7</strong><span>핵심 동작 검증 항목</span></article>
       <article><strong>1</strong><span>저장된 GNS3 Lab</span></article>
     </div>
     <p class="method-note"><b>처음부터 PCAP이나 FDB 명령을 해석할 필요는 없습니다.</b> 바로 아래 <b>00 · 처음 읽기</b>부터 보고, 그다음 실험은 “정말 그렇게 동작했는지 확인하는 증거”로 보면 됩니다.</p>
@@ -60,6 +60,39 @@
       <p>한 줄로 줄이면 <b>출발지를 보고 학습하고, 목적지를 보고 전달합니다.</b></p>
     </div>
 
+    <div class="frame-anatomy" aria-label="Ethernet 프레임에서 MAC 학습과 전달 판단에 사용하는 필드">
+      <div class="frame-anatomy-head">
+        <div>
+          <span class="eyebrow">FRAME ANATOMY</span>
+          <h3>스위치가 실제로 보는 Ethernet Frame</h3>
+        </div>
+        <p>프레임의 앞부분만 보면 <b>Learning</b>과 <b>Forwarding</b>을 분리해서 이해할 수 있습니다.</p>
+      </div>
+      <div class="frame-fields">
+        <div class="frame-field frame-dst">
+          <small>Destination MAC</small>
+          <strong>PC2 MAC</strong>
+          <span>FDB 조회 → 출력 포트 결정</span>
+        </div>
+        <div class="frame-field frame-src">
+          <small>Source MAC</small>
+          <strong>PC1 MAC</strong>
+          <span>Learning → 수신 포트와 함께 기록</span>
+        </div>
+        <div class="frame-field">
+          <small>EtherType</small>
+          <strong>IPv4 / ARP</strong>
+          <span>상위 프로토콜 종류</span>
+        </div>
+        <div class="frame-field">
+          <small>Payload</small>
+          <strong>IP · ARP 데이터</strong>
+          <span>상위 계층 데이터</span>
+        </div>
+      </div>
+      <p class="method-note">학습에 필요한 핵심은 <b>Source MAC</b>, 전달 판단에 필요한 핵심은 <b>Destination MAC</b>입니다. 이해를 위해 Preamble·FCS 등은 생략했습니다.</p>
+    </div>
+
     <div class="path-facts">
       <article>
         <span>① 프레임이 들어옴</span>
@@ -74,7 +107,7 @@
       <article>
         <span>③ 내보낼 곳을 결정</span>
         <h3>알면 한 곳, 모르면 여러 곳</h3>
-        <p>PC2 위치를 알면 그 포트로만 보냅니다. 모르면 같은 LAN의 다른 포트들로 <b>Flooding</b>합니다.</p>
+        <p>PC2 위치를 알면 그 포트로만 보냅니다. 모르면 동일 VLAN/Broadcast Domain의 다른 전달 가능 포트로 <b>Flooding</b>합니다.</p>
       </article>
     </div>
 
@@ -106,14 +139,14 @@
             <th scope="row">Unknown Unicast</th>
             <td>PC2의 실제 MAC</td>
             <td>PC2가 어느 포트인지 모름</td>
-            <td>수신 포트를 제외한 같은 LAN의 포트로 <b>Flooding</b></td>
+            <td>동일 VLAN/Broadcast Domain의 전달 가능한 포트 중 수신 포트를 제외하고 <b>Flooding</b></td>
             <td>“PC2에게 가는 건 맞는데 어느 문인지 모른다.”</td>
           </tr>
           <tr>
             <th scope="row">Broadcast</th>
             <td><code>ff:ff:ff:ff:ff:ff</code></td>
             <td>특정 한 장비의 포트를 찾는 상황이 아님</td>
-            <td>수신 포트를 제외한 같은 LAN의 포트로 전달</td>
+            <td>동일 VLAN/Broadcast Domain의 전달 가능한 포트 중 수신 포트를 제외하고 전달</td>
             <td>“처음부터 같은 LAN 모두에게 보내는 주소다.”</td>
           </tr>
         </tbody>
@@ -166,6 +199,9 @@
         </tbody>
       </table>
     </div>
+    <div class="note practice-note">
+      <b>실무 정확도 · VLAN도 함께 생각하기:</b> 실제 Ethernet Switch의 동적 FDB는 하나의 전역 <code>MAC → Port</code> 표라기보다 <b>VLAN(Forwarding Domain)별로 MAC의 위치를 학습</b>한다고 이해하는 것이 정확합니다. 즉 실무에서는 <b>VLAN + MAC → Port</b> 관점이 중요합니다. 이 Lab은 단일 Broadcast Domain만 사용하므로 초급 설명에서는 <b>MAC → Port</b>로 단순화했습니다.
+    </div>
     <div class="test-guide">
       <h3>그래서 ARP에는 있는데 MAC Table에는 없을 수도 있습니다.</h3>
       <p>PC1이 <b>PC2의 MAC 주소</b>를 알아도, 스위치가 <b>PC2가 어느 포트에 있는지</b> 모를 수 있습니다. 아래 04번 Unknown Unicast 실험이 바로 이 상태를 일부러 만든 것입니다.</p>
@@ -176,7 +212,7 @@
       <p><b>MAC Table = FDB(Forwarding Database)</b> · 이 페이지에서는 같은 의미로 봐도 됩니다.</p>
       <p><b>Learning</b> · 들어온 프레임의 Source MAC과 수신 포트를 기록하는 것.</p>
       <p><b>Forwarding</b> · Destination MAC을 보고 적절한 출력 포트로 프레임을 보내는 것.</p>
-      <p><b>Flooding</b> · 출력 포트를 하나로 정할 수 없거나 Broadcast일 때 같은 LAN의 여러 포트로 프레임을 전달하는 것.</p>
+      <p><b>Flooding</b> · 출력 포트를 하나로 정할 수 없거나 Broadcast일 때 동일 VLAN/Broadcast Domain에서 전달 가능한 여러 포트로 프레임을 보내는 것.</p>
       <p><b>Aging</b> · 일정 시간 동안 갱신되지 않은 동적 MAC Table 항목을 지우는 것.</p>
     </details>
     <p class="method-note">여기까지 읽었다면 아래부터는 새 개념이라기보다 <b>위 설명이 실제로 맞는지 GNS3·FDB·PCAP으로 확인하는 구간</b>입니다. 한 번에 전부 이해할 필요 없습니다.</p>
@@ -196,10 +232,51 @@
     </div>
     <p class="method-note"><b>보는 순서:</b> 받은 프레임의 Source/Destination MAC → MAC Table 상태 → 스위치의 출력 결정.</p>
 
+    <div class="lab-scope">
+      <b>이 Lab의 범위:</b> 단일 VLAN/Broadcast Domain · 모든 링크 Forwarding 상태 · Port Isolation 없음 · Gateway/NAT 없음. 실제 네트워크에서는 VLAN, STP 상태, 보안 기능 등에 따라 Flooding 가능한 포트 범위가 달라질 수 있습니다.
+    </div>
+
+    <div class="prediction-card" id="unknown-prediction">
+      <span class="eyebrow">PREDICT BEFORE CHECKING</span>
+      <h3>먼저 예상해보세요 · PC3 링크에서도 보일까요?</h3>
+      <p>PC1의 ARP Cache에는 <b>PC2 MAC이 남아 있지만</b>, SW1의 FDB에서 <b>PC2 MAC 항목만 삭제</b>했습니다. 이 상태에서 PC1이 PC2로 Unicast를 보내면 PC3 연결 링크에서도 그 프레임이 관찰될까요?</p>
+      <div class="prediction-actions" role="group" aria-label="Unknown Unicast 예측 답변">
+        <button type="button" data-prediction="yes" aria-pressed="false">보인다</button>
+        <button type="button" data-prediction="no" aria-pressed="false">안 보인다</button>
+      </div>
+      <div class="prediction-result" id="prediction-result" aria-live="polite" hidden></div>
+    </div>
+
     <div class="path-facts" aria-live="polite" aria-atomic="true">
       <article><span>① 받은 프레임</span><h3 id="frame-destination">목적지 MAC: PC2</h3><p id="frame-source">출발지 MAC: PC1 · PC2행 ICMP 요청</p></article>
       <article><span>② 스위치 MAC Table</span><h3 id="table-state">PC2 MAC → 2번 포트</h3><p id="source-learning">수신한 출발지 PC1 MAC → 1번 포트 학습·갱신</p></article>
       <article><span>③ 출력 결정</span><h3 id="forward-state">2번 포트로만 전달</h3><p id="copy-state">목적지 MAC은 PC2 그대로</p></article>
+    </div>
+
+    <div class="mobile-path-flow" aria-live="polite" aria-atomic="true">
+      <div class="mobile-flow-node source">
+        <small>INGRESS</small>
+        <strong>PC1</strong>
+        <span>프레임을 SW1으로 전송</span>
+      </div>
+      <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
+      <div class="mobile-flow-node switch">
+        <small>SW1 · FDB LOOKUP</small>
+        <strong id="mobile-switch-state">PC2 MAC → 2번 포트</strong>
+        <span>Source MAC 학습 후 Destination MAC 조회</span>
+      </div>
+      <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
+      <div class="mobile-flow-branches">
+        <div class="mobile-flow-node">
+          <small>PC2 링크</small>
+          <strong id="mobile-pc2-state">전달</strong>
+        </div>
+        <div class="mobile-flow-node">
+          <small>PC3 링크</small>
+          <strong id="mobile-pc3-state">전달하지 않음</strong>
+        </div>
+      </div>
+      <p>모바일에서는 위 흐름을 먼저 보고, 아래 상세 토폴로지는 필요할 때 좌우로 확인하세요.</p>
     </div>
 
     <div class="path-scroll">
@@ -358,7 +435,7 @@
     <div class="section-head"><div><div class="eyebrow">06 · 이해 확인</div><h2>이 네 문장을 자신의 말로 설명할 수 있으면 됩니다.</h2></div><span class="tag learn">초급 핵심</span></div>
     <div class="learning-checks">
       <article class="card"><h3>1. Switch는 어느 MAC을 보고 학습하나요?</h3><details class="test-commands"><summary>답 확인</summary><p><b>Source MAC</b>입니다. 그리고 그 프레임이 들어온 포트를 함께 기록합니다.</p></details></article>
-      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>같은 VLAN/LAN의 전달 가능한 다른 포트로 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
+      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>동일 VLAN/Broadcast Domain에서 전달 가능한 포트 중 수신 포트를 제외하고 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
       <article class="card"><h3>3. Unknown Unicast와 Broadcast는 같은가요?</h3><details class="test-commands"><summary>답 확인</summary><p>아닙니다. Unknown Unicast의 목적지 MAC은 특정 장비의 실제 MAC이고, Broadcast는 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p></details></article>
       <article class="card"><h3>4. ARP Table과 MAC Table의 차이는?</h3><details class="test-commands"><summary>답 확인</summary><p>ARP는 <b>IP → MAC</b>, Switch MAC Table/FDB는 <b>MAC → Port</b>를 기억합니다.</p></details></article>
     </div>
