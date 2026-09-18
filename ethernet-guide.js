@@ -413,7 +413,7 @@
    'cli-command':state.commands[cliVendor],
    'cli-command-note':state.notes[cliVendor],
    'cli-output':state.output,
-   'cli-next':state.next,
+   'cli-next-check':state.next,
    'cli-step-count':String(cliStep+1),
    'cli-vendor-label':cliVendor==='aruba'?'ARUBA AOS-SWITCH · 예시':'CISCO IOS XE · 예시'
   };
@@ -431,7 +431,7 @@
   if(progress) progress.style.width=((cliStep+1)/cliStates.length*100)+'%';
 
   const prev=$('cli-prev');
-  const next=$('cli-next');
+  const next=$('cli-next-button');
   if(prev) prev.disabled=cliStep===0;
   if(next){
    next.disabled=cliStep===cliStates.length-1;
@@ -453,7 +453,7 @@
  if(cliPrev) cliPrev.addEventListener('click',()=>{
   if(cliStep>0){cliStep--;renderCli();}
  });
- const cliNextButton=$('cli-next');
+ const cliNextButton=$('cli-next-button');
  if(cliNextButton) cliNextButton.addEventListener('click',()=>{
   if(cliStep<cliStates.length-1){cliStep++;renderCli();}
  });
