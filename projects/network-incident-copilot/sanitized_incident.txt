@@ -1,0 +1,5 @@
+192.0.2.11 UP active=120 standby=10 connection-type=frequency
+192.0.2.12 UP active=10 standby=100 connection-type=frequency
+partial_collection: true
+dynamic_radius_role: true
+STA not found
