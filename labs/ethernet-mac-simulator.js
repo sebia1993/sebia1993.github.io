@@ -14,7 +14,7 @@
     {
       title:'스위치는 무엇을 기억할까요?',
       text:'이번 실습에서는 딱 한 가지만 봅니다. PC1에서 들어온 프레임을 보고 SW1이 어떤 정보를 MAC Table(FDB)에 기록하는지 확인하세요.',
-      run:'▶ 결과 확인하기',
+      run:'② 실행해서 확인하기',
       prediction:{
         question:'PC1의 프레임이 port 1로 들어왔습니다. SW1이 가장 먼저 기억하는 것은 무엇일까요?',
         options:[
@@ -37,7 +37,7 @@
     {
       title:'목적지 위치를 알고 있다면?',
       text:'SW1의 FDB에는 이미 PC2 MAC → port 2가 있습니다. PC1이 PC2로 보내는 프레임이 어느 포트로 나가는지 확인합니다.',
-      run:'▶ 결과 확인하기',
+      run:'② 실행해서 확인하기',
       prediction:{
         question:'SW1이 PC2 MAC의 위치를 이미 알고 있다면 프레임은 어디로 나갈까요?',
         options:[
@@ -61,7 +61,7 @@
     {
       title:'목적지 위치를 모른다면?',
       text:'PC1은 PC2 MAC을 알고 있지만 SW1 FDB에는 PC2 MAC의 위치가 없습니다. 호스트의 ARP 캐시와 스위치의 FDB가 서로 다르다는 점을 확인합니다.',
-      run:'▶ 결과 확인하기',
+      run:'② 실행해서 확인하기',
       prediction:{
         question:'PC2의 MAC은 맞지만 SW1이 그 MAC의 포트를 모릅니다. SW1은 어떻게 할까요?',
         options:[
@@ -86,7 +86,7 @@
     {
       title:'Broadcast는 무엇이 다를까요?',
       text:'이번에는 PC1이 ARP Request를 보냅니다. Unknown Unicast와 둘 다 여러 포트로 보일 수 있지만 Ethernet 목적지 MAC 자체가 다릅니다.',
-      run:'▶ 결과 확인하기',
+      run:'② 실행해서 확인하기',
       prediction:{
         question:'ARP Request의 Ethernet 목적지 MAC은 무엇일까요?',
         options:[
@@ -110,7 +110,7 @@
     {
       title:'기억한 위치 정보가 사라지면?',
       text:'PC1의 ARP 캐시에는 PC2 MAC이 남아 있지만 SW1의 PC2 FDB 엔트리는 Aging으로 사라지는 상황입니다. 첫 프레임과 재학습 과정을 확인합니다.',
-      run:'▶ 결과 확인하기',
+      run:'② 실행해서 확인하기',
       prediction:{
         question:'PC2 FDB 엔트리만 사라지고 PC1의 ARP 캐시는 남아 있습니다. 다음 첫 프레임은 어떻게 될까요?',
         options:[
@@ -510,7 +510,7 @@
     const box=$('predictionFeedback');
     box.hidden=false;
     box.className='prediction-feedback '+(correct?'correct':'incorrect');
-    box.innerHTML='<b>'+(correct?'예상이 맞았습니다.':'예상과 실제 결과가 달랐습니다.')+'</b>'
+    box.innerHTML='<div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b>'+(correct?'예상이 맞았습니다.':'예상과 실제 결과가 달랐습니다.')+'</b>'
       +'<span>내 예상: '+(picked?picked[1]:'—')+'</span>'
       +'<span>실제: '+(expected?expected[1]:'—')+'</span>'
       +'<p>'+cfg.prediction.explain+'</p>';
