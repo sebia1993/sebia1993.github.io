@@ -64,7 +64,7 @@ $("#nextBtn").onclick=()=>{
 $("#resetBtn").onclick=()=>configureLesson(state.lesson);
 $("#applyBtn").onclick=()=>{
   state.mask=+$("#maskInput").value;state.gw=$("#gwInput").value.trim();
-  if(!isValidIp(state.gw)){alert("Gateway 형식을 확인하세요.");return}
+  if(!isUnicastIpv4(state.gw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
   state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderState();renderArp();
   log(`PC1 빠른 설정 적용: ${state.pc1Ip}/${state.mask}, GW ${state.gw}`);renderLessonStatus()
 };
