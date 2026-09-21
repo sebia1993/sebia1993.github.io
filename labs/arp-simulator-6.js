@@ -63,8 +63,10 @@ $("#nextBtn").onclick=()=>{
 };
 $("#resetBtn").onclick=()=>configureLesson(state.lesson);
 $("#applyBtn").onclick=()=>{
-  state.mask=+$("#maskInput").value;state.gw=$("#gwInput").value.trim();
-  if(!isUnicastIpv4(state.gw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
+  const nextMask=+$("#maskInput").value,nextGw=$("#gwInput").value.trim();
+  if(!isUsableInterfaceIp(state.pc1Ip,nextMask)){alert("현재 PC1 IP는 선택한 Prefix에서 Network/Broadcast 주소가 되어 사용할 수 없습니다.");return}
+  if(!isUnicastIpv4(nextGw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
+  state.mask=nextMask;state.gw=nextGw;
   state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderState();renderArp();
   log(`PC1 빠른 설정 적용: ${state.pc1Ip}/${state.mask}, GW ${state.gw}`);renderLessonStatus()
 };
