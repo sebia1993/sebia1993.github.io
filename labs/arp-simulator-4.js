@@ -103,6 +103,10 @@ function completeCurrentLessonIfReady(){
   if(items.every(x=>x[2])){
     state.completed[i]=true;
     revealPrediction();
+    if(typeof isAdvancedMode==="function"&&!isAdvancedMode()){
+      if(i===0)setExplain("<b>한 줄 결론:</b> 같은 네트워크(on-link) 목적지는 <b>최종 목적지 자신의 MAC</b>을 ARP로 알아내고 직접 전달합니다.");
+      if(i===1)setExplain("<b>한 줄 결론:</b> 다른 네트워크 목적지는 <b>최종 PC의 MAC이 아니라 Default Gateway의 MAC</b>을 ARP로 알아낸 뒤 Gateway에 먼저 전달합니다.","remote");
+    }
     renderLessonStatus();
     if(i===lessons.length-1 && state.completed.every(Boolean)){
       setTimeout(()=>$("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"}),350);
@@ -139,6 +143,11 @@ function recordFailure(){
     revealPrediction();
     if(typeof isAdvancedMode==="function"&&!isAdvancedMode()&&state.predictionChoice){
       state.completed[state.lesson]=true;
+    }
+    if(typeof isAdvancedMode==="function"&&!isAdvancedMode()){
+      if(state.lesson===2)setExplain("<b>한 줄 결론:</b> 원격 목적지에서는 설정된 Default Gateway를 next-hop으로 믿습니다. Gateway 주소가 틀리면 그 잘못된 주소를 ARP하다가 Reply를 받지 못해 멈춥니다.","error");
+      if(state.lesson===3)setExplain("<b>한 줄 결론:</b> Subnet Mask가 틀리면 on-link 판단부터 잘못되어, Gateway 대신 원격 PC를 같은 LAN에서 직접 ARP할 수 있습니다.","error");
+      if(state.lesson===4)setExplain("<b>한 줄 결론:</b> ARP 대상이 올바른 Gateway여도 실제 인터페이스가 Down이면 ARP Reply를 받을 수 없어 Ethernet 전송으로 진행하지 못합니다.","error");
     }
     $("#recoveryNudge").classList.add("show");
     const advancedAction=(typeof isAdvancedMode==="function"&&!isAdvancedMode())
