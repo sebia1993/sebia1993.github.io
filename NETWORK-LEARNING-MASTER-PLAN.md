@@ -110,7 +110,7 @@ MacBook: Git/GitHub, 교육 코드, Plan/명령 템플릿, PCAP 분석, 결과 �
 
 ## 8. Evidence 표준과 완료 게이트
 
-각 실행은 `schemaVersion`, `lab`, `runId`, UTC 시작/종료, 환경·플랫폼·버전, `provenance`(real-lab/simulation), `status`, 정상/장애/복구 시나리오, expected/actual, PASS/FAIL/INCONCLUSIVE/NOT_RUN, artifact 경로·SHA-256·capture point·관측 구간·filter, 검토 상태를 가진다. 계획은 expected만 기록하고 actual은 null, artifact는 빈 배열로 둔다. 실패를 정상 확인으로 바꾸지 않는다.
+각 실행은 `schemaVersion`, `lab`, `runId`, UTC 시작/종료, 환경·플랫폼·버전, `provenance`(real-lab/simulation), `status`, 정상/장애/복구 시나리오, expected/actual, PASS/FAIL/INCONCLUSIVE/NOT_RUN, artifact 경로·SHA-256·capture point·관측 구간·filter, 검토 상태를 가진다. 계획은 expected만 기록하고 actual과 provenance는 null, plannedProvenance는 real-lab, artifact는 빈 배열로 둔다. 실패를 정상 확인으로 바꾸지 않는다.
 
 교육 문서 상태(`contentStatus`)와 실험 상태(`labStatus`)는 독립한다. `planned`는 Plan/준비 중, `in-progress`는 교육 또는 실험 일부 진행, `ready`는 결과 검토 준비, `completed`는 아래 11항목을 모두 충족한 경우다. 기존 ready 라벨의 의미를 일괄 변경하지 않는다.
 

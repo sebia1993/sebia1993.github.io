@@ -70,9 +70,9 @@
       "id": "ip-subnetting",
       "category": "0단계 · 네트워크 기초",
       "title": "IP 주소 / Subnetting",
-      "status": "planned",
-      "statusLabel": "보강 예정",
-      "summary": "IP, Prefix, Network/Broadcast 주소와 같은·다른 네트워크 판단을 먼저 정리합니다.",
+      "status": "in-progress",
+      "statusLabel": "교육 파일럿 · 실제 실습 대기",
+      "summary": "IP·Prefix 계산과 직접/Gateway 전달을 먼저 예측하고 시뮬레이션으로 연습합니다. 실제 Lab·PCAP 검증은 미수행입니다.",
       "why": "ARP와 Default Gateway 동작을 이해하기 위한 가장 중요한 선행 개념입니다.",
       "completeWhen": "주어진 IP/Mask만 보고 통신 대상이 같은 네트워크인지 판단하고, 왜 Gateway를 사용하는지 설명할 수 있습니다.",
       "labs": 0,
@@ -81,7 +81,10 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": "./labs/ip-subnetting.html",
+      "detailLabel": "IP/Subnetting 학습 연습 시작 →",
+      "contentStatus": "pilot",
+      "labStatus": "not-run"
     },
     {
       "id": "ethernet-mac-table",
