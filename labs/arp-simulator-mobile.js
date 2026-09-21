@@ -196,9 +196,23 @@
       markDevices(["mtR2","mtSw2","mtPc2"]);markLinks(["r2sw2","sw2pc2"]);
     }else if(title.includes("R2 → PC3")){
       markDevices(["mtR2","mtSw1","mtPc3"]);markLinks(["sw1r2","sw1pc3"]);
-    }else if(kind==="reply"&&title.includes("PC3")){
-      markDevices(["mtPc3","mtSw1","mtPc1"],"reply-active");markLinks(["sw1pc3","pc1sw1"],true);
-    }else if(kind==="reply"&&title.includes("PC2")){
+    }else if(kind==="reply"&&title.includes("ARP Reply")){
+      if(title.startsWith("PC3 → PC1")){
+        markDevices(["mtPc3","mtSw1","mtPc1"],"reply-active");markLinks(["sw1pc3","pc1sw1"],true);
+      }else if(title.startsWith("PC3 → R2")){
+        markDevices(["mtPc3","mtSw1","mtR2"],"reply-active");markLinks(["sw1pc3","sw1r2"],true);
+      }else if(title.startsWith("PC2 → R2")){
+        markDevices(["mtPc2","mtSw2","mtR2"],"reply-active");markLinks(["sw2pc2","r2sw2"],true);
+      }else if(title.startsWith("R2")&&title.includes("→ PC3")){
+        markDevices(["mtR2","mtSw1","mtPc3"],"reply-active");markLinks(["sw1r2","sw1pc3"],true);
+      }else if(title.startsWith("R2")&&title.includes("→ PC2")){
+        markDevices(["mtR2","mtSw2","mtPc2"],"reply-active");markLinks(["r2sw2","sw2pc2"],true);
+      }else if(title.startsWith("R2")&&title.includes("→ PC1")){
+        markDevices(["mtR2","mtSw1","mtPc1"],"reply-active");markLinks(["sw1r2","pc1sw1"],true);
+      }
+    }else if(kind==="reply"&&title.includes("Echo Reply")&&title.includes("PC3")){
+      markDevices(["mtPc3","mtSw1","mtR2","mtPc1"],"reply-active");markLinks(["sw1pc3","sw1r2","pc1sw1"],true);
+    }else if(kind==="reply"&&title.includes("Echo Reply")&&title.includes("PC2")){
       markDevices(["mtPc2","mtSw2","mtR2","mtSw1","mtPc1"],"reply-active");markLinks(["sw2pc2","r2sw2","sw1r2","pc1sw1"],true);
     }else if(kind==="error"){
       const map=[["PC1↔SW1","pc1sw1"],["SW1↔PC3","sw1pc3"],["SW1↔R2","sw1r2"],["R2↔SW2","r2sw2"],["SW2↔PC2","sw2pc2"]];
