@@ -194,6 +194,8 @@
       markDevices(["mtR2"]);
     }else if(title.includes("R2 → PC2")){
       markDevices(["mtR2","mtSw2","mtPc2"]);markLinks(["r2sw2","sw2pc2"]);
+    }else if(title.includes("R2 → PC3")){
+      markDevices(["mtR2","mtSw1","mtPc3"]);markLinks(["sw1r2","sw1pc3"]);
     }else if(kind==="reply"&&title.includes("PC3")){
       markDevices(["mtPc3","mtSw1","mtPc1"],"reply-active");markLinks(["sw1pc3","pc1sw1"],true);
     }else if(kind==="reply"&&title.includes("PC2")){
