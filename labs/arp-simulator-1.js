@@ -12,7 +12,7 @@ const lessons=[
     hints:[
       "PC1과 PC3의 주소에서 /24 기준 네트워크 부분이 같은지 먼저 보세요.",
       "같은 네트워크라면 Default Gateway를 거치지 않고 목적지 장비의 MAC을 직접 알아냅니다.",
-      "PC3를 선택한 뒤 PING을 보내고, ARP Table에 192.168.10.20이 생기는지 확인하세요."
+      "PC3를 선택한 뒤 PING을 보내고, PC1 Neighbor(ARP) Table에 192.168.10.20이 생기는지 확인하세요."
     ]
   },
   {
@@ -20,7 +20,7 @@ const lessons=[
     hints:[
       "PC1은 192.168.10.0/24, PC2는 192.168.20.0/24입니다. 서로 같은 네트워크인지 보세요.",
       "원격 네트워크라면 PC1은 최종 목적지 PC2보다 먼저 Default Gateway에게 프레임을 넘겨야 합니다.",
-      "ARP Table에서 PC2가 아니라 192.168.10.1(Default Gateway)의 MAC이 생기는지 확인하세요."
+      "PC1 Neighbor(ARP) Table에서 PC2가 아니라 192.168.10.1(Default Gateway)의 MAC이 생기는지 확인하세요."
     ]
   },
   {
