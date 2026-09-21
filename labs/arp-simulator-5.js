@@ -166,18 +166,19 @@ async function completeEchoReply(dest){
 
 async function ping(){
   if(state.busy)return;
+  if(typeof isAdvancedMode==="function"&&!isAdvancedMode()&&!state.predictionChoice)return;
   state.busy=true;resetFlow();resetPacketStudy();state.last=null;
   const dest=selectedDestination();
   const destIp=dest.ip;
   const onLink=sameSubnet(state.pc1Ip,destIp,state.mask);
   $("#pingBtn").disabled=true;
-  $("#resultHint").textContent="현재 설정값으로 routing/ARP/neighbor 경로를 계산하고 있습니다.";
+  $("#resultHint").textContent="현재 설정값으로 경로/ARP/Neighbor 흐름를 계산하고 있습니다.";
 
   setStep("s1",onLink?"ON-LINK · 직접 전달":"VIA GATEWAY · 원격 경로",
     onLink
       ?`PC1 ${state.pc1Ip}/${state.mask} 기준 ${destIp}을 on-link로 판단합니다.`
       :`PC1 ${state.pc1Ip}/${state.mask} 기준 ${destIp}은 on-link가 아니므로 Default Gateway ${state.gw}를 사용합니다.`);
-  setLiveEvent("route","PC1 · Routing 판단",
+  setLiveEvent("route","PC1 · 경로 판단",
     onLink
       ?`${destIp}을 on-link로 판단했습니다. 목적지 IPv4 주소의 MAC을 확인합니다.`
       :`${destIp}은 remote 목적지이므로 next-hop은 Default Gateway ${state.gw}입니다.`);
