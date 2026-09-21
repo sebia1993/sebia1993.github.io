@@ -201,7 +201,7 @@ async function ping(){
 
   if(!firstHopMac){
     addArpSnapshot(arpTarget,onLink);
-    const targetKind=firstHopEndpoint?.key==="pc3"?"pc3":firstHopEndpoint?.key==="r2"?"r2":"none";
+    const targetKind=firstHopEndpoint?.key==="pc3"?"pc3":firstHopEndpoint?.key==="r2"&&firstHopEndpoint.up?"r2":"none";
     const req=await animateArpBroadcast(targetKind);
     if(!req.ok){
       setStep("s3",`ARP 경로 실패 · ${LINK_UI[req.key].label}`,"필요한 ARP 교환을 완료하지 못했습니다.","error");
@@ -212,7 +212,7 @@ async function ping(){
     }
 
     firstHopEndpoint=lanAEndpointByIp(arpTarget);
-    if(!firstHopEndpoint||firstHopEndpoint.key==="pc1"){
+    if(!firstHopEndpoint||firstHopEndpoint.key==="pc1"||(firstHopEndpoint.key==="r2"&&!firstHopEndpoint.up)){
       setStep("s3","ARP Reply 없음",`${arpTarget}의 MAC 주소를 얻지 못했습니다.`,"error");
       setStep("s4","PING 실패","ARP/neighbor resolution 단계에서 중단되었습니다.","error");
       let why;
