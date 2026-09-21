@@ -91,14 +91,14 @@ window.setArpViewMode=setViewMode;
 
 $$(".lesson-tab").forEach((b,i)=>b.onclick=()=>configureLesson(i));
 $$(".dest-btn").forEach(b=>b.onclick=()=>chooseDest(b.dataset.dest));
-$(".device-config-hit").forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.device)});
-$(".link-badge").forEach(x=>x.onclick=(e)=>{e.stopPropagation();if(isAdvancedMode())toggleCable(x.dataset.link)});
+$$(".device-config-hit").forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.device)});
+$$(".link-badge").forEach(x=>x.onclick=(e)=>{e.stopPropagation();if(isAdvancedMode())toggleCable(x.dataset.link)});
 const PATH_TO_LINK={pathPc1Sw1:"pc1sw1",pathPc3Sw1:"sw1pc3",pathSw1R2:"sw1r2",pathR2Sw2:"r2sw2",pathSw2Pc2:"sw2pc2"};
 Object.entries(PATH_TO_LINK).forEach(([id,key])=>{
   $("#"+id).onclick=(e)=>{e.stopPropagation();if(isAdvancedMode())toggleCable(key)};
 });
-$('[data-cable]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())toggleCable(x.dataset.cable)});
-$('[data-open-device]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.openDevice)});
+$$('[data-cable]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())toggleCable(x.dataset.cable)});
+$$('[data-open-device]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.openDevice)});
 $("#drawerClose").onclick=()=>{$("#deviceDrawer").classList.remove("show");state.openDevice=null};
 $("#pingBtn").onclick=ping;
 $("#hintBtn").onclick=showHint;
@@ -123,7 +123,7 @@ $$("[data-clear-neighbor]").forEach(btn=>btn.onclick=()=>{
   if(!["pc1","pc2","pc3","r2"].includes(key))return;
   clearNeighborCache(key);renderArp();log(`${key.toUpperCase()} Neighbor cache cleared`);
 });
-$("[data-view-mode]").forEach(btn=>btn.onclick=()=>setViewMode(btn.dataset.viewMode));
+$$("[data-view-mode]").forEach(btn=>btn.onclick=()=>setViewMode(btn.dataset.viewMode));
 document.addEventListener("click",e=>{
   const trigger=e.target.closest?.("[data-open-advanced-mode]");
   if(!trigger)return;
