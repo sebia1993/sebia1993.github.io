@@ -42,6 +42,19 @@ function addSnapshot(s){
   renderSnapshot(state.snapshots.length-1);
   renderComparison();
 }
+function packetStageTypeLabel(s){
+  if(s.protocol==="ARP"){
+    return s.arpOp==="reply"
+      ?{text:"ARP REPLY",className:"arp-reply"}
+      :{text:"ARP REQUEST",className:"arp-request"};
+  }
+  if(s.protocol==="ICMP"){
+    return s.title?.includes("Echo Reply")
+      ?{text:"ICMP ECHO REPLY",className:"icmp-reply"}
+      :{text:"ICMP ECHO REQUEST",className:"icmp-request"};
+  }
+  return {text:s.protocol||"PACKET",className:""};
+}
 function renderSnapshot(i){
   const s=state.snapshots[i]; if(!s)return;
   state.snapshotIndex=i;
@@ -81,9 +94,15 @@ function renderSnapshot(i){
     }
   }
 
-  $("#packetStages").innerHTML=state.snapshots.map((x,idx)=>
-    `<button class="packet-stage-btn ${idx===i?"active":""}" data-snap="${idx}">${idx+1}. ${x.short}<span>${x.protocol} · ${x.hop}</span></button>`
-  ).join("");
+  $("#packetStages").innerHTML=state.snapshots.map((x,idx)=>{
+    const meta=packetStageTypeLabel(x);
+    return `<button class="packet-stage-btn ${idx===i?"active":""}" data-snap="${idx}">
+      <span class="packet-stage-order">STEP ${String(idx+1).padStart(2,"0")}</span>
+      <span class="packet-stage-type ${meta.className}">${meta.text}</span>
+      <span class="packet-stage-name">${x.short}</span>
+      <span class="packet-stage-hop">${x.hop}</span>
+    </button>`;
+  }).join("");
   $$("#packetStages .packet-stage-btn").forEach(b=>b.onclick=()=>renderSnapshot(+b.dataset.snap));
 }
 function renderComparison(){
