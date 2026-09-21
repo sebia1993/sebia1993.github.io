@@ -32,7 +32,7 @@ labs/ip-subnetting.html (17개 교육 구획, 결과 상태 표시)
 
 ## 3. Scenario 계약
 
-ID는 파일명·결과·링크에서 안정적으로 유지한다. Topology는 `{nodes:[{id,label,x,y}], links:[{id,from,to}]}`. Scenario는 `id`, `title`, `kind`(normal/failure/recovery), `description`, `question`, `choices:[{id,label}]`, `correctId`, `feedback`, `steps:[{title,detail,nodeId,packet}]`를 가진다. packet은 `sourceIp`, `destinationIp`, `arpTarget`, `destinationMac`, `note` 같은 교육용 문자열이다. 모든 데이터는 `provenance: simulation` 범위다. 이후 실제 evidence reference는 별도 result manifest만 참조한다.
+ID는 파일명·결과·링크에서 안정적으로 유지한다. Topology는 `{nodes:[{id,label,x,y}], links:[{id,from,to}]}`. Scenario는 `id`, `title`, `kind`(normal/failure/recovery), `description`, `question`, `choices:[{id,label}]`, `correctId`, `feedback`, `steps:[{title,detail,nodeId,packet}]`를 가진다. packet은 `sourceIp`, `destinationIp`, `arpTarget`, `destinationMac`, `note` 같은 교육용 문자열이다. Step 선택 필드는 `fromNodeId`(명시된 프레임 출발점), `packetId`(동일 프레임의 다음 홉), `animate: false`(개념·무응답 관찰)다. 이전 단계의 장치 위치만으로 새 패킷 출발점을 추정하지 않는다. 현재 renderer는 교육용 연결 경로를 보여 주며 Routing/STP를 계산하는 네트워크 에뮬레이터가 아니다. 모든 시나리오 데이터는 `provenance: simulation` 범위다. 이후 실제 evidence reference는 별도 result manifest만 참조한다.
 
 최소 engine API는 `mountLab(root, {title, topology, scenarios}) → {destroy()}`. `core.js`의 `createState(scenario)`, `choose(state, scenario, choiceId)`, `advance(state, scenario)`, `reset(scenario)`는 새 상태를 반환한다. 엔진이 DOM과 run token을 소유한다. 세부 export/API 변경 시 이 문서를 함께 갱신한다.
 
@@ -56,11 +56,11 @@ IPv4 문자열은 정확한 4옥텟 0..255, Prefix 정수 0..32만 허용한다.
 
 기본 모드가 항상 시작값이다. 고급 모드는 header/CLI/RFC 설명만 더 보여주며 답이나 Packet 결과를 바꾸지 않는다. 키보드로 접근 가능한 버튼/라디오, 명확한 label, `aria-pressed`, 피드백 `role=status`를 사용한다. Packet 상세는 modal 대신 펼침 영역으로 구현해 focus trap 위험을 줄인다.
 
-topology는 내부 가로 viewport와 확대/축소 버튼을 제공한다. 따라가기는 기본 꺼짐, 사용자가 켠 경우 viewport 안에서만 수평 이동하며 문서 세로 위치는 바꾸지 않는다. 읽고 있는 문단으로 강제 scroll하지 않는다. reduced-motion이면 단계 결과를 즉시 표시한다. 버튼 44px 이상, 최소 16px 본문, 작은 폭에서도 페이지 전체 horizontal overflow 없음. 링크/Packet 색 외에 텍스트로 의미를 전달한다.
+topology는 내부 가로 viewport와 확대/축소 버튼을 제공한다. 기본값은 자연 크기로 장치 글씨를 유지하고, 보기 맞춤을 눌렀을 때만 전체 축소 개요로 전환한다. 따라가기는 기본 꺼짐, 사용자가 켠 경우 viewport 안에서만 수평 이동하며 문서 세로 위치는 바꾸지 않는다. 읽고 있는 문단으로 강제 scroll하지 않는다. reduced-motion이면 단계 결과를 즉시 표시한다. 버튼 44px 이상, 최소 16px 본문, 작은 폭에서도 페이지 전체 horizontal overflow 없음. 링크/Packet 색 외에 텍스트로 의미를 전달한다.
 
 ## 7. Evidence와 진도 경계
 
-UI 완료는 현재 연습의 마지막 단계 도달이다. `results/`나 `learning-data.json`에 쓰지 않는다. 실제 Lab 완료는 Master Plan의 11개 gate, 최소 2개 장애와 각각의 복구/근거가 있어야 한다. 최초 IP 결과는 `labStatus: not-run`, 정상·장애·복구 판정은 `NOT_RUN`, actual null, artifact 빈 배열로 저장한다. 로드맵은 교육 파일럿을 안내할 수 있지만 모든 실험 카운터는 0이다.
+UI 완료는 현재 연습의 마지막 단계 도달이다. `results/`나 `learning-data.json`에 쓰지 않는다. 실제 Lab 완료는 Master Plan의 11개 gate, 최소 2개 장애와 각각의 복구/근거가 있어야 한다. 미실행 결과의 `provenance`는 null이고 `plannedProvenance`에 의도한 real-lab을 기록한다. 최초 IP 결과는 `labStatus: not-run`, 정상·장애·복구 판정은 `NOT_RUN`, actual null, artifact 빈 배열로 저장한다. 로드맵은 교육 파일럿을 안내할 수 있지만 모든 실험 카운터는 0이다.
 
 ## 8. 테스트와 점진 이관
 
