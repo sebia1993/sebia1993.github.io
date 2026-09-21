@@ -1,9 +1,43 @@
 (() => {
  const $=id=>document.getElementById(id);
+
+ let learningMode='basic';
+ function setLearningMode(mode,{scrollToAdvanced=false}={}){
+  learningMode=mode==='advanced'?'advanced':'basic';
+  const advanced=learningMode==='advanced';
+
+  document.documentElement.dataset.learningMode=learningMode;
+  document.querySelectorAll('[data-learning-level="advanced"]').forEach(section=>{section.hidden=!advanced;});
+  document.querySelectorAll('[data-mode-link="advanced"]').forEach(link=>{link.hidden=!advanced;});
+  document.querySelectorAll('[data-basic-only]').forEach(el=>{el.hidden=advanced;});
+  document.querySelectorAll('[data-learning-mode]').forEach(button=>{
+   button.setAttribute('aria-pressed',String(button.dataset.learningMode===learningMode));
+  });
+
+  const note=$('learning-mode-note');
+  if(note){
+   note.textContent=advanced
+    ? '고급 모드: 기본 학습 내용에 MAC Move·Flapping, 운영 판단 문제, CLI 흐름, 원본 검증 자료를 추가로 표시합니다.'
+    : '기본 모드: Source MAC Learning → Destination MAC 조회 → Known/Unknown/Broadcast → ARP와 FDB 분리 순서만 먼저 봅니다.';
+  }
+
+  if(advanced&&scrollToAdvanced){
+   const target=$('practical-extension');
+   if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+ }
+
+ document.querySelectorAll('[data-learning-mode]').forEach(button=>button.addEventListener('click',()=>{
+  setLearningMode(button.dataset.learningMode);
+ }));
+ const enableAdvanced=$('enable-advanced');
+ if(enableAdvanced) enableAdvanced.addEventListener('click',()=>setLearningMode('advanced',{scrollToAdvanced:true}));
+ setLearningMode('basic');
+
  const modes={
  known:{title:'Known Unicast · 목적지 포트를 알고 있음',dst:'목적지 MAC: PC2',src:'출발지 MAC: PC1 · PC2행 ICMP 요청',table:'PC2 MAC → 2번 포트',learn:'받은 요청의 출발지 PC1 MAC → 1번 포트 학습·갱신',forward:'2번 포트로만 전달',copy:'목적지 MAC은 PC2 그대로',observer:'PC3 링크: 이 요청을 전달하지 않음',scope:'PC1 → PC2 통신 · 근거 실험 02',scenario:'02-known-unicast',flood:false},
  unknown:{title:'Unknown Unicast · 목적지 포트 정보가 없음',dst:'목적지 MAC: PC2',src:'출발지 MAC: PC1 · PC2행 ICMP 요청',table:'PC2 MAC → 등록 없음',learn:'받은 요청의 출발지 PC1 MAC → 1번 포트 학습·갱신',forward:'동일 VLAN에서 수신 1번 제외 → 2·3번으로 Flooding',copy:'복사본도 목적지 MAC은 PC2 그대로',observer:'PC3 링크에도 관찰 · PC3행 프레임은 아님',scope:'PC1 → PC2 통신 · 근거 실험 04. 링크 관찰은 PC3 내부 처리·응답을 증명하지 않습니다.',scenario:'04-unknown-unicast',flood:true},
- broadcast:{title:'Broadcast · 처음부터 같은 LAN에 보내는 주소',dst:'목적지 MAC: ff:ff:ff:ff:ff:ff',src:'출발지 MAC: PC1 · ARP 질문 대상 IP: PC3 (192.168.10.30)',table:'목적지 한 포트를 찾는 Unicast 조회가 아님',learn:'이 요청에서도 출발지 PC1 MAC → 1번 포트 학습·갱신',forward:'동일 VLAN에서 수신 1번 제외 → 2·3번으로 Broadcast 전달',copy:'처음부터 끝까지 Broadcast 목적지 MAC 유지',observer:'PC2·PC3 링크에 전달 · ARP가 묻는 IP는 PC3',scope:'실제 실험 03은 PC3를 찾는 ARP입니다. Known/Unknown의 PC2행 ICMP와 대상·프레임 종류가 다릅니다.',scenario:'03-broadcast',flood:true}
+ broadcast:{title:'Broadcast · 처음부터 동일 Broadcast Domain에 보내는 주소',dst:'목적지 MAC: ff:ff:ff:ff:ff:ff',src:'출발지 MAC: PC1 · ARP 질문 대상 IP: PC3 (192.168.10.30)',table:'목적지 한 포트를 찾는 Unicast 조회가 아님',learn:'이 요청에서도 출발지 PC1 MAC → 1번 포트 학습·갱신',forward:'동일 VLAN에서 수신 1번 제외 → 2·3번으로 Broadcast 전달',copy:'처음부터 끝까지 Broadcast 목적지 MAC 유지',observer:'PC2·PC3 링크에 전달 · ARP가 묻는 IP는 PC3',scope:'실제 실험 03은 PC3를 찾는 ARP입니다. Known/Unknown의 PC2행 ICMP와 대상·프레임 종류가 다릅니다.',scenario:'03-broadcast',flood:true}
  };
  let selected='known';
  function render(step='request'){
@@ -26,17 +60,46 @@
   const mobileSwitch=$('mobile-switch-state');
   const mobilePc2=$('mobile-pc2-state');
   const mobilePc3=$('mobile-pc3-state');
-  if(mobileSwitch&&mobilePc2&&mobilePc3){
-   if(selected==='known'){
+  const mobileSource=$('mobile-source-device');
+  const mobileSourceDetail=$('mobile-source-detail');
+  const mobilePrimaryLabel=$('mobile-primary-label');
+  const mobileSecondaryLabel=$('mobile-secondary-label');
+  if(mobileSwitch&&mobilePc2&&mobilePc3&&mobileSource&&mobileSourceDetail&&mobilePrimaryLabel&&mobileSecondaryLabel){
+   mobileSecondaryLabel.textContent='PC3 링크';
+
+   if(selected==='unknown'&&step==='reply'){
+    mobileSource.textContent='PC2';
+    mobileSourceDetail.textContent='응답 프레임을 SW1으로 전송';
+    mobileSwitch.textContent='PC2를 port 2에 학습 · PC1 MAC → 1번 포트';
+    mobilePrimaryLabel.textContent='PC1 링크';
+    mobilePc2.textContent='Known Unicast 응답 전달';
+    mobilePc3.textContent='전달하지 않음';
+   }else if(selected==='unknown'&&step==='next'){
+    mobileSource.textContent='PC1';
+    mobileSourceDetail.textContent='재학습 이후 다음 요청 전송';
     mobileSwitch.textContent='PC2 MAC → 2번 포트';
+    mobilePrimaryLabel.textContent='PC2 링크';
+    mobilePc2.textContent='Known Unicast 전달';
+    mobilePc3.textContent='전달하지 않음';
+   }else if(selected==='known'){
+    mobileSource.textContent='PC1';
+    mobileSourceDetail.textContent='프레임을 SW1으로 전송';
+    mobileSwitch.textContent='PC2 MAC → 2번 포트';
+    mobilePrimaryLabel.textContent='PC2 링크';
     mobilePc2.textContent='Known Unicast 전달';
     mobilePc3.textContent='전달하지 않음';
    }else if(selected==='unknown'){
+    mobileSource.textContent='PC1';
+    mobileSourceDetail.textContent='PC2 목적지 Unicast를 SW1으로 전송';
     mobileSwitch.textContent='PC2 MAC → 등록 없음';
+    mobilePrimaryLabel.textContent='PC2 링크';
     mobilePc2.textContent='Flooding 복사본 전달';
     mobilePc3.textContent='Flooding 복사본 전달';
    }else{
+    mobileSource.textContent='PC1';
+    mobileSourceDetail.textContent='ARP Broadcast를 SW1으로 전송';
     mobileSwitch.textContent='Destination = ff:ff:ff:ff:ff:ff';
+    mobilePrimaryLabel.textContent='PC2 링크';
     mobilePc2.textContent='Broadcast 전달';
     mobilePc3.textContent='Broadcast 전달';
    }
