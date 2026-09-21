@@ -16,7 +16,8 @@ function applyDeviceConfig(){
     if(!isUsableInterfaceIp(e0,m0)||!isUsableInterfaceIp(e1,m1)){
       alert("R2 인터페이스 IP는 각 Prefix에서 사용 가능한 unicast 주소여야 합니다.");return;
     }
-    if(e0===e1||duplicateInterfaceIp(e0,"r2e0")||duplicateInterfaceIp(e1,"r2e1")){
+    const hostIps=[state.pc1Ip,state.pc2Ip,state.pc3Ip];
+    if(e0===e1||hostIps.includes(e0)||hostIps.includes(e1)){
       alert("R2/Host 간 중복 인터페이스 IP는 지원하지 않습니다.");return;
     }
     state.r2e0Ip=e0;state.r2e0Mask=m0;
