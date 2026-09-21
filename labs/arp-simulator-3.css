@@ -250,3 +250,9 @@ body[data-sim-mode="basic"] .explain{font-size:12px;padding:12px 14px}
   body[data-sim-mode="basic"] .controls{display:grid;grid-template-columns:1fr}
   body[data-sim-mode="basic"] .ping-btn{min-width:0;width:100%}
 }
+
+.prediction-feedback-title{
+  margin-bottom:3px;color:#175da8;font-size:9px;font-weight:1000;letter-spacing:.04em
+}
+.prediction-feedback.correct .prediction-feedback-title{color:#08765d}
+.prediction-feedback.incorrect .prediction-feedback-title{color:#9a620e}
