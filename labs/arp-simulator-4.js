@@ -1,3 +1,65 @@
+function renderPrediction(){
+  const l=lessons[state.lesson];
+  state.predictionChoice=null;
+  state.predictionLocked=false;
+  const title=$("#predictionTitle"),help=$("#predictionHelp"),options=$("#predictionOptions"),feedback=$("#predictionFeedback");
+  if(!title||!help||!options||!feedback)return;
+  title.textContent=l.prediction.question;
+  help.textContent=state.lesson<2
+    ?"정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 ARP 대상과 비교해 보세요."
+    :"먼저 실패 원인을 예상한 뒤 실제로 PING을 보내 어느 단계에서 멈추는지 비교해 보세요.";
+  feedback.hidden=true;
+  feedback.className="prediction-feedback";
+  feedback.textContent="";
+  options.innerHTML="";
+  l.prediction.options.forEach(([id,label])=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.dataset.prediction=id;
+    btn.setAttribute("aria-pressed","false");
+    btn.textContent=label;
+    btn.onclick=()=>{
+      if(state.busy||state.predictionLocked)return;
+      state.predictionChoice=id;
+      $$("[data-prediction]").forEach(b=>{
+        const active=b.dataset.prediction===id;
+        b.classList.toggle("selected",active);
+        b.setAttribute("aria-pressed",String(active));
+      });
+      updatePredictionControls();
+    };
+    options.appendChild(btn);
+  });
+  updatePredictionControls();
+}
+function updatePredictionControls(){
+  const btn=$("#pingBtn"); if(!btn)return;
+  if(typeof isAdvancedMode==="function"&&isAdvancedMode()){
+    btn.disabled=state.busy;
+  }else{
+    btn.disabled=state.busy||!state.predictionChoice;
+  }
+}
+function revealPrediction(){
+  const l=lessons[state.lesson];
+  if(!state.predictionChoice||state.predictionLocked)return;
+  state.predictionLocked=true;
+  const picked=l.prediction.options.find(x=>x[0]===state.predictionChoice);
+  const expected=l.prediction.options.find(x=>x[0]===l.prediction.correct);
+  const correct=state.predictionChoice===l.prediction.correct;
+  const box=$("#predictionFeedback");
+  if(box){
+    box.hidden=false;
+    box.className="prediction-feedback "+(correct?"correct":"incorrect");
+    box.innerHTML="<b>"+(correct?"예상이 맞았습니다.":"예상과 실제 동작이 달랐습니다.")+"</b>"
+      +"<span>내 예상: "+(picked?picked[1]:"—")+"</span>"
+      +"<span>실제: "+(expected?expected[1]:"—")+"</span>"
+      +"<p>"+l.prediction.explain+"</p>";
+  }
+  $$("[data-prediction]").forEach(b=>b.disabled=true);
+  updatePredictionControls();
+}
+
 function renderLessonStatus(){
   const items=checklistState();
   $("#checkList").innerHTML=items.map(([title,desc,done])=>`
@@ -9,9 +71,12 @@ function renderLessonStatus(){
   if(state.completed[state.lesson]){
     badge.textContent="완료";badge.className="status-badge success";
     verdict.className="verdict success";
+    const conceptOnly=state.lesson>=2 && state.failureSeen[state.lesson] && !recoveryCorrect();
     verdict.innerHTML=state.lesson<2
-      ?"<b>실습 완료:</b> 패킷 흐름과 ARP 동작이 정상적으로 확인됐습니다."
-      :"<b>복구 완료:</b> 장애를 재현한 뒤 원인을 수정하고 재PING 성공까지 확인했습니다.";
+      ?"<b>학습 완료:</b> 예상한 ARP 대상과 실제 패킷 흐름을 비교했습니다."
+      :conceptOnly
+        ?"<b>개념 확인 완료:</b> 실패 지점과 원인을 확인했습니다. 직접 설정을 고쳐보는 복구 실습은 고급 모드에서 선택적으로 진행할 수 있습니다."
+        :"<b>복구 완료:</b> 장애 원인을 수정하고 재PING 성공까지 확인했습니다.";
     next.disabled=false;
     next.textContent=state.lesson===lessons.length-1?"전체 완료 결과 보기 →":"다음 실습 →";
   }else if(state.lesson>=2 && state.failureSeen[state.lesson]){
@@ -37,6 +102,7 @@ function completeCurrentLessonIfReady(){
   const items=checklistState();
   if(items.every(x=>x[2])){
     state.completed[i]=true;
+    revealPrediction();
     renderLessonStatus();
     if(i===lessons.length-1 && state.completed.every(Boolean)){
       setTimeout(()=>$("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"}),350);
@@ -70,11 +136,15 @@ function resetHint(){
 function recordFailure(){
   if(state.lesson>=2){
     state.failureSeen[state.lesson]=true;
+    revealPrediction();
+    if(typeof isAdvancedMode==="function"&&!isAdvancedMode()&&state.predictionChoice){
+      state.completed[state.lesson]=true;
+    }
     $("#recoveryNudge").classList.add("show");
     const advancedAction=(typeof isAdvancedMode==="function"&&!isAdvancedMode())
       ?'<br><button type="button" class="recovery-mode-btn" data-open-advanced-mode>고급 모드로 전환해 직접 복구하기</button>'
       :'';
-    $("#recoveryNudge").innerHTML="<b>1단계 완료 · 장애 재현 성공.</b> 이제 실패 지점을 근거로 원인을 좁혀보세요. 막히면 힌트를 한 단계씩 사용할 수 있습니다."+advancedAction;
+    $("#recoveryNudge").innerHTML="<b>실패 지점 확인 완료.</b> 예상과 실제 실패 원인을 비교해 보세요. 설정을 직접 수정해 보고 싶다면 고급 모드에서 복구 실습을 이어갈 수 있습니다."+advancedAction;
   }
   renderLessonStatus();
 }
