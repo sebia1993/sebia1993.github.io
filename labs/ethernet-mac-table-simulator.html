@@ -47,7 +47,7 @@
 
   <section class="lab-scope-strip advanced-only" aria-label="시뮬레이터 범위와 가정">
     <b>이 실습의 기본 가정</b>
-    <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 Forwarding · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
+    <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 전달 상태 · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
     <span><b>Aging 기준 = 300초</b>는 이 시뮬레이터와 검증 GNS3 Linux Bridge의 학습 조건이며 모든 스위치의 고정값이 아닙니다. 경과 시간은 실제 시간에 자동 증가하지 않고 실습의 시간 경과 버튼으로만 진행됩니다.</span>
   </section>
 
@@ -56,7 +56,7 @@
       <div class="coach-icon" id="coachIcon">1</div>
       <div class="coach-main">
         <div class="coach-title" id="coachTitle">첫 Ping에서 스위치가 언제 MAC을 배우는지 확인하세요.</div>
-        <div class="coach-text" id="coachText">처음에는 FDB와 PC1 ARP Cache가 비어 있습니다.</div>
+        <div class="coach-text" id="coachText">처음에는 FDB와 PC1 ARP 캐시가 비어 있습니다.</div>
         <div class="coach-state" aria-live="polite">
           <span><b>호스트</b><strong id="startArpState">PC1/PC2 ARP · 비어 있음</strong></span>
           <span><b>SW1</b><strong id="startFdbState">FDB · 동적 PC 엔트리 없음</strong></span>
@@ -105,7 +105,7 @@
 
         <g font-family="Segoe UI,Arial,sans-serif">
           <text x="36" y="42" fill="#40546c" font-size="14" letter-spacing="2">ETHERNET / MAC TABLE · 실습 토폴로지</text>
-          <text x="1364" y="42" text-anchor="end" fill="#40546c" font-size="14">Source MAC 학습 → Destination MAC 조회 → Forwarding</text>
+          <text x="1364" y="42" text-anchor="end" fill="#40546c" font-size="14">Source MAC 학습 → Destination MAC 조회 → 전달</text>
           <text x="58" y="113" fill="#075a43" font-size="20" font-weight="bold">단일 Ethernet L2 Broadcast Domain</text>
           <text class="topology-detail" x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 전달 상태</text>
 
@@ -317,18 +317,18 @@
           <tbody id="fdbBody"></tbody>
         </table>
 
-        <div class="table-title spaced"><strong>PC1 · ARP Cache</strong><span>IP → MAC</span></div>
+        <div class="table-title spaced"><strong>PC1 · ARP 캐시</strong><span>IP → MAC</span></div>
         <table class="state-table">
           <thead><tr><th>IPv4</th><th>MAC</th></tr></thead>
           <tbody id="arpBody"></tbody>
         </table>
 
-        <div class="table-title spaced"><strong>PC2 · ARP Cache</strong><span>독립된 호스트 상태</span></div>
+        <div class="table-title spaced"><strong>PC2 · ARP 캐시</strong><span>독립된 호스트 상태</span></div>
         <table class="state-table">
           <thead><tr><th>IPv4</th><th>MAC</th></tr></thead>
           <tbody id="pc2ArpBody"></tbody>
         </table>
-        <p class="panel-note"><b>중요:</b> PC1 ARP Cache, PC2 ARP Cache, SW1 FDB는 서로 다른 장비가 별도로 유지하는 상태입니다. 한 장비가 배운 정보를 다른 장비에 자동으로 복사하지 않습니다.</p>
+        <p class="panel-note"><b>중요:</b> PC1 ARP 캐시, PC2 ARP 캐시, SW1 FDB는 서로 다른 장비가 별도로 유지하는 상태입니다. 한 장비가 배운 정보를 다른 장비에 자동으로 복사하지 않습니다.</p>
       </div>
     </details>
 
@@ -345,7 +345,7 @@
           <button type="button" id="manualBroadcastBtn">PC1 Broadcast</button>
         </div>
         <div class="scope-note">
-          <b>Simulator 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 300초 기준의 단순 Aging, Same-port Filtering과 Re-learning을 모델링합니다.
+          <b>시뮬레이터 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 300초 기준의 단순 Aging, Same-port Filtering과 Re-learning을 모델링합니다.
           Aging 경과 시간은 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 범위 밖입니다.
         </div>
       </div>
