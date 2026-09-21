@@ -73,7 +73,7 @@
     },
     {
       title:'Aging으로 사라진 엔트리가 어떻게 다시 학습되는지 확인하세요.',
-      text:'이 Lab의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 Age를 진행합니다.',
+      text:'이 실습의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 Age를 진행합니다.',
       run:'▶ Aging 후 PC1 → PC2',
       hints:[
         '이 실습에서 PC1 ARP Cache의 PC2 항목은 유지됩니다. <b>FDB Aging과 ARP Cache는 별개</b>입니다.',
@@ -166,8 +166,8 @@
     });
     const p2=document.querySelector('#pc2ReceiveBadge text');
     const p3=document.querySelector('#pc3ReceiveBadge text');
-    if(p2) p2.textContent='DESTINATION';
-    if(p3) p3.textContent='OBSERVER';
+    if(p2) p2.textContent='목적지';
+    if(p3) p3.textContent='관찰 단말';
   }
 
   function renderReceiveBadges(egress,kind,dstMac){
@@ -179,13 +179,13 @@
       if(!badge||!text) return;
       if(kind==='flood'){
         badge.classList.add('flood');
-        text.textContent=dstMac===DEV.pc2.mac&&port===3?'FLOOD COPY':'FLOODING';
+        text.textContent=dstMac===DEV.pc2.mac&&port===3?'Flooding 복제본':'Flooding';
       }else if(kind==='broadcast'){
         badge.classList.add('flood');
-        text.textContent='BROADCAST';
+        text.textContent='Broadcast';
       }else{
         badge.classList.add('active');
-        text.textContent='RECEIVE';
+        text.textContent='수신';
       }
     };
     apply(2,'pc2ReceiveBadge');
@@ -209,9 +209,9 @@
     const l=$('svgLearnDecision');
     const q=$('svgLookupDecision');
     const a=$('svgActionDecision');
-    if(l) l.textContent='LEARN  · '+(learn||'—');
-    if(q) q.textContent='LOOKUP · '+(lookup||'—');
-    if(a) a.textContent='ACTION · '+(action||'READY');
+    if(l) l.textContent='학습   · '+(learn||'—');
+    if(q) q.textContent='조회   · '+(lookup||'—');
+    if(a) a.textContent='동작   · '+(action||'준비');
   }
 
   function focusTopologyPort(port){
@@ -251,11 +251,11 @@
   }
 
   function shortFrameLabel(frameType){
-    if(frameType.includes('ARP REQUEST')) return 'ARP REQ';
-    if(frameType.includes('ARP REPLY')) return 'ARP REP';
+    if(frameType.includes('ARP REQUEST')) return 'ARP 요청';
+    if(frameType.includes('ARP REPLY')) return 'ARP 응답';
     if(frameType.includes('ICMP')) return 'ICMP';
-    if(frameType.includes('BROADCAST')) return 'BCAST';
-    return 'FRAME';
+    if(frameType.includes('BROADCAST')) return 'Broadcast';
+    return 'Frame';
   }
 
   async function animateIngress(port,frameType){
@@ -349,7 +349,7 @@
     strip.className='live-event-strip'+(kind?' '+kind:'');
     $('liveEventTitle').textContent=title;
     $('liveEventDetail').textContent=detail;
-    $('liveEventKind').textContent=label||'EVENT';
+    $('liveEventKind').textContent=label||'이벤트';
     $('liveEventIcon').textContent=kind==='aging'?'⏱':kind==='broadcast'?'B':kind==='flood'?'F':kind==='known'?'K':kind==='filter'?'S':'L';
     const topoLabel=$('traceModeLabel');
     if(topoLabel) topoLabel.textContent=(label||'EVENT')+' · '+title;
@@ -465,7 +465,7 @@
       'FDB Hit이면 해당 출력 포트로만 Known Unicast가 전달되는 것을 확인했습니다.',
       'Unknown Unicast는 목적지 MAC을 바꾸지 않은 채 다른 전달 가능 포트로 Flooding됨을 확인했습니다.',
       'Broadcast는 Ethernet Destination을 ff:ff:ff:ff:ff:ff로 사용하고, ARP Target Hardware는 별도 필드임을 확인했습니다.',
-      '이 Lab의 300초 Aging 기준에서 엔트리 소멸 뒤 첫 요청은 Flooding되고 Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
+      '이 실습의 300초 Aging 기준에서 엔트리 소멸 뒤 첫 요청은 Flooding되고 Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
     ][idx];
   }
 
@@ -529,8 +529,8 @@
     }
 
     setBasic(null,{title:'대기',detail:'Destination MAC을 받으면 FDB에서 조회합니다.'},{title:'대기',detail:'아직 전달할 프레임이 없습니다.'});
-    setSvgDecision('—','—','READY');
-    setLive('', '프레임 이벤트 대기','실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.','READY');
+    setSvgDecision('—','—','준비');
+    setLive('', 'Frame 이벤트 대기','실습을 실행하면 현재 Frame과 SW1의 판단이 여기에 표시됩니다.','준비');
     renderMobileFlow(null,'프레임 대기',[],'',null);
     renderReceiveBadges([],'',null);
     renderTables();
@@ -568,15 +568,15 @@
     setLinks(ingress,[],'');
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source Learning을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
-    setSvgDecision('대기','대기','FRAME IN · port '+ingress);
-    setLive('learning',frameType+' · FRAME IN',srcDev.name+'의 프레임이 port '+ingress+'로 SW1에 들어왔습니다.','FRAME IN');
+    setSvgDecision('대기','대기','Frame 수신 · port '+ingress);
+    setLive('learning',frameType+' · Frame 수신',srcDev.name+'의 Frame이 port '+ingress+'로 SW1에 들어왔습니다.','Frame 수신');
     await animateIngress(ingress,frameType);
 
     learn(srcDev);
     renderTables();
     setFlow(2);
-    setSvgDecision(srcDev.name+' → port '+ingress,'대기','SOURCE LEARNED');
-    setLive('learning','Source MAC Learning',srcDev.name+' MAC → port '+ingress+'을 Dynamic FDB에 학습/갱신했습니다.','LEARNING');
+    setSvgDecision(srcDev.name+' → port '+ingress,'대기','Source MAC 학습 완료');
+    setLive('learning','Source MAC Learning',srcDev.name+' MAC → port '+ingress+'을 Dynamic FDB에 학습/갱신했습니다.','MAC 학습');
     addLog('LEARN '+srcDev.name+' '+srcDev.mac+' -> port '+ingress);
     await sleep(420);
 
@@ -595,7 +595,7 @@
       lookupDetail='특정 한 포트의 Unicast FDB Hit을 찾는 상황이 아닙니다.';
       actionTitle='Broadcast 전달';
       actionDetail='수신 port '+ingress+' 제외 → '+portList(egress);
-      setLive('broadcast','Destination = Broadcast',BROADCAST+'이므로 동일 Broadcast Domain의 다른 전달 가능 포트로 보냅니다.','BROADCAST');
+      setLive('broadcast','Destination MAC = Broadcast',BROADCAST+'이므로 동일 Broadcast Domain의 다른 전달 가능 포트로 보냅니다.','Broadcast');
     }else{
       const entry=fdb.get(dstMac);
       if(entry&&entry.port!==ingress){
@@ -605,7 +605,7 @@
         lookupDetail=macName(dstMac)+' → port '+entry.port+' 엔트리를 찾았습니다.';
         actionTitle='Known Unicast';
         actionDetail='port '+entry.port+'로만 전달';
-        setLive('known','FDB Hit · Known Unicast',macName(dstMac)+'의 출력 포트를 알고 있습니다.','KNOWN');
+        setLive('known','FDB Hit · Known Unicast',macName(dstMac)+'의 출력 포트를 알고 있습니다.','Known Unicast');
       }else if(entry&&entry.port===ingress){
         kind='filter';
         egress=[];
@@ -613,7 +613,7 @@
         lookupDetail='목적지 MAC이 같은 수신 포트 방향으로 학습되어 있습니다.';
         actionTitle='Same-port Filtering';
         actionDetail='다른 포트로 전달하지 않음';
-        setLive('filter','Same-port Filtering','목적지가 수신 포트와 같은 방향에 있으므로 다른 출력 포트로 전달하지 않습니다.','FILTER');
+        setLive('filter','Same-port Filtering','목적지가 수신 포트와 같은 방향에 있으므로 다른 출력 포트로 전달하지 않습니다.','Filtering');
       }else{
         kind='flood';
         egress=otherPorts;
@@ -621,25 +621,25 @@
         lookupDetail=macName(dstMac)+'의 출력 포트 정보가 없습니다.';
         actionTitle='Unknown Unicast Flooding';
         actionDetail='목적지 MAC 유지 · 수신 port '+ingress+' 제외 → '+portList(egress);
-        setLive('flood','FDB Miss · Unknown Unicast',macName(dstMac)+' 자체는 그대로 두고 다른 전달 가능 포트로 Flooding합니다.','UNKNOWN');
+        setLive('flood','FDB Miss · Unknown Unicast',macName(dstMac)+' 자체는 그대로 두고 다른 전달 가능 포트로 Flooding합니다.','Unknown Unicast');
       }
     }
 
     setBasic(frame,{title:lookupTitle,detail:lookupDetail},{title:actionTitle,detail:actionDetail});
     const lookupShort=kind==='known'
-      ? macName(dstMac)+' → HIT '+(egress[0]?'port '+egress[0]:'SAME PORT')
+      ? macName(dstMac)+' → FDB Hit '+(egress[0]?'port '+egress[0]:'동일 port')
       : kind==='filter'
-        ? macName(dstMac)+' → SAME PORT'
+        ? macName(dstMac)+' → 동일 port'
         : kind==='broadcast'
-          ? 'DST = BROADCAST'
-          : macName(dstMac)+' → MISS';
+          ? 'Destination = Broadcast'
+          : macName(dstMac)+' → FDB Miss';
     const actionShort=kind==='known'
-      ? (egress.length?'KNOWN → '+portList(egress):'FILTER · no egress')
+      ? (egress.length?'Known Unicast → '+portList(egress):'Filtering · 출력 없음')
       : kind==='filter'
-        ? 'SAME-PORT FILTER'
+        ? 'Same-port Filtering'
         : kind==='broadcast'
-          ? 'BROADCAST → '+portList(egress)
-          : 'FLOOD → '+portList(egress);
+          ? 'Broadcast → '+portList(egress)
+          : 'Flooding → '+portList(egress);
     setSvgDecision(srcDev.name+' → port '+ingress,lookupShort,actionShort);
     await sleep(430);
 
@@ -728,12 +728,12 @@
     }
     flags.aged=!fdb.has(DEV.pc2.mac)&&arpPc1.get(DEV.pc2.ip)===DEV.pc2.mac;
     renderTables();
-    setLive('aging','PC2 Dynamic FDB Aged Out','이 Lab의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','AGING');
+    setLive('aging','PC2 Dynamic FDB Aging 완료','이 실습의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','Aging');
     setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'PC2 FDB 없음',detail:'ARP는 남아 있지만 SW1은 PC2의 출력 포트를 모릅니다.'},{title:'다음 프레임 대기',detail:'이제 PC1 → PC2를 실행하세요.'});
-    setSvgDecision('—','PC2 → MISS','NEXT FRAME · FLOOD 예상');
+    setSvgDecision('—','PC2 → FDB Miss','다음 Frame · Flooding 예상');
     renderMobileFlow(DEV.pc1,'다음 프레임 대기',[],'',DEV.pc2.mac);
     addTimeline('aging','FDB Aging','PC2 dynamic entry 삭제 · PC1 ARP 유지 · 자동 시간 경과는 모델링하지 않음');
-    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 Simulator의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
+    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 시뮬레이터의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
     renderChecks();
     updateControls();
   }
@@ -769,7 +769,7 @@
     }
     renderTables();
     addLog('MANUAL AGE +301s -> entries at or above '+FDB_AGE_LIMIT+'s removed');
-    setLive('aging','수동 Aging +301초','고급 조작으로 현재 Dynamic FDB의 300초 이상 엔트리를 제거했습니다.','AGING');
+    setLive('aging','수동 Aging +301초','고급 조작으로 현재 Dynamic FDB의 300초 이상 엔트리를 제거했습니다.','Aging');
   }
 
   function setMode(mode){
@@ -780,7 +780,7 @@
       btn.setAttribute('aria-pressed',String(on));
     });
     $('viewModeSummary').textContent=mode==='basic'
-      ? '기본 모드 · 처음에는 프레임과 FDB의 핵심 변화만 확인하세요.'
+      ? '기본 모드 · 처음에는 Frame과 FDB의 핵심 변화만 확인하세요.'
       : '고급 모드 · SW1 FDB, PC1/PC2 ARP Cache와 현재 실습 상태를 직접 바꾸는 자유 조작을 표시합니다.';
   }
 
@@ -815,7 +815,7 @@
     fdb.clear();
     renderTables();
     addLog('MANUAL CLEAR all FDB entries');
-    setLive('aging','FDB 전체 비움','고급 조작으로 SW1 Dynamic FDB를 모두 비웠습니다.','CLEAR');
+    setLive('aging','FDB 전체 비움','고급 조작으로 SW1 Dynamic FDB를 모두 비웠습니다.','삭제');
   });
 
   $('clearPc2Btn').addEventListener('click',()=>{
@@ -824,7 +824,7 @@
     fdb.delete(DEV.pc2.mac);
     renderTables();
     addLog('MANUAL CLEAR PC2 FDB only');
-    setLive('aging','PC2 FDB만 삭제','PC1/PC2 ARP Cache는 변경하지 않았습니다.','CLEAR');
+    setLive('aging','PC2 FDB만 삭제','PC1/PC2 ARP Cache는 변경하지 않았습니다.','삭제');
   });
 
   $('manualAgeBtn').addEventListener('click',manualAge);
