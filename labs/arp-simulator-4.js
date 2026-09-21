@@ -25,7 +25,7 @@ function renderPrediction(){
       if(state.busy||state.predictionLocked)return;
       state.predictionChoice=id;
       document.body.classList.add("prediction-selected");
-      $("[data-prediction]").forEach(b=>{
+      $$("[data-prediction]").forEach(b=>{
         const active=b.dataset.prediction===id;
         b.classList.toggle("selected",active);
         b.setAttribute("aria-pressed",String(active));
