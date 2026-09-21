@@ -140,7 +140,7 @@ setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-mode11";
+  const version="20260921-mode12";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
