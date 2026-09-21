@@ -5,7 +5,7 @@ function applyDeviceConfig(){
     if(!isUsableInterfaceIp(ip,prefix)){
       alert("Host IP는 현재 Prefix에서 사용 가능한 unicast 주소여야 합니다. Network/Broadcast/Loopback/Multicast 주소는 지원하지 않습니다.");return;
     }
-    if(!isUnicastIpv4(gw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
+    if(!isUsableInterfaceIp(gw,prefix)){alert("Gateway는 해당 Prefix 형식에서 Network/Broadcast가 아닌 사용 가능한 unicast host 주소여야 합니다.");return}
     if(duplicateInterfaceIp(ip,d)){alert("같은 토폴로지에서 중복된 인터페이스 IP는 지원하지 않습니다.");return}
     if(d==="pc1"){state.pc1Ip=ip;state.mask=prefix;state.gw=gw}
     if(d==="pc3"){state.pc3Ip=ip;state.pc3Mask=prefix;state.pc3Gw=gw}
