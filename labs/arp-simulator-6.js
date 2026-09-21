@@ -90,7 +90,7 @@ $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.targe
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260917-mobile5";
+  const version="20260921-accuracy7";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
