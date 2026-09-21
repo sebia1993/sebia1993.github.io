@@ -22,8 +22,10 @@
   #topologyMount>.topology-shell{display:none!important}
   .mobile-topology{display:block;border:1px solid #cad9e4;border-radius:17px;background:#f5f8fb;padding:12px;overflow:hidden}
   .mobile-topology *{box-sizing:border-box}
-  .mt-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+  .mt-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px}
   .mt-head strong{font-size:13px}
+  .mt-direction-note{margin-bottom:10px;padding:7px 8px;border:1px dashed #cbd9e3;border-radius:9px;background:#fff;color:#657d90;font-size:9px;line-height:1.45}
+  .mt-direction-note b:first-child{color:#08765d}.mt-direction-note b:last-child{color:#175da8}
   .mt-dest{border-radius:999px;padding:6px 9px;background:#e7f6ef;color:#08765d;font-size:10px;font-weight:1000}
   .mt-dest.remote{background:#e9f2ff;color:#175da8}
   .mt-zone{border:1px dashed #9fc4b8;background:#edf9f4;border-radius:14px;padding:10px}
