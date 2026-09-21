@@ -22,49 +22,117 @@ async function animateArpBroadcast(targetKind){
   }
   await move(paths.pc1sw1);markRequest(["pc1sw1"]);
   setLiveEvent("arp","SW1 · ARP Broadcast Flooding",
-    `PC1의 ARP Request가 SW1에 도착했습니다. 스위치는 목적지 MAC이 Broadcast이므로 들어온 포트를 제외한 같은 LAN의 다른 포트로 복제해 보냅니다.`);
+    "PC1의 ARP Request가 SW1에 도착했습니다. Ethernet Destination이 Broadcast이므로 SW1은 들어온 포트를 제외한 LAN A의 다른 포트로 Flooding합니다.");
   const jobs=[];
   if(effectiveLinkUp("sw1pc3"))jobs.push(moveSvgDot("arpBranchPc3",paths.sw1pc3));
   if(effectiveLinkUp("sw1r2"))jobs.push(moveSvgDot("arpBranchR2",paths.sw1r2));
   await Promise.all(jobs);
-  const targetLink=targetKind==="pc3"?"sw1pc3":"sw1r2";
-  if(!effectiveLinkUp(targetLink)){
+  const targetLink=targetKind==="pc3"?"sw1pc3":targetKind==="r2"?"sw1r2":null;
+  if(targetLink&&!effectiveLinkUp(targetLink)){
     const reason=linkDownReason(targetLink);
     showPacketStop(targetLink,reason);
     return {ok:false,key:targetLink,reason};
   }
-  markRequest([targetLink]);
+  if(targetLink)markRequest([targetLink]);
   return {ok:true};
 }
 async function animateReply(keys){
   setPacketVisual("reply");
+  const done=[];
   for(const key of keys){
+    const linkKey=key==="pc3sw1"?"sw1pc3":
+                  key==="pc2sw2"?"sw2pc2":
+                  key==="sw2r2"?"r2sw2":
+                  key==="sw1r2"?"sw1r2":
+                  key==="r2sw1"?"sw1r2":
+                  key==="sw1pc1"?"pc1sw1":null;
+    if(linkKey&&!effectiveLinkUp(linkKey)){
+      const reason=linkDownReason(linkKey);
+      showPacketStop(linkKey,reason);
+      markReply(done);
+      setPacketVisual("request");
+      return {ok:false,key:linkKey,reason};
+    }
     const route=key==="pc3sw1"?[...paths.sw1pc3].reverse():
                 key==="pc2sw2"?[...paths.sw2pc2].reverse():
                 key==="sw2r2"?[...paths.r2sw2].reverse():
+                key==="sw1r2"?paths.sw1r2:
                 key==="r2sw1"?[...paths.sw1r2].reverse():
                 key==="sw1pc1"?[...paths.pc1sw1].reverse():[];
     if(route.length)await move(route);
+    done.push(key);
   }
-  markReply(keys);
+  markReply(done);
   setPacketVisual("request");
+  return {ok:true};
 }
-async function showRouteLookup(destIp,ok){
+async function animateRouterArp(route,dest){
+  hidePacketStop();setPacketVisual("request");
+  if(route.segment==="B"){
+    if(!effectiveLinkUp("r2sw2")){
+      const reason=linkDownReason("r2sw2");showPacketStop("r2sw2",reason);return {ok:false,key:"r2sw2",reason};
+    }
+    await move(paths.r2sw2);markRequest(["r2sw2"]);
+    setLiveEvent("arp","R2 → LAN B · ARP Broadcast",`R2가 ${dest.ip}의 MAC을 알아내기 위해 eth1에서 ARP Request를 Broadcast합니다.`);
+    if(destinationIsOnPhysicalSegment(dest,"B")){
+      if(!effectiveLinkUp(dest.accessLink)){
+        const reason=linkDownReason(dest.accessLink);showPacketStop(dest.accessLink,reason);return {ok:false,key:dest.accessLink,reason};
+      }
+      await move(paths.sw2pc2);markRequest(["sw2pc2"]);
+    }else if(effectiveLinkUp("sw2pc2")){
+      await move(paths.sw2pc2);markRequest(["sw2pc2"]);
+    }
+    return {ok:true};
+  }
+  if(!effectiveLinkUp("sw1r2")){
+    const reason=linkDownReason("sw1r2");showPacketStop("sw1r2",reason);return {ok:false,key:"sw1r2",reason};
+  }
+  await move([...paths.sw1r2].reverse());markRequest(["r2sw1"]);
+  setLiveEvent("arp","R2 → LAN A · ARP Broadcast",`R2가 ${dest.ip}의 MAC을 알아내기 위해 eth0에서 ARP Request를 Broadcast합니다.`);
+  if(effectiveLinkUp("sw1pc3"))await moveSvgDot("arpBranchPc3",paths.sw1pc3);
+  if(destinationIsOnPhysicalSegment(dest,"A")&&!effectiveLinkUp(dest.accessLink)){
+    const reason=linkDownReason(dest.accessLink);showPacketStop(dest.accessLink,reason);return {ok:false,key:dest.accessLink,reason};
+  }
+  if(destinationIsOnPhysicalSegment(dest,"A"))markRequest(["sw1pc3"]);
+  return {ok:true};
+}
+async function animateRouterArpReply(route,dest){
+  return route.segment==="B"
+    ?animateReply(["pc2sw2","sw2r2"])
+    :animateReply(["pc3sw1","sw1r2"]);
+}
+async function animateR2ToDestination(route,dest){
+  if(route.segment==="B"){
+    const r=await animateLinks(["r2sw2","sw2pc2"]);
+    if(r.ok)markRequest(["r2sw2","sw2pc2"]);
+    return r;
+  }
+  if(!effectiveLinkUp("sw1r2")){
+    const reason=linkDownReason("sw1r2");showPacketStop("sw1r2",reason);return {ok:false,key:"sw1r2",reason};
+  }
+  await move([...paths.sw1r2].reverse());
+  if(!effectiveLinkUp("sw1pc3")){
+    const reason=linkDownReason("sw1pc3");showPacketStop("sw1pc3",reason);return {ok:false,key:"sw1pc3",reason};
+  }
+  await move(paths.sw1pc3);markRequest(["r2sw1","sw1pc3"]);
+  return {ok:true};
+}
+async function showRouteLookup(destIp,route){
   setLiveEvent("route","R2 · Route Lookup",
-    ok?`${destIp}가 ${networkAddress(state.r2e1Ip,state.r2e1Mask)}에 매칭되어 eth1으로 전달합니다.`:
-       `${destIp}와 일치하는 Connected Route를 찾지 못했습니다.`);
+    route?`${destIp}가 Connected Route ${route.network}에 매칭되어 ${route.egress}으로 전달합니다.`:
+          `${destIp}와 일치하는 UP 상태의 Connected Route를 찾지 못했습니다.`);
   const card=$("#routeLookupCard");card.classList.add("show");
   $("#routeLookupDst").textContent=`Destination: ${destIp}`;
   const r1=$("#routeStep1"),r2=$("#routeStep2"),r3=$("#routeStep3");
   [r1,r2,r3].forEach(x=>x.classList.remove("fail"));
-  if(ok){
+  if(route){
     $("#routeLookupState").textContent="MATCH";
-    $("#routeResult").textContent=`${networkAddress(state.r2e1Ip,state.r2e1Mask)} → eth1`;
+    $("#routeResult").textContent=`${route.network} → ${route.egress}`;
     $("#routeTtl").textContent="64 → 63";
-    $("#routeL2").textContent=`Src R2 eth1 → Dst PC2`;
+    $("#routeL2").textContent=`ARP/neighbor 확인 후 Src R2 ${route.egress} → Dst next-hop`;
   }else{
     $("#routeLookupState").textContent="NO ROUTE";
-    $("#routeResult").textContent=`Connected route 없음`;r1.classList.add("fail");
+    $("#routeResult").textContent="UP 상태의 Connected Route 없음";r1.classList.add("fail");
     $("#routeTtl").textContent="전달 안 함";r2.classList.add("fail");
     $("#routeL2").textContent="새 Frame 생성 안 함";r3.classList.add("fail");
   }
@@ -107,9 +175,9 @@ function renderState(){
   $("#pc1NetLabel").textContent=`NET ${networkAddress(state.pc1Ip,state.mask)}`;
   $("#pc3NetLabel").textContent=`NET ${networkAddress(state.pc3Ip,state.pc3Mask)}`;
   $("#pc2NetLabel").textContent=`NET ${networkAddress(state.pc2Ip,state.pc2Mask)}`;
-  const pc1GwOk=sameSubnet(state.pc1Ip,state.gw,state.mask);
-  const pc3GwOk=sameSubnet(state.pc3Ip,state.pc3Gw,state.pc3Mask);
-  const pc2GwOk=sameSubnet(state.pc2Ip,state.pc2Gw,state.pc2Mask);
+  const pc1GwOk=gatewayLooksValid(state.pc1Ip,state.mask,state.gw,state.r2e0Ip);
+  const pc3GwOk=gatewayLooksValid(state.pc3Ip,state.pc3Mask,state.pc3Gw,state.r2e0Ip);
+  const pc2GwOk=gatewayLooksValid(state.pc2Ip,state.pc2Mask,state.pc2Gw,state.r2e1Ip);
   $("#pc1LogicalChip").setAttribute("class","logical-chip "+(pc1GwOk?"":"bad"));
   $("#pc3LogicalChip").setAttribute("class","logical-chip "+(pc3GwOk?"":"bad"));
   $("#pc2LogicalChip").setAttribute("class","logical-chip "+(pc2GwOk?"":"bad"));
@@ -149,7 +217,8 @@ function openDeviceConfig(device){
         ${deviceFormField("DEFAULT GATEWAY","cfgGw",gw)}
       </div>
       <div class="drawer-help">
-        <b>실시간 반영:</b> IP/Prefix/Gateway는 다음 PING에서 Local/Remote 판단, ARP 대상, Reply 경로 계산에 사용됩니다.
+        <b>실시간 반영:</b> IP/Prefix/Gateway는 다음 PING에서 on-link 판단, ARP 대상, Reply 경로 계산에 사용됩니다.
+        이 학습 모델에서 Gateway는 해당 Host Prefix 기준 on-link여야 하며, 각 Physical Segment의 R2 인터페이스와 일치해야 정상 Gateway로 동작합니다.
         특히 Gateway를 바꾸면 토폴로지의 <b>${name} 아래 GW 표시</b>도 즉시 바뀝니다.
       </div>
       <div class="drawer-actions"><button id="drawerResetDevice">기본값</button><button class="apply" id="drawerApply">이 설정 적용</button></div>`;
@@ -166,7 +235,7 @@ function openDeviceConfig(device){
         <button id="cfgEth0Btn" class="${state.eth0?"on":"off"}">eth0 ${state.eth0?"UP":"DOWN"}</button>
         <button id="cfgEth1Btn" class="${state.eth1?"on":"off"}">eth1 ${state.eth1?"UP":"DOWN"}</button>
       </div>
-      <div class="drawer-help"><b>실시간 반영:</b> R2 인터페이스 주소·Prefix·UP/DOWN 상태는 Connected Network와 패킷 전달 경로에 바로 반영됩니다. Cable 자체의 상태는 Physical Link 설정에서 별도로 바꿀 수 있습니다.</div>
+      <div class="drawer-help"><b>실시간 반영:</b> R2 인터페이스 주소·Prefix·UP/DOWN 상태는 Connected Route와 패킷 전달 경로에 바로 반영됩니다. 둘 다 목적지와 매칭되면 더 긴 Prefix를 우선합니다. Cable 자체의 상태는 Physical Link 설정에서 별도로 바꿀 수 있습니다.</div>
       <div class="drawer-actions"><button id="drawerResetDevice">기본값</button><button class="apply" id="drawerApply">이 설정 적용</button></div>`;
     $("#cfgEth0Btn").onclick=()=>{state.eth0=!state.eth0;openDeviceConfig("r2");renderState()};
     $("#cfgEth1Btn").onclick=()=>{state.eth1=!state.eth1;openDeviceConfig("r2");renderState()};
@@ -184,7 +253,7 @@ function resetOpenDevice(){
     state.r2e0Ip=GOOD.r2e0Ip;state.r2e0Mask=GOOD.r2e0Mask;state.r2e1Ip=GOOD.r2e1Ip;state.r2e1Mask=GOOD.r2e1Mask;
     state.eth0=true;state.eth1=true;
   }
-  state.arp={};state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
+  state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
   log(`${d.toUpperCase()} 설정을 기본값으로 복원`);
   openDeviceConfig(d);
 }
