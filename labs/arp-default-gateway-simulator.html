@@ -3,30 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARP / Default Gateway — Interactive Lab</title>
-<link rel="stylesheet" href="arp-simulator-1.css?v=20260921-mode9">
-<link rel="stylesheet" href="arp-simulator-2.css?v=20260921-mode9">
-<link rel="stylesheet" href="arp-simulator-3.css?v=20260921-mode9">
+<title>ARP / Default Gateway — 실습</title>
+<link rel="stylesheet" href="arp-simulator-1.css?v=20260921-mode10">
+<link rel="stylesheet" href="arp-simulator-2.css?v=20260921-mode10">
+<link rel="stylesheet" href="arp-simulator-3.css?v=20260921-mode10">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
   <header class="hero">
-    <small>FOUNDATION · INTERACTIVE LAB</small>
+    <small>기초 · 실습</small>
     <h1>ARP / Default Gateway</h1>
-    <p>토폴로지는 이제 물리 연결뿐 아니라 각 장비가 계산한 논리 Network, Request/Reply 경로, ARP Broadcast, R2 Route Lookup, Cable/Interface Down 차이까지 실시간으로 보여줍니다.</p>
+    <p>PC1이 목적지를 보고 <b>직접 보낼지, Default Gateway로 보낼지 판단하고</b>, 그 다음 <b>누구의 MAC 주소를 ARP로 알아내는지</b> 단계별로 확인합니다.</p>
     <div class="start-guide">
-      <div class="guide-step"><b>1</b><span><strong>목적지 선택</strong>PC3 또는 PC2를 눌러보세요.</span></div>
-      <div class="guide-step"><b>2</b><span><strong>PING 보내기</strong>큰 초록 버튼 하나만 누르면 됩니다.</span></div>
-      <div class="guide-step"><b>3</b><span><strong>흐름 확인</strong>패킷이 누구에게 가는지 눈으로 확인합니다.</span></div>
+      <div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 실습에서 확인할 한 가지를 먼저 봅니다.</span></div>
+      <div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>PING을 보내기 전에 결과를 골라보세요.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>내 예상과 실제 경로를 비교합니다.</span></div>
     </div>
   </header>
 
   <nav class="lesson-tabs" id="lessonTabs">
-    <button class="lesson-tab active" data-lesson="0">1 · 같은 네트워크</button>
-    <button class="lesson-tab" data-lesson="1">2 · 다른 네트워크</button>
-    <button class="lesson-tab" data-lesson="2">3 · 잘못된 Gateway</button>
-    <button class="lesson-tab" data-lesson="3">4 · 잘못된 Mask</button>
-    <button class="lesson-tab" data-lesson="4">5 · Gateway Down</button>
+    <button class="lesson-tab active" data-lesson="0">1 · 같은 네트워크면 누구를 ARP할까?</button>
+    <button class="lesson-tab" data-lesson="1">2 · 다른 네트워크면 누구를 ARP할까?</button>
+    <button class="lesson-tab" data-lesson="2">3 · Gateway 주소가 틀리면?</button>
+    <button class="lesson-tab" data-lesson="3">4 · Subnet Mask가 틀리면?</button>
+    <button class="lesson-tab" data-lesson="4">5 · Gateway가 응답하지 않으면?</button>
   </nav>
 
   <div class="course-progress">
@@ -46,6 +46,11 @@
     </div>
   </section>
 
+  <div class="beginner-key">
+    <b>처음이라면 이 순서만 기억하세요.</b>
+    <span><strong>목적지 판단 → next-hop 선택 → next-hop MAC을 ARP로 확인 → Ethernet 전송</strong></span>
+  </div>
+
   <section class="card lab-card">
     <div class="coach">
       <div class="coach-icon" id="coachIcon">1</div>
@@ -56,6 +61,16 @@
       <button class="hint-trigger" id="hintBtn">막혔나요? 힌트 1/3</button>
     </div>
     <div class="hint-box" id="hintBox"></div>
+
+    <section class="prediction-card" id="predictionCard" aria-labelledby="predictionTitle">
+      <div class="prediction-copy">
+        <small>실행하기 전에 먼저 생각해 보세요</small>
+        <h2 id="predictionTitle">PC1은 누구의 MAC 주소를 ARP로 알아낼까요?</h2>
+        <p id="predictionHelp">정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 패킷 흐름과 비교해 보세요.</p>
+      </div>
+      <div class="prediction-options" id="predictionOptions" role="group" aria-label="예상 답 선택"></div>
+      <div class="prediction-feedback" id="predictionFeedback" aria-live="polite" hidden></div>
+    </section>
 
     <div id="topologyMount"></div>
 
@@ -98,7 +113,7 @@
           <span id="destPc2Ip">192.168.20.10 · LAN B</span>
         </button>
       </div>
-      <button class="ping-btn" id="pingBtn">▶ PING 보내기</button>
+      <button class="ping-btn" id="pingBtn" disabled>▶ 결과 확인하기</button>
     </div>
 
     <div class="result-title">
@@ -106,10 +121,10 @@
       <span id="resultHint">PING을 보내면 순서대로 표시됩니다.</span>
     </div>
     <div class="flow">
-      <div class="flow-step" id="s1"><div class="n">STEP 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p></div>
-      <div class="flow-step" id="s2"><div class="n">STEP 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p></div>
-      <div class="flow-step" id="s3"><div class="n">STEP 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p></div>
-      <div class="flow-step" id="s4"><div class="n">STEP 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p></div>
+      <div class="flow-step" id="s1"><div class="n">단계 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p></div>
+      <div class="flow-step" id="s2"><div class="n">단계 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p></div>
+      <div class="flow-step" id="s3"><div class="n">단계 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p></div>
+      <div class="flow-step" id="s4"><div class="n">단계 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p></div>
     </div>
     <div class="explain" id="explainBox">먼저 <b>PC3</b>를 선택한 상태에서 <b>PING 보내기</b>를 눌러보세요.</div>
 
@@ -130,7 +145,7 @@
   </section>
 
   <section class="course-complete" id="courseComplete">
-    <div class="eyebrow2">FOUNDATION · COMPLETE</div>
+    <div class="eyebrow2">기초 실습 완료</div>
     <h2>ARP / Default Gateway 실습을 모두 완료했습니다.</h2>
     <p>같은 Subnet, 다른 Subnet, 잘못된 Gateway/Mask, Gateway/Link 장애까지 직접 확인하고 복구했습니다.</p>
     <div class="completion-grid">
@@ -313,14 +328,14 @@
   <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라 검증된 ARP / Default Gateway 동작을 학습용으로 재현합니다. Simulator 초기 TTL은 64입니다. <b>모델링 범위:</b> IPv4/Ethernet과 R2의 Connected Route를 모델링합니다. 이 Lab에서 LAN A와 LAN B는 각각 하나의 Ethernet L2 Broadcast Domain이며 VLAN은 사용하지 않습니다. PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Switch는 ARP Broadcast Flooding과 필요한 Frame 경로만 시각화하며 MAC Table learning·Unknown Unicast Flooding·VLAN/Trunk·STP는 모델링하지 않습니다. Proxy ARP·Static Route·NAT·동적 라우팅·ICMP Redirect·ICMP Destination Unreachable·ICMP Time Exceeded·ARP cache aging/state transition도 범위 밖입니다. 동일 인터페이스로 다시 forwarding되는 고급 구성에서도 Route/ARP/Frame 전달만 표시합니다.</div>
 </div>
 
-<script src="arp-topology-1.js?v=20260921-mode9"></script>
-<script src="arp-topology-2.js?v=20260921-mode9"></script>
-<script src="arp-topology-init.js?v=20260921-mode9"></script>
-<script src="arp-simulator-1.js?v=20260921-mode9"></script>
-<script src="arp-simulator-2.js?v=20260921-mode9"></script>
-<script src="arp-simulator-3.js?v=20260921-mode9"></script>
-<script src="arp-simulator-4.js?v=20260921-mode9"></script>
-<script src="arp-simulator-5.js?v=20260921-mode9"></script>
-<script src="arp-simulator-6.js?v=20260921-mode9"></script>
+<script src="arp-topology-1.js?v=20260921-mode10"></script>
+<script src="arp-topology-2.js?v=20260921-mode10"></script>
+<script src="arp-topology-init.js?v=20260921-mode10"></script>
+<script src="arp-simulator-1.js?v=20260921-mode10"></script>
+<script src="arp-simulator-2.js?v=20260921-mode10"></script>
+<script src="arp-simulator-3.js?v=20260921-mode10"></script>
+<script src="arp-simulator-4.js?v=20260921-mode10"></script>
+<script src="arp-simulator-5.js?v=20260921-mode10"></script>
+<script src="arp-simulator-6.js?v=20260921-mode10"></script>
 </body>
 </html>
