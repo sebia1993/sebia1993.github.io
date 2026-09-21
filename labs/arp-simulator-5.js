@@ -189,7 +189,7 @@ async function ping(){
     setStep("s4","PING 실패","유효한 next-hop을 만들 수 없어 ARP/ICMP 전송을 시작하지 못했습니다.","error");
     setExplain(`<b>Gateway 설정 오류:</b> Default Gateway는 송신 Host가 자신의 Ethernet 구간에서 직접 도달할 수 있는 on-link 주소여야 합니다.`,"error");
     log(`ping ${destIp} → FAIL · gateway ${state.gw} is not on-link`);
-    state.last={ok:false,stage:"gateway-offlink"};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"gateway-offlink"};recordFailure();updatePredictionControls();state.busy=false;return;
   }
 
   const arpTarget=onLink?destIp:state.gw;
@@ -209,7 +209,7 @@ async function ping(){
       setStep("s4","PING 실패","next-hop MAC을 얻지 못해 IPv4 Packet을 Ethernet으로 전달할 수 없습니다.","error");
       setExplain(`<b>ARP Link 실패:</b> ${LINK_UI[req.key].label} 상태 때문에 ${arpTarget}에 대한 Neighbor Resolution을 완료하지 못했습니다.`,"error");
       log(`ping ${destIp} → FAIL · ARP path down`);
-      state.last={ok:false,stage:"arp-link",link:req.key};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"arp-link",link:req.key};recordFailure();updatePredictionControls();state.busy=false;return;
     }
 
     firstHopEndpoint=lanAEndpointByIp(arpTarget);
@@ -227,7 +227,7 @@ async function ping(){
       setExplain(`<b>실패 지점 · ARP</b><br>${why}`,"error");
       setLiveEvent("error","ARP Reply 없음",`${arpTarget}의 IPv4→MAC 매핑을 얻지 못했습니다.`);
       log(`ping ${destIp} → FAIL · ARP ${arpTarget} no reply`);
-      state.last={ok:false,stage:"arp"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"arp"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
     }
 
     // ARP Request를 실제로 받은 응답자는 PC1의 Sender IP/MAC을 학습할 수 있습니다.
@@ -242,7 +242,7 @@ async function ping(){
     if(!rep.ok){
       setStep("s3","ARP Reply 경로 실패",`${LINK_UI[rep.key].label}에서 Reply가 돌아오지 못했습니다.`,"error");
       setStep("s4","PING 실패","PC1이 ARP Reply를 수신하지 못했습니다.","error");
-      state.last={ok:false,stage:"arp-reply-link"};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"arp-reply-link"};recordFailure();updatePredictionControls();state.busy=false;return;
     }
 
     firstHopMac=firstHopEndpoint.mac;
@@ -268,11 +268,11 @@ async function ping(){
         setExplain("<b>중요:</b> 잘못된 Gateway 주소가 실제 Host IP라면 ARP는 성공할 수 있습니다. 그러나 ARP 성공은 그 장비가 Router라는 뜻이 아니며, 일반 End Host인 PC3는 원격 IPv4 Packet을 forwarding하지 않습니다.","error");
       }
       log(`ping ${destIp} → FAIL · gateway points to non-forwarding PC3`);
-      state.last={ok:false,stage:"gateway-not-router"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"gateway-not-router"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
     }
 
     setStep("s4","PING 실패 · 유효한 Router next-hop 없음","PC1이 원격 목적지로 사용할 next-hop이 R2가 아닙니다.","error");
-    state.last={ok:false,stage:"gateway-not-router"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"gateway-not-router"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
   }
 
   setStep("s3",onLink?`Ethernet Dst → ${dest.name} MAC`:"Ethernet Dst → R2 eth0 MAC",
@@ -282,7 +282,7 @@ async function ping(){
     if(dest.segment!=="A"){
       // 정상적으로는 앞선 ARP 단계에서 Reply를 못 받아 여기까지 오지 않습니다.
       setStep("s4","PING 실패 · 잘못된 on-link 판단",`${dest.name}은 실제 LAN ${dest.segment}에 있습니다.`,"error");
-      state.last={ok:false,stage:"physical-segment"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"physical-segment"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
     }
 
     addLocalIcmpSnapshot(dest,firstHopMac);
@@ -291,7 +291,7 @@ async function ping(){
     if(localAnim.ok)markRequest(["pc1sw1","sw1pc3"]);
     if(!localAnim.ok){
       setStep("s4",`PING 실패 · ${LINK_UI[localAnim.key].label} DOWN`,"ARP 이후 ICMP Echo Request가 링크에서 중단됐습니다.","error");
-      state.last={ok:false,stage:"link",link:localAnim.key};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+      state.last={ok:false,stage:"link",link:localAnim.key};recordFailure();updatePredictionControls();state.busy=false;return;
     }
 
     const reply=await completeEchoReply(dest);
@@ -302,14 +302,14 @@ async function ping(){
       log(`ping ${destIp} → FAIL · ${reply.stage}`);
       state.last={ok:false,stage:reply.stage};recordFailure();
     }
-    resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+    resetPacket();updatePredictionControls();state.busy=false;return;
   }
 
   const toR2=await animateLinks(["pc1sw1","sw1r2"]);
   if(toR2.ok)markRequest(["pc1sw1","sw1r2"]);
   if(!toR2.ok){
     setStep("s4",`PING 실패 · ${LINK_UI[toR2.key].label} DOWN`,"ICMP Echo Request가 R2까지 도달하지 못했습니다.","error");
-    state.last={ok:false,stage:"link",link:toR2.key};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"link",link:toR2.key};recordFailure();updatePredictionControls();state.busy=false;return;
   }
   addPc1ToR2Snapshot(dest,firstHopMac);
 
@@ -319,7 +319,7 @@ async function ping(){
     setStep("s4","PING 실패 · R2 NO ROUTE","R2에 목적지 IPv4 주소와 매칭되는 UP 상태의 Connected Route가 없습니다.","error");
     setExplain(`R2의 eth0=${state.r2e0Ip}/${state.r2e0Mask}, eth1=${state.r2e1Ip}/${state.r2e1Mask}와 목적지 ${destIp}을 비교하세요. 이 Simulator에는 Static Route가 없습니다.`,"error");
     log(`ping ${destIp} → FAIL · R2 no connected route`);
-    state.last={ok:false,stage:"route"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"route"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
   }
 
   const forwardNeighbor=await ensureRouterNeighbor(dest,route,"forward");
@@ -327,7 +327,7 @@ async function ping(){
     setStep("s4","PING 실패 · R2 Neighbor Resolution","R2가 출력 링크에서 목적지 Host MAC을 확인하지 못했습니다.","error");
     setExplain(`<b>R2 출력 ARP 실패:</b> Route는 ${route.network} → ${route.egress}을 선택했지만 LAN ${route.segment}에서 ${dest.ip}에 대한 Neighbor Resolution을 완료하지 못했습니다.`,"error");
     log(`ping ${destIp} → FAIL · R2 neighbor resolution`);
-    state.last={ok:false,stage:"r2-arp"};recordFailure();resetPacket();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"r2-arp"};recordFailure();resetPacket();updatePredictionControls();state.busy=false;return;
   }
 
   addR2ToDestinationSnapshot(dest,route);
@@ -336,7 +336,7 @@ async function ping(){
   const toDest=await animateR2ToDestination(route,dest);
   if(!toDest.ok){
     setStep("s4",`PING 실패 · ${LINK_UI[toDest.key]?.label||toDest.key} DOWN`,"R2는 Route와 Neighbor 정보를 알고 있지만 실제 Frame 전달이 중단됐습니다.","error");
-    state.last={ok:false,stage:"link",link:toDest.key};recordFailure();$("#pingBtn").disabled=false;state.busy=false;return;
+    state.last={ok:false,stage:"link",link:toDest.key};recordFailure();updatePredictionControls();state.busy=false;return;
   }
 
   const reply=await completeEchoReply(dest);
@@ -347,5 +347,5 @@ async function ping(){
     log(`ping ${destIp} → FAIL · ${reply.stage}`);
     state.last={ok:false,stage:reply.stage};recordFailure();
   }
-  resetPacket();$("#pingBtn").disabled=false;state.busy=false;
+  resetPacket();updatePredictionControls();state.busy=false;
 }
