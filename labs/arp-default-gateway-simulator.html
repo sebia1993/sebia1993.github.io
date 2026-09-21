@@ -171,6 +171,14 @@
               <div class="meaning-note" id="macMeaning">MAC 주소의 의미가 여기에 표시됩니다.</div>
             </div>
 
+            <div class="meaning-card" id="arpHardwareCard" style="display:none">
+              <div class="layer">ARP PAYLOAD · HARDWARE ADDRESS</div>
+              <h4>ARP 내부의 Hardware Address는?</h4>
+              <div class="meaning-pair"><b>Sender Hardware</b><code id="arpSenderHardware">—</code></div>
+              <div class="meaning-pair"><b>Target Hardware</b><code id="arpTargetHardware">—</code></div>
+              <div class="meaning-note" id="arpHardwareMeaning">Ethernet Destination MAC과 ARP Target Hardware Address는 서로 다른 필드입니다.</div>
+            </div>
+
             <div class="meaning-card">
               <div class="layer">NEXT-HOP</div>
               <h4>지금 당장 다음 상대는?</h4>
@@ -179,10 +187,10 @@
             </div>
 
             <div class="meaning-card">
-              <div class="layer">L3 · TTL</div>
-              <h4>라우터를 몇 번 더 지날 수 있나?</h4>
+              <div class="layer">L3 · IPv4 TTL</div>
+              <h4>IPv4 Packet의 TTL은 어떻게 처리되는가?</h4>
               <div class="meaning-pair"><b>현재 TTL</b><code id="ttl">—</code></div>
-              <div class="meaning-note" id="ttlMeaning">ARP에는 TTL이 없고, IP 패킷은 라우터를 지날 때 감소합니다.</div>
+              <div class="meaning-note" id="ttlMeaning">TTL은 IPv4 Packet의 무한 순환을 제한하는 수명 값입니다. 이 Simulator는 초기 TTL 64를 사용하며 R2가 forwarding할 때 1 감소시킵니다.</div>
             </div>
           </div>
 
@@ -195,19 +203,19 @@
             <div class="concept"><b>IP 주소</b><span>최종 통신 상대를 식별</span></div>
             <div class="concept"><b>MAC 주소</b><span>현재 Ethernet 링크의 전달 상대</span></div>
             <div class="concept"><b>Next-hop</b><span>지금 당장 패킷을 넘길 다음 장비</span></div>
-            <div class="concept"><b>TTL</b><span>라우터를 지날 때마다 1 감소</span></div>
+            <div class="concept"><b>TTL</b><span>IPv4 수명 값 · 이 Lab에서는 R2 forwarding 시 64 → 63</span></div>
           </div>
 
           <div id="compareBox" class="compare-box">
             <div class="compare-head">라우터 통과 전 ↔ 통과 후 비교</div>
             <table class="compare-table">
-              <thead><tr><th>항목</th><th>PC1 → R2</th><th>R2 → PC2</th><th>해석</th></tr></thead>
+              <thead><tr><th>항목</th><th>PC1 → R2</th><th id="cmpHopB">R2 → 목적지</th><th>해석</th></tr></thead>
               <tbody>
                 <tr><td>Source IP</td><td id="cmpSrcIpA">—</td><td id="cmpSrcIpB">—</td><td class="same-value">그대로</td></tr>
                 <tr><td>Destination IP</td><td id="cmpDstIpA">—</td><td id="cmpDstIpB">—</td><td class="same-value">그대로</td></tr>
                 <tr><td>Source MAC</td><td id="cmpSrcMacA">—</td><td id="cmpSrcMacB">—</td><td class="changed-value">라우터 경계에서 변경</td></tr>
                 <tr><td>Destination MAC</td><td id="cmpDstMacA">—</td><td id="cmpDstMacB">—</td><td class="changed-value">라우터 경계에서 변경</td></tr>
-                <tr><td>TTL</td><td id="cmpTtlA">—</td><td id="cmpTtlB">—</td><td class="changed-value">64 → 63</td></tr>
+                <tr><td>TTL</td><td id="cmpTtlA">—</td><td id="cmpTtlB">—</td><td class="changed-value">Simulator 초기 64 → R2 이후 63</td></tr>
               </tbody>
             </table>
             <div class="compare-takeaway">
@@ -222,12 +230,27 @@
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="arpBody"><tr><td colspan="3" style="color:#7a90a3">아직 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
+            <strong style="display:block;margin-top:18px">PC3 Neighbor(ARP) Table</strong>
+            <p>PC3가 직접 Reply하거나 Gateway를 사용할 때 필요한 LAN A의 IPv4→MAC 매핑입니다.</p>
+            <table class="arp-table">
+              <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
+              <tbody id="pc3ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 PC3가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
+            </table>
+
+            <strong style="display:block;margin-top:18px">PC2 Neighbor(ARP) Table</strong>
+            <p>PC2가 Echo Reply를 보낼 때 자신의 Gateway 또는 on-link 상대를 확인하는 매핑입니다.</p>
+            <table class="arp-table">
+              <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
+              <tbody id="pc2ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 PC2가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
+            </table>
+
             <strong style="display:block;margin-top:18px">R2 Neighbor(ARP) Table = “라우터가 출력 링크의 next-hop MAC을 확인한 결과”</strong>
             <p>원격 통신에서는 PC1만 ARP하는 것이 아닙니다. R2도 선택한 출력 링크에서 최종 Host 또는 다음 홉의 MAC을 알아야 Ethernet Frame을 만들 수 있습니다.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="r2ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 R2가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
+            <p><b>Simulator 단순화:</b> ARP/Neighbor cache의 실제 aging timer와 REACHABLE/STALE 같은 상태 전이는 모델링하지 않습니다. Cache는 관련 설정 변경, 실습 초기화 또는 명시적 clear 명령 전까지 유지됩니다.</p>
           </div>
         </div>
       </div>
@@ -236,7 +259,7 @@
     <details class="panel" id="advancedPanel">
       <summary>고급 실습 · 장비 설정 / 터미널 <span style="font-weight:500;color:#7b8fa1;font-size:12px">토폴로지 설정과 완전히 연동</span></summary>
       <div class="panel-body">
-        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 경로에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet, R2의 Connected Route, Proxy ARP 비활성. Static Route·NAT·동적 라우팅은 모델링하지 않습니다.</div>
+        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 방향 Neighbor Resolution에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet, R2의 Connected Route, Proxy ARP 비활성. PC1/PC2/PC3는 일반 End Host로 IP forwarding을 하지 않습니다. Static Route·NAT·동적 라우팅과 ARP cache aging/state transition은 모델링하지 않습니다.</div>
 
         <div class="device-quick-grid">
           <button class="device-quick" data-open-device="pc1"><b>PC1 설정</b><span id="quickPc1">192.168.10.10/24 · GW 192.168.10.1</span></button>
@@ -269,23 +292,23 @@
         <div class="terminal">
           <div class="term-head">PC1 · 학습용 CLI</div>
           <div class="term-out" id="termOut"></div>
-          <div class="term-entry"><b>PC1&gt;</b><input id="termInput" placeholder="show ip / show arp / show r2 / ping &lt;IP&gt;"></div>
+          <div class="term-entry"><b>PC1&gt;</b><input id="termInput" placeholder="show arp [pc1|pc2|pc3|r2] / clear arp [대상] / ping &lt;IP&gt;"></div>
         </div>
       </div>
     </details>
   </div>
 
-  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라, 검증된 IPv4/Ethernet ARP / Default Gateway 동작을 학습용으로 재현합니다. Proxy ARP·Static Route·NAT·동적 라우팅은 범위 밖입니다.</div>
+  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라, 검증된 IPv4/Ethernet ARP / Default Gateway 동작을 학습용으로 재현합니다. Simulator 초기 TTL은 64이며, PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Proxy ARP·Static Route·NAT·동적 라우팅·ARP cache aging/state transition은 범위 밖입니다.</div>
 </div>
 
-<script src="arp-topology-1.js"></script>
-<script src="arp-topology-2.js"></script>
-<script src="arp-topology-init.js"></script>
-<script src="arp-simulator-1.js"></script>
-<script src="arp-simulator-2.js"></script>
-<script src="arp-simulator-3.js"></script>
-<script src="arp-simulator-4.js"></script>
-<script src="arp-simulator-5.js"></script>
-<script src="arp-simulator-6.js?v=20260917-mobile5"></script>
+<script src="arp-topology-1.js?v=20260921-accuracy7"></script>
+<script src="arp-topology-2.js?v=20260921-accuracy7"></script>
+<script src="arp-topology-init.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-1.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-2.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-3.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-4.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-5.js?v=20260921-accuracy7"></script>
+<script src="arp-simulator-6.js?v=20260921-accuracy7"></script>
 </body>
 </html>
