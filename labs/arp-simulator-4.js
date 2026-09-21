@@ -4,6 +4,7 @@ function renderPrediction(){
   const l=lessons[state.lesson];
   state.predictionChoice=null;
   state.predictionLocked=false;
+  document.body.classList.remove("prediction-selected");
   const title=$("#predictionTitle"),help=$("#predictionHelp"),options=$("#predictionOptions"),feedback=$("#predictionFeedback");
   if(!title||!help||!options||!feedback)return;
   title.textContent=l.prediction.question;
@@ -23,7 +24,8 @@ function renderPrediction(){
     btn.onclick=()=>{
       if(state.busy||state.predictionLocked)return;
       state.predictionChoice=id;
-      $$("[data-prediction]").forEach(b=>{
+      document.body.classList.add("prediction-selected");
+      $("[data-prediction]").forEach(b=>{
         const active=b.dataset.prediction===id;
         b.classList.toggle("selected",active);
         b.setAttribute("aria-pressed",String(active));
