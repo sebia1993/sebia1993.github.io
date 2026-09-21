@@ -254,7 +254,7 @@ function renderState(){
 
   const target=state.dest==="pc3"?state.pc3Ip:state.pc2Ip;
   const seesLocal=sameSubnet(state.pc1Ip,target,state.mask);
-  $("#pc1DecisionLabel").textContent=`${state.dest.toUpperCase()} ${target} = ${seesLocal?"LOCAL":"REMOTE"}`;
+  $("#pc1DecisionLabel").textContent=`${state.dest.toUpperCase()} ${target} = ${seesLocal?"ON-LINK":"VIA GATEWAY"}`;
   const suspicious=state.dest==="pc2"&&seesLocal;
   $("#pc1DecisionChip").setAttribute("class","logical-chip "+(suspicious?"warn":""));
 
