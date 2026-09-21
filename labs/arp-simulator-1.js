@@ -53,7 +53,7 @@ const state={
   pc2Ip:GOOD.pc2Ip,pc2Mask:GOOD.pc2Mask,pc2Gw:GOOD.pc2Gw,
   r2e0Ip:GOOD.r2e0Ip,r2e0Mask:GOOD.r2e0Mask,eth0:true,
   r2e1Ip:GOOD.r2e1Ip,r2e1Mask:GOOD.r2e1Mask,eth1:true,
-  arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
+  arp:{},r2Arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
   completed:Array(5).fill(false),failureSeen:Array(5).fill(false),hintLevel:0,openDevice:null,
   cables:{pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true}
 };
@@ -73,6 +73,28 @@ function isValidIp(ip){
 function gatewayLooksValid(ip,prefix,gw,routerIp){
   return isValidIp(gw) && sameSubnet(ip,gw,prefix) && gw===routerIp;
 }
+function selectedDestination(){
+  return state.dest==="pc3"
+    ?{key:"pc3",name:"PC3",ip:state.pc3Ip,prefix:state.pc3Mask,gw:state.pc3Gw,mac:MAC.pc3,segment:"A",accessLink:"sw1pc3"}
+    :{key:"pc2",name:"PC2",ip:state.pc2Ip,prefix:state.pc2Mask,gw:state.pc2Gw,mac:MAC.pc2,segment:"B",accessLink:"sw2pc2"};
+}
+function routerInterfaceForSegment(segment){
+  return segment==="A"
+    ?{name:"eth0",segment:"A",ip:state.r2e0Ip,prefix:state.r2e0Mask,mac:MAC.r2e0,up:state.eth0,link:"sw1r2"}
+    :{name:"eth1",segment:"B",ip:state.r2e1Ip,prefix:state.r2e1Mask,mac:MAC.r2e1,up:state.eth1,link:"r2sw2"};
+}
+function routerRouteFor(ip){
+  const candidates=[];
+  if(state.eth0&&sameSubnet(state.r2e0Ip,ip,state.r2e0Mask)){
+    candidates.push({egress:"eth0",segment:"A",routerIp:state.r2e0Ip,prefix:state.r2e0Mask,routerMac:MAC.r2e0,network:networkAddress(state.r2e0Ip,state.r2e0Mask)});
+  }
+  if(state.eth1&&sameSubnet(state.r2e1Ip,ip,state.r2e1Mask)){
+    candidates.push({egress:"eth1",segment:"B",routerIp:state.r2e1Ip,prefix:state.r2e1Mask,routerMac:MAC.r2e1,network:networkAddress(state.r2e1Ip,state.r2e1Mask)});
+  }
+  candidates.sort((a,b)=>b.prefix-a.prefix);
+  return candidates[0]||null;
+}
+function destinationIsOnPhysicalSegment(dest,segment){return dest.segment===segment}
 
 function setLiveEvent(kind,title,detail){
   const strip=$("#liveEventStrip");
@@ -102,10 +124,20 @@ function setStep(id,title,text,status="done"){
 function renderArp(){
   const rows=Object.entries(state.arp);
   $("#arpBody").innerHTML=rows.length?rows.map(([ip,mac])=>{
-    const meaning=ip===state.r2e0Ip?"원격 네트워크로 나갈 때 사용할 PC1의 Default Gateway":
-                  ip===state.pc3Ip?"같은 LAN에 있는 PC3":"현재 LAN에서 학습한 이웃";
+    const meaning=ip===state.r2e0Ip?"원격 목적지로 보낼 때 PC1이 사용할 Default Gateway":
+                  ip===state.pc3Ip?"LAN A에서 PC1이 직접 전달할 수 있는 PC3":"PC1이 현재 Ethernet 구간에서 학습한 이웃";
     return `<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaning}</td></tr>`;
-  }).join(""):`<tr><td colspan="3" style="color:#7a90a3">아직 학습한 ARP 항목이 없습니다.</td></tr>`;
+  }).join(""):`<tr><td colspan="3" style="color:#7a90a3">아직 PC1이 학습한 ARP 항목이 없습니다.</td></tr>`;
+  const r2Body=$("#r2ArpBody");
+  if(r2Body){
+    const r2Rows=Object.entries(state.r2Arp);
+    r2Body.innerHTML=r2Rows.length?r2Rows.map(([ip,mac])=>{
+      const meaning=ip===state.pc1Ip?"LAN A의 PC1":
+                    ip===state.pc2Ip?"LAN B의 PC2":
+                    ip===state.pc3Ip?"LAN A의 PC3":"R2가 출력 링크에서 학습한 이웃";
+      return `<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaning}</td></tr>`;
+    }).join(""):`<tr><td colspan="3" style="color:#7a90a3">아직 R2가 학습한 ARP 항목이 없습니다.</td></tr>`;
+  }
 }
 
 const LINK_UI={
@@ -153,7 +185,7 @@ function renderLinks(){
 }
 function toggleCable(key){
   state.cables[key]=!state.cables[key];
-  state.arp={};state.last=null;resetPacketStudy();renderArp();renderLinks();renderLessonStatus();
+  state.last=null;resetPacketStudy();renderArp();renderLinks();renderLessonStatus();
   log(`${LINK_UI[key].label} Cable → ${state.cables[key]?"UP":"DOWN"}`);
 }
 function showPacketStop(key,reason=""){
@@ -197,8 +229,8 @@ async function animateLinks(keys){
   return {ok:true};
 }
 
-const TRACE_REQ={pc1sw1:"traceReqPc1Sw1",sw1pc3:"traceReqSw1Pc3",sw1r2:"traceReqSw1R2",r2sw2:"traceReqR2Sw2",sw2pc2:"traceReqSw2Pc2"};
-const TRACE_REP={pc3sw1:"traceRepPc3Sw1",pc2sw2:"traceRepPc2Sw2",sw2r2:"traceRepSw2R2",r2sw1:"traceRepR2Sw1",sw1pc1:"traceRepSw1Pc1"};
+const TRACE_REQ={pc1sw1:"traceReqPc1Sw1",sw1pc3:"traceReqSw1Pc3",sw1r2:"traceReqSw1R2",r2sw1:"traceReqR2Sw1",r2sw2:"traceReqR2Sw2",sw2pc2:"traceReqSw2Pc2"};
+const TRACE_REP={pc3sw1:"traceRepPc3Sw1",pc2sw2:"traceRepPc2Sw2",sw2r2:"traceRepSw2R2",sw1r2:"traceRepSw1R2",r2sw1:"traceRepR2Sw1",sw1pc1:"traceRepSw1Pc1"};
 function clearTracePaths(){
   $$(".trace-path").forEach(x=>x.classList.remove("show"));
   $$(".trace-label").forEach(x=>x.classList.remove("show"));
