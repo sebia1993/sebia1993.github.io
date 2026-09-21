@@ -139,24 +139,169 @@
     setFdb(dev.mac,dev.port,0);
   }
 
+  const portPathIds={1:'pathP1Sw',2:'pathSwP2',3:'pathSwP3'};
+  const ingressTraceIds={1:'traceP1Sw',2:'traceP2Sw',3:'traceP3Sw'};
+  const egressTraceIds={1:'traceSwP1',2:'traceSwP2',3:'traceSwP3'};
+  const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function clearPacketSprites(){
+    ['packetIngress','packetOut2','packetOut3'].forEach(id=>{
+      const el=$(id);
+      if(el){
+        el.classList.remove('show','flood');
+        el.setAttribute('transform','translate(-100 -100)');
+      }
+    });
+  }
+
+  function clearTraceState(){
+    document.querySelectorAll('.mac-trace').forEach(path=>path.classList.remove('show','flood'));
+  }
+
+  function clearReceiveBadges(){
+    ['pc2ReceiveBadge','pc3ReceiveBadge'].forEach(id=>{
+      const el=$(id);
+      if(!el) return;
+      el.classList.remove('active','flood');
+    });
+    const p2=document.querySelector('#pc2ReceiveBadge text');
+    const p3=document.querySelector('#pc3ReceiveBadge text');
+    if(p2) p2.textContent='DESTINATION';
+    if(p3) p3.textContent='OBSERVER';
+  }
+
+  function renderReceiveBadges(egress,kind,dstMac){
+    clearReceiveBadges();
+    const apply=(port,id)=>{
+      if(!egress.includes(port)) return;
+      const badge=$(id);
+      const text=document.querySelector('#'+id+' text');
+      if(!badge||!text) return;
+      if(kind==='flood'){
+        badge.classList.add('flood');
+        text.textContent=dstMac===DEV.pc2.mac&&port===3?'FLOOD COPY':'FLOODING';
+      }else if(kind==='broadcast'){
+        badge.classList.add('flood');
+        text.textContent='BROADCAST';
+      }else{
+        badge.classList.add('active');
+        text.textContent='RECEIVE';
+      }
+    };
+    apply(2,'pc2ReceiveBadge');
+    apply(3,'pc3ReceiveBadge');
+  }
+
+  function renderSvgFdb(){
+    const rows=Array.from(fdb.entries()).sort((a,b)=>a[1].port-b[1].port);
+    const labels=rows.slice(0,3).map(([mac,v])=>{
+      const dev=Object.values(DEV).find(x=>x.mac===mac);
+      const name=dev?dev.name+' MAC':mac;
+      return name+'  →  port '+v.port+'   age '+v.age+'s';
+    });
+    for(let i=0;i<3;i++){
+      const el=$('svgFdbRow'+(i+1));
+      if(el) el.textContent=labels[i]||'—';
+    }
+  }
+
+  function focusTopologyPort(port){
+    const shell=$('topologyShell');
+    if(!shell||shell.scrollWidth<=shell.clientWidth) return;
+    const ratio=port===1?0:port===2||port===3?1:.45;
+    const max=Math.max(0,shell.scrollWidth-shell.clientWidth);
+    shell.scrollTo({left:max*ratio,behavior:reduceMotion?'auto':'smooth'});
+  }
+
+  function animateSprite(spriteId,pathId,label,duration=520){
+    const sprite=$(spriteId);
+    const path=$(pathId);
+    if(!sprite||!path) return Promise.resolve();
+    const text=sprite.querySelector('text');
+    if(text) text.textContent=label;
+    sprite.classList.add('show');
+    const length=path.getTotalLength();
+    const run=()=>{
+      const pt=path.getPointAtLength(length);
+      sprite.setAttribute('transform','translate('+pt.x+' '+pt.y+')');
+      return Promise.resolve();
+    };
+    if(reduceMotion) return run();
+    return new Promise(resolve=>{
+      const started=performance.now();
+      function tick(now){
+        const t=Math.min(1,(now-started)/duration);
+        const eased=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+        const pt=path.getPointAtLength(length*eased);
+        sprite.setAttribute('transform','translate('+pt.x+' '+pt.y+')');
+        if(t<1) requestAnimationFrame(tick);
+        else resolve();
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function shortFrameLabel(frameType){
+    if(frameType.includes('ARP REQUEST')) return 'ARP REQ';
+    if(frameType.includes('ARP REPLY')) return 'ARP REP';
+    if(frameType.includes('ICMP')) return 'ICMP';
+    if(frameType.includes('BROADCAST')) return 'BCAST';
+    return 'FRAME';
+  }
+
+  async function animateIngress(port,frameType){
+    clearPacketSprites();
+    clearTraceState();
+    const trace=$(ingressTraceIds[port]);
+    if(trace) trace.classList.add('show');
+    focusTopologyPort(port);
+    await animateSprite('packetIngress',ingressTraceIds[port],shortFrameLabel(frameType),reduceMotion?0:560);
+    focusTopologyPort(0);
+  }
+
+  async function animateEgress(egress,kind,frameType,dstMac){
+    clearTraceState();
+    const tasks=[];
+    egress.forEach((port,index)=>{
+      const trace=$(egressTraceIds[port]);
+      if(trace){
+        trace.classList.add('show');
+        if(kind==='flood'||kind==='broadcast') trace.classList.add('flood');
+      }
+      const spriteId=index===0?'packetOut2':'packetOut3';
+      const sprite=$(spriteId);
+      if(sprite){
+        sprite.classList.add('show');
+        sprite.classList.toggle('flood',kind==='flood'||kind==='broadcast');
+      }
+      tasks.push(animateSprite(spriteId,egressTraceIds[port],shortFrameLabel(frameType),reduceMotion?0:620));
+    });
+    renderReceiveBadges(egress,kind,dstMac);
+    if(egress.length) focusTopologyPort(egress[0]);
+    await Promise.all(tasks);
+  }
+
   function clearLinkState(){
-    [1,2,3].forEach(p=>{
-      const el=$('link-p'+p);
+    Object.values(portPathIds).forEach(id=>{
+      const el=$(id);
       if(el) el.classList.remove('ingress','egress','flood');
     });
+    clearTraceState();
+    clearReceiveBadges();
   }
 
   function setLinks(ingress,egress,kind){
     clearLinkState();
-    const inEl=$('link-p'+ingress);
+    const inEl=$(portPathIds[ingress]);
     if(inEl) inEl.classList.add('ingress');
     egress.forEach(p=>{
-      const el=$('link-p'+p);
+      const el=$(portPathIds[p]);
       if(el){
         el.classList.add('egress');
         if(kind==='flood'||kind==='broadcast') el.classList.add('flood');
       }
     });
+    renderReceiveBadges(egress,kind,null);
   }
 
   function renderMobileFlow(srcDev,actionTitle,egress,kind,dstMac){
@@ -197,7 +342,8 @@
     $('liveEventDetail').textContent=detail;
     $('liveEventKind').textContent=label||'EVENT';
     $('liveEventIcon').textContent=kind==='aging'?'⏱':kind==='broadcast'?'B':kind==='flood'?'F':kind==='known'?'K':kind==='filter'?'S':'L';
-    $('switchBadge').textContent=(label||'READY').toUpperCase();
+    const topoLabel=$('traceModeLabel');
+    if(topoLabel) topoLabel.textContent=(label||'EVENT')+' · '+title;
   }
 
   function setBasic(frame,lookup,action){
@@ -207,6 +353,8 @@
     $('switchLookupDetail').textContent=lookup.detail;
     $('switchAction').textContent=action.title;
     $('switchActionDetail').textContent=action.detail;
+    const svgLookup=$('svgLookupText');
+    if(svgLookup) svgLookup.textContent='LOOKUP · '+lookup.title+' / '+action.title;
   }
 
   function renderArpFields(srcDev,meta){
@@ -262,6 +410,7 @@
 
     $('arpBody').innerHTML=renderNeighborRows(arpPc1,'PC1 ARP Cache가 비어 있습니다.');
     $('pc2ArpBody').innerHTML=renderNeighborRows(arpPc2,'PC2 ARP Cache가 비어 있습니다.');
+    renderSvgFdb();
   }
 
   function renderProgress(){
@@ -350,6 +499,7 @@
     $('eventLog').textContent='아직 이벤트가 없습니다.';
     $('manualStateWarning').innerHTML='이 조작은 현재 FDB/ARP 상태에 직접 반영됩니다. 표준 실습 흐름으로 돌아가려면 <b>실습 기본 상태로 복원</b>을 누르세요.';
     clearLinkState();
+    clearPacketSprites();
     resetFlow();
     renderArpFields(null,null);
 
@@ -372,6 +522,7 @@
     setBasic(null,{title:'대기',detail:'Destination MAC을 받으면 FDB에서 조회합니다.'},{title:'대기',detail:'아직 전달할 프레임이 없습니다.'});
     setLive('', '프레임 이벤트 대기','실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.','READY');
     renderMobileFlow(null,'프레임 대기',[],'',null);
+    renderReceiveBadges([],'',null);
     renderTables();
     renderChecks();
     renderLessonMeta();
@@ -408,7 +559,7 @@
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source Learning을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
     setLive('learning',frameType+' · FRAME IN',srcDev.name+'의 프레임이 port '+ingress+'로 SW1에 들어왔습니다.','FRAME IN');
-    await sleep(360);
+    await animateIngress(ingress,frameType);
 
     learn(srcDev);
     renderTables();
@@ -468,10 +619,11 @@
     setFlow(4);
     setLinks(ingress,egress,kind);
     renderMobileFlow(srcDev,actionTitle,egress,kind,dstMac);
+    await animateEgress(egress,kind,frameType,dstMac);
     const eventTitle=frameType+' · '+actionTitle;
     addTimeline(kind,eventTitle,srcDev.name+' port '+ingress+' → '+(egress.length?portList(egress):'전달 없음'));
     addLog(frameType+' src='+srcDev.mac+' dst='+dstMac+' ingress=port'+ingress+' action='+actionTitle+' egress='+egress.join(','));
-    await sleep(650);
+    await sleep(reduceMotion?10:260);
 
     return {kind,egress,lookupTitle,actionTitle,srcMac:srcDev.mac,dstMac,frameType};
   }
