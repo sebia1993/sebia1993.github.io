@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0",
+  "lab": "ip-subnetting",
+  "title": "IP 주소 / Subnetting",
+  "contentStatus": "in-progress",
+  "labStatus": "not-run",
+  "status": "NOT_RUN",
+  "provenance": null,
+  "plannedProvenance": "real-lab",
+  "note": "이 파일은 실제 Lab의 예정된 검증 항목입니다. 실행 기록이 아니며 브라우저 시뮬레이션 결과를 포함하지 않습니다.",
+  "runId": null,
+  "startedAt": null,
+  "finishedAt": null,
+  "environment": {
+    "kind": "isolated-gns3",
+    "executionHost": null,
+    "platform": null,
+    "version": null,
+    "managementTransport": "Tailscale (management only; not capture path)",
+    "verified": false
+  },
+  "plan": "lab-plans/ip-subnetting.md",
+  "addressPlan": {
+    "simulation": "RFC 5737 documentation addresses; PC1 /25, wrong-mask /24",
+    "realLab": "RFC 1918 isolated addresses from lab plan; PC1 /24, wrong-mask /16",
+    "mappingVerified": false
+  },
+  "actual": null,
+  "artifacts": [],
+  "scenarios": [
+    {
+      "id": "same-subnet",
+      "phase": "normal",
+      "expected": { "arpTarget": "same-subnet-peer", "echoReplies": 3, "gatewayUsed": false },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    },
+    {
+      "id": "different-subnet",
+      "phase": "normal",
+      "expected": { "arpTarget": "configured-gateway", "echoReplies": 3, "destinationIpPreserved": true, "ethernetHeaderRewrittenAtRouter": true },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    },
+    {
+      "id": "wrong-mask",
+      "phase": "failure",
+      "expected": { "arpTarget": "remote-peer", "arpReplyObserved": false, "remoteEchoReplies": 0, "localControlEchoReplies": 3, "proxyArpEnabled": false },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    },
+    {
+      "id": "mask-recovery",
+      "phase": "recovery",
+      "recovers": "wrong-mask",
+      "expected": { "sourcePrefixRestored": true, "arpTarget": "configured-gateway", "remoteEchoReplies": 3, "localControlEchoReplies": 3 },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    },
+    {
+      "id": "wrong-gateway",
+      "phase": "failure",
+      "expected": { "arpTarget": "unused-gateway-address", "arpReplyObserved": false, "remoteEchoReplies": 0, "localControlEchoReplies": 3 },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    },
+    {
+      "id": "gateway-recovery",
+      "phase": "recovery",
+      "recovers": "wrong-gateway",
+      "expected": { "gatewayRestored": true, "arpTarget": "configured-gateway", "remoteEchoReplies": 3, "localControlEchoReplies": 3 },
+      "actual": null,
+      "result": "NOT_RUN",
+      "artifacts": []
+    }
+  ],
+  "review": { "status": "not-reviewed", "reviewedAt": null, "evidencePrivacyReviewed": false, "learnerExplanationReviewed": false },
+  "limitations": [
+    "Windows/GNS3 실행 환경은 아직 구성·검증하지 않았습니다.",
+    "교육용 모델의 예상 동작은 Packet Capture 또는 실제 장애·복구 근거가 아닙니다.",
+    "이 파일의 존재와 UI 테스트 통과는 로드맵 실험 수치를 증가시키지 않습니다."
+  ]
+}

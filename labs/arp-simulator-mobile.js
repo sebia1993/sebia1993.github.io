@@ -234,9 +234,9 @@
     }
   }
 
-  $m("[data-m-device]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode())openDeviceConfig(b.dataset.mDevice)}));
+  $$m("[data-m-device]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode())openDeviceConfig(b.dataset.mDevice)}));
   $$m("[data-m-dest]").forEach(b=>b.addEventListener("click",()=>{chooseDest(b.dataset.mDest);syncTopology()}));
-  $m("[data-m-link]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode()){toggleCable(b.dataset.mLink);syncTopology()}}));
+  $$m("[data-m-link]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode()){toggleCable(b.dataset.mLink);syncTopology()}}));
 
   function closeSheet(){
     const d=document.querySelector("#deviceDrawer");
@@ -275,6 +275,6 @@
   };
 
   mq.addEventListener?.("change",()=>{syncTopology();if(!mq.matches)closeSheet()});
-  $m("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!(typeof isAdvancedMode==="function"&&isAdvancedMode()))));
+  $$m("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!(typeof isAdvancedMode==="function"&&isAdvancedMode()))));
   syncTopology();
 })();
