@@ -34,7 +34,7 @@
       hints:[
         'Destination MAC은 <b>PC2의 실제 MAC</b>입니다.',
         'SW1 FDB에 <b>PC2 MAC → port 2</b>가 있으므로 출력 포트를 하나로 결정할 수 있습니다.',
-        'Known Unicast에서는 이 Lab 조건에서 PC3의 port 3로 복사하지 않습니다.'
+        'Known Unicast에서는 이 실습 조건에서 PC3의 port 3로 복사하지 않습니다.'
       ],
       checks:[
         ['known','FDB Hit','PC2 MAC → port 2 조회 성공'],
@@ -73,10 +73,10 @@
     },
     {
       title:'Aging으로 사라진 엔트리가 어떻게 다시 학습되는지 확인하세요.',
-      text:'이 실습의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 Age를 진행합니다.',
+      text:'이 실습의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 경과 시간을 진행합니다.',
       run:'▶ Aging 후 PC1 → PC2',
       hints:[
-        '이 실습에서 PC1 ARP 캐시의 PC2 항목은 유지됩니다. <b>FDB Aging과 ARP Cache는 별개</b>입니다.',
+        '이 실습에서 PC1 ARP 캐시의 PC2 항목은 유지됩니다. <b>FDB Aging과 ARP 캐시는 별개</b>입니다.',
         'PC2 FDB가 사라진 첫 Unicast는 Unknown Unicast로 Flooding됩니다.',
         'PC2가 Reply를 보내면 Source MAC으로 다시 학습되고, 그 다음 요청은 Known Unicast가 됩니다.'
       ],
@@ -94,7 +94,7 @@
     ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC → port 2'],
     ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC 없음'],
     ['PC1이 PC3 MAC을 아직 모름','SW1 FDB · PC1 MAC → port 1'],
-    ['PC1 ARP · PC2 MAC 보유 · PC2 ARP · PC1 MAC 보유','SW1 FDB · PC2 Age 299초 / PC1 Age 10초']
+    ['PC1 ARP · PC2 MAC 보유 · PC2 ARP · PC1 MAC 보유','SW1 FDB · PC2 경과 시간 299초 / PC1 경과 시간 10초']
   ];
 
   const evidenceByLesson=[
@@ -376,7 +376,7 @@
     $('arpEthDst').textContent=BROADCAST;
     $('arpSenderHw').textContent=srcDev.mac+' · '+srcDev.name;
     $('arpTargetIp').textContent=meta.arpTargetIp||'—';
-    $('arpTargetHw').textContent='미확정 · Simulator 표시 00:00:00:00:00:00';
+    $('arpTargetHw').textContent='미확정 · 시뮬레이터 표시 00:00:00:00:00:00';
   }
 
   function addTimeline(kind,title,detail){
@@ -385,7 +385,7 @@
     const item=document.createElement('div');
     item.className='timeline-item '+kind;
     const small=document.createElement('small');
-    small.textContent='STEP '+String(timelineCount).padStart(2,'0');
+    small.textContent='단계 '+String(timelineCount).padStart(2,'0');
     const b=document.createElement('b');
     b.textContent=title;
     const span=document.createElement('span');
@@ -417,8 +417,8 @@
       '<tr><td><code>'+mac+'</code></td><td>port '+v.port+'</td><td>'+v.age+'s</td></tr>'
     ).join(''):'<tr><td colspan="3" class="empty-row">동적 FDB 엔트리가 없습니다.</td></tr>';
 
-    $('arpBody').innerHTML=renderNeighborRows(arpPc1,'PC1 ARP Cache가 비어 있습니다.');
-    $('pc2ArpBody').innerHTML=renderNeighborRows(arpPc2,'PC2 ARP Cache가 비어 있습니다.');
+    $('arpBody').innerHTML=renderNeighborRows(arpPc1,'PC1 ARP 캐시가 비어 있습니다.');
+    $('pc2ArpBody').innerHTML=renderNeighborRows(arpPc2,'PC2 ARP 캐시가 비어 있습니다.');
     renderSvgFdb();
   }
 
@@ -549,7 +549,7 @@
     $('coachTitle').textContent=cfg.title;
     $('coachText').textContent=cfg.text;
     $('runBtn').textContent=cfg.run;
-    $('resultHint').textContent=idx===2?'ARP Cache와 FDB를 분리해서 보세요.':'Source Learning과 Destination Lookup을 분리해서 보세요.';
+    $('resultHint').textContent=idx===2?'ARP 캐시와 FDB를 분리해서 보세요.':'Source MAC 학습과 Destination MAC 조회을 분리해서 보세요.';
     setExplain(idx===4?'먼저 <b>+5초 경과</b>를 눌러 PC2 FDB Aging을 발생시키세요.':'<b>'+cfg.run.replace('▶ ','')+'</b>을 눌러 현재 상태를 확인하세요.');
     resetScenario();
     renderProgress();
@@ -567,7 +567,7 @@
     setFlow(1);
     setLinks(ingress,[],'');
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
-    setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source Learning을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
+    setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source MAC 학습을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
     setSvgDecision('대기','대기','Frame 수신 · port '+ingress);
     setLive('learning',frameType+' · Frame 수신',srcDev.name+'의 Frame이 port '+ingress+'로 SW1에 들어왔습니다.','Frame 수신');
     await animateIngress(ingress,frameType);
@@ -681,7 +681,7 @@
         flags.knownAfter=c.kind==='known'&&c.egress.length===1&&c.egress[0]===2;
 
         await processFrame(DEV.pc2,DEV.pc1.mac,'ICMP ECHO REPLY');
-        setExplain('<b>핵심:</b> PC1과 PC2의 ARP Cache, SW1의 FDB는 각각 독립 상태입니다. PC2는 ARP Request의 Sender IP/MAC을 확인하고, SW1은 PC2가 실제 Reply를 보낸 뒤 Source MAC으로 PC2 → port 2를 학습합니다.');
+        setExplain('<b>핵심:</b> PC1과 PC2의 ARP 캐시, SW1의 FDB는 각각 독립 상태입니다. PC2는 ARP Request의 Sender IP/MAC을 확인하고, SW1은 PC2가 실제 Reply를 보낸 뒤 Source MAC으로 PC2 → port 2를 학습합니다.');
       }else if(lesson===1){
         const r=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
         flags.known=r.kind==='known'&&r.egress[0]===2;
@@ -708,7 +708,7 @@
 
         const again=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST · AGAIN');
         flags.known=again.kind==='known'&&again.egress[0]===2;
-        setExplain('<b>Aging → Flooding → Re-learning → Known:</b> 이 Lab에서는 FDB Aging 기준을 300초로 둡니다. PC1 ARP가 남아 있으므로 첫 요청은 PC2 MAC을 그대로 사용하고, PC2 Reply의 Source MAC으로 SW1이 다시 학습한 뒤 다음 요청은 Known Unicast가 됩니다.');
+        setExplain('<b>Aging → Flooding → Re-learning → Known:</b> 이 실습에서는 FDB Aging 기준을 300초로 둡니다. PC1 ARP가 남아 있으므로 첫 요청은 PC2 MAC을 그대로 사용하고, PC2 Reply의 Source MAC으로 SW1이 다시 학습한 뒤 다음 요청은 Known Unicast가 됩니다.');
       }
       completeIfReady();
     }finally{
@@ -728,12 +728,12 @@
     }
     flags.aged=!fdb.has(DEV.pc2.mac)&&arpPc1.get(DEV.pc2.ip)===DEV.pc2.mac;
     renderTables();
-    setLive('aging','PC2 Dynamic FDB Aging 완료','이 실습의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','Aging');
+    setLive('aging','PC2 Dynamic FDB Aging 완료','이 실습의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP 캐시의 PC2 IP → MAC은 그대로 남아 있습니다.','Aging');
     setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'PC2 FDB 없음',detail:'ARP는 남아 있지만 SW1은 PC2의 출력 포트를 모릅니다.'},{title:'다음 프레임 대기',detail:'이제 PC1 → PC2를 실행하세요.'});
     setSvgDecision('—','PC2 → FDB Miss','다음 Frame · Flooding 예상');
     renderMobileFlow(DEV.pc1,'다음 프레임 대기',[],'',DEV.pc2.mac);
     addTimeline('aging','FDB Aging','PC2 동적 엔트리 삭제 · PC1 ARP 유지 · 자동 시간 경과는 모델링하지 않음');
-    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 시뮬레이터의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
+    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP 캐시는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 시뮬레이터의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
     renderChecks();
     updateControls();
   }
@@ -820,11 +820,11 @@
 
   $('clearPc2Btn').addEventListener('click',()=>{
     if(busy) return;
-    markManualStateChanged('PC2의 Dynamic FDB 엔트리만 삭제했습니다. PC1/PC2 ARP Cache는 유지됩니다.');
+    markManualStateChanged('PC2의 Dynamic FDB 엔트리만 삭제했습니다. PC1/PC2 ARP 캐시는 유지됩니다.');
     fdb.delete(DEV.pc2.mac);
     renderTables();
     addLog('수동 조작 · PC2 FDB만 삭제');
-    setLive('aging','PC2 FDB만 삭제','PC1/PC2 ARP Cache는 변경하지 않았습니다.','삭제');
+    setLive('aging','PC2 FDB만 삭제','PC1/PC2 ARP 캐시는 변경하지 않았습니다.','삭제');
   });
 
   $('manualAgeBtn').addEventListener('click',manualAge);
