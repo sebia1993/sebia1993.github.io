@@ -323,7 +323,7 @@ function resetOpenDevice(){
     state.r2e0Ip=GOOD.r2e0Ip;state.r2e0Mask=GOOD.r2e0Mask;state.r2e1Ip=GOOD.r2e1Ip;state.r2e1Mask=GOOD.r2e1Mask;
     state.eth0=true;state.eth1=true;
   }
-  state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
+  clearAllNeighborCaches();state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
   log(`${d.toUpperCase()} 설정을 기본값으로 복원`);
   openDeviceConfig(d);
 }
