@@ -9,7 +9,7 @@
   mobile.innerHTML=`
     <div class="mt-head">
       <strong>모바일 토폴로지</strong>
-      <span id="mtDest" class="mt-dest">PC3 · LOCAL</span>
+      <span id="mtDest" class="mt-dest">PC3 · ON-LINK</span>
     </div>
 
     <section class="mt-zone">
@@ -147,9 +147,9 @@
 
     const target=state.dest==="pc3"?state.pc3Ip:state.pc2Ip;
     const local=sameSubnet(state.pc1Ip,target,state.mask);
-    setText("#mtPc1Decision",`${state.dest.toUpperCase()} ${target} → ${local?"LOCAL":"REMOTE"}`);
+    setText("#mtPc1Decision",`${state.dest.toUpperCase()} ${target} → ${local?"ON-LINK":"VIA GATEWAY"}`);
     const destBadge=$m("#mtDest");
-    destBadge.textContent=`${state.dest.toUpperCase()} · ${local?"LOCAL":"REMOTE"}`;
+    destBadge.textContent=`${state.dest.toUpperCase()} · ${local?"ON-LINK":"VIA GATEWAY"}`;
     destBadge.classList.toggle("remote",!local);
     $m("#mtDecisionBox").classList.toggle("warn",state.dest==="pc2"&&local);
 
