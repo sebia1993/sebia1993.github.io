@@ -123,7 +123,7 @@ function physicalHostByIp(ip,segment){
   return ["pc1","pc3","pc2"].map(hostByKey).find(h=>h&&h.segment===segment&&h.ip===ip)||null;
 }
 function lanAEndpointByIp(ip){
-  if(ip===state.r2e0Ip&&state.eth0)return {key:"r2",name:"R2 eth0",ip:state.r2e0Ip,mac:MAC.r2e0,segment:"A",accessLink:"sw1r2"};
+  if(ip===state.r2e0Ip)return {key:"r2",name:"R2 eth0",ip:state.r2e0Ip,mac:MAC.r2e0,segment:"A",accessLink:"sw1r2",up:state.eth0};
   return physicalHostByIp(ip,"A");
 }
 function routerInterfaceForSegment(segment){
