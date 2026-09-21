@@ -146,7 +146,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>다른 대역으로 보낼 때 목적지 IP가 게이트웨이 IP로 바뀌지 않았다.</strong> PC1은 다음 전달 대상인 게이트웨이의 MAC을 알아내 Ethernet 프레임을 보냈고, 라우터는 반대편 링크에 맞춰 MAC 헤더를 새로 만들었다.</p>
+<p><strong>다른 대역으로 보낼 때 목적지 IP가 게이트웨이 IP로 바뀌지 않았다.</strong> PC1은 다음 전달 대상인 게이트웨이의 MAC을 알아내 Ethernet 프레임을 보냈고, 라우터는 수신 L2 헤더를 제거한 뒤 반대편 링크에 맞는 새 Ethernet 프레임으로 재캡슐화했다.</p>
 <p>장애별 차이:</p>
 <ul>
 <li>잘못된 GW: PC1이 <code>192.168.10.254</code>를 ARP로 찾았지만 응답이 없었다.</li>
@@ -204,7 +204,7 @@ PC1&gt; ping 192.168.20.10 -c 3 -i 500 -w 1000
 PC1&gt; show arp
 R2# ip link set eth0 up
 PC1&gt; ping 192.168.20.10 -c 3 -i 500 -w 1000</code></pre>
-<p>실제 결과: Gateway MAC이 캐시에 남은 채 기존 MAC으로 Echo Request 3개 전송. 장애 구간에서 PC1의 새 ARP는 0개, PC2 응답 0개, 라우터 출력 링크의 대상 요청 0개. eth0 복구 후 3/3 응답.</p>
+<p>실제 결과: Gateway MAC이 캐시에 남은 채 기존 MAC으로 Echo Request 3개 전송. 장애 구간에서 PC1의 새 ARP는 0개, PC2 응답 0개, R2 출력 링크에서 PC1→PC2 ICMP Echo Request는 0개. eth0 복구 후 3/3 응답.</p>
 <p>Gateway MAC은 <code>02:42:d4:39:68:00</code>이며, 장애 전 캐시 잔여 85초, 장애 후 79초였습니다. 장애 PC1 캡처 frame 1~3은 모두 기존 MAC으로 향하는 ICMP 요청입니다. PC1이 새로 보낸 ARP는 없었습니다. R2 오른쪽의 frame 1~2는 R2가 PC2를 확인한 ARP 요청·응답이며 PC1의 ICMP 전달과 구분해야 합니다. 복구된 PC1 요청은 frame 7, 11, 15, R2 오른쪽은 frame 3, 5, 7입니다.</p>
 <p>복구: R2 eth0/eth1 UP, ip_forward=1을 확인했습니다. PC1→PC2와 PC1→PC3는 각각 3/3 응답했습니다. 세 링크에서 복구 PC2 요청·응답 각 3개를 확인했고, 라우터 양쪽 요청의 ICMP 바이트 동일성과 TTL 64→63을 확인했습니다.</p>
 <p><a href="10-arp-cache-gateway-down/console.txt">콘솔</a> · <a href="10-arp-cache-gateway-down/pc1-sw1.pcap">PC1 PCAP</a> · <a href="10-arp-cache-gateway-down/sw1-r1.pcap">R2 입력 PCAP</a> · <a href="10-arp-cache-gateway-down/r1-sw2.pcap">R2 출력 PCAP</a></p>
@@ -218,7 +218,7 @@ PC1&gt; ping 192.168.20.10 -c 3 -i 500 -w 1000
 PC1&gt; show arp
 R2# sysctl -w net.ipv4.ip_forward=1
 PC1&gt; ping 192.168.20.10 -c 3 -i 500 -w 1000</code></pre>
-<p>실제 결과: Gateway ARP Request/Reply 각 1개 성공 후 Echo Request 3개가 R2 입력 링크에 도착. 장애 구간에서 R2 출력 링크의 대상 요청 0개, PC2 응답 0개. forwarding 복구 후 3/3 응답.</p>
+<p>실제 결과: Gateway ARP Request/Reply 각 1개 성공 후 Echo Request 3개가 R2 입력 링크에 도착. 장애 구간에서 R2 출력 링크의 PC1→PC2 ICMP Echo Request는 0개, PC2 응답 0개. forwarding 복구 후 3/3 응답.</p>
 <p>ARP 캐시가 비어 있음을 확인하고 실행했습니다. PC1 frame 1은 192.168.10.1을 묻는 ARP, frame 2는 Gateway Reply, frame 3~5는 목적지 IP 192.168.20.10 / 목적지 MAC 02:42:d4:39:68:00인 요청입니다. 장애 중 R2 오른쪽에는 프레임이 없었습니다. 복구된 PC1 요청은 frame 7, 9, 11, R2 오른쪽은 frame 1, 3, 5입니다.</p>
 <p>복구: R2 eth0/eth1 UP, ip_forward=1을 확인했습니다. PC1→PC2와 PC1→PC3는 각각 3/3 응답했습니다. 세 링크에서 복구 PC2 요청·응답 각 3개를 확인했고, 라우터 양쪽 요청의 ICMP 바이트 동일성과 TTL 64→63을 확인했습니다.</p>
 <p><a href="11-forwarding-disabled/console.txt">콘솔</a> · <a href="11-forwarding-disabled/pc1-sw1.pcap">PC1 PCAP</a> · <a href="11-forwarding-disabled/sw1-r1.pcap">R2 입력 PCAP</a> · <a href="11-forwarding-disabled/r1-sw2.pcap">R2 출력 PCAP</a></p>
