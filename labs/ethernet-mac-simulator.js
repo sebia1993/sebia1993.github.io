@@ -12,89 +12,135 @@
 
   const lessons=[
     {
-      title:'첫 Ping에서 Source MAC Learning을 확인하세요.',
-      text:'FDB와 PC1/PC2 ARP 캐시가 비어 있습니다. ARP Request와 Reply가 오갈 때 각 장비가 무엇을 독립적으로 배우는지 보세요.',
-      run:'▶ 첫 PING 실행',
+      title:'스위치는 무엇을 기억할까요?',
+      text:'이번 실습에서는 딱 한 가지만 봅니다. PC1에서 들어온 프레임을 보고 SW1이 어떤 정보를 MAC Table(FDB)에 기록하는지 확인하세요.',
+      run:'▶ 결과 확인하기',
+      prediction:{
+        question:'PC1의 프레임이 port 1로 들어왔습니다. SW1이 가장 먼저 기억하는 것은 무엇일까요?',
+        options:[
+          ['source','PC1 MAC → port 1'],
+          ['destination','PC2 MAC → port 2'],
+          ['both','PC1과 PC2를 동시에 학습']
+        ],
+        correct:'source',
+        explain:'스위치는 들어온 프레임의 Source MAC을 보고 “이 MAC은 이 포트 쪽에 있구나”라고 학습합니다. Destination MAC은 학습 재료가 아니라 전달 포트를 찾는 데 사용합니다.'
+      },
       hints:[
-        '스위치는 Destination MAC을 보고 학습하지 않습니다. 먼저 <b>Source MAC</b>을 봅니다.',
-        'PC1의 ARP Request가 port 1로 들어오면 <b>PC1 MAC → port 1</b>이 먼저 생깁니다.',
-        'PC2는 자신을 향한 ARP Request의 Sender IP/MAC을 확인할 수 있고, PC2가 ARP Reply를 보내면 SW1은 그 Reply의 Source MAC으로 <b>PC2 MAC → port 2</b>를 학습합니다.'
+        '스위치가 <b>어느 방향에서 프레임을 받았는지</b> 생각해 보세요.',
+        '학습에 사용하는 것은 <b>Source MAC</b>입니다.',
+        'PC1에서 port 1로 들어왔으므로 <b>PC1 MAC → port 1</b>을 기억합니다.'
       ],
       checks:[
-        ['pc1Learn','PC1 Source 학습','ARP Request 수신으로 PC1 → port 1'],
-        ['pc2Neighbor','PC2 Neighbor 학습','ARP Request의 Sender IP/MAC을 PC2가 확인'],
-        ['pc2Learn','PC2 Source 학습','ARP Reply 수신으로 PC2 → port 2'],
-        ['knownAfter','다음 요청 Known','PC2를 배운 뒤 port 2로만 전달']
+        ['pc1Learn','Source MAC 학습','PC1 MAC → port 1을 학습']
       ]
     },
     {
-      title:'Known Unicast는 어느 포트로 나갈까요?',
-      text:'SW1은 이미 PC2 MAC → port 2를 알고 있습니다. PC1의 Unicast를 실행해 PC3 링크가 조용한지 확인하세요.',
-      run:'▶ PC1 → PC2 Unicast',
+      title:'목적지 위치를 알고 있다면?',
+      text:'SW1의 FDB에는 이미 PC2 MAC → port 2가 있습니다. PC1이 PC2로 보내는 프레임이 어느 포트로 나가는지 확인합니다.',
+      run:'▶ 결과 확인하기',
+      prediction:{
+        question:'SW1이 PC2 MAC의 위치를 이미 알고 있다면 프레임은 어디로 나갈까요?',
+        options:[
+          ['p2','port 2로만 전달'],
+          ['p3','port 3로만 전달'],
+          ['both','port 2와 port 3 모두로 전달']
+        ],
+        correct:'p2',
+        explain:'목적지 MAC의 위치가 FDB에 있으면 해당 포트로만 Known Unicast 전달을 합니다.'
+      },
       hints:[
-        'Destination MAC은 <b>PC2의 실제 MAC</b>입니다.',
-        'SW1 FDB에 <b>PC2 MAC → port 2</b>가 있으므로 출력 포트를 하나로 결정할 수 있습니다.',
-        'Known Unicast에서는 이 실습 조건에서 PC3의 port 3로 복사하지 않습니다.'
+        'SW1 FDB에 <b>PC2 MAC → port 2</b>가 있습니다.',
+        'Destination MAC의 출력 포트를 이미 알고 있으므로 Flooding할 이유가 없습니다.',
+        '정답은 <b>port 2로만 전달</b>입니다.'
       ],
       checks:[
-        ['known','FDB Hit','PC2 MAC → port 2 조회 성공'],
-        ['onlyP2','port 2로만 전달','PC3 링크에는 요청을 내보내지 않음']
+        ['known','Known Unicast','FDB의 port 2 정보 사용'],
+        ['onlyP2','PC3 미전달','port 2로만 전달']
       ]
     },
     {
-      title:'Unknown Unicast Flooding을 직접 확인하세요.',
-      text:'PC1은 ARP 캐시에서 PC2 MAC을 알고 있지만 SW1 FDB에는 PC2가 없습니다. ARP와 FDB가 독립이라는 점이 핵심입니다.',
-      run:'▶ PC1 → PC2 Unicast',
+      title:'목적지 위치를 모른다면?',
+      text:'PC1은 PC2 MAC을 알고 있지만 SW1 FDB에는 PC2 MAC의 위치가 없습니다. 호스트의 ARP 캐시와 스위치의 FDB가 서로 다르다는 점을 확인합니다.',
+      run:'▶ 결과 확인하기',
+      prediction:{
+        question:'PC2의 MAC은 맞지만 SW1이 그 MAC의 포트를 모릅니다. SW1은 어떻게 할까요?',
+        options:[
+          ['p2','port 2로만 보냄'],
+          ['flood','port 2와 port 3으로 Flooding'],
+          ['arp','프레임을 버리고 새 ARP Request로 바꿈']
+        ],
+        correct:'flood',
+        explain:'Unknown Unicast는 목적지 MAC을 그대로 유지한 채 수신 포트를 제외한 다른 전달 가능 포트로 Flooding합니다.'
+      },
       hints:[
-        'PC1은 PC2 MAC을 이미 알고 있으므로 <b>새 ARP Request로 바꾸지 않습니다.</b>',
-        'Destination MAC은 계속 <b>PC2 실제 MAC</b>입니다. Broadcast 주소로 바뀌지 않습니다.',
-        'SW1만 출력 포트를 모르므로 수신 port 1을 제외한 port 2·3으로 Flooding합니다.'
+        'PC1은 이미 PC2 MAC을 알고 있으므로 새 ARP Request를 만들 필요가 없습니다.',
+        'SW1만 <b>PC2 MAC이 어느 포트에 있는지</b> 모릅니다.',
+        '따라서 목적지 MAC은 그대로 두고 port 2·3으로 Flooding합니다.'
       ],
       checks:[
-        ['dstPreserved','목적지 MAC 유지','PC2 실제 MAC 그대로'],
-        ['flood','Unknown Flooding','수신 port 1 제외 → port 2·3'],
-        ['pc3Seen','PC3 링크에서도 관찰','하지만 PC3 목적지 프레임은 아님']
+        ['dstPreserved','목적지 MAC 유지','PC2 MAC 그대로'],
+        ['flood','Unknown Unicast Flooding','port 2·3으로 전달'],
+        ['pc3Seen','PC3 링크에서도 관찰','목적지는 여전히 PC2']
       ]
     },
     {
-      title:'Broadcast와 Unknown Unicast의 차이를 확인하세요.',
-      text:'PC1이 PC3를 찾는 ARP Request를 보냅니다. Ethernet Destination MAC은 ff:ff:ff:ff:ff:ff이지만 ARP Target Hardware는 아직 알아내려는 값입니다.',
-      run:'▶ ARP Broadcast 실행',
+      title:'Broadcast는 무엇이 다를까요?',
+      text:'이번에는 PC1이 ARP Request를 보냅니다. Unknown Unicast와 둘 다 여러 포트로 보일 수 있지만 Ethernet 목적지 MAC 자체가 다릅니다.',
+      run:'▶ 결과 확인하기',
+      prediction:{
+        question:'ARP Request의 Ethernet 목적지 MAC은 무엇일까요?',
+        options:[
+          ['pc3','PC3 MAC'],
+          ['broadcast','ff:ff:ff:ff:ff:ff'],
+          ['pc2','PC2 MAC']
+        ],
+        correct:'broadcast',
+        explain:'Broadcast는 Ethernet 목적지 MAC 자체가 ff:ff:ff:ff:ff:ff입니다. Unknown Unicast는 실제 단말의 Unicast MAC을 그대로 유지한다는 점이 다릅니다.'
+      },
       hints:[
-        'Broadcast는 FDB에서 특정 Destination MAC의 포트를 찾는 상황이 아닙니다.',
-        'Ethernet Destination MAC <b>ff:ff:ff:ff:ff:ff</b>와 ARP Target Hardware는 서로 다른 필드입니다.',
-        'port 2와 port 3 모두로 전달되지만 Unknown Unicast와 달리 Ethernet Destination MAC 자체가 Broadcast입니다.'
+        'ARP Request는 같은 Broadcast Domain의 여러 장비가 볼 수 있어야 합니다.',
+        'Ethernet Broadcast MAC은 <b>ff:ff:ff:ff:ff:ff</b>입니다.',
+        'Unknown Unicast는 여러 포트로 전달되어도 목적지 MAC 자체는 Broadcast로 바뀌지 않습니다.'
       ],
       checks:[
-        ['broadcastMac','Broadcast MAC','Ethernet Destination = ff:ff:ff:ff:ff:ff'],
-        ['broadcastFlood','Broadcast 전달','수신 port 1 제외 → port 2·3'],
-        ['sourceLearn','Source는 여전히 학습','PC1 MAC → port 1 갱신']
+        ['broadcastMac','Broadcast MAC','목적지 = ff:ff:ff:ff:ff:ff'],
+        ['broadcastFlood','Broadcast 전달','port 2·3으로 전달']
       ]
     },
     {
-      title:'Aging으로 사라진 엔트리가 어떻게 다시 학습되는지 확인하세요.',
-      text:'이 실습의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 경과 시간을 진행합니다.',
-      run:'▶ Aging 후 PC1 → PC2',
+      title:'기억한 위치 정보가 사라지면?',
+      text:'PC1의 ARP 캐시에는 PC2 MAC이 남아 있지만 SW1의 PC2 FDB 엔트리는 Aging으로 사라지는 상황입니다. 첫 프레임과 재학습 과정을 확인합니다.',
+      run:'▶ 결과 확인하기',
+      prediction:{
+        question:'PC2 FDB 엔트리만 사라지고 PC1의 ARP 캐시는 남아 있습니다. 다음 첫 프레임은 어떻게 될까요?',
+        options:[
+          ['arp','PC1이 새 ARP Request부터 보냄'],
+          ['flood','PC2 MAC을 그대로 사용하고 SW1이 Flooding'],
+          ['fail','즉시 통신 실패하고 끝남']
+        ],
+        correct:'flood',
+        explain:'ARP 캐시와 FDB는 별개입니다. PC1은 알고 있는 PC2 MAC으로 Unicast 프레임을 만들고, SW1은 출력 포트를 몰라 Unknown Unicast Flooding합니다. PC2가 응답하면 다시 학습됩니다.'
+      },
       hints:[
-        '이 실습에서 PC1 ARP 캐시의 PC2 항목은 유지됩니다. <b>FDB Aging과 ARP 캐시는 별개</b>입니다.',
-        'PC2 FDB가 사라진 첫 Unicast는 Unknown Unicast로 Flooding됩니다.',
-        'PC2가 Reply를 보내면 Source MAC으로 다시 학습되고, 그 다음 요청은 Known Unicast가 됩니다.'
+        'PC1의 ARP 캐시는 지워지지 않았습니다.',
+        '따라서 PC1은 PC2 MAC으로 바로 Unicast 프레임을 만듭니다.',
+        'SW1은 PC2 포트를 모르므로 먼저 Flooding하고, PC2의 응답 Source MAC으로 다시 학습합니다.'
       ],
       checks:[
-        ['aged','PC2 FDB Aging','PC2 엔트리만 소멸 · ARP는 유지'],
-        ['flood','첫 요청 Flooding','PC2 위치를 몰라 port 2·3으로 전달'],
-        ['relearn','PC2 Re-learning','Reply의 Source MAC으로 port 2 재학습'],
+        ['aged','PC2 FDB Aging','PC2 엔트리 소멸'],
+        ['flood','첫 요청 Flooding','port 2·3으로 전달'],
+        ['relearn','PC2 재학습','응답 Source MAC으로 port 2 학습'],
         ['known','다음 요청 Known','재학습 뒤 port 2로만 전달']
       ]
     }
   ];
 
   const startStates=[
-    ['PC1/PC2 ARP 캐시 · 비어 있음','SW1 FDB · 동적 PC 엔트리 없음'],
-    ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC → port 2'],
-    ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC 없음'],
-    ['PC1이 PC3 MAC을 아직 모름','SW1 FDB · PC1 MAC → port 1'],
-    ['PC1 ARP · PC2 MAC 보유 · PC2 ARP · PC1 MAC 보유','SW1 FDB · PC2 경과 시간 299초 / PC1 경과 시간 10초']
+    ['이번 실습은 ARP보다 Source MAC 학습에 집중','SW1 FDB · 비어 있음'],
+    ['PC1은 PC2 MAC을 알고 있음','SW1 FDB · PC2 MAC → port 2'],
+    ['PC1은 PC2 MAC을 알고 있음','SW1 FDB · PC2 MAC 위치 없음'],
+    ['PC1이 ARP Request를 보낼 예정','SW1 FDB · PC1 MAC → port 1'],
+    ['PC1 ARP · PC2 MAC 유지','SW1 FDB · PC2 엔트리 299초']
   ];
 
   const evidenceByLesson=[
@@ -116,6 +162,8 @@
   let logLines=[];
   let timelineCount=0;
   let manualDirty=false;
+  let predictionChoice=null;
+  let lessonRan=false;
 
   function macName(mac){
     if(mac===BROADCAST) return BROADCAST;
@@ -422,6 +470,52 @@
     renderSvgFdb();
   }
 
+  function renderPrediction(){
+    const cfg=lessons[lesson];
+    predictionChoice=null;
+    lessonRan=false;
+    $('predictionTitle').textContent=cfg.prediction.question;
+    $('predictionHelp').textContent=lesson===4
+      ? '먼저 결과를 예상하고, +5초 경과로 PC2 FDB 엔트리를 지운 뒤 결과를 확인하세요.'
+      : '정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 동작과 비교해 보세요.';
+    $('predictionFeedback').hidden=true;
+    $('predictionFeedback').className='prediction-feedback';
+    $('predictionFeedback').textContent='';
+    $('predictionOptions').innerHTML='';
+    cfg.prediction.options.forEach(([id,label])=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.dataset.prediction=id;
+      btn.textContent=label;
+      btn.addEventListener('click',()=>{
+        if(busy||lessonRan) return;
+        predictionChoice=id;
+        document.querySelectorAll('[data-prediction]').forEach(b=>{
+          const on=b.dataset.prediction===id;
+          b.classList.toggle('selected',on);
+          b.setAttribute('aria-pressed',String(on));
+        });
+        updateControls();
+      });
+      $('predictionOptions').appendChild(btn);
+    });
+  }
+
+  function revealPrediction(){
+    const cfg=lessons[lesson];
+    if(!predictionChoice) return;
+    const correct=predictionChoice===cfg.prediction.correct;
+    const picked=cfg.prediction.options.find(x=>x[0]===predictionChoice);
+    const expected=cfg.prediction.options.find(x=>x[0]===cfg.prediction.correct);
+    const box=$('predictionFeedback');
+    box.hidden=false;
+    box.className='prediction-feedback '+(correct?'correct':'incorrect');
+    box.innerHTML='<b>'+(correct?'예상이 맞았습니다.':'예상과 실제 결과가 달랐습니다.')+'</b>'
+      +'<span>내 예상: '+(picked?picked[1]:'—')+'</span>'
+      +'<span>실제: '+(expected?expected[1]:'—')+'</span>'
+      +'<p>'+cfg.prediction.explain+'</p>';
+  }
+
   function renderProgress(){
     const count=completed.size;
     $('courseCount').textContent=count+' / '+lessons.length+' 완료';
@@ -491,7 +585,7 @@
   }
 
   function updateControls(){
-    $('runBtn').disabled=busy||manualDirty||(lesson===4&&!flags.aged);
+    $('runBtn').disabled=busy||manualDirty||lessonRan||!predictionChoice||(lesson===4&&!flags.aged);
     $('ageBtn').disabled=busy||manualDirty||Boolean(flags.aged);
     $('ageBtn').hidden=lesson!==4;
   }
@@ -504,6 +598,8 @@
     logLines=[];
     timelineCount=0;
     manualDirty=false;
+    predictionChoice=null;
+    lessonRan=false;
     $('eventTimeline').innerHTML='<div class="timeline-empty">실행하면 프레임 순서가 여기에 쌓입니다.</div>';
     $('eventLog').textContent='아직 이벤트가 없습니다.';
     $('manualStateWarning').innerHTML='이 조작은 현재 FDB/ARP 상태에 직접 반영됩니다. 표준 실습 흐름으로 돌아가려면 <b>실습 기본 상태로 복원</b>을 누르세요.';
@@ -536,6 +632,7 @@
     renderTables();
     renderChecks();
     renderLessonMeta();
+    renderPrediction();
     updateControls();
   }
 
@@ -549,8 +646,10 @@
     $('coachTitle').textContent=cfg.title;
     $('coachText').textContent=cfg.text;
     $('runBtn').textContent=cfg.run;
-    $('resultHint').textContent=idx===2?'ARP 캐시와 FDB를 분리해서 보세요.':'Source MAC 학습과 Destination MAC 조회을 분리해서 보세요.';
-    setExplain(idx===4?'먼저 <b>+5초 경과</b>를 눌러 PC2 FDB Aging을 발생시키세요.':'<b>'+cfg.run.replace('▶ ','')+'</b>을 눌러 현재 상태를 확인하세요.');
+    $('resultHint').textContent=idx===2?'ARP 캐시와 FDB를 분리해서 보세요.':'Source MAC 학습과 Destination MAC 조회를 분리해서 보세요.';
+    setExplain(idx===4
+      ? '먼저 <b>결과를 예상</b>하고 <b>+5초 경과</b>로 PC2 FDB 엔트리를 지운 뒤 결과를 확인하세요.'
+      : '먼저 위 질문의 답을 <b>예상</b>한 뒤 <b>결과 확인하기</b>를 눌러보세요.');
     resetScenario();
     renderProgress();
     const lab=document.querySelector('.lab-card');
@@ -656,32 +755,31 @@
   }
 
   async function runLesson(){
-    if(busy||manualDirty) return;
+    if(busy||manualDirty||lessonRan||!predictionChoice) return;
     if(lesson===4&&!flags.aged) return;
     busy=true;
     updateControls();
     try{
       if(lesson===0){
-        const a=await processFrame(DEV.pc1,BROADCAST,'ARP REQUEST',{arpRequest:true,arpTargetIp:DEV.pc2.ip});
-        flags.pc1Learn=fdb.has(DEV.pc1.mac)&&a.kind==='broadcast';
+        clearLinkState();
+        clearPacketSprites();
+        resetFlow();
+        setFlow(1);
+        setLinks(1,[],'');
+        renderMobileFlow(DEV.pc1,'프레임 수신',[],'',DEV.pc2.mac);
+        setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'아직 조회하지 않음',detail:'이번 실습에서는 Source MAC 학습까지만 관찰합니다.'},{title:'관찰 중',detail:'PC1 프레임이 port 1로 들어옵니다.'});
+        setSvgDecision('대기','이번 실습에서는 잠시 숨김','port 1에서 프레임 수신');
+        setLive('learning','PC1 프레임 수신','PC1의 프레임이 port 1로 SW1에 들어왔습니다.','프레임 수신');
+        await animateIngress(1,'ETHERNET FRAME');
 
-        if(a.egress.includes(DEV.pc2.port)){
-          arpPc2.set(DEV.pc1.ip,DEV.pc1.mac);
-          flags.pc2Neighbor=arpPc2.get(DEV.pc1.ip)===DEV.pc1.mac;
-          addLog('PC2 ARP 학습 '+DEV.pc1.ip+' -> '+DEV.pc1.mac+' from ARP Request sender fields');
-          renderTables();
-        }
-
-        const b=await processFrame(DEV.pc2,DEV.pc1.mac,'ARP REPLY');
-        arpPc1.set(DEV.pc2.ip,DEV.pc2.mac);
+        learn(DEV.pc1);
         renderTables();
-        flags.pc2Learn=fdb.has(DEV.pc2.mac)&&b.kind==='known';
-
-        const c=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
-        flags.knownAfter=c.kind==='known'&&c.egress.length===1&&c.egress[0]===2;
-
-        await processFrame(DEV.pc2,DEV.pc1.mac,'ICMP ECHO REPLY');
-        setExplain('<b>핵심:</b> PC1과 PC2의 ARP 캐시, SW1의 FDB는 각각 독립 상태입니다. PC2는 ARP Request의 Sender IP/MAC을 확인하고, SW1은 PC2가 실제 Reply를 보낸 뒤 Source MAC으로 PC2 → port 2를 학습합니다.');
+        setFlow(2);
+        setSvgDecision('PC1 → port 1','다음 실습에서 확인','Source MAC 학습 완료');
+        setLive('learning','Source MAC 학습','SW1은 들어온 프레임의 Source MAC인 PC1 MAC을 port 1과 함께 기억합니다.','MAC 학습');
+        addLog('학습 '+DEV.pc1.name+' '+DEV.pc1.mac+' -> port 1');
+        flags.pc1Learn=fdb.has(DEV.pc1.mac)&&fdb.get(DEV.pc1.mac).port===1;
+        setExplain('<b>한 줄 결론:</b> 스위치는 프레임이 들어온 포트를 기준으로 <b>Source MAC → 수신 port</b>를 MAC Table(FDB)에 학습합니다. Destination MAC의 전달 판단은 다음 실습에서 확인합니다.');
       }else if(lesson===1){
         const r=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
         flags.known=r.kind==='known'&&r.egress[0]===2;
@@ -710,6 +808,8 @@
         flags.known=again.kind==='known'&&again.egress[0]===2;
         setExplain('<b>Aging → Flooding → Re-learning → Known:</b> 이 실습에서는 FDB Aging 기준을 300초로 둡니다. PC1 ARP가 남아 있으므로 첫 요청은 PC2 MAC을 그대로 사용하고, PC2 Reply의 Source MAC으로 SW1이 다시 학습한 뒤 다음 요청은 Known Unicast가 됩니다.');
       }
+      lessonRan=true;
+      revealPrediction();
       completeIfReady();
     }finally{
       busy=false;
