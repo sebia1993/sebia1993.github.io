@@ -27,7 +27,7 @@ function configureLesson(i){
              i===1?"remote":i>=2?"error":"same");
   renderLessonStatus();
   renderPrediction();
-  $("#pingBtn").textContent="▶ 결과 확인하기";
+  $("#pingBtn").textContent="② 실행해서 확인하기";
   updatePredictionControls();
   log(`--- 실습 ${i+1}: ${l.title} ---`);
 }
@@ -140,7 +140,7 @@ setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-mode10";
+  const version="20260921-mode11";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
