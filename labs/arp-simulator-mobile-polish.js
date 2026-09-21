@@ -39,20 +39,20 @@
   function renderMobileComparison(){
     if(!mobileCompare)return;
     const a=state.snapshots.find(x=>x.key==="icmp-pc1-r2");
-    const b=state.snapshots.find(x=>x.key==="icmp-r2-pc2");
+    const b=state.snapshots.find(x=>x.key==="icmp-r2-dest");
     if(!a||!b){mobileCompare.innerHTML="";return}
     const rows=[
       ["Source IP",a.srcIp,b.srcIp,"그대로","same"],
       ["Destination IP",a.dstIp,b.dstIp,"그대로","same"],
-      ["Source MAC",a.srcMac,b.srcMac,"링크마다 변경","changed"],
-      ["Destination MAC",a.dstMac,b.dstMac,"링크마다 변경","changed"],
-      ["TTL",a.ttl,b.ttl,"라우터 통과 시 1 감소","changed"]
+      ["Source MAC",a.srcMac,b.srcMac,"라우터 경계에서 변경","changed"],
+      ["Destination MAC",a.dstMac,b.dstMac,"라우터 경계에서 변경","changed"],
+      ["TTL",a.ttl,b.ttl,`Simulator ${a.ttl} → R2 이후 ${b.ttl}`,"changed"]
     ];
     mobileCompare.innerHTML=rows.map(([name,before,after,meaning,kind])=>`
       <article class="mobile-compare-card">
         <h5>${name}</h5>
         <div class="mobile-compare-row"><b>PC1 → R2</b><code>${before??"—"}</code></div>
-        <div class="mobile-compare-row"><b>R2 → PC2</b><code>${after??"—"}</code></div>
+        <div class="mobile-compare-row"><b>${b.compareLabel||"R2 → 목적지"}</b><code>${after??"—"}</code></div>
         <div class="mobile-compare-meaning ${kind}">${meaning}</div>
       </article>`).join("");
   }
