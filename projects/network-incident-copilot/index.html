@@ -7,20 +7,20 @@
 body{margin:0;background:#08111f;color:#edf3ff;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:1050px;margin:auto;padding:32px 18px 60px}h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:8px 0 14px}
 p{color:#b9c7da}.tag{display:inline-block;padding:5px 10px;border:1px solid #31516e;border-radius:999px;color:#8edcff;font-size:12px;font-weight:800}
-.stats,.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(3,1fr);margin:22px 0}.grid{grid-template-columns:1fr 1fr}.card,.stat{background:#101b2e;border:1px solid #263752;border-radius:16px;padding:18px}
+.stats,.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(4,1fr);margin:22px 0}.grid{grid-template-columns:1fr 1fr}.card,.stat{background:#101b2e;border:1px solid #263752;border-radius:16px;padding:18px}
 .stat b{font-size:26px;display:block}.flow{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}.flow span{padding:7px 10px;border-radius:9px;background:#0b1626;border:1px solid #293b55}
 textarea{width:100%;min-height:245px;box-sizing:border-box;background:#07101c;color:#eaf3ff;border:1px solid #38506f;border-radius:10px;padding:12px;font:13px/1.5 ui-monospace,monospace}
 button,a{display:inline-block;margin:10px 8px 0 0;padding:9px 12px;border-radius:9px;border:1px solid #31516e;text-decoration:none;font-weight:800}
 button{background:#75d5ff;color:#05131f;cursor:pointer}a{color:#cdefff;background:#13243a}.finding{padding:11px;margin-top:9px;border-radius:10px;background:#0a1525;border:1px solid #2a3b55}.warn{color:#ffd166}.crit{color:#ff7f90}.info{color:#7bd7ff}.note{padding:12px;border-left:3px solid #ffd166;background:#181c25;border-radius:8px}
-@media(max-width:760px){.grid,.stats{grid-template-columns:1fr}}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.grid,.stats{grid-template-columns:1fr}}
 </style></head>
 <body><main>
-<span class="tag">PORTFOLIO PROTOTYPE · DETERMINISTIC AI BOUNDARY</span>
+<span class="tag">VALIDATED LOCAL RUNTIME · DETERMINISTIC AI BOUNDARY</span>
 <h1>Network Incident Copilot</h1>
 <p>Raw CLI를 LLM의 진실 원천으로 사용하지 않고, 먼저 deterministic parser/rule layer가 <b>관측 사실·실패·Unknown</b>을 구조화한 뒤 로컬 AI는 설명만 담당하도록 설계한 네트워크 장애 분석 프로토타입입니다.</p>
-<div class="stats"><div class="stat"><b>5 / 5</b>Core unit tests</div><div class="stat"><b>16 / 16</b>Fixture evaluation</div><div class="stat"><b>0</b>External AI APIs required</div></div>
+<div class="stats"><div class="stat"><b>5 / 5</b>Core unit tests</div><div class="stat"><b>16 / 16</b>Fixture evaluation</div><div class="stat"><b>8 / 8</b>qwen3:8b model cases</div><div class="stat"><b>0</b>External AI APIs required</div></div>
 <div class="flow"><span>Sanitized CLI</span><span>Parser</span><span>Structured Facts</span><span>Guardrails</span><span>Local Ollama</span><span>Incident Brief</span></div>
-<div class="note"><b>증거 경계:</b> 이 브라우저 데모는 deterministic 계층만 재현합니다. 실제 Ollama 모델 성능은 로컬 실모델 평가 전까지 성과로 주장하지 않습니다.</div>
+<div class="note"><b>증거 경계:</b> qwen3:8b를 Ollama에서 8개 휴리스틱 모델 평가로 검증했습니다. 이 브라우저 데모는 deterministic 계층만 재현하며, production safety나 실제 장비 정확성을 주장하지 않습니다.</div>
 <div class="grid">
 <section class="card"><h2>Sanitized evidence</h2>
 <textarea id="in">192.0.2.11 UP active=120 standby=10
@@ -38,6 +38,7 @@ STA not found</textarea>
 <p><code>SSH timeout</code>은 <code>COLLECTION_FAILED</code>로 처리하며 Controller Down을 만들지 않습니다. Dynamic RADIUS Role은 실제 적용 Role을 추정하지 않고, <code>STA not found</code>도 세션 종료 확정으로 바꾸지 않습니다.</p>
 <a href="https://github.com/sebia1993/sebia1993.github.io/tree/main/projects/network-incident-copilot" target="_blank">GitHub source snapshot →</a>
 <a href="evaluation.json" target="_blank">16-case JSON →</a>
+<a href="model_evaluation.json" target="_blank">qwen3:8b model evaluation →</a>
 <a href="network_incident_copilot.py" target="_blank">Runnable Python →</a>
 </section>
 </main>

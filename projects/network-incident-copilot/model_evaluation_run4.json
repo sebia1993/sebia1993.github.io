@@ -1,0 +1,148 @@
+{
+  "schema_version": 3,
+  "model": "qwen3:8b",
+  "executed_at_utc": "2026-09-21T13:14:03.701218+00:00",
+  "temperature": 0.1,
+  "passed": 8,
+  "total": 8,
+  "cases": [
+    {
+      "name": "timeout_not_outage",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "2e79f5618ca2dc1f06aef295c21564ee1b275612338bef0b1a6227c8bfd1c800",
+      "prompt_sha256": "e08569b0b3ed73bc96a0b2e039f124ab721e1af0af00bbe0d1e865805f578ef6",
+      "output_sha256": "122b1589631cf8c386bd35d9fda05937d2027cc1afc44fc6bfee485e8622eb8e",
+      "output": "**관찰된 사실**  \n수집 상태가 실패되었으며, 수집 오류가 관찰되었습니다.  \n\n**해석**  \n수집 실패로 인해 컨트롤러 상태를 결론 내릴 수 없습니다. 이는 수집 시스템의 일시적 장애나 통신 문제를 나타낼 수 있습니다.  \n\n**미지사항**  \n수집 실패의 원인(예: 네트워크 장애, 시스템 오류)은 명확하지 않으며, 데이터 누락 또는 수집 경로 문제도 배제되지 않았습니다.  \n\n**다음 점검 사항**  \n1. 승인된 대체 경로를 통해 재시도합니다.  \n2. 관리 평면의 연결성을 확인합니다.  \n3. 독립적인 MM/클러스터 정보를 비교합니다."
+    },
+    {
+      "name": "partial_collection_keeps_unknowns",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "1684dfc398039236160eb3df90ff898cb7f52b8b3fa40a546e0ab71cbfbe295e",
+      "prompt_sha256": "464b639e91cf77768f2aa954e71f43174badfc40e99fcce5fed793a4c99eda93",
+      "output_sha256": "8f245b9141afd22fbc6ce8e89fb6904f8b0007dfcf4a64d9aceb4bec71114f80",
+      "output": "**관찰된 사실**  \n- 수집 상태가 부분적임을 확인 (partial_collection: true).  \n- 컨트롤러 192.0.2.11의 mm_state가 \"up\" 상태임을 확인 (show switches 명령어).  \n\n**해석**  \n- 네트워크 장비의 컨트롤러 상태는 정상이지만, 수집 데이터가 불완전해 전체 네트워크 상태를 판단할 수 없음.  \n- 부분 수집으로 인해 특정 클라이언트 또는 연결 상태에 대한 정보가 누락될 수 있음.  \n\n**미지사항**  \n- 수집 실패 또는 데이터 누락 여부 확인되지 않음.  \n- STA_NOT_FOUND와 같은 클라이언트 상태 정보는 수집되지 않음.  \n\n**다음 점검 사항**  \n1. 수집 상태를 완전한 상태로 확인하기 위한 추가 데이터 수집.  \n2. 클라이언트 연결 상태 및 기타 네트워크 요소에 대한 추가 확인."
+    },
+    {
+      "name": "dynamic_role_not_invented",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "bc71ef7c4261a37057822aafcdc12d91a372eda1ffaf8d9c570a3108688cd8d6",
+      "prompt_sha256": "8f77235124afb4befa326b0d5c6ee1b278c4a1399a936c93961b1c7fb8aae28f",
+      "output_sha256": "b1c64934eb8f5d6f032eea18847fe71eb6c4cee682898fcdd3363e82f9101192",
+      "output": "**관찰된 사실**  \n- 정책 매핑기에서 `policy.dynamic_radius_role` 값이 `true`로 확인됨 (신뢰도: 관찰됨).  \n\n**해석**  \n- 동적 RADIUS 역할이 WLC 기본 역할을 대체할 수 있으나, 효과적인 역할이 추론되지 않음. 이로 인해 접근 제어 정책 적용 시 불확실성이 존재함.  \n\n**미지사항**  \n- 효과적인 역할이 정확히 결정되지 않아, 실제 인증 결과(예: Access-Accept/role)에 대한 확인이 필요함.  \n\n**다음 점검 사항**  \n1. 승인된 AAA 증거에서 Access-Accept/role 결과를 확인해야 함.  \n2. WLC 기본 역할과 효과적인 역할을 별도로 관리해야 함."
+    },
+    {
+      "name": "acl_unknown_no_access_verdict",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "201675f44aae55fe8ac9444e5811d25c16e6ae6bf0ac8e7aa49bd7933cbcd96e",
+      "prompt_sha256": "39b66fd8481eecdb0aa73a8bfb8d659f4292046d3ee969980805c9243c4eb46f",
+      "output_sha256": "d201403936113842a5a546261390dcf86e8f3f257e8106d30b6110d683983ab1",
+      "output": "**관찰된 사실**  \n정책 매핑기에서 `policy.acl_unresolved`가 관찰되었으며, 해당 값은 `true`로 확인되었습니다.  \n\n**해석**  \nACL 의존성이 해결되지 않아 트래픽의 접근 권한 결과가 불확실한 상태입니다. 이는 정책 실행 시 접근 허용/거부 판단에 영향을 줄 수 있는 위험 요소로 분류됩니다.  \n\n**미지사항**  \nACL 의존성에 대한 완전한 분석 또는 관련된 ACL/Alias 객체의 정확한 의존 관계가 명확하지 않으며, 수집 실패 또는 데이터 누락이 여전히 가능성 있음.  \n\n**다음 점검 사항**  \n1. 참조된 ACL/Alias 객체 의존성 해결 확인  \n2. ACL 의존성 완료 전까지 트래픽을 허용/거부로 분류하지 않음."
+    },
+    {
+      "name": "explicit_mm_down_is_observed_not_root_cause",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "20ced38db75f9992c7f30e695dd1e5b32cad1a49a65e4cf6b432778229a6e66e",
+      "prompt_sha256": "653682ec1115bde46e4e4c651bf01f680962f259c9ba6434acc0d39d1697806e",
+      "output_sha256": "ae960433b5fffbe417f07cf289ad90ff511e5027eeafcc96820cb433b8b27120",
+      "output": "**관찰된 사실**  \n제어기 192.0.2.20의 `mm_state`가 \"down\"으로 명시적으로 보고되었습니다. 이는 `show switches` 명령어 실행 결과에서 확인되었습니다.  \n\n**해석**  \n제어기 192.0.2.20이 관리자 시스템에서 명시적으로 다운 상태로 판단되었으며, 이는 클러스터 내에서 중요한 역할을 수행하는 장비의 고장 가능성을 시사합니다.  \n\n**미지사항**  \n정확한 원인(예: 구성 오류, 하드웨어 고장, 네트워크 분리 등)은 현재 수집된 데이터로 판단할 수 없습니다. 추가 분석이 필요합니다.  \n\n**다음 점검 사항**  \n1. 관리자 접근성 확인  \n2. 클러스터 피어/그룹 멤버십 상태 검증  \n3. 서비스 영향 평가 후 복구 조치 진행"
+    },
+    {
+      "name": "sta_not_found_not_closed",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "48bda6609c1bb4f2b48185bcb40e63389128cc6dfd31a6f12d640b00f34bc033",
+      "prompt_sha256": "65ab06a5e0a81cf40b1cd45c4442a921ed4734bb2b2b366a38c1deb9ea71d559",
+      "output_sha256": "ea82f895da9677ee8dcd5ea81b5d2c33aca5db26676ced41d3950d247e7b606b",
+      "output": "**관찰된 사실**  \n세션 검색을 통해 클라이언트를 찾지 못했습니다 (session.lookup: sta_not_found). 해당 결과는 관찰된 상태로, 클라이언트의 존재 여부를 명확히 확인하지 못했습니다.  \n\n**해석**  \nSTA_NOT_FOUND는 클라이언트가 존재하지 않는다는 것을 의미하지만, 이는 확정적인 세션 종료를 나타내는 것이 아닙니다. 현재 수집 상태는 완료되었으나, 데이터 누락 가능성은 배제되지 않았습니다. 클라이언트가 여전히 활성 상태일 수 있으므로 추가 분석이 필요합니다.  \n\n**미지사항**  \n- 클라이언트의 실제 연결 상태(활성/비활성)에 대한 명확한 정보 부족  \n- 수집 과정에서 데이터 누락 또는 수집 실패가 발생했는지 여부에 대한 확인 필요  \n\n**다음 점검 사항**  \n1. 글로벌 사용자 테이블을 재검토하여 클라이언트 존재 여부 확인  \n2. 클라이언트의 로밍 또는 연결 해제 이력 확인  \n3. 수집이 성공적으로 수행되었는지 재확인하여 세션 종료를 판단할 수 있도록 준비"
+    },
+    {
+      "name": "client_skew_is_signal_not_cause",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "d4a5d36cde4991fa14f4eee8976ba643d391aebcb3e9d8d9ccc5e7b7c7002ac5",
+      "prompt_sha256": "fd42638f0ede5d79e80ed42500929a97b21b390c3dde8a160f9e3ba3b7db528e",
+      "output_sha256": "93f7e1deed0cc4028efdfc41d2d37f050b25668c0f6249d9368164b88b59c64a",
+      "output": "**관찰된 사실**  \n- 컨트롤러 192.0.2.11의 활성 클라이언트 수는 120개, 대기 클라이언트 수는 10개.  \n- 컨트롤러 192.0.2.12의 활성 클라이언트 수는 10개, 대기 클라이언트 수는 100개.  \n- 모든 데이터는 \"load distribution\" 소스에서 수집되었으며, 신뢰도는 \"observed\".  \n\n**해석**  \n- 활성 클라이언트 분포가 비대칭적으로 나타남 (192.0.2.11=120, 192.0.2.12=10).  \n- 이는 단순한 신호일 뿐, 원인을 결론적으로 판단할 수 있는 수준이 아님.  \n- 경고 수준의 이상으로 분류되었으나, 추가 분석이 필요함.  \n\n**미지사항**  \n- 클라이언트 분포 비대칭의 근본 원인은 명확하지 않음.  \n- 대기 클라이언트 수가 높은 192.0.2.12의 상태 및 연결 유형에 대한 정보 부족.  \n- 클러스터 전체 사용률에 대한 확인이 미흡함.  \n\n**다음 점검 사항**  \n1. 활성 클라이언트 분포의 일시적 변화 여부를 재확인.  \n2. MM 상태 및 연결 유형을 비교해 분석.  \n3. 클러스터 전체 사용률을 확인하여 확장 여부 판단.  \n4. 대기 클라이언트 수가 높은 컨트롤러의 구체적 원인 파악."
+    },
+    {
+      "name": "empty_evidence_admits_insufficiency",
+      "passed": true,
+      "required_signal_found": true,
+      "forbidden_matches": [],
+      "section_signals": {
+        "observed": true,
+        "interpretation": true,
+        "unknowns": true,
+        "next_checks": true
+      },
+      "section_signals_complete": true,
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "prompt_sha256": "8be3ea1ea72f6577ad905ea14bee9b7feaef10512f71c6454dba431ab69e8a6b",
+      "output_sha256": "ce5a88c8eac9725abf13f9e8e114f99fa2762fda39421ea98703ce6e0f326c19",
+      "output": "**관찰된 사실**  \n- 수집 상태는 \"complete\"이지만, 관찰된 사실 및 분석 결과가 없습니다.  \n\n**해석**  \n- 제공된 데이터가 비어 있어 네트워크 장애나 이벤트에 대한 분석이 불가능합니다.  \n\n**미지사항**  \n- 데이터 수집 과정에서 누락 또는 실패가 발생했을 가능성은 배제할 수 없습니다.  \n\n**다음 점검 사항**  \n- 데이터 수집 프로세스의 정확성을 재검토하고, 관련 시스템의 로그 및 상태를 추가로 확인해야 합니다."
+    }
+  ],
+  "note": "Heuristic portfolio evaluation of grounded explanation behavior; every case must also expose all four requested sections. It does not prove production safety, real-device accuracy, or autonomous-remediation correctness.",
+  "rechecked_at_utc": "2026-09-21T13:22:15.878203+00:00"
+}

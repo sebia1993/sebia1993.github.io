@@ -9,7 +9,8 @@ This directory is the public, single-file snapshot of the modular `Network Incid
 - External AI API required: **No**
 - Local Ollama integration: **Implemented in the Python snapshot**
 - Model-behavior evaluation harness: **8 guardrail cases implemented**
-- Exact model evaluation: **Pending local execution; not claimed yet**
+- Local model evaluation: **qwen3:8b · 8/8 heuristic cases passed**
+- Repeat evidence: **4 captured runs rechecked at 8/8**
 
 ## Architecture
 
@@ -58,7 +59,7 @@ Then run the eight-case grounded-behavior evaluation:
 python3 model_eval.py --model <local-model-name>
 ```
 
-This writes `model_evaluation.json` with the model name, UTC execution time, per-case input/prompt/output SHA-256, raw model output, required-signal checks, forbidden-conclusion matches, and section-presence signals.
+This writes `model_evaluation.json` with the model name, UTC execution time, per-case input/prompt/output SHA-256, raw model output, required-signal checks, forbidden-conclusion matches, and section-presence signals. The current evaluator requires all four Korean sections and supports `--recheck <saved-json>` so previously captured raw outputs can be re-scored after evaluator fixes.
 
 The eight cases cover:
 
@@ -77,4 +78,4 @@ The live `index.html` page reproduces the deterministic layer only. It does not 
 
 The committed `evaluation.json` is synthetic/fixture evidence. It is not production network accuracy, autonomous-remediation safety certification, or real Aruba device validation.
 
-The model harness is intentionally heuristic. A high score does not by itself prove model safety or real-device correctness. Exact model-level metrics will only be presented as portfolio evidence after local execution and manual review of the saved outputs.
+On 2026-09-21, `qwen3:8b` was executed locally through Ollama 0.34.2. Four captured runs, including the canonical result, passed all eight heuristic cases after manual review and evaluator recheck. This is evidence of one local model's grounded-explanation behavior for these fixtures; it is not production network accuracy, autonomous-remediation safety certification, or real Aruba device validation.
