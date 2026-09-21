@@ -479,6 +479,19 @@
   </div>
 </section>
 
+<section id="explanation">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">06 · 이해 확인</div><h2>이 네 문장을 자신의 말로 설명할 수 있으면 됩니다.</h2></div><span class="tag learn">초급 핵심</span></div>
+    <div class="learning-checks">
+      <article class="card"><h3>1. Switch는 어느 MAC을 보고 학습하나요?</h3><details class="test-commands"><summary>답 확인</summary><p><b>Source MAC</b>입니다. 그리고 그 프레임이 들어온 포트를 함께 기록합니다.</p></details></article>
+      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>동일 VLAN/Broadcast Domain에서 전달 가능한 포트 중 수신 포트를 제외하고 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
+      <article class="card"><h3>3. Unknown Unicast와 Broadcast는 같은가요?</h3><details class="test-commands"><summary>답 확인</summary><p>아닙니다. Unknown Unicast의 목적지 MAC은 특정 장비의 실제 MAC이고, Broadcast는 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p></details></article>
+      <article class="card"><h3>4. ARP Table과 MAC Table의 차이는?</h3><details class="test-commands"><summary>답 확인</summary><p>ARP는 <b>IP → MAC</b>, Switch MAC Table/FDB는 <b>MAC → Port</b>를 기억합니다.</p></details></article>
+    </div>
+    <p class="method-note">이 네 가지가 아직 헷갈리면 아래 주제로 넘어가지 않아도 됩니다. 이 페이지의 목표는 용어 암기가 아니라 <b>프레임이 왜 그 포트로 이동하는지 설명할 수 있게 되는 것</b>입니다.</p>
+  </div>
+</section>
+
 <section id="advanced-entry" class="advanced-entry" data-basic-only>
   <div class="shell">
     <div class="advanced-entry-card">
@@ -855,18 +868,7 @@ AA:AA:AA:AA:AA:01  18     20</pre>
   </div>
 </section>
 
-<section id="explanation">
-  <div class="shell">
-    <div class="section-head"><div><div class="eyebrow">06 · 이해 확인</div><h2>이 네 문장을 자신의 말로 설명할 수 있으면 됩니다.</h2></div><span class="tag learn">초급 핵심</span></div>
-    <div class="learning-checks">
-      <article class="card"><h3>1. Switch는 어느 MAC을 보고 학습하나요?</h3><details class="test-commands"><summary>답 확인</summary><p><b>Source MAC</b>입니다. 그리고 그 프레임이 들어온 포트를 함께 기록합니다.</p></details></article>
-      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>동일 VLAN/Broadcast Domain에서 전달 가능한 포트 중 수신 포트를 제외하고 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
-      <article class="card"><h3>3. Unknown Unicast와 Broadcast는 같은가요?</h3><details class="test-commands"><summary>답 확인</summary><p>아닙니다. Unknown Unicast의 목적지 MAC은 특정 장비의 실제 MAC이고, Broadcast는 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p></details></article>
-      <article class="card"><h3>4. ARP Table과 MAC Table의 차이는?</h3><details class="test-commands"><summary>답 확인</summary><p>ARP는 <b>IP → MAC</b>, Switch MAC Table/FDB는 <b>MAC → Port</b>를 기억합니다.</p></details></article>
-    </div>
-    <p class="method-note">이 네 가지가 아직 헷갈리면 아래 주제로 넘어가지 않아도 됩니다. 이 페이지의 목표는 용어 암기가 아니라 <b>프레임이 왜 그 포트로 이동하는지 설명할 수 있게 되는 것</b>입니다.</p>
-  </div>
-</section>
+
 
 </main>
 <footer class="footer"><div class="shell">현상일 · Enterprise Network Learning Evidence</div></footer>
