@@ -11,6 +11,7 @@
       <strong>모바일 토폴로지</strong>
       <span id="mtDest" class="mt-dest">PC3 · ON-LINK</span>
     </div>
+    <div class="mt-direction-note"><b>초록</b> = 요청 방향 · <b>파랑</b> = 응답 방향 · ARP/ICMP 프로토콜 색상 구분이 아닙니다.</div>
 
     <section class="mt-zone">
       <div class="mt-zone-title"><span>LAN A · SW1 SIDE</span><span id="mtLanANet">R2 eth0</span></div>
@@ -233,9 +234,9 @@
     }
   }
 
-  $$m("[data-m-device]").forEach(b=>b.addEventListener("click",()=>openDeviceConfig(b.dataset.mDevice)));
+  $m("[data-m-device]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode())openDeviceConfig(b.dataset.mDevice)}));
   $$m("[data-m-dest]").forEach(b=>b.addEventListener("click",()=>{chooseDest(b.dataset.mDest);syncTopology()}));
-  $$m("[data-m-link]").forEach(b=>b.addEventListener("click",()=>{toggleCable(b.dataset.mLink);syncTopology()}));
+  $m("[data-m-link]").forEach(b=>b.addEventListener("click",()=>{if(typeof isAdvancedMode==="function"&&isAdvancedMode()){toggleCable(b.dataset.mLink);syncTopology()}}));
 
   function closeSheet(){
     const d=document.querySelector("#deviceDrawer");
@@ -274,5 +275,6 @@
   };
 
   mq.addEventListener?.("change",()=>{syncTopology();if(!mq.matches)closeSheet()});
+  $m("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!(typeof isAdvancedMode==="function"&&isAdvancedMode()))));
   syncTopology();
 })();
