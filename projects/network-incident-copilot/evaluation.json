@@ -1,0 +1,152 @@
+{
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "name": "timeout_not_down",
+      "passed": true,
+      "expected_required": [
+        "COLLECTION_FAILED"
+      ],
+      "actual_codes": [
+        "COLLECTION_FAILED"
+      ],
+      "collection_status": "failed"
+    },
+    {
+      "name": "partial_collection",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "partial"
+    },
+    {
+      "name": "mm_down",
+      "passed": true,
+      "expected_required": [
+        "MM_REPORTED_DOWN"
+      ],
+      "actual_codes": [
+        "MM_REPORTED_DOWN"
+      ],
+      "collection_status": "complete"
+    },
+    {
+      "name": "mm_up",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "dynamic_role",
+      "passed": true,
+      "expected_required": [
+        "DYNAMIC_ROLE_UNKNOWN"
+      ],
+      "actual_codes": [
+        "DYNAMIC_ROLE_UNKNOWN"
+      ],
+      "collection_status": "complete"
+    },
+    {
+      "name": "acl_unresolved",
+      "passed": true,
+      "expected_required": [
+        "ACL_UNRESOLVED"
+      ],
+      "actual_codes": [
+        "ACL_UNRESOLVED"
+      ],
+      "collection_status": "complete"
+    },
+    {
+      "name": "sta_not_found",
+      "passed": true,
+      "expected_required": [
+        "STA_NOT_FOUND"
+      ],
+      "actual_codes": [
+        "STA_NOT_FOUND"
+      ],
+      "collection_status": "complete"
+    },
+    {
+      "name": "balanced_clients",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "skewed_clients",
+      "passed": true,
+      "expected_required": [
+        "CLIENT_DISTRIBUTION_SKEW"
+      ],
+        "actual_codes": [
+        "CLIENT_DISTRIBUTION_SKEW"
+      ],
+      "collection_status": "complete"
+    },
+    {
+      "name": "low_volume_not_skew",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "timeout_and_dynamic",
+      "passed": true,
+      "expected_required": [
+        "COLLECTION_FAILED",
+        "DYNAMIC_ROLE_UNKNOWN"
+      ],
+      "actual_codes": [
+        "COLLECTION_FAILED",
+        "DYNAMIC_ROLE_UNKNOWN"
+      ],
+      "collection_status": "failed"
+    },
+    {
+      "name": "explicit_down_with_partial",
+      "passed": true,
+      "expected_required": [
+        "MM_REPORTED_DOWN"
+      ],
+      "actual_codes": [
+        "MM_REPORTED_DOWN"
+      ],
+      "collection_status": "partial"
+    },
+    {
+      "name": "session_zero",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "session_present",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "connection_type_only",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    },
+    {
+      "name": "empty",
+      "passed": true,
+      "expected_required": [],
+      "actual_codes": [],
+      "collection_status": "complete"
+    }
+  ]
+}
