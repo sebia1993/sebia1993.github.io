@@ -497,20 +497,23 @@
       const btn=document.createElement('button');
       btn.type='button';
       btn.dataset.prediction=id;
+      btn.setAttribute('aria-pressed','false');
       btn.textContent=label;
-      btn.addEventListener('click',()=>{
-        if(busy||lessonRan) return;
-        predictionChoice=id;
-        document.body.classList.add('prediction-selected');
-        document.querySelectorAll('[data-prediction]').forEach(b=>{
-          const on=b.dataset.prediction===id;
-          b.classList.toggle('selected',on);
-          b.setAttribute('aria-pressed',String(on));
-        });
-        updateControls();
-      });
       $('predictionOptions').appendChild(btn);
     });
+    $('predictionOptions').onclick=e=>{
+      const btn=e.target.closest?.('[data-prediction]');
+      if(!btn||!$('predictionOptions').contains(btn)||busy||lessonRan) return;
+      const id=btn.dataset.prediction;
+      predictionChoice=id;
+      document.body.classList.add('prediction-selected');
+      document.querySelectorAll('[data-prediction]').forEach(b=>{
+        const on=b.dataset.prediction===id;
+        b.classList.toggle('selected',on);
+        b.setAttribute('aria-pressed',String(on));
+      });
+      updateControls();
+    };
   }
 
   function revealPrediction(){
