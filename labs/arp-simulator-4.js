@@ -20,7 +20,7 @@ function renderLessonStatus(){
     verdict.className="verdict failure";
     verdict.innerHTML=recoveryCorrect()
       ?"<b>설정은 정상으로 돌아왔습니다.</b> 마지막으로 PING을 다시 보내 실제 통신이 복구됐는지 검증하세요."
-      :"<b>장애 재현 완료.</b> 이제 패킷 단서와 고급 실습 설정을 이용해 원인을 찾아 복구하세요.";
+      :"<b>장애 재현 완료.</b> 기본 모드에서는 원인 흐름을 확인하고, 설정 변경이 필요하면 <b>고급 모드</b>로 전환해 복구하세요.";
     next.disabled=true;next.textContent="복구 완료 후 다음 실습 →";
   }else{
     badge.textContent="진행 중";badge.className="status-badge";
@@ -53,7 +53,13 @@ function showHint(){
   box.classList.add("show");
   box.innerHTML=`<b>힌트 ${state.hintLevel}/3</b><br>${l.hints[state.hintLevel-1]}`;
   $("#hintBtn").textContent=state.hintLevel<3?`다음 힌트 ${state.hintLevel+1}/3`:"힌트 모두 확인";
-  if(state.lesson>=2 && state.hintLevel>=2)$("#advancedPanel").open=true;
+  if(state.lesson>=2 && state.hintLevel>=2){
+    if(typeof isAdvancedMode==="function" && isAdvancedMode()){
+      $("#advancedPanel").open=true;
+    }else{
+      box.innerHTML+=`<div><button type="button" class="recovery-mode-btn" data-open-advanced-mode>고급 모드에서 복구 설정 열기</button></div>`;
+    }
+  }
 }
 function resetHint(){
   state.hintLevel=0;
@@ -65,7 +71,10 @@ function recordFailure(){
   if(state.lesson>=2){
     state.failureSeen[state.lesson]=true;
     $("#recoveryNudge").classList.add("show");
-    $("#recoveryNudge").innerHTML="<b>1단계 완료 · 장애 재현 성공.</b> 이제 실패 지점을 근거로 원인을 좁혀보세요. 막히면 힌트를 한 단계씩 사용할 수 있습니다.";
+    const advancedAction=(typeof isAdvancedMode==="function"&&!isAdvancedMode())
+      ?'<br><button type="button" class="recovery-mode-btn" data-open-advanced-mode>고급 모드로 전환해 직접 복구하기</button>'
+      :'';
+    $("#recoveryNudge").innerHTML="<b>1단계 완료 · 장애 재현 성공.</b> 이제 실패 지점을 근거로 원인을 좁혀보세요. 막히면 힌트를 한 단계씩 사용할 수 있습니다."+advancedAction;
   }
   renderLessonStatus();
 }
