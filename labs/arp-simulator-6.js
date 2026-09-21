@@ -70,7 +70,6 @@ $("#applyBtn").onclick=()=>{
 };
 $("#ethBtn").onclick=()=>{state.eth0=!state.eth0;state.last=null;renderState();log(`R2 eth0 → ${state.eth0?"UP":"DOWN"}`);renderLessonStatus()};
 $("#clearArpBtn").onclick=()=>{state.arp={};renderArp();log("PC1 ARP cache cleared")};
-$("#clearR2ArpBtn").onclick=()=>{state.r2Arp={};renderArp();log("R2 ARP cache cleared")};
 $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.target.value="";runCmd(v)}};
 
 configureLesson(0);
