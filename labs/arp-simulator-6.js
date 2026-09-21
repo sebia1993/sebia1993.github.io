@@ -57,16 +57,48 @@ function runCmd(c){
   }
   else log("지원 명령: show ip | show arp [pc1|pc2|pc3|r2] | show r2 | show pc2 | show pc3 | clear arp [대상|all] | ping <PC2/PC3 IP>");
 }
+function isAdvancedMode(){return document.body.dataset.simMode==="advanced"}
+function setViewMode(mode,{openPanel=false,scroll=false}={}){
+  const next=mode==="advanced"?"advanced":"basic";
+  document.body.dataset.simMode=next;
+  const advanced=next==="advanced";
+  $$("[data-view-mode]").forEach(btn=>{
+    const active=btn.dataset.viewMode===next;
+    btn.classList.toggle("active",active);
+    btn.setAttribute("aria-pressed",String(active));
+  });
+  const summary=$("#viewModeSummary");
+  if(summary){
+    summary.textContent=advanced
+      ?"고급 모드 · 패킷 상세, 독립 Neighbor Table, 장비 설정과 링크 조작을 확인할 수 있습니다."
+      :"기본 모드 · 처음에는 목적지 판단 → ARP 대상 → Ethernet 전달 → 결과의 핵심 흐름에 집중합니다.";
+  }
+  if(!advanced){
+    $("#deviceDrawer")?.classList.remove("show");
+    state.openDevice=null;
+    if($("#advancedPanel"))$("#advancedPanel").open=false;
+    if($("#packetStudyPanel"))$("#packetStudyPanel").open=false;
+  }else if(openPanel){
+    const panel=$("#advancedPanel");
+    if(panel){
+      panel.open=true;
+      if(scroll)setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"start"}),20);
+    }
+  }
+  $$("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
+}
+window.setArpViewMode=setViewMode;
+
 $$(".lesson-tab").forEach((b,i)=>b.onclick=()=>configureLesson(i));
 $$(".dest-btn").forEach(b=>b.onclick=()=>chooseDest(b.dataset.dest));
-$$(".device-config-hit").forEach(x=>x.onclick=()=>openDeviceConfig(x.dataset.device));
-$$(".link-badge").forEach(x=>x.onclick=(e)=>{e.stopPropagation();toggleCable(x.dataset.link)});
+$(".device-config-hit").forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.device)});
+$(".link-badge").forEach(x=>x.onclick=(e)=>{e.stopPropagation();if(isAdvancedMode())toggleCable(x.dataset.link)});
 const PATH_TO_LINK={pathPc1Sw1:"pc1sw1",pathPc3Sw1:"sw1pc3",pathSw1R2:"sw1r2",pathR2Sw2:"r2sw2",pathSw2Pc2:"sw2pc2"};
 Object.entries(PATH_TO_LINK).forEach(([id,key])=>{
-  $("#"+id).onclick=(e)=>{e.stopPropagation();toggleCable(key)};
+  $("#"+id).onclick=(e)=>{e.stopPropagation();if(isAdvancedMode())toggleCable(key)};
 });
-$$('[data-cable]').forEach(x=>x.onclick=()=>toggleCable(x.dataset.cable));
-$$('[data-open-device]').forEach(x=>x.onclick=()=>openDeviceConfig(x.dataset.openDevice));
+$('[data-cable]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())toggleCable(x.dataset.cable)});
+$('[data-open-device]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDeviceConfig(x.dataset.openDevice)});
 $("#drawerClose").onclick=()=>{$("#deviceDrawer").classList.remove("show");state.openDevice=null};
 $("#pingBtn").onclick=ping;
 $("#hintBtn").onclick=showHint;
@@ -86,12 +118,24 @@ $("#applyBtn").onclick=()=>{
 };
 $("#ethBtn").onclick=()=>{state.eth0=!state.eth0;state.last=null;renderState();log(`R2 eth0 → ${state.eth0?"UP":"DOWN"}`);renderLessonStatus()};
 $("#clearArpBtn").onclick=()=>{clearNeighborCache("pc1");renderArp();log("PC1 Neighbor cache cleared")};
+$("[data-clear-neighbor]").forEach(btn=>btn.onclick=()=>{
+  const key=btn.dataset.clearNeighbor;
+  if(!["pc1","pc2","pc3","r2"].includes(key))return;
+  clearNeighborCache(key);renderArp();log(`${key.toUpperCase()} Neighbor cache cleared`);
+});
+$("[data-view-mode]").forEach(btn=>btn.onclick=()=>setViewMode(btn.dataset.viewMode));
+document.addEventListener("click",e=>{
+  const trigger=e.target.closest?.("[data-open-advanced-mode]");
+  if(!trigger)return;
+  setViewMode("advanced",{openPanel:true,scroll:true});
+});
 $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.target.value="";runCmd(v)}};
 
+setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-accuracy8";
+  const version="20260921-mode9";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
