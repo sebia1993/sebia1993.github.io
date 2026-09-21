@@ -89,7 +89,7 @@ function setViewMode(mode,{openPanel=false,scroll=false}={}){
       if(scroll)setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"start"}),20);
     }
   }
-  $("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
+  $$("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
   if(typeof updatePredictionControls==="function")updatePredictionControls();
 }
 window.setArpViewMode=setViewMode;
