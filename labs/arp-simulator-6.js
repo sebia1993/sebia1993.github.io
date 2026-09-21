@@ -6,7 +6,8 @@ function configureLesson(i){
   state.r2e0Ip=GOOD.r2e0Ip;state.r2e0Mask=GOOD.r2e0Mask;state.eth0=true;
   state.r2e1Ip=GOOD.r2e1Ip;state.r2e1Mask=GOOD.r2e1Mask;state.eth1=true;
   state.cables={pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true};
-  clearAllNeighborCaches();state.last=null;state.failureSeen[i]=false;resetHint();
+  clearAllNeighborCaches();state.last=null;state.failureSeen[i]=false;
+  state.predictionChoice=null;state.predictionLocked=false;resetHint();
   const l=lessons[i];
   if(l.type==="gw")state.gw="192.168.10.254";
   if(l.type==="mask")state.mask=16;
@@ -25,7 +26,10 @@ function configureLesson(i){
              "먼저 <b>PING 보내기</b>로 장애를 재현하세요. 이후 해당 장비의 ⚙ 설정에서 실제 값을 수정할 수 있습니다.",
              i===1?"remote":i>=2?"error":"same");
   renderLessonStatus();
-  log(`--- Lesson ${i+1}: ${l.title} ---`);
+  renderPrediction();
+  $("#pingBtn").textContent="▶ 결과 확인하기";
+  updatePredictionControls();
+  log(`--- 실습 ${i+1}: ${l.title} ---`);
 }
 function runCmd(c){
   const cmd=c.trim();if(!cmd)return;log(`PC1> ${cmd}`);
@@ -85,7 +89,8 @@ function setViewMode(mode,{openPanel=false,scroll=false}={}){
       if(scroll)setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"start"}),20);
     }
   }
-  $$("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
+  $("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
+  if(typeof updatePredictionControls==="function")updatePredictionControls();
 }
 window.setArpViewMode=setViewMode;
 
@@ -135,7 +140,7 @@ setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-mode9";
+  const version="20260921-mode10";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
