@@ -118,7 +118,7 @@ $("#applyBtn").onclick=()=>{
 };
 $("#ethBtn").onclick=()=>{state.eth0=!state.eth0;state.last=null;renderState();log(`R2 eth0 → ${state.eth0?"UP":"DOWN"}`);renderLessonStatus()};
 $("#clearArpBtn").onclick=()=>{clearNeighborCache("pc1");renderArp();log("PC1 Neighbor cache cleared")};
-$("[data-clear-neighbor]").forEach(btn=>btn.onclick=()=>{
+$$("[data-clear-neighbor]").forEach(btn=>btn.onclick=()=>{
   const key=btn.dataset.clearNeighbor;
   if(!["pc1","pc2","pc3","r2"].includes(key))return;
   clearNeighborCache(key);renderArp();log(`${key.toUpperCase()} Neighbor cache cleared`);
