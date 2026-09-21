@@ -297,3 +297,16 @@ body[data-sim-mode="advanced"] .quick-next-bar{display:none!important}
   .quick-next-btn{min-height:44px;padding:10px 13px}
   body.quick-next-visible{padding-bottom:78px}
 }
+
+
+/* mode15 · prediction first, action second */
+body[data-sim-mode="basic"]:not(.prediction-selected) .controls{
+  display:none!important;
+}
+body[data-sim-mode="basic"].prediction-selected .controls{
+  animation:primaryActionReveal .18s ease-out both;
+}
+@keyframes primaryActionReveal{
+  from{opacity:0;transform:translateY(-5px)}
+  to{opacity:1;transform:translateY(0)}
+}
