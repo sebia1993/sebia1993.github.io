@@ -270,12 +270,14 @@
     shell.scrollTo({left:max*ratio,behavior:reduceMotion?'auto':'smooth'});
   }
 
-  function animateSprite(spriteId,pathId,label,duration=520){
+  function animateSprite(spriteId,pathId,frameInfo,duration=520){
     const sprite=$(spriteId);
     const path=$(pathId);
     if(!sprite||!path) return Promise.resolve();
-    const text=sprite.querySelector('text');
-    if(text) text.textContent=label;
+    const title=sprite.querySelector('.frame-title');
+    const sub=sprite.querySelector('.frame-sub');
+    if(title) title.textContent=frameInfo?.title||'Ethernet Frame';
+    if(sub) sub.textContent=frameInfo?.sub||'상위 내용 생략';
     sprite.classList.add('show');
     const length=path.getTotalLength();
     const run=()=>{
@@ -298,12 +300,19 @@
     });
   }
 
-  function shortFrameLabel(frameType){
-    if(frameType.includes('ARP REQUEST')) return 'ARP 요청';
-    if(frameType.includes('ARP REPLY')) return 'ARP 응답';
-    if(frameType.includes('ICMP')) return 'ICMP';
-    if(frameType.includes('BROADCAST')) return 'Broadcast';
-    return 'Frame';
+  function frameDisplayInfo(frameType){
+    const t=String(frameType||'').toUpperCase();
+    if(t.includes('ARP REQUEST')) return {title:'Ethernet Frame',sub:'ARP Request'};
+    if(t.includes('ARP REPLY')) return {title:'Ethernet Frame',sub:'ARP Reply'};
+    if(t.includes('ICMP ECHO REQUEST')) return {title:'Ethernet Frame',sub:'IPv4 · ICMP Echo Request'};
+    if(t.includes('ICMP ECHO REPLY')) return {title:'Ethernet Frame',sub:'IPv4 · ICMP Echo Reply'};
+    if(t.includes('ICMP')) return {title:'Ethernet Frame',sub:'IPv4 · ICMP'};
+    if(t.includes('BROADCAST')) return {title:'Ethernet Frame',sub:'Broadcast payload'};
+    return {title:'Ethernet Frame',sub:'상위 내용 생략'};
+  }
+
+  function framePayloadText(frameType){
+    return frameDisplayInfo(frameType).sub;
   }
 
   async function animateIngress(port,frameType){
@@ -312,7 +321,7 @@
     const trace=$(ingressTraceIds[port]);
     if(trace) trace.classList.add('show');
     focusTopologyPort(port);
-    await animateSprite('packetIngress',ingressTraceIds[port],shortFrameLabel(frameType),reduceMotion?0:560);
+    await animateSprite('packetIngress',ingressTraceIds[port],frameDisplayInfo(frameType),reduceMotion?0:560);
     focusTopologyPort(0);
   }
 
@@ -331,7 +340,7 @@
         sprite.classList.add('show');
         sprite.classList.toggle('flood',kind==='flood'||kind==='broadcast');
       }
-      tasks.push(animateSprite(spriteId,egressTraceIds[port],shortFrameLabel(frameType),reduceMotion?0:620));
+      tasks.push(animateSprite(spriteId,egressTraceIds[port],frameDisplayInfo(frameType),reduceMotion?0:620));
     });
     renderReceiveBadges(egress,kind,dstMac);
     if(egress.length) focusTopologyPort(egress[0]);
@@ -668,7 +677,7 @@
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source MAC 학습을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
     setSvgDecision('대기','대기','프레임 수신 · port '+ingress);
-    setLive('learning',frameType+' · 프레임 수신',srcDev.name+'의 Frame이 port '+ingress+'로 SW1에 들어왔습니다.','프레임 수신');
+    setLive('learning','Ethernet Frame 수신',srcDev.name+'의 Ethernet Frame이 port '+ingress+'로 SW1에 들어왔습니다. 내부 내용: '+framePayloadText(frameType)+'.','프레임 수신');
     await animateIngress(ingress,frameType);
 
     learn(srcDev);
@@ -746,9 +755,9 @@
     setLinks(ingress,egress,kind);
     renderMobileFlow(srcDev,actionTitle,egress,kind,dstMac);
     await animateEgress(egress,kind,frameType,dstMac);
-    const eventTitle=frameType+' · '+actionTitle;
-    addTimeline(kind,eventTitle,srcDev.name+' port '+ingress+' → '+(egress.length?portList(egress):'전달 없음'));
-    addLog(frameType+' src='+srcDev.mac+' dst='+dstMac+' ingress=port'+ingress+' action='+actionTitle+' egress='+egress.join(','));
+    const eventTitle='Ethernet Frame · '+actionTitle;
+    addTimeline(kind,eventTitle,framePayloadText(frameType)+' 포함 · '+srcDev.name+' port '+ingress+' → '+(egress.length?portList(egress):'전달 없음'));
+    addLog('ETHERNET FRAME payload='+framePayloadText(frameType)+' src='+srcDev.mac+' dst='+dstMac+' ingress=port'+ingress+' action='+actionTitle+' egress='+egress.join(','));
     await sleep(reduceMotion?10:260);
 
     return {kind,egress,lookupTitle,actionTitle,srcMac:srcDev.mac,dstMac,frameType};
