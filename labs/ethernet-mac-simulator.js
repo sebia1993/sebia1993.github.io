@@ -626,7 +626,7 @@
 
     setBasic(null,{title:'대기',detail:'Destination MAC을 받으면 FDB에서 조회합니다.'},{title:'대기',detail:'아직 전달할 프레임이 없습니다.'});
     setSvgDecision('—','—','준비');
-    setLive('', 'Frame 이벤트 대기','실습을 실행하면 현재 Frame과 SW1의 판단이 여기에 표시됩니다.','준비');
+    setLive('', '프레임 이벤트 대기','실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.','준비');
     renderMobileFlow(null,'프레임 대기',[],'',null);
     renderReceiveBadges([],'',null);
     renderTables();
@@ -667,15 +667,15 @@
     setLinks(ingress,[],'');
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source MAC 학습을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
-    setSvgDecision('대기','대기','Frame 수신 · port '+ingress);
-    setLive('learning',frameType+' · Frame 수신',srcDev.name+'의 Frame이 port '+ingress+'로 SW1에 들어왔습니다.','Frame 수신');
+    setSvgDecision('대기','대기','프레임 수신 · port '+ingress);
+    setLive('learning',frameType+' · 프레임 수신',srcDev.name+'의 Frame이 port '+ingress+'로 SW1에 들어왔습니다.','프레임 수신');
     await animateIngress(ingress,frameType);
 
     learn(srcDev);
     renderTables();
     setFlow(2);
     setSvgDecision(srcDev.name+' → port '+ingress,'대기','Source MAC 학습 완료');
-    setLive('learning','Source MAC Learning',srcDev.name+' MAC → port '+ingress+'을 Dynamic FDB에 학습/갱신했습니다.','MAC 학습');
+    setLive('learning','Source MAC 학습',srcDev.name+' MAC → port '+ingress+'을 Dynamic FDB에 학습/갱신했습니다.','MAC 학습');
     addLog('학습 '+srcDev.name+' '+srcDev.mac+' -> port '+ingress);
     await sleep(420);
 
@@ -726,16 +726,16 @@
 
     setBasic(frame,{title:lookupTitle,detail:lookupDetail},{title:actionTitle,detail:actionDetail});
     const lookupShort=kind==='known'
-      ? macName(dstMac)+' → FDB Hit '+(egress[0]?'port '+egress[0]:'동일 port')
+      ? macName(dstMac)+' → FDB 일치 '+(egress[0]?'port '+egress[0]:'동일 port')
       : kind==='filter'
         ? macName(dstMac)+' → 동일 port'
         : kind==='broadcast'
           ? 'Destination = Broadcast'
-          : macName(dstMac)+' → FDB Miss';
+          : macName(dstMac)+' → FDB 정보 없음';
     const actionShort=kind==='known'
-      ? (egress.length?'Known Unicast → '+portList(egress):'Filtering · 출력 없음')
+      ? (egress.length?'Known Unicast → '+portList(egress):'필터링 · 출력 없음')
       : kind==='filter'
-        ? 'Same-port Filtering'
+        ? '같은 포트 필터링'
         : kind==='broadcast'
           ? 'Broadcast → '+portList(egress)
           : 'Flooding → '+portList(egress);
@@ -776,7 +776,7 @@
         renderTables();
         setFlow(2);
         setSvgDecision('PC1 → port 1','다음 실습에서 확인','Source MAC 학습 완료');
-        setLive('learning','Source MAC 학습','SW1은 들어온 프레임의 Source MAC인 PC1 MAC을 port 1과 함께 기억합니다.','MAC 학습');
+        setLive('learning','Source MAC 학습','SW1은 들어온 프레임의 Source MAC인 PC1 MAC을 port 1과 함께 기억합니다. 이번 실습에서는 이후 전달 과정은 의도적으로 숨기고 학습 동작만 관찰합니다.','MAC 학습');
         addLog('학습 '+DEV.pc1.name+' '+DEV.pc1.mac+' -> port 1');
         flags.pc1Learn=fdb.has(DEV.pc1.mac)&&fdb.get(DEV.pc1.mac).port===1;
         setExplain('<b>한 줄 결론:</b> 스위치는 프레임이 들어온 포트를 기준으로 <b>Source MAC → 수신 port</b>를 MAC Table(FDB)에 학습합니다. Destination MAC의 전달 판단은 다음 실습에서 확인합니다.');
@@ -830,10 +830,10 @@
     renderTables();
     setLive('aging','PC2 Dynamic FDB Aging 완료','이 실습의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP 캐시의 PC2 IP → MAC은 그대로 남아 있습니다.','Aging');
     setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'PC2 FDB 없음',detail:'ARP는 남아 있지만 SW1은 PC2의 출력 포트를 모릅니다.'},{title:'다음 프레임 대기',detail:'이제 PC1 → PC2를 실행하세요.'});
-    setSvgDecision('—','PC2 → FDB Miss','다음 Frame · Flooding 예상');
+    setSvgDecision('—','PC2 → FDB 정보 없음','다음 프레임 · Flooding 예상');
     renderMobileFlow(DEV.pc1,'다음 프레임 대기',[],'',DEV.pc2.mac);
     addTimeline('aging','FDB Aging','PC2 동적 엔트리 삭제 · PC1 ARP 유지 · 자동 시간 경과는 모델링하지 않음');
-    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP 캐시는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 시뮬레이터의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
+    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP 캐시는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 시뮬레이터의 경과 시간은 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
     renderChecks();
     updateControls();
   }
