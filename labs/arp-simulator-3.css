@@ -98,3 +98,90 @@
   .compare-box{overflow:auto}.compare-table{min-width:680px}
   .lesson-tabs{margin-left:-2px;margin-right:-2px}
 }
+
+
+/* V9 · beginner-first basic / advanced view modes */
+.view-mode-card{
+  display:flex;justify-content:space-between;gap:16px;align-items:center;
+  margin:12px 0 0;padding:13px 15px;background:#f8fbfd;border:1px solid #d5e2ea;
+  border-radius:16px;box-shadow:var(--shadow)
+}
+.view-mode-copy{min-width:0}
+.view-mode-copy strong{display:block;font-size:13px;color:#173b58}
+.view-mode-copy span{display:block;margin-top:3px;color:#667e91;font-size:10px;line-height:1.5}
+.view-mode-actions{display:flex;gap:7px;flex:0 0 auto}
+.view-mode-btn{
+  min-width:132px;border:1px solid #cfdae4;background:#fff;color:#456176;border-radius:11px;
+  padding:8px 11px;text-align:left;cursor:pointer
+}
+.view-mode-btn b{display:block;font-size:11px}
+.view-mode-btn small{display:block;margin-top:2px;color:#8093a5;font-size:8px}
+.view-mode-btn.active,.view-mode-btn[aria-pressed="true"]{
+  border-color:#2c759c;background:#edf7fb;color:#154e6d;box-shadow:inset 0 0 0 1px rgba(44,117,156,.08)
+}
+.view-mode-btn.active small,.view-mode-btn[aria-pressed="true"] small{color:#4b7187}
+
+.legend-direction-note{
+  flex-basis:100%;padding-top:5px;border-top:1px dashed #d8e2e9;color:#61798c;line-height:1.5
+}
+.legend-direction-note b{color:#36576e}
+
+.neighbor-table-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.neighbor-table-head.spaced{margin-top:18px}
+.neighbor-table-head strong{min-width:0}
+.neighbor-clear-btn{
+  flex:0 0 auto;border:1px solid #cfdce5;background:#fff;color:#536e82;border-radius:9px;
+  padding:6px 8px;font-size:9px;font-weight:900;cursor:pointer
+}
+.neighbor-clear-btn:hover{background:#f1f6f9;border-color:#aabfce}
+.neighbor-clear-btn:active{transform:translateY(1px)}
+
+.packet-stage-btn{min-width:155px}
+.packet-stage-order{
+  display:block!important;margin:0 0 4px!important;color:#6b8396!important;
+  font-size:8px!important;font-weight:1000!important;letter-spacing:.08em!important
+}
+.packet-stage-type{
+  display:inline-flex!important;margin:0!important;border-radius:999px;padding:3px 6px;
+  background:#e8f2f8;color:#315f79!important;font-size:8px!important;font-weight:1000!important;letter-spacing:.05em
+}
+.packet-stage-type.arp-request{background:#e0f5ed;color:#08765d!important}
+.packet-stage-type.arp-reply{background:#e7f0ff;color:#175da8!important}
+.packet-stage-type.icmp-request{background:#f4edff;color:#6945a2!important}
+.packet-stage-name{display:block!important;margin-top:5px!important;color:#1f3f56!important;font-size:11px!important;font-weight:900!important}
+.packet-stage-hop{display:block!important;margin-top:2px!important;color:#8093a5!important;font-size:9px!important;font-weight:600!important}
+
+.recovery-mode-btn{
+  display:inline-flex;align-items:center;justify-content:center;margin-top:9px;border:1px solid #c89b50;
+  background:#fff;color:#79551c;border-radius:9px;padding:7px 10px;font-size:10px;font-weight:1000;cursor:pointer
+}
+
+/* Basic is always the first-load experience. Advanced details and mutation controls stay hidden. */
+body[data-sim-mode="basic"] .advanced-only,
+body[data-sim-mode="basic"] .details-grid,
+body[data-sim-mode="basic"] .topology-tip,
+body[data-sim-mode="basic"] .physical-logical-note,
+body[data-sim-mode="basic"] .route-lookup-card{display:none!important}
+body[data-sim-mode="basic"] .config-tag,
+body[data-sim-mode="basic"] .config-tag-text{display:none!important}
+body[data-sim-mode="basic"] .device-config-hit,
+body[data-sim-mode="basic"] .topology-link,
+body[data-sim-mode="basic"] .link-badge{pointer-events:none!important;cursor:default!important}
+body[data-sim-mode="basic"] #deviceDrawer{display:none!important}
+
+/* Mobile topology keeps its visual links, but configuration/link mutation is advanced-only. */
+body[data-sim-mode="basic"] [data-m-device]{display:none!important}
+body[data-sim-mode="basic"] [data-m-link]{pointer-events:none!important;cursor:default!important}
+
+@media(max-width:720px){
+  .view-mode-card{display:grid;grid-template-columns:1fr;gap:9px;padding:11px}
+  .view-mode-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .view-mode-btn{min-width:0;width:100%}
+  .neighbor-table-head{align-items:flex-start}
+}
+@media(max-width:420px){
+  .view-mode-actions{grid-template-columns:1fr}
+  .view-mode-btn{text-align:center}
+}
