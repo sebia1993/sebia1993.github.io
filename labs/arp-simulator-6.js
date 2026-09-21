@@ -6,7 +6,7 @@ function configureLesson(i){
   state.r2e0Ip=GOOD.r2e0Ip;state.r2e0Mask=GOOD.r2e0Mask;state.eth0=true;
   state.r2e1Ip=GOOD.r2e1Ip;state.r2e1Mask=GOOD.r2e1Mask;state.eth1=true;
   state.cables={pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true};
-  state.arp={};state.r2Arp={};state.last=null;state.failureSeen[i]=false;resetHint();
+  clearAllNeighborCaches();state.last=null;state.failureSeen[i]=false;resetHint();
   const l=lessons[i];
   if(l.type==="gw")state.gw="192.168.10.254";
   if(l.type==="mask")state.mask=16;
@@ -17,7 +17,7 @@ function configureLesson(i){
   $("#recoveryNudge").classList.remove("show");$("#recoveryNudge").innerHTML="";
   $$(".lesson-tab").forEach((b,idx)=>b.classList.toggle("active",idx===i));
   $("#advancedNote").innerHTML=i<2?
-    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 바꿀 수 있습니다. 다음 PING에서는 PC1의 on-link 판단, Gateway 유효성, R2 Connected Route, PC1/R2 ARP cache를 실제 시뮬레이션 상태로 사용합니다. Proxy ARP·Static Route·NAT는 범위 밖입니다.":
+    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 바꿀 수 있습니다. 다음 PING에서는 PC1의 on-link 판단, Gateway 유효성, R2 Connected Route와 PC1·PC2·PC3·R2의 독립 Neighbor Cache를 사용합니다. Reply 방향에서도 Cache가 없으면 ARP Request/Reply를 수행합니다. Proxy ARP·Static Route·NAT·ARP aging/state transition은 범위 밖입니다.":
     `<b>복구 목표:</b> 장애를 재현한 뒤 토폴로지 장비 설정을 직접 수정하고 다시 PING하여 성공시키세요.`;
   setExplain(i===0?"먼저 <b>PC3</b>가 선택된 상태에서 <b>PING 보내기</b>를 눌러보세요.":
              i===1?"이번에는 <b>PC2</b>로 PING을 보내 Gateway를 거치는지 확인하세요.":
@@ -29,19 +29,32 @@ function configureLesson(i){
 function runCmd(c){
   const cmd=c.trim();if(!cmd)return;log(`PC1> ${cmd}`);
   const p=cmd.split(/\s+/);
+  const showCache=(key,label)=>{
+    const cache=neighborCacheFor(key),rows=Object.entries(cache||{});
+    log(rows.length?`${label} Neighbor Table\n`+rows.map(x=>x.join("  ")).join("\n"):`${label} Neighbor Table empty`);
+  };
   if(cmd==="show ip")log(`PC1 ${state.pc1Ip}/${state.mask}\nGATEWAY ${state.gw}`);
-  else if(cmd==="show arp"){const r=Object.entries(state.arp);log(r.length?r.map(x=>x.join("  ")).join("\n"):"ARP cache empty");}
+  else if(p[0]==="show"&&p[1]==="arp"){
+    const key=(p[2]||"pc1").toLowerCase();
+    if(["pc1","pc2","pc3","r2"].includes(key))showCache(key,key.toUpperCase());
+    else log("사용법: show arp [pc1|pc2|pc3|r2]");
+  }
   else if(cmd==="show r2")log(`eth0 ${state.r2e0Ip}/${state.r2e0Mask} ${state.eth0?"UP":"DOWN"}\neth1 ${state.r2e1Ip}/${state.r2e1Mask} ${state.eth1?"UP":"DOWN"}`);
   else if(cmd==="show pc2")log(`PC2 ${state.pc2Ip}/${state.pc2Mask}\nGATEWAY ${state.pc2Gw}`);
   else if(cmd==="show pc3")log(`PC3 ${state.pc3Ip}/${state.pc3Mask}\nGATEWAY ${state.pc3Gw}`);
-  else if(cmd==="clear arp"){state.arp={};renderArp();log("PC1 ARP cache cleared");}
+  else if(p[0]==="clear"&&p[1]==="arp"){
+    const key=(p[2]||"pc1").toLowerCase();
+    if(key==="all"){clearAllNeighborCaches();renderArp();log("ALL Neighbor caches cleared");}
+    else if(["pc1","pc2","pc3","r2"].includes(key)){clearNeighborCache(key);renderArp();log(`${key.toUpperCase()} Neighbor cache cleared`);}
+    else log("사용법: clear arp [pc1|pc2|pc3|r2|all]");
+  }
   else if(p[0]==="ping"&&p[1]){
     if(p[1]===state.pc3Ip)chooseDest("pc3");
     else if(p[1]===state.pc2Ip)chooseDest("pc2");
     else {log(`현재 실습 목적지: PC3 ${state.pc3Ip}, PC2 ${state.pc2Ip}`);return}
     ping();
   }
-  else log("지원 명령: show ip | show arp | show r2 | show pc2 | show pc3 | clear arp | ping <PC2/PC3 IP>");
+  else log("지원 명령: show ip | show arp [pc1|pc2|pc3|r2] | show r2 | show pc2 | show pc3 | clear arp [대상|all] | ping <PC2/PC3 IP>");
 }
 $$(".lesson-tab").forEach((b,i)=>b.onclick=()=>configureLesson(i));
 $$(".dest-btn").forEach(b=>b.onclick=()=>chooseDest(b.dataset.dest));
@@ -67,11 +80,11 @@ $("#applyBtn").onclick=()=>{
   if(!isUsableInterfaceIp(state.pc1Ip,nextMask)){alert("현재 PC1 IP는 선택한 Prefix에서 Network/Broadcast 주소가 되어 사용할 수 없습니다.");return}
   if(!isUnicastIpv4(nextGw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
   state.mask=nextMask;state.gw=nextGw;
-  state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderState();renderArp();
+  clearAllNeighborCaches();state.last=null;resetPacketStudy();renderState();renderArp();
   log(`PC1 빠른 설정 적용: ${state.pc1Ip}/${state.mask}, GW ${state.gw}`);renderLessonStatus()
 };
 $("#ethBtn").onclick=()=>{state.eth0=!state.eth0;state.last=null;renderState();log(`R2 eth0 → ${state.eth0?"UP":"DOWN"}`);renderLessonStatus()};
-$("#clearArpBtn").onclick=()=>{state.arp={};renderArp();log("PC1 ARP cache cleared")};
+$("#clearArpBtn").onclick=()=>{clearNeighborCache("pc1");renderArp();log("PC1 Neighbor cache cleared")};
 $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.target.value="";runCmd(v)}};
 
 configureLesson(0);
