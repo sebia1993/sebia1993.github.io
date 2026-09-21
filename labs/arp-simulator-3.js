@@ -23,7 +23,7 @@ function applyDeviceConfig(){
     state.r2e0Ip=e0;state.r2e0Mask=m0;
     state.r2e1Ip=e1;state.r2e1Mask=m1;
   }
-  state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
+  clearAllNeighborCaches();state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
   log(`${d.toUpperCase()} 설정 적용 · 다음 PING부터 새 구성 사용`);
   openDeviceConfig(d);
 }
@@ -34,6 +34,7 @@ function resetPacketStudy(){
   $("#packetStudyContent").style.display="none";
   $("#packetStages").innerHTML="";
   $("#compareBox").classList.remove("show");
+  const arpHardware=$("#arpHardwareCard");if(arpHardware)arpHardware.style.display="none";
 }
 function addSnapshot(s){
   state.snapshots.push(s);
@@ -44,16 +45,19 @@ function addSnapshot(s){
 function renderSnapshot(i){
   const s=state.snapshots[i]; if(!s)return;
   state.snapshotIndex=i;
+  const isArp=s.protocol==="ARP";
   $("#packetEmpty").style.display="none";
   $("#packetStudyContent").style.display="block";
   $("#protocolBadge").textContent=s.protocol;
   $("#protocolBadge").className="protocol-badge "+(s.protocol==="ICMP"?"icmp":"");
   $("#packetSceneTitle").textContent=s.title;
   $("#packetOneLine").textContent=s.oneLine;
-  $("#addressLayerLabel").textContent=s.protocol==="ARP"?"ARP · ADDRESS RESOLUTION":"L3 · IPv4";
-  $("#addressLayerTitle").textContent=s.protocol==="ARP"?"누구의 MAC 주소를 묻는가?":"최종 목적지는 누구인가?";
-  $("#addrLabel1").textContent=s.protocol==="ARP"?"Sender IP":"Source IP";
-  $("#addrLabel2").textContent=s.protocol==="ARP"?"Target IP":"Destination IP";
+  $("#addressLayerLabel").textContent=isArp?"ARP · PROTOCOL ADDRESS":"L3 · IPv4";
+  $("#addressLayerTitle").textContent=isArp
+    ?(s.arpOp==="reply"?"누가 어떤 IPv4→MAC 매핑을 알려주는가?":"누구의 MAC 주소를 알아내려 하는가?")
+    :"최종 목적지는 누구인가?";
+  $("#addrLabel1").textContent=isArp?"Sender IP":"Source IP";
+  $("#addrLabel2").textContent=isArp?"Target IP":"Destination IP";
   $("#srcIp").textContent=s.srcIp??"—";
   $("#dstIp").textContent=s.dstIp??"—";
   $("#srcMac").textContent=s.srcMac??"—";
@@ -65,6 +69,18 @@ function renderSnapshot(i){
   $("#nextHopMeaning").textContent=s.nextHopMeaning;
   $("#ttlMeaning").textContent=s.ttlMeaning;
   $("#packetWhy").innerHTML=s.why;
+
+  const arpCard=$("#arpHardwareCard");
+  if(arpCard){
+    arpCard.style.display=isArp?"block":"none";
+    if(isArp){
+      $("#arpSenderHardware").textContent=s.arpSenderMac??s.srcMac??"—";
+      $("#arpTargetHardware").textContent=s.arpTargetMac??"—";
+      $("#arpHardwareMeaning").textContent=s.arpHardwareMeaning||
+        "Ethernet Source/Destination MAC은 Frame 전달용 필드이고, ARP Sender/Target Hardware Address는 ARP payload 내부의 별도 필드입니다.";
+    }
+  }
+
   $("#packetStages").innerHTML=state.snapshots.map((x,idx)=>
     `<button class="packet-stage-btn ${idx===i?"active":""}" data-snap="${idx}">${idx+1}. ${x.short}<span>${x.protocol} · ${x.hop}</span></button>`
   ).join("");
@@ -76,117 +92,175 @@ function renderComparison(){
   const box=$("#compareBox");
   if(!a||!b){box.classList.remove("show");return}
   box.classList.add("show");
+  $("#cmpHopB").textContent=b.compareLabel||"R2 → 목적지";
   $("#cmpSrcIpA").textContent=a.srcIp;$("#cmpSrcIpB").textContent=b.srcIp;
   $("#cmpDstIpA").textContent=a.dstIp;$("#cmpDstIpB").textContent=b.dstIp;
   $("#cmpSrcMacA").textContent=a.srcMac;$("#cmpSrcMacB").textContent=b.srcMac;
   $("#cmpDstMacA").textContent=a.dstMac;$("#cmpDstMacB").textContent=b.dstMac;
   $("#cmpTtlA").textContent=a.ttl;$("#cmpTtlB").textContent=b.ttl;
 }
+
+function addArpRequestDetail({key,short,sourceName,sourceIp,sourceMac,targetIp,segment,nextHopMeaning,why,oneLine}){
+  addSnapshot({
+    key,protocol:"ARP",arpOp:"request",short,
+    hop:`${sourceName} → LAN ${segment} 전체`,
+    title:`ARP Request · “${targetIp}의 MAC 주소가 누구인가?”`,
+    oneLine:oneLine||`${sourceName}이 ${targetIp}의 MAC을 알아내기 위해 LAN ${segment}에서 Ethernet Broadcast로 묻습니다.`,
+    srcIp:sourceIp,dstIp:targetIp,srcMac:sourceMac,dstMac:"ff:ff:ff:ff:ff:ff",
+    arpSenderMac:sourceMac,arpTargetMac:"미확정 · 요청 시 아직 모름",
+    nextHop:targetIp,ttl:"해당 없음",
+    ipMeaning:"ARP Sender IP와 Target IP는 ARP payload의 protocol address 필드입니다. ARP Frame 자체에는 IPv4/ICMP Header가 없습니다.",
+    macMeaning:"Ethernet Destination은 ff:ff:ff:ff:ff:ff Broadcast입니다. 이것은 ARP Target Hardware Address와 다른 필드입니다.",
+    arpHardwareMeaning:"ARP Request의 Sender Hardware Address에는 요청자 MAC이 들어가고, Target Hardware Address는 아직 알아내려는 값이므로 미확정 상태입니다.",
+    nextHopMeaning,
+    ttlMeaning:"ARP는 IPv4 Packet이 아니므로 IPv4 TTL 필드가 없습니다.",
+    why
+  });
+}
+function addArpReplyDetail({key,short,responderName,responderIp,responderMac,requesterName,requesterIp,requesterMac,nextHopMeaning,why}){
+  addSnapshot({
+    key,protocol:"ARP",arpOp:"reply",short,
+    hop:`${responderName} → ${requesterName}`,
+    title:`ARP Reply · “${responderIp}은 ${responderMac}”`,
+    oneLine:`${responderName}이 자신의 IPv4→MAC 매핑을 ${requesterName}에게 알려줍니다.`,
+    srcIp:responderIp,dstIp:requesterIp,srcMac:responderMac,dstMac:requesterMac,
+    arpSenderMac:responderMac,arpTargetMac:requesterMac,
+    nextHop:requesterIp,ttl:"해당 없음",
+    ipMeaning:"ARP Reply의 Sender IP는 응답자의 IPv4 주소이고 Target IP는 요청자의 IPv4 주소입니다.",
+    macMeaning:`Ethernet Destination은 요청자 ${requesterName} MAC으로, 일반적인 ARP Reply는 요청자에게 Unicast됩니다.`,
+    arpHardwareMeaning:"ARP Reply에서는 Sender Hardware Address에 응답자 MAC, Target Hardware Address에 요청자 MAC이 명시됩니다.",
+    nextHopMeaning,
+    ttlMeaning:"ARP에는 IPv4 TTL 필드가 없습니다.",
+    why
+  });
+}
 function addArpSnapshot(target,local){
   const dest=selectedDestination();
-  addSnapshot({
-    key:"arp-request",protocol:"ARP",short:"MAC 주소 질문",
-    hop:local?"PC1 → LAN A 전체":"PC1 → LAN A 전체",
-    title:`ARP Request · “${target}의 MAC 주소가 누구인가?”`,
+  addArpRequestDetail({
+    key:"arp-request",short:"PC1의 MAC 질문",sourceName:"PC1",sourceIp:state.pc1Ip,sourceMac:MAC.pc1,
+    targetIp:target,segment:"A",
     oneLine:local
-      ?`PC1이 같은 LAN에 있는 ${target}의 MAC 주소를 모르기 때문에 LAN A 전체에 Broadcast로 묻습니다.`
-      :`PC1이 원격 목적지로 바로 보내는 것이 아니라, 먼저 Next-hop ${target}의 MAC 주소를 알아내기 위해 LAN A 전체에 Broadcast로 묻습니다.`,
-    srcIp:state.pc1Ip,dstIp:target,srcMac:MAC.pc1,dstMac:"ff:ff:ff:ff:ff:ff",
-    nextHop:target,ttl:"해당 없음",
-    ipMeaning:"ARP의 Sender IP와 Target IP입니다. ARP Frame 자체에는 IPv4/ICMP Header가 없으며, 필요한 neighbor resolution이 끝난 뒤 IPv4 Packet을 Ethernet Frame에 실어 전송합니다.",
-    macMeaning:"ARP Request는 같은 LAN의 모든 장비가 볼 수 있도록 목적지 MAC ff:ff:ff:ff:ff:ff(Broadcast)를 사용합니다.",
-    nextHopMeaning:local?"PC1이 목적지를 on-link로 판단했으므로 최종 목적지 자신이 next-hop입니다.":"목적지가 on-link가 아니므로 Default Gateway가 현재 LAN에서의 next-hop입니다.",
-    ttlMeaning:"TTL은 IPv4 헤더의 필드입니다. ARP Frame에는 IPv4 TTL이 없습니다.",
+      ?`PC1이 on-link로 판단한 ${dest.name}(${target})의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`
+      :`PC1이 remote 목적지로 보내기 전에 next-hop ${target}의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`,
+    nextHopMeaning:local?"PC1이 목적지를 on-link로 판단했으므로 최종 목적지 자신이 next-hop입니다.":"목적지가 on-link가 아니므로 설정된 Default Gateway가 현재 LAN의 next-hop입니다.",
     why:local
-      ?`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 ${dest.name}(${dest.ip})을 <b>on-link</b>로 판단했습니다. 그래서 Gateway가 아니라 목적지 IPv4 주소의 MAC을 직접 찾습니다.`
-      :`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 ${dest.name}(${dest.ip})이 <b>on-link가 아니라고</b> 판단했습니다. 따라서 최종 목적지 Host가 아니라 <b>Default Gateway ${target}</b>의 MAC부터 찾습니다.`
+      ?`PC1은 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})을 <b>on-link</b>로 판단했습니다.`
+      :`PC1은 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})이 <b>on-link가 아니라고</b> 판단해 Default Gateway ${target}을 ARP합니다.`
   });
 }
 function addArpReplySnapshot(target,local,responderName,responderMac){
-  addSnapshot({
-    key:"arp-reply",protocol:"ARP",short:"ARP Reply",
-    hop:`${responderName} → PC1`,
-    title:`ARP Reply · “${target}은 ${responderMac}”`,
-    oneLine:`${responderName}이 자신의 MAC 주소를 PC1에게 유니캐스트로 알려줍니다. 이 Reply를 받은 뒤 PC1 Neighbor(ARP) Table에 매핑이 저장됩니다.`,
-    srcIp:target,dstIp:state.pc1Ip,srcMac:responderMac,dstMac:MAC.pc1,
-    nextHop:state.pc1Ip,ttl:"해당 없음",
-    ipMeaning:"ARP Reply의 Sender IP는 질문받은 IPv4 주소이며 Target IP는 요청자 PC1입니다.",
-    macMeaning:"ARP Reply Ethernet Destination은 요청자 PC1 MAC입니다. Request의 Broadcast와 달리 일반적인 Reply는 요청자에게 Unicast됩니다.",
-    nextHopMeaning:local?"PC1과 목적지가 같은 LAN에서 직접 neighbor resolution을 완료했습니다.":"PC1이 Default Gateway의 MAC을 확인했습니다.",
-    ttlMeaning:"ARP는 IPv4가 아니므로 TTL 필드가 없습니다.",
-    why:"ARP Request만으로 MAC을 학습하는 것이 아니라, 응답 장비의 ARP Reply를 통해 IPv4→MAC 매핑을 확인합니다."
+  addArpReplyDetail({
+    key:"arp-reply",short:"PC1이 받는 ARP Reply",
+    responderName,responderIp:target,responderMac,
+    requesterName:"PC1",requesterIp:state.pc1Ip,requesterMac:MAC.pc1,
+    nextHopMeaning:local?"PC1이 on-link 목적지의 MAC을 확인했습니다.":"PC1이 Default Gateway의 MAC을 확인했습니다.",
+    why:"PC1은 ARP Reply를 받은 뒤 해당 IPv4→MAC 매핑을 자신의 Neighbor(ARP) Table에 저장합니다."
   });
 }
 function addRouterArpRequestSnapshot(dest,route){
-  addSnapshot({
-    key:"r2-arp-request",protocol:"ARP",short:"R2의 MAC 질문",
-    hop:`R2 ${route.egress} → LAN ${route.segment} 전체`,
-    title:`R2 ARP Request · “${dest.ip}의 MAC 주소가 누구인가?”`,
-    oneLine:`Route Lookup으로 ${route.egress}이 선택된 뒤, R2도 출력 Ethernet 구간에서 next-hop ${dest.ip}의 MAC을 알아야 새 Frame을 만들 수 있습니다.`,
-    srcIp:route.routerIp,dstIp:dest.ip,srcMac:route.routerMac,dstMac:"ff:ff:ff:ff:ff:ff",
-    nextHop:dest.ip,ttl:"해당 없음",
-    ipMeaning:"이것은 R2가 출력 링크에서 수행하는 ARP입니다. 원래 ICMP Packet의 Source/Destination IP와 별개의 ARP Frame입니다.",
-    macMeaning:"R2의 ARP Request도 Ethernet Broadcast로 해당 L2 Segment에 전파됩니다.",
-    nextHopMeaning:`R2가 선택한 Connected Route ${route.network}의 출력 인터페이스는 ${route.egress}입니다.`,
-    ttlMeaning:"ARP Frame에는 IPv4 TTL이 없습니다.",
-    why:`PC1이 Gateway MAC을 알아냈다고 해서 R2가 ${dest.name} MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자기 next-hop의 MAC을 확인합니다.`
+  addArpRequestDetail({
+    key:"r2-arp-request",short:"R2의 MAC 질문",
+    sourceName:`R2 ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
+    targetIp:dest.ip,segment:route.segment,
+    nextHopMeaning:`R2의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 출력 Ethernet 구간에서 ${dest.ip}의 MAC이 필요합니다.`,
+    why:`PC1이 Gateway MAC을 알고 있어도 R2가 ${dest.name} MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자신의 next-hop MAC을 확인합니다.`
   });
 }
 function addRouterArpReplySnapshot(dest,route){
-  addSnapshot({
-    key:"r2-arp-reply",protocol:"ARP",short:"Host의 ARP Reply",
-    hop:`${dest.name} → R2 ${route.egress}`,
-    title:`ARP Reply · ${dest.name} → R2 ${route.egress}`,
-    oneLine:`${dest.name}이 ${dest.ip}에 대한 MAC ${dest.mac}을 R2에게 알려줍니다. R2 Neighbor Table에 이 매핑이 저장됩니다.`,
-    srcIp:dest.ip,dstIp:route.routerIp,srcMac:dest.mac,dstMac:route.routerMac,
-    nextHop:route.routerIp,ttl:"해당 없음",
-    ipMeaning:"ARP Reply의 Sender IP는 최종 Host의 IPv4 주소이고 Target IP는 R2의 해당 인터페이스 주소입니다.",
-    macMeaning:"Reply는 R2 인터페이스 MAC으로 Unicast됩니다.",
-    nextHopMeaning:"이 Reply 후 R2는 실제 IPv4 Packet을 해당 Host MAC으로 캡슐화할 수 있습니다.",
-    ttlMeaning:"ARP에는 TTL이 없습니다.",
-    why:"Route Lookup은 출력 인터페이스를 고르고, ARP/neighbor resolution은 그 출력 링크에서 사용할 Destination MAC을 제공합니다."
+  addArpReplyDetail({
+    key:"r2-arp-reply",short:`${dest.name}의 ARP Reply`,
+    responderName:dest.name,responderIp:dest.ip,responderMac:dest.mac,
+    requesterName:`R2 ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
+    nextHopMeaning:`R2가 ${dest.ip} → ${dest.mac} 매핑을 확인했습니다.`,
+    why:"이 Reply 후 R2는 원래 IPv4 Packet을 출력 링크용 Ethernet Frame으로 재캡슐화할 수 있습니다."
+  });
+}
+function addHostArpRequestSnapshot(host,targetIp,targetName,purpose){
+  addArpRequestDetail({
+    key:`reply-arp-request-${host.key}`,short:`${host.name}의 Reply용 ARP`,
+    sourceName:host.name,sourceIp:host.ip,sourceMac:host.mac,targetIp,segment:host.segment,
+    nextHopMeaning:`${host.name}이 Echo Reply를 보내기 전에 ${targetName}의 MAC을 확인합니다.`,
+    why:purpose
+  });
+}
+function addHostArpReplySnapshot(responder,requester,purpose){
+  addArpReplyDetail({
+    key:`reply-arp-reply-${requester.key}`,short:`${requester.name}이 받는 ARP Reply`,
+    responderName:responder.name,responderIp:responder.ip,responderMac:responder.mac,
+    requesterName:requester.name,requesterIp:requester.ip,requesterMac:requester.mac,
+    nextHopMeaning:`${requester.name}이 ${responder.ip} → ${responder.mac} 매핑을 확인했습니다.`,
+    why:purpose
+  });
+}
+function addR2ReturnArpRequestSnapshot(host,route){
+  addArpRequestDetail({
+    key:"return-r2-arp-request",short:"R2의 Return ARP",
+    sourceName:`R2 ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
+    targetIp:host.ip,segment:route.segment,
+    nextHopMeaning:`Echo Reply를 PC1로 전달하려면 R2도 출력 LAN ${route.segment}에서 PC1 MAC이 필요합니다.`,
+    why:"Return Route가 존재하는 것과 Ethernet Destination MAC을 이미 알고 있는 것은 별개입니다."
+  });
+}
+function addR2ReturnArpReplySnapshot(host,route){
+  addArpReplyDetail({
+    key:"return-r2-arp-reply",short:"PC1의 Return ARP Reply",
+    responderName:host.name,responderIp:host.ip,responderMac:host.mac,
+    requesterName:`R2 ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
+    nextHopMeaning:"R2가 Return Path에서 사용할 PC1 MAC을 확인했습니다.",
+    why:"R2는 이제 Echo Reply를 LAN A용 새 Ethernet Frame으로 만들어 PC1에 전달할 수 있습니다."
   });
 }
 function addLocalIcmpSnapshot(dest,mac){
   addSnapshot({
     key:"icmp-pc1-local",protocol:"ICMP",short:`${dest.name}로 실제 PING`,
-    hop:`PC1 → ${dest.name}`,
-    title:`ICMP Echo Request · PC1 → ${dest.name}`,
-    oneLine:`${dest.name}가 PC1 기준 on-link이고 실제 LAN A에 있으므로 IP 최종 목적지와 Ethernet 현재 수신자가 모두 ${dest.name}입니다.`,
-    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:dest.ip,ttl:"64",
+    hop:`PC1 → ${dest.name}`,title:`ICMP Echo Request · PC1 → ${dest.name}`,
+    oneLine:`${dest.name}가 PC1 기준 on-link이고 실제 LAN A에 있으므로 IPv4 최종 목적지와 Ethernet 현재 수신자가 모두 ${dest.name}입니다.`,
+    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:dest.ip,ttl:String(SIM_INITIAL_TTL),
     ipMeaning:`Source/Destination IP는 PC1 → ${dest.name}입니다.`,
     macMeaning:`같은 Ethernet Segment에서 직접 전달하므로 Destination MAC도 ${dest.name} MAC입니다.`,
     nextHopMeaning:`on-link 목적지에서는 최종 목적지 ${dest.name} 자체가 next-hop입니다.`,
-    ttlMeaning:"라우터를 통과하지 않으므로 TTL 64가 감소하지 않습니다.",
-    why:`<b>on-link 전달의 핵심:</b> PC1이 목적지를 직접 전달 대상으로 판단했고, 실제로 같은 LAN A에 해당 IPv4 주소의 Host가 있으므로 Gateway를 거치지 않습니다.`
+    ttlMeaning:`이 Simulator의 초기 IPv4 TTL은 ${SIM_INITIAL_TTL}입니다. 이 경로에서는 Router forwarding이 없으므로 감소하지 않습니다.`,
+    why:"같은 L2 Segment에서 SW1이 Frame을 전달해도 Source/Destination MAC pair를 라우터처럼 다시 작성하지 않습니다."
   });
 }
 function addPc1ToR2Snapshot(dest,mac){
   addSnapshot({
     key:"icmp-pc1-r2",protocol:"ICMP",short:"PC1에서 R2로",
-    hop:"LAN A · PC1 → R2",
-    title:"ICMP Echo Request · PC1 → R2",
-    oneLine:`최종 목적지는 ${dest.ip}(${dest.name})이지만, LAN A에서 지금 당장 Frame을 받을 장비는 Default Gateway R2(${state.r2e0Ip})입니다.`,
-    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:state.r2e0Ip,ttl:"64",
+    hop:"LAN A · PC1 → R2",title:"ICMP Echo Request · PC1 → R2",
+    oneLine:`최종 목적지는 ${dest.ip}(${dest.name})이지만, LAN A에서 현재 Frame을 받을 next-hop은 R2 eth0(${state.r2e0Ip})입니다.`,
+    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:state.r2e0Ip,ttl:String(SIM_INITIAL_TTL),
     ipMeaning:`Destination IP ${dest.ip}은 최종 목적지 ${dest.name}을 계속 가리킵니다. NAT 없는 이 Lab에서는 R2 주소로 바뀌지 않습니다.`,
-    macMeaning:"LAN A에서는 Ethernet Destination MAC이 R2 eth0입니다. SW1이 Frame을 전달하는 동안 이 MAC pair를 다시 쓰지는 않습니다.",
-    nextHopMeaning:`PC1 입장에서 현재 next-hop은 설정된 Default Gateway ${state.gw}입니다. R2 eth0는 ${state.r2e0Ip}입니다.`,
-    ttlMeaning:"PC1이 만든 IPv4 Packet의 TTL은 64입니다. R2가 라우팅하여 전달할 때 1 감소합니다.",
+    macMeaning:"LAN A에서 Ethernet Destination은 R2 eth0 MAC입니다. SW1을 통과할 때 이 MAC pair가 바뀌지는 않습니다.",
+    nextHopMeaning:`PC1의 현재 next-hop은 Default Gateway ${state.gw}입니다.`,
+    ttlMeaning:`PC1이 만든 IPv4 Packet의 초기 TTL은 ${SIM_INITIAL_TTL}이며, R2가 forwarding할 때 1 감소합니다.`,
     why:"IP Destination은 end-to-end 목적지를, Ethernet Destination MAC은 현재 L2 Segment의 next-hop을 나타냅니다."
+  });
+}
+function addPc1ToWrongGatewaySnapshot(dest,gatewayHost){
+  addSnapshot({
+    key:"icmp-pc1-wrong-gateway-host",protocol:"ICMP",short:"잘못된 Gateway Host로 전달",
+    hop:`PC1 → ${gatewayHost.name}`,title:`ICMP Echo Request · Ethernet은 ${gatewayHost.name}, IP는 ${dest.name}`,
+    oneLine:`PC1은 Default Gateway로 설정된 ${gatewayHost.name}의 MAC을 알아냈기 때문에 Frame은 ${gatewayHost.name}에게 전달하지만 IPv4 Destination은 여전히 ${dest.ip}입니다.`,
+    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:gatewayHost.mac,nextHop:gatewayHost.ip,ttl:String(SIM_INITIAL_TTL),
+    ipMeaning:`IPv4 Destination은 최종 목적지 ${dest.name}(${dest.ip})을 유지합니다.`,
+    macMeaning:`Ethernet Destination은 잘못 설정된 Gateway ${gatewayHost.name} MAC입니다.`,
+    nextHopMeaning:`${gatewayHost.name}는 이 Simulator에서 IP forwarding을 하지 않는 End Host이므로 Router 역할을 할 수 없습니다.`,
+    ttlMeaning:`Router forwarding이 일어나지 않으므로 TTL은 ${SIM_INITIAL_TTL} 상태에서 폐기됩니다.`,
+    why:"잘못된 Gateway 주소가 실제 Host의 IPv4 주소라면 ARP 자체는 성공할 수 있습니다. 그러나 그 Host가 Router가 아니면 원격 목적지로 Packet을 forwarding하지 않습니다."
   });
 }
 function addR2ToDestinationSnapshot(dest,route){
   addSnapshot({
     key:"icmp-r2-dest",protocol:"ICMP",short:`R2에서 ${dest.name}로`,
-    hop:`LAN ${route.segment} · R2 → ${dest.name}`,
+    hop:`LAN ${route.segment} · R2 → ${dest.name}`,compareLabel:`R2 → ${dest.name}`,
     title:`라우팅 후 새 Ethernet Frame · R2 → ${dest.name}`,
-    oneLine:`R2는 IPv4 Packet을 ${route.egress}으로 전달하면서 출력 링크용 새 Ethernet Frame으로 재캡슐화하고 TTL을 1 줄입니다.`,
-    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:route.routerMac,dstMac:dest.mac,nextHop:dest.ip,ttl:"63",
+    oneLine:`R2는 IPv4 Packet을 ${route.egress}으로 forwarding하면서 출력 링크용 새 Ethernet Frame으로 재캡슐화하고 TTL을 1 감소시킵니다.`,
+    srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:route.routerMac,dstMac:dest.mac,nextHop:dest.ip,ttl:String(SIM_INITIAL_TTL-1),
     ipMeaning:`Source/Destination IP 주소는 여전히 ${state.pc1Ip} → ${dest.ip}입니다. NAT 없는 일반 라우팅에서는 최종 목적지 IP가 R2로 바뀌지 않습니다.`,
     macMeaning:`출력 LAN ${route.segment}에서는 Source MAC이 R2 ${route.egress}, Destination MAC이 ${dest.name} MAC입니다.`,
     nextHopMeaning:`R2의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 링크에서는 ${dest.name}이 직접 next-hop입니다.`,
-    ttlMeaning:"R2를 한 번 통과했으므로 TTL이 64에서 63으로 감소했습니다.",
-    why:"라우터는 수신 Ethernet Frame의 L2 Header를 제거하고 routing 후 출력 링크용 새 Ethernet Frame을 생성합니다. 같은 L2 Segment 내부의 스위치 통과만으로 MAC pair가 바뀌는 것은 아닙니다."
+    ttlMeaning:`이 Simulator는 초기 TTL ${SIM_INITIAL_TTL}을 사용하며 R2가 한 번 forwarding했으므로 ${SIM_INITIAL_TTL-1}이 되었습니다.`,
+    why:"라우터는 수신 Ethernet Frame의 L2 Header를 제거하고 routing 후 출력 링크용 새 Ethernet Frame을 생성합니다. 같은 L2 Segment의 Switch forwarding만으로 MAC pair가 바뀌는 것은 아닙니다."
   });
 }
 
