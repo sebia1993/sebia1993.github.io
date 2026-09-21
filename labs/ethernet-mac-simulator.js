@@ -8,19 +8,21 @@
     pc3:{name:'PC3',ip:'192.168.10.30',mac:'00:50:79:66:68:02',port:3}
   };
   const BROADCAST='ff:ff:ff:ff:ff:ff';
+  const FDB_AGE_LIMIT=300;
 
   const lessons=[
     {
       title:'첫 Ping에서 Source MAC Learning을 확인하세요.',
-      text:'FDB와 PC1 ARP Cache가 비어 있습니다. ARP Request와 Reply가 오갈 때 누가 언제 학습되는지 보세요.',
+      text:'FDB와 PC1/PC2 ARP Cache가 비어 있습니다. ARP Request와 Reply가 오갈 때 각 장비가 무엇을 독립적으로 배우는지 보세요.',
       run:'▶ 첫 PING 실행',
       hints:[
         '스위치는 Destination MAC을 보고 학습하지 않습니다. 먼저 <b>Source MAC</b>을 봅니다.',
         'PC1의 ARP Request가 port 1로 들어오면 <b>PC1 MAC → port 1</b>이 먼저 생깁니다.',
-        'PC2가 ARP Reply를 보내고 그 프레임이 port 2로 들어와야 <b>PC2 MAC → port 2</b>가 생깁니다.'
+        'PC2는 자신을 향한 ARP Request의 Sender IP/MAC을 확인할 수 있고, PC2가 ARP Reply를 보내면 SW1은 그 Reply의 Source MAC으로 <b>PC2 MAC → port 2</b>를 학습합니다.'
       ],
       checks:[
         ['pc1Learn','PC1 Source 학습','ARP Request 수신으로 PC1 → port 1'],
+        ['pc2Neighbor','PC2 Neighbor 학습','ARP Request의 Sender IP/MAC을 PC2가 확인'],
         ['pc2Learn','PC2 Source 학습','ARP Reply 수신으로 PC2 → port 2'],
         ['knownAfter','다음 요청 Known','PC2를 배운 뒤 port 2로만 전달']
       ]
@@ -56,22 +58,22 @@
     },
     {
       title:'Broadcast와 Unknown Unicast의 차이를 확인하세요.',
-      text:'PC1이 PC3를 찾는 ARP Request를 보냅니다. 이번 Destination MAC은 처음부터 ff:ff:ff:ff:ff:ff 입니다.',
+      text:'PC1이 PC3를 찾는 ARP Request를 보냅니다. Ethernet Destination MAC은 ff:ff:ff:ff:ff:ff이지만 ARP Target Hardware는 아직 알아내려는 값입니다.',
       run:'▶ ARP Broadcast 실행',
       hints:[
         'Broadcast는 FDB에서 특정 Destination MAC의 포트를 찾는 상황이 아닙니다.',
-        'Ethernet Destination MAC이 <b>ff:ff:ff:ff:ff:ff</b>인지 확인하세요.',
-        'port 2와 port 3 모두로 전달되지만 Unknown Unicast와 달리 목적지 MAC 자체가 Broadcast입니다.'
+        'Ethernet Destination MAC <b>ff:ff:ff:ff:ff:ff</b>와 ARP Target Hardware는 서로 다른 필드입니다.',
+        'port 2와 port 3 모두로 전달되지만 Unknown Unicast와 달리 Ethernet Destination MAC 자체가 Broadcast입니다.'
       ],
       checks:[
-        ['broadcastMac','Broadcast MAC','Destination = ff:ff:ff:ff:ff:ff'],
+        ['broadcastMac','Broadcast MAC','Ethernet Destination = ff:ff:ff:ff:ff:ff'],
         ['broadcastFlood','Broadcast 전달','수신 port 1 제외 → port 2·3'],
         ['sourceLearn','Source는 여전히 학습','PC1 MAC → port 1 갱신']
       ]
     },
     {
       title:'Aging으로 사라진 엔트리가 어떻게 다시 학습되는지 확인하세요.',
-      text:'PC2 엔트리는 299초 동안 갱신되지 않았고 PC1은 최근 갱신된 상태입니다. 먼저 +5초를 눌러 PC2만 Aging시켜 보세요.',
+      text:'이 Lab의 Aging 기준은 300초입니다. PC2 엔트리는 299초, PC1은 10초 상태에서 시작하며 실제 시간이 아니라 +5초 버튼으로만 Age를 진행합니다.',
       run:'▶ Aging 후 PC1 → PC2',
       hints:[
         '이 실습에서 PC1 ARP Cache의 PC2 항목은 유지됩니다. <b>FDB Aging과 ARP Cache는 별개</b>입니다.',
@@ -87,24 +89,46 @@
     }
   ];
 
+  const startStates=[
+    ['PC1/PC2 ARP Cache · 비어 있음','SW1 FDB · 동적 PC 엔트리 없음'],
+    ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC → port 2'],
+    ['PC1 ARP · PC2 MAC 보유','SW1 FDB · PC2 MAC 없음'],
+    ['PC1이 PC3 MAC을 아직 모름','SW1 FDB · PC1 MAC → port 1'],
+    ['PC1 ARP · PC2 MAC 보유 · PC2 ARP · PC1 MAC 보유','SW1 FDB · PC2 Age 299초 / PC1 Age 10초']
+  ];
+
+  const evidenceByLesson=[
+    ['../ethernet-viewer.html?mode=console&scenario=01-arp-first-contact','실제 GNS3 Source Learning 근거 보기 →'],
+    ['../ethernet-viewer.html?mode=packets&scenario=02-known-unicast&point=pc3-sw1','실제 Known Unicast PC3 미전달 PCAP 보기 →'],
+    ['../ethernet-viewer.html?mode=packets&scenario=04-unknown-unicast&point=pc3-sw1','실제 PC3 링크의 Unknown Unicast PCAP 보기 →'],
+    ['../ethernet-viewer.html?mode=packets&scenario=03-broadcast&point=pc3-sw1','실제 Broadcast PC3 링크 PCAP 보기 →'],
+    ['../learning/foundations/ethernet-mac-table/report.html','실제 Aging · Re-learning 검증 보고서 보기 →']
+  ];
+
   let lesson=0;
   let fdb=new Map();
   let arpPc1=new Map();
+  let arpPc2=new Map();
   let flags={};
   let completed=new Set();
   let busy=false;
   let hintIndex=0;
   let logLines=[];
   let timelineCount=0;
+  let manualDirty=false;
 
   function macName(mac){
-    if(mac===BROADCAST) return 'ff:ff:ff:ff:ff:ff';
+    if(mac===BROADCAST) return BROADCAST;
     for(const dev of Object.values(DEV)) if(dev.mac===mac) return dev.name+' MAC';
     return mac;
   }
 
   function portList(ports){
     return ports.map(p=>'port '+p).join(' · ');
+  }
+
+  function devByPort(port){
+    return Object.values(DEV).find(dev=>dev.port===port);
   }
 
   function setFdb(mac,port,age=0){
@@ -135,6 +159,24 @@
     });
   }
 
+  function renderMobileFlow(srcDev,actionTitle,egress,kind,dstMac){
+    $('mobileSource').textContent=srcDev?srcDev.name:'대기';
+    $('mobileSwitch').textContent=actionTitle||'프레임 대기';
+    [1,2,3].forEach(port=>{
+      const el=$('mobilePc'+port);
+      if(!el) return;
+      if(srcDev&&srcDev.port===port){
+        el.textContent='INGRESS';
+      }else if(egress.includes(port)){
+        if(kind==='flood'&&port===3&&dstMac===DEV.pc2.mac) el.textContent='Flooding 관찰 · 목적지는 PC2';
+        else if(kind==='broadcast') el.textContent='Broadcast 전달';
+        else el.textContent='전달';
+      }else{
+        el.textContent='전달 안 함';
+      }
+    });
+  }
+
   function resetFlow(){
     for(let i=1;i<=4;i++) $('s'+i).classList.remove('active','done');
   }
@@ -154,7 +196,7 @@
     $('liveEventTitle').textContent=title;
     $('liveEventDetail').textContent=detail;
     $('liveEventKind').textContent=label||'EVENT';
-    $('liveEventIcon').textContent=kind==='aging'?'⏱':kind==='broadcast'?'B':kind==='flood'?'F':kind==='known'?'K':'L';
+    $('liveEventIcon').textContent=kind==='aging'?'⏱':kind==='broadcast'?'B':kind==='flood'?'F':kind==='known'?'K':kind==='filter'?'S':'L';
     $('switchBadge').textContent=(label||'READY').toUpperCase();
   }
 
@@ -167,12 +209,31 @@
     $('switchActionDetail').textContent=action.detail;
   }
 
+  function renderArpFields(srcDev,meta){
+    const strip=$('arpFieldStrip');
+    if(!meta||!meta.arpRequest){
+      strip.hidden=true;
+      return;
+    }
+    strip.hidden=false;
+    $('arpEthDst').textContent=BROADCAST;
+    $('arpSenderHw').textContent=srcDev.mac+' · '+srcDev.name;
+    $('arpTargetIp').textContent=meta.arpTargetIp||'—';
+    $('arpTargetHw').textContent='미확정 · Simulator 표시 00:00:00:00:00:00';
+  }
+
   function addTimeline(kind,title,detail){
     if(timelineCount===0) $('eventTimeline').innerHTML='';
     timelineCount++;
     const item=document.createElement('div');
     item.className='timeline-item '+kind;
-    item.innerHTML='<small>STEP '+String(timelineCount).padStart(2,'0')+'</small><b>'+title+'</b><span>'+detail+'</span>';
+    const small=document.createElement('small');
+    small.textContent='STEP '+String(timelineCount).padStart(2,'0');
+    const b=document.createElement('b');
+    b.textContent=title;
+    const span=document.createElement('span');
+    span.textContent=detail;
+    item.append(small,b,span);
     $('eventTimeline').appendChild(item);
     item.scrollIntoView({behavior:'smooth',block:'nearest',inline:'end'});
   }
@@ -186,16 +247,21 @@
     $('eventLog').scrollTop=$('eventLog').scrollHeight;
   }
 
+  function renderNeighborRows(map,emptyText){
+    const rows=Array.from(map.entries());
+    return rows.length?rows.map(([ip,mac])=>
+      '<tr><td>'+ip+'</td><td><code>'+mac+'</code></td></tr>'
+    ).join(''):'<tr><td colspan="2" class="empty-row">'+emptyText+'</td></tr>';
+  }
+
   function renderTables(){
     const rows=Array.from(fdb.entries()).sort((a,b)=>a[1].port-b[1].port);
     $('fdbBody').innerHTML=rows.length?rows.map(([mac,v])=>
       '<tr><td><code>'+mac+'</code></td><td>port '+v.port+'</td><td>'+v.age+'s</td></tr>'
     ).join(''):'<tr><td colspan="3" class="empty-row">동적 FDB 엔트리가 없습니다.</td></tr>';
 
-    const arpRows=Array.from(arpPc1.entries());
-    $('arpBody').innerHTML=arpRows.length?arpRows.map(([ip,mac])=>
-      '<tr><td>'+ip+'</td><td><code>'+mac+'</code></td></tr>'
-    ).join(''):'<tr><td colspan="2" class="empty-row">PC1 ARP Cache가 비어 있습니다.</td></tr>';
+    $('arpBody').innerHTML=renderNeighborRows(arpPc1,'PC1 ARP Cache가 비어 있습니다.');
+    $('pc2ArpBody').innerHTML=renderNeighborRows(arpPc2,'PC2 ARP Cache가 비어 있습니다.');
   }
 
   function renderProgress(){
@@ -217,14 +283,16 @@
       return '<div class="check-item'+(done?' done':'')+'"><div class="check-dot">'+(done?'✓':'·')+'</div><div><b>'+label+'</b><span>'+desc+'</span></div></div>';
     }).join('');
 
-    const all=cfg.checks.every(c=>Boolean(flags[c[0]]));
+    const all=!manualDirty&&cfg.checks.every(c=>Boolean(flags[c[0]]));
     const already=completed.has(lesson);
     const badge=$('lessonBadge');
     badge.classList.toggle('success',all||already);
-    badge.textContent=all?'완료':already?'완료 기록':'진행 중';
+    badge.textContent=manualDirty?'자유 조작 중':all?'완료':already?'완료 기록':'진행 중';
     $('nextBtn').disabled=!(all||already);
     $('verdictBox').className='verdict'+(all?' success':'');
-    if(all){
+    if(manualDirty){
+      $('verdictBox').innerHTML='<b>고급 자유 조작 상태:</b> 현재 상태는 표준 실습 시작 조건과 다를 수 있습니다. 완료 판정을 다시 받으려면 실습 기본 상태로 복원하세요.';
+    }else if(all){
       $('verdictBox').innerHTML='<b>완료:</b> '+completionText(lesson);
     }else if(already){
       $('verdictBox').innerHTML='이 실습은 이전에 완료했습니다. 다시 실행해 상태 변화를 재확인할 수 있습니다.';
@@ -235,17 +303,17 @@
 
   function completionText(idx){
     return [
-      'Source MAC은 학습에, Destination MAC은 출력 포트 결정에 사용된다는 흐름을 확인했습니다.',
+      'PC1/PC2의 Neighbor 상태와 SW1 FDB가 서로 독립적으로 형성되고, Source MAC은 학습에 Destination MAC은 출력 포트 결정에 사용됨을 확인했습니다.',
       'FDB Hit이면 해당 출력 포트로만 Known Unicast가 전달되는 것을 확인했습니다.',
       'Unknown Unicast는 목적지 MAC을 바꾸지 않은 채 다른 전달 가능 포트로 Flooding됨을 확인했습니다.',
-      'Broadcast는 처음부터 ff:ff:ff:ff:ff:ff를 목적지로 사용하며 Source Learning은 그대로 수행됨을 확인했습니다.',
-      'FDB Aging 뒤 첫 요청은 Flooding되고, Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
+      'Broadcast는 Ethernet Destination을 ff:ff:ff:ff:ff:ff로 사용하고, ARP Target Hardware는 별도 필드임을 확인했습니다.',
+      '이 Lab의 300초 Aging 기준에서 엔트리 소멸 뒤 첫 요청은 Flooding되고 Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
     ][idx];
   }
 
   function completeIfReady(){
     const cfg=lessons[lesson];
-    if(cfg.checks.every(c=>Boolean(flags[c[0]]))){
+    if(!manualDirty&&cfg.checks.every(c=>Boolean(flags[c[0]]))){
       completed.add(lesson);
       renderProgress();
     }
@@ -257,22 +325,33 @@
     $('explainBox').innerHTML=html;
   }
 
+  function renderLessonMeta(){
+    $('startArpState').textContent=startStates[lesson][0];
+    $('startFdbState').textContent=startStates[lesson][1];
+    $('evidenceLink').href=evidenceByLesson[lesson][0];
+    $('evidenceLink').textContent=evidenceByLesson[lesson][1];
+  }
+
   function updateControls(){
-    $('runBtn').disabled=busy||(lesson===4&&!flags.aged);
-    $('ageBtn').disabled=busy||Boolean(flags.aged);
+    $('runBtn').disabled=busy||manualDirty||(lesson===4&&!flags.aged);
+    $('ageBtn').disabled=busy||manualDirty||Boolean(flags.aged);
     $('ageBtn').hidden=lesson!==4;
   }
 
   function resetScenario(){
     fdb=new Map();
     arpPc1=new Map();
+    arpPc2=new Map();
     flags={};
     logLines=[];
     timelineCount=0;
+    manualDirty=false;
     $('eventTimeline').innerHTML='<div class="timeline-empty">실행하면 프레임 순서가 여기에 쌓입니다.</div>';
     $('eventLog').textContent='아직 이벤트가 없습니다.';
+    $('manualStateWarning').innerHTML='이 조작은 현재 FDB/ARP 상태에 직접 반영됩니다. 표준 실습 흐름으로 돌아가려면 <b>실습 기본 상태로 복원</b>을 누르세요.';
     clearLinkState();
     resetFlow();
+    renderArpFields(null,null);
 
     if(lesson===1){
       setFdb(DEV.pc1.mac,1,8);
@@ -287,12 +366,15 @@
       setFdb(DEV.pc1.mac,1,10);
       setFdb(DEV.pc2.mac,2,299);
       arpPc1.set(DEV.pc2.ip,DEV.pc2.mac);
+      arpPc2.set(DEV.pc1.ip,DEV.pc1.mac);
     }
 
     setBasic(null,{title:'대기',detail:'Destination MAC을 받으면 FDB에서 조회합니다.'},{title:'대기',detail:'아직 전달할 프레임이 없습니다.'});
     setLive('', '프레임 이벤트 대기','실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.','READY');
+    renderMobileFlow(null,'프레임 대기',[],'',null);
     renderTables();
     renderChecks();
+    renderLessonMeta();
     updateControls();
   }
 
@@ -310,17 +392,20 @@
     setExplain(idx===4?'먼저 <b>+5초 경과</b>를 눌러 PC2 FDB Aging을 발생시키세요.':'<b>'+cfg.run.replace('▶ ','')+'</b>을 눌러 현재 상태를 확인하세요.');
     resetScenario();
     renderProgress();
-    window.scrollTo({top:document.querySelector('.lab-card').offsetTop-14,behavior:'smooth'});
+    const lab=document.querySelector('.lab-card');
+    if(lab) window.scrollTo({top:lab.offsetTop-14,behavior:'smooth'});
   }
 
-  async function processFrame(srcDev,dstMac,frameType){
+  async function processFrame(srcDev,dstMac,frameType,meta={}){
     const ingress=srcDev.port;
     const otherPorts=[1,2,3].filter(p=>p!==ingress);
     const frame={src:srcDev.mac,dst:dstMac};
 
+    renderArpFields(srcDev,meta);
     resetFlow();
     setFlow(1);
     setLinks(ingress,[],'');
+    renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source Learning을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
     setLive('learning',frameType+' · FRAME IN',srcDev.name+'의 프레임이 port '+ingress+'로 SW1에 들어왔습니다.','FRAME IN');
     await sleep(360);
@@ -347,7 +432,7 @@
       lookupDetail='특정 한 포트의 Unicast FDB Hit을 찾는 상황이 아닙니다.';
       actionTitle='Broadcast 전달';
       actionDetail='수신 port '+ingress+' 제외 → '+portList(egress);
-      setLive('broadcast','Destination = Broadcast','ff:ff:ff:ff:ff:ff이므로 동일 Broadcast Domain의 다른 전달 가능 포트로 보냅니다.','BROADCAST');
+      setLive('broadcast','Destination = Broadcast',BROADCAST+'이므로 동일 Broadcast Domain의 다른 전달 가능 포트로 보냅니다.','BROADCAST');
     }else{
       const entry=fdb.get(dstMac);
       if(entry&&entry.port!==ingress){
@@ -359,13 +444,13 @@
         actionDetail='port '+entry.port+'로만 전달';
         setLive('known','FDB Hit · Known Unicast',macName(dstMac)+'의 출력 포트를 알고 있습니다.','KNOWN');
       }else if(entry&&entry.port===ingress){
-        kind='known';
+        kind='filter';
         egress=[];
         lookupTitle='FDB Hit · ingress와 동일';
         lookupDetail='목적지 MAC이 같은 수신 포트 방향으로 학습되어 있습니다.';
-        actionTitle='이 Lab에서는 전달 없음';
-        actionDetail='동일 수신 포트 특수 케이스는 고급 장비별 동작을 단순화합니다.';
-        setLive('known','FDB Hit · Same-port','이 Simulator는 같은 수신 포트로 되돌리는 특수 동작을 단순화합니다.','FILTER');
+        actionTitle='Same-port Filtering';
+        actionDetail='다른 포트로 전달하지 않음';
+        setLive('filter','Same-port Filtering','목적지가 수신 포트와 같은 방향에 있으므로 다른 출력 포트로 전달하지 않습니다.','FILTER');
       }else{
         kind='flood';
         egress=otherPorts;
@@ -382,23 +467,31 @@
 
     setFlow(4);
     setLinks(ingress,egress,kind);
+    renderMobileFlow(srcDev,actionTitle,egress,kind,dstMac);
     const eventTitle=frameType+' · '+actionTitle;
     addTimeline(kind,eventTitle,srcDev.name+' port '+ingress+' → '+(egress.length?portList(egress):'전달 없음'));
     addLog(frameType+' src='+srcDev.mac+' dst='+dstMac+' ingress=port'+ingress+' action='+actionTitle+' egress='+egress.join(','));
     await sleep(650);
 
-    return {kind,egress,lookupTitle,actionTitle};
+    return {kind,egress,lookupTitle,actionTitle,srcMac:srcDev.mac,dstMac,frameType};
   }
 
   async function runLesson(){
-    if(busy) return;
+    if(busy||manualDirty) return;
     if(lesson===4&&!flags.aged) return;
     busy=true;
     updateControls();
     try{
       if(lesson===0){
-        const a=await processFrame(DEV.pc1,BROADCAST,'ARP REQUEST');
+        const a=await processFrame(DEV.pc1,BROADCAST,'ARP REQUEST',{arpRequest:true,arpTargetIp:DEV.pc2.ip});
         flags.pc1Learn=fdb.has(DEV.pc1.mac)&&a.kind==='broadcast';
+
+        if(a.egress.includes(DEV.pc2.port)){
+          arpPc2.set(DEV.pc1.ip,DEV.pc1.mac);
+          flags.pc2Neighbor=arpPc2.get(DEV.pc1.ip)===DEV.pc1.mac;
+          addLog('PC2 ARP LEARN '+DEV.pc1.ip+' -> '+DEV.pc1.mac+' from ARP Request sender fields');
+          renderTables();
+        }
 
         const b=await processFrame(DEV.pc2,DEV.pc1.mac,'ARP REPLY');
         arpPc1.set(DEV.pc2.ip,DEV.pc2.mac);
@@ -409,7 +502,7 @@
         flags.knownAfter=c.kind==='known'&&c.egress.length===1&&c.egress[0]===2;
 
         await processFrame(DEV.pc2,DEV.pc1.mac,'ICMP ECHO REPLY');
-        setExplain('<b>핵심:</b> PC1은 ARP Request의 Source로 먼저 학습되고, PC2는 ARP Reply를 실제로 보낸 뒤 Source MAC으로 학습됩니다. 이후 ICMP 요청은 Known Unicast가 됩니다.');
+        setExplain('<b>핵심:</b> PC1과 PC2의 ARP Cache, SW1의 FDB는 각각 독립 상태입니다. PC2는 ARP Request의 Sender IP/MAC을 확인하고, SW1은 PC2가 실제 Reply를 보낸 뒤 Source MAC으로 PC2 → port 2를 학습합니다.');
       }else if(lesson===1){
         const r=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
         flags.known=r.kind==='known'&&r.egress[0]===2;
@@ -417,16 +510,16 @@
         setExplain('<b>Known Unicast:</b> SW1이 PC2 MAC → port 2를 이미 알고 있으므로 port 2로만 전달합니다. PC3 링크에는 이 요청을 복사하지 않습니다.');
       }else if(lesson===2){
         const r=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
-        flags.dstPreserved=$('frameDst').textContent==='PC2 MAC';
+        flags.dstPreserved=r.dstMac===DEV.pc2.mac;
         flags.flood=r.kind==='flood'&&r.egress.includes(2)&&r.egress.includes(3);
         flags.pc3Seen=r.egress.includes(3);
-        setExplain('<b>Unknown Unicast ≠ Broadcast:</b> PC1은 PC2 MAC을 이미 알고 있으므로 Destination MAC은 PC2 그대로입니다. SW1만 출력 포트를 몰라 port 2·3으로 Flooding합니다. PC3는 프레임을 볼 수 있지만 목적지는 PC3가 아닙니다.','flood');
+        setExplain('<b>Unknown Unicast ≠ Broadcast:</b> PC1은 PC2 MAC을 이미 알고 있으므로 Destination MAC은 PC2 그대로입니다. SW1만 출력 포트를 몰라 port 2·3으로 Flooding합니다. PC3 링크에서는 프레임이 관찰되지만 Ethernet 목적지는 PC2이므로 PC3를 위한 프레임으로 바뀐 것이 아닙니다.','flood');
       }else if(lesson===3){
-        const r=await processFrame(DEV.pc1,BROADCAST,'ARP REQUEST');
-        flags.broadcastMac=$('frameDst').textContent===BROADCAST;
+        const r=await processFrame(DEV.pc1,BROADCAST,'ARP REQUEST',{arpRequest:true,arpTargetIp:DEV.pc3.ip});
+        flags.broadcastMac=r.dstMac===BROADCAST;
         flags.broadcastFlood=r.kind==='broadcast'&&r.egress.includes(2)&&r.egress.includes(3);
         flags.sourceLearn=fdb.has(DEV.pc1.mac);
-        setExplain('<b>Broadcast:</b> Destination MAC 자체가 ff:ff:ff:ff:ff:ff입니다. 여러 포트로 전달된다는 결과만 보면 Unknown Unicast와 비슷해 보여도 프레임의 목적지 MAC이 다릅니다.','broadcast');
+        setExplain('<b>Broadcast:</b> Ethernet Destination은 '+BROADCAST+'입니다. ARP Target IPv4는 PC3이지만 ARP Target Hardware는 아직 알아내려는 값으로, Ethernet Broadcast Destination과 같은 필드가 아닙니다.','broadcast');
       }else if(lesson===4){
         const first=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST');
         flags.flood=first.kind==='flood'&&first.egress.includes(2)&&first.egress.includes(3);
@@ -436,7 +529,7 @@
 
         const again=await processFrame(DEV.pc1,DEV.pc2.mac,'ICMP ECHO REQUEST · AGAIN');
         flags.known=again.kind==='known'&&again.egress[0]===2;
-        setExplain('<b>Aging → Flooding → Re-learning → Known:</b> FDB 엔트리가 사라져도 PC1 ARP가 남아 있으면 첫 요청은 PC2 MAC을 그대로 사용합니다. SW1은 Flooding하고, PC2 Reply의 Source MAC으로 다시 학습한 뒤 다음 요청은 Known Unicast가 됩니다.');
+        setExplain('<b>Aging → Flooding → Re-learning → Known:</b> 이 Lab에서는 FDB Aging 기준을 300초로 둡니다. PC1 ARP가 남아 있으므로 첫 요청은 PC2 MAC을 그대로 사용하고, PC2 Reply의 Source MAC으로 SW1이 다시 학습한 뒤 다음 요청은 Known Unicast가 됩니다.');
       }
       completeIfReady();
     }finally{
@@ -446,26 +539,36 @@
   }
 
   function ageLesson(){
-    if(lesson!==4||busy||flags.aged) return;
+    if(lesson!==4||busy||manualDirty||flags.aged) return;
     for(const [mac,entry] of Array.from(fdb.entries())){
       entry.age+=5;
-      if(entry.age>=300){
+      if(entry.age>=FDB_AGE_LIMIT){
         fdb.delete(mac);
-        addLog('AGE OUT '+mac+' after '+entry.age+'s');
+        addLog('AGE OUT '+mac+' after '+entry.age+'s (Lab threshold '+FDB_AGE_LIMIT+'s)');
       }
     }
     flags.aged=!fdb.has(DEV.pc2.mac)&&arpPc1.get(DEV.pc2.ip)===DEV.pc2.mac;
     renderTables();
-    setLive('aging','PC2 Dynamic FDB Aged Out','PC2 MAC → port 2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','AGING');
+    setLive('aging','PC2 Dynamic FDB Aged Out','이 Lab의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','AGING');
     setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'PC2 FDB 없음',detail:'ARP는 남아 있지만 SW1은 PC2의 출력 포트를 모릅니다.'},{title:'다음 프레임 대기',detail:'이제 PC1 → PC2를 실행하세요.'});
-    addTimeline('aging','FDB Aging','PC2 dynamic entry 삭제 · PC1 ARP 유지');
-    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다.','flood');
+    renderMobileFlow(DEV.pc1,'다음 프레임 대기',[],'',DEV.pc2.mac);
+    addTimeline('aging','FDB Aging','PC2 dynamic entry 삭제 · PC1 ARP 유지 · 자동 시간 경과는 모델링하지 않음');
+    setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 Simulator의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
+    renderChecks();
+    updateControls();
+  }
+
+  function markManualStateChanged(message){
+    manualDirty=true;
+    flags={};
+    $('manualStateWarning').innerHTML='<b>자유 조작 상태:</b> '+message+' 표준 실습 완료 판정을 받으려면 <b>실습 기본 상태로 복원</b>하세요.';
     renderChecks();
     updateControls();
   }
 
   async function runManual(src,dst,type){
     if(busy) return;
+    markManualStateChanged('수동 프레임 전송으로 FDB 상태가 변경될 수 있습니다.');
     busy=true;
     updateControls();
     try{
@@ -479,12 +582,13 @@
 
   function manualAge(){
     if(busy) return;
+    markManualStateChanged('Aging 시간을 수동으로 진행했습니다.');
     for(const [mac,entry] of Array.from(fdb.entries())){
       entry.age+=301;
-      if(entry.age>=300) fdb.delete(mac);
+      if(entry.age>=FDB_AGE_LIMIT) fdb.delete(mac);
     }
     renderTables();
-    addLog('MANUAL AGE +301s -> expired dynamic entries removed');
+    addLog('MANUAL AGE +301s -> entries at or above '+FDB_AGE_LIMIT+'s removed');
     setLive('aging','수동 Aging +301초','고급 조작으로 현재 Dynamic FDB의 300초 이상 엔트리를 제거했습니다.','AGING');
   }
 
@@ -497,7 +601,7 @@
     });
     $('viewModeSummary').textContent=mode==='basic'
       ? '기본 모드 · 처음에는 프레임과 FDB의 핵심 변화만 확인하세요.'
-      : '고급 모드 · 현재 Dynamic FDB, PC1 ARP Cache와 직접 상태 조작을 추가로 표시합니다.';
+      : '고급 모드 · SW1 FDB, PC1/PC2 ARP Cache와 현재 실습 상태를 직접 바꾸는 자유 조작을 표시합니다.';
   }
 
   document.querySelectorAll('[data-lesson]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -518,6 +622,7 @@
   $('runBtn').addEventListener('click',runLesson);
   $('ageBtn').addEventListener('click',ageLesson);
   $('resetBtn').addEventListener('click',()=>{ if(!busy) loadLesson(lesson); });
+  $('resetLabStateBtn').addEventListener('click',()=>{ if(!busy) loadLesson(lesson); });
   $('nextBtn').addEventListener('click',()=>{
     if(busy) return;
     if(lesson<lessons.length-1) loadLesson(lesson+1);
@@ -526,14 +631,22 @@
 
   $('clearFdbBtn').addEventListener('click',()=>{
     if(busy) return;
-    fdb.clear();renderTables();addLog('MANUAL CLEAR all FDB entries');
+    markManualStateChanged('SW1 Dynamic FDB 전체를 비웠습니다.');
+    fdb.clear();
+    renderTables();
+    addLog('MANUAL CLEAR all FDB entries');
     setLive('aging','FDB 전체 비움','고급 조작으로 SW1 Dynamic FDB를 모두 비웠습니다.','CLEAR');
   });
+
   $('clearPc2Btn').addEventListener('click',()=>{
     if(busy) return;
-    fdb.delete(DEV.pc2.mac);renderTables();addLog('MANUAL CLEAR PC2 FDB only');
-    setLive('aging','PC2 FDB만 삭제','PC1 ARP Cache는 변경하지 않았습니다.','CLEAR');
+    markManualStateChanged('PC2의 Dynamic FDB 엔트리만 삭제했습니다. PC1/PC2 ARP Cache는 유지됩니다.');
+    fdb.delete(DEV.pc2.mac);
+    renderTables();
+    addLog('MANUAL CLEAR PC2 FDB only');
+    setLive('aging','PC2 FDB만 삭제','PC1/PC2 ARP Cache는 변경하지 않았습니다.','CLEAR');
   });
+
   $('manualAgeBtn').addEventListener('click',manualAge);
   $('manualUnicastBtn').addEventListener('click',()=>runManual(DEV.pc1,DEV.pc2.mac,'MANUAL PC1 → PC2'));
   $('manualReplyBtn').addEventListener('click',()=>runManual(DEV.pc2,DEV.pc1.mac,'MANUAL PC2 → PC1'));
