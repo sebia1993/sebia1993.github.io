@@ -36,16 +36,32 @@ async function animateArpBroadcast(targetKind){
   if(targetLink)markRequest([targetLink]);
   return {ok:true};
 }
+function directionalRoute(key){
+  if(key==="pc1sw1")return paths.pc1sw1;
+  if(key==="sw1pc1")return [...paths.pc1sw1].reverse();
+  if(key==="pc3sw1")return [...paths.sw1pc3].reverse();
+  if(key==="sw1pc3")return paths.sw1pc3;
+  if(key==="pc2sw2")return [...paths.sw2pc2].reverse();
+  if(key==="sw2pc2")return paths.sw2pc2;
+  if(key==="sw1r2")return paths.sw1r2;
+  if(key==="r2sw1")return [...paths.sw1r2].reverse();
+  if(key==="r2sw2")return paths.r2sw2;
+  if(key==="sw2r2")return [...paths.r2sw2].reverse();
+  return [];
+}
+function directionalLinkKey(key){
+  if(key==="pc1sw1"||key==="sw1pc1")return "pc1sw1";
+  if(key==="pc3sw1"||key==="sw1pc3")return "sw1pc3";
+  if(key==="pc2sw2"||key==="sw2pc2")return "sw2pc2";
+  if(key==="sw1r2"||key==="r2sw1")return "sw1r2";
+  if(key==="r2sw2"||key==="sw2r2")return "r2sw2";
+  return null;
+}
 async function animateReply(keys){
   setPacketVisual("reply");
   const done=[];
   for(const key of keys){
-    const linkKey=key==="pc3sw1"?"sw1pc3":
-                  key==="pc2sw2"?"sw2pc2":
-                  key==="sw2r2"?"r2sw2":
-                  key==="sw1r2"?"sw1r2":
-                  key==="r2sw1"?"sw1r2":
-                  key==="sw1pc1"?"pc1sw1":null;
+    const linkKey=directionalLinkKey(key);
     if(linkKey&&!effectiveLinkUp(linkKey)){
       const reason=linkDownReason(linkKey);
       showPacketStop(linkKey,reason);
@@ -53,18 +69,57 @@ async function animateReply(keys){
       setPacketVisual("request");
       return {ok:false,key:linkKey,reason};
     }
-    const route=key==="pc3sw1"?[...paths.sw1pc3].reverse():
-                key==="pc2sw2"?[...paths.sw2pc2].reverse():
-                key==="sw2r2"?[...paths.r2sw2].reverse():
-                key==="sw1r2"?paths.sw1r2:
-                key==="r2sw1"?[...paths.sw1r2].reverse():
-                key==="sw1pc1"?[...paths.pc1sw1].reverse():[];
+    const route=directionalRoute(key);
     if(route.length)await move(route);
     done.push(key);
   }
   markReply(done);
   setPacketVisual("request");
   return {ok:true};
+}
+async function animateHostArpRequest(host,targetKind){
+  hidePacketStop();setPacketVisual("request");
+  if(host.key==="pc2"){
+    if(!effectiveLinkUp("sw2pc2")){
+      const reason=linkDownReason("sw2pc2");
+      showPacketStop("sw2pc2",reason);
+      return {ok:false,key:"sw2pc2",reason};
+    }
+    await move([...paths.sw2pc2].reverse());markRequest(["pc2sw2"]);
+    setLiveEvent("arp","PC2 → LAN B · ARP Broadcast",`${host.name}이 LAN B에서 ARP Request를 Broadcast합니다.`);
+    if(effectiveLinkUp("r2sw2")){
+      await move([...paths.r2sw2].reverse());markRequest(["sw2r2"]);
+    }else if(targetKind==="r2"){
+      const reason=linkDownReason("r2sw2");
+      showPacketStop("r2sw2",reason);
+      return {ok:false,key:"r2sw2",reason};
+    }
+    return {ok:true};
+  }
+
+  if(host.key==="pc3"){
+    if(!effectiveLinkUp("sw1pc3")){
+      const reason=linkDownReason("sw1pc3");
+      showPacketStop("sw1pc3",reason);
+      return {ok:false,key:"sw1pc3",reason};
+    }
+    await move([...paths.sw1pc3].reverse());markRequest(["pc3sw1"]);
+    setLiveEvent("arp","PC3 → LAN A · ARP Broadcast",`${host.name}이 LAN A에서 ARP Request를 Broadcast합니다. SW1은 들어온 포트를 제외한 PC1/R2 방향으로 Flooding합니다.`);
+    const jobs=[];
+    if(effectiveLinkUp("pc1sw1"))jobs.push(moveSvgDot("arpBranchPc1",[...paths.pc1sw1].reverse()));
+    if(effectiveLinkUp("sw1r2"))jobs.push(moveSvgDot("arpBranchR2",paths.sw1r2));
+    await Promise.all(jobs);
+    if(targetKind==="pc1"&&!effectiveLinkUp("pc1sw1")){
+      const reason=linkDownReason("pc1sw1");showPacketStop("pc1sw1",reason);return {ok:false,key:"pc1sw1",reason};
+    }
+    if(targetKind==="r2"&&!effectiveLinkUp("sw1r2")){
+      const reason=linkDownReason("sw1r2");showPacketStop("sw1r2",reason);return {ok:false,key:"sw1r2",reason};
+    }
+    if(targetKind==="pc1")markRequest(["sw1pc1"]);
+    if(targetKind==="r2")markRequest(["sw1r2"]);
+    return {ok:true};
+  }
+  return {ok:false,key:"",reason:"UNSUPPORTED"};
 }
 async function animateRouterArp(route,dest){
   hidePacketStop();setPacketVisual("request");
@@ -74,35 +129,45 @@ async function animateRouterArp(route,dest){
     }
     await move(paths.r2sw2);markRequest(["r2sw2"]);
     setLiveEvent("arp","R2 → LAN B · ARP Broadcast",`R2가 ${dest.ip}의 MAC을 알아내기 위해 eth1에서 ARP Request를 Broadcast합니다.`);
-    if(destinationIsOnPhysicalSegment(dest,"B")){
-      if(!effectiveLinkUp(dest.accessLink)){
-        const reason=linkDownReason(dest.accessLink);showPacketStop(dest.accessLink,reason);return {ok:false,key:dest.accessLink,reason};
-      }
+    if(effectiveLinkUp("sw2pc2")){
       await move(paths.sw2pc2);markRequest(["sw2pc2"]);
-    }else if(effectiveLinkUp("sw2pc2")){
-      await move(paths.sw2pc2);markRequest(["sw2pc2"]);
+    }else if(dest.key==="pc2"){
+      const reason=linkDownReason("sw2pc2");showPacketStop("sw2pc2",reason);return {ok:false,key:"sw2pc2",reason};
     }
     return {ok:true};
   }
+
   if(!effectiveLinkUp("sw1r2")){
     const reason=linkDownReason("sw1r2");showPacketStop("sw1r2",reason);return {ok:false,key:"sw1r2",reason};
   }
   await move([...paths.sw1r2].reverse());markRequest(["r2sw1"]);
-  setLiveEvent("arp","R2 → LAN A · ARP Broadcast",`R2가 ${dest.ip}의 MAC을 알아내기 위해 eth0에서 ARP Request를 Broadcast합니다.`);
-  if(effectiveLinkUp("sw1pc3"))await moveSvgDot("arpBranchPc3",paths.sw1pc3);
-  if(destinationIsOnPhysicalSegment(dest,"A")&&!effectiveLinkUp(dest.accessLink)){
-    const reason=linkDownReason(dest.accessLink);showPacketStop(dest.accessLink,reason);return {ok:false,key:dest.accessLink,reason};
+  setLiveEvent("arp","R2 → LAN A · ARP Broadcast",`R2가 ${dest.ip}의 MAC을 알아내기 위해 eth0에서 ARP Request를 Broadcast합니다. SW1은 PC1과 PC3 방향으로 Flooding합니다.`);
+  const jobs=[];
+  if(effectiveLinkUp("pc1sw1"))jobs.push(moveSvgDot("arpBranchPc1",[...paths.pc1sw1].reverse()));
+  if(effectiveLinkUp("sw1pc3"))jobs.push(moveSvgDot("arpBranchPc3",paths.sw1pc3));
+  await Promise.all(jobs);
+
+  if(dest.key==="pc1"){
+    if(!effectiveLinkUp("pc1sw1")){
+      const reason=linkDownReason("pc1sw1");showPacketStop("pc1sw1",reason);return {ok:false,key:"pc1sw1",reason};
+    }
+    markRequest(["sw1pc1"]);
+  }else if(dest.key==="pc3"){
+    if(!effectiveLinkUp("sw1pc3")){
+      const reason=linkDownReason("sw1pc3");showPacketStop("sw1pc3",reason);return {ok:false,key:"sw1pc3",reason};
+    }
+    markRequest(["sw1pc3"]);
   }
-  if(destinationIsOnPhysicalSegment(dest,"A"))markRequest(["sw1pc3"]);
   return {ok:true};
 }
 async function animateRouterArpReply(route,dest){
-  return route.segment==="B"
-    ?animateReply(["pc2sw2","sw2r2"])
-    :animateReply(["pc3sw1","sw1r2"]);
+  if(dest.key==="pc1")return animateReply(["pc1sw1","sw1r2"]);
+  if(dest.key==="pc3")return animateReply(["pc3sw1","sw1r2"]);
+  return animateReply(["pc2sw2","sw2r2"]);
 }
 async function animateR2ToDestination(route,dest){
   if(route.segment==="B"){
+    if(dest.key!=="pc2")return {ok:false,key:"sw2pc2",reason:"PHYSICAL_SEGMENT"};
     const r=await animateLinks(["r2sw2","sw2pc2"]);
     if(r.ok)markRequest(["r2sw2","sw2pc2"]);
     return r;
@@ -110,11 +175,16 @@ async function animateR2ToDestination(route,dest){
   if(!effectiveLinkUp("sw1r2")){
     const reason=linkDownReason("sw1r2");showPacketStop("sw1r2",reason);return {ok:false,key:"sw1r2",reason};
   }
-  await move([...paths.sw1r2].reverse());
-  if(!effectiveLinkUp("sw1pc3")){
-    const reason=linkDownReason("sw1pc3");showPacketStop("sw1pc3",reason);return {ok:false,key:"sw1pc3",reason};
+  await move([...paths.sw1r2].reverse());markRequest(["r2sw1"]);
+  const access=dest.key==="pc1"?"pc1sw1":"sw1pc3";
+  if(!effectiveLinkUp(access)){
+    const reason=linkDownReason(access);showPacketStop(access,reason);return {ok:false,key:access,reason};
   }
-  await move(paths.sw1pc3);markRequest(["r2sw1","sw1pc3"]);
+  if(dest.key==="pc1"){
+    await move([...paths.pc1sw1].reverse());markRequest(["sw1pc1"]);
+  }else{
+    await move(paths.sw1pc3);markRequest(["sw1pc3"]);
+  }
   return {ok:true};
 }
 async function showRouteLookup(destIp,route){
@@ -128,7 +198,7 @@ async function showRouteLookup(destIp,route){
   if(route){
     $("#routeLookupState").textContent="MATCH";
     $("#routeResult").textContent=`${route.network} → ${route.egress}`;
-    $("#routeTtl").textContent="64 → 63";
+    $("#routeTtl").textContent=`Simulator ${SIM_INITIAL_TTL} → ${SIM_INITIAL_TTL-1}`;
     $("#routeL2").textContent=`ARP/neighbor 확인 후 Src R2 ${route.egress} → Dst next-hop`;
   }else{
     $("#routeLookupState").textContent="NO ROUTE";
