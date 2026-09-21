@@ -164,6 +164,7 @@
   let manualDirty=false;
   let predictionChoice=null;
   let lessonRan=false;
+  let primaryActionVisible=true;
 
   function macName(mac){
     if(mac===BROADCAST) return BROADCAST;
@@ -551,22 +552,6 @@
     badge.textContent=manualDirty?'자유 조작 중':all?'완료':already?'완료 기록':'진행 중';
     const canContinue=all||already;
     $('nextBtn').disabled=!canContinue;
-    const quickBar=$('quickNextBar');
-    const quickBtn=$('quickNextBtn');
-    const quickLabel=$('quickNextLabel');
-    const basicMode=document.body.dataset.simMode==='basic';
-    if(quickBar){
-      quickBar.hidden=!(canContinue&&basicMode);
-      document.body.classList.toggle('quick-next-visible',canContinue&&basicMode);
-    }
-    if(quickBtn){
-      quickBtn.textContent=lesson===lessons.length-1?'전체 완료 보기 →':'다음 실습 →';
-    }
-    if(quickLabel){
-      quickLabel.textContent=lesson===lessons.length-1
-        ? '마지막 실습까지 완료했습니다.'
-        : '스크롤하지 않고 바로 다음 실습으로 이동할 수 있습니다.';
-    }
     $('verdictBox').className='verdict'+(all?' success':'');
     if(manualDirty){
       $('verdictBox').innerHTML='<b>고급 자유 조작 상태:</b> 현재 상태는 표준 실습 시작 조건과 다를 수 있습니다. 완료 판정을 다시 받으려면 실습 기본 상태로 복원하세요.';
@@ -577,6 +562,7 @@
     }else{
       $('verdictBox').textContent='위 조건을 실제 프레임 흐름에서 확인하세요.';
     }
+    updateQuickActionBar();
   }
 
   function completionText(idx){
@@ -610,10 +596,60 @@
     $('evidenceLink').textContent=evidenceByLesson[lesson][1];
   }
 
+  function updateQuickActionBar(){
+    const bar=$('quickNextBar');
+    const btn=$('quickNextBtn');
+    const label=$('quickNextLabel');
+    if(!bar||!btn||!label) return;
+
+    const basic=document.body.dataset.simMode==='basic';
+    const done=completed.has(lesson);
+    let action='';
+    let eyebrow='';
+    let copy='';
+    let buttonText='';
+    let disabled=false;
+
+    if(basic&&done){
+      action='next';
+      eyebrow='현재 실습 완료';
+      copy=lesson===lessons.length-1
+        ? '마지막 실습까지 완료했습니다.'
+        : '바로 다음 실습으로 이동할 수 있습니다.';
+      buttonText=lesson===lessons.length-1?'전체 완료 보기 →':'다음 실습 →';
+    }else if(basic&&!primaryActionVisible&&predictionChoice&&!lessonRan&&!manualDirty){
+      if(lesson===4&&!flags.aged){
+        action='age';
+        eyebrow='다음 단계';
+        copy='PC2 FDB Aging을 먼저 진행하세요.';
+        buttonText='⏱ +5초 경과';
+        disabled=busy||Boolean(flags.aged);
+      }else{
+        action='run';
+        eyebrow='예상 선택 완료';
+        copy='스크롤하지 않고 여기서 바로 결과를 확인할 수 있습니다.';
+        buttonText='② 실행해서 확인하기';
+        disabled=busy;
+      }
+    }
+
+    const show=Boolean(action);
+    bar.hidden=!show;
+    document.body.classList.toggle('quick-next-visible',show);
+    if(!show) return;
+    bar.dataset.quickAction=action;
+    const small=bar.querySelector('.quick-next-copy small');
+    if(small) small.textContent=eyebrow;
+    label.textContent=copy;
+    btn.textContent=buttonText;
+    btn.disabled=disabled;
+  }
+
   function updateControls(){
     $('runBtn').disabled=busy||manualDirty||lessonRan||!predictionChoice||(lesson===4&&!flags.aged);
     $('ageBtn').disabled=busy||manualDirty||Boolean(flags.aged);
     $('ageBtn').hidden=lesson!==4;
+    updateQuickActionBar();
   }
 
   function resetScenario(){
@@ -937,7 +973,24 @@
   }
 
   $('nextBtn').addEventListener('click',goNextLesson);
-  $('quickNextBtn').addEventListener('click',goNextLesson);
+  $('quickNextBtn').addEventListener('click',()=>{
+    const action=$('quickNextBar')?.dataset.quickAction;
+    if(action==='next') goNextLesson();
+    else if(action==='run') runLesson();
+    else if(action==='age') ageLesson();
+  });
+
+  const primaryControls=document.querySelector('.controls');
+  if(primaryControls&&'IntersectionObserver' in window){
+    const observer=new IntersectionObserver(entries=>{
+      primaryActionVisible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.2);
+      updateQuickActionBar();
+    },{threshold:[0,.2,.6]});
+    observer.observe(primaryControls);
+  }else{
+    primaryActionVisible=false;
+    window.addEventListener('scroll',updateQuickActionBar,{passive:true});
+  }
 
   $('clearFdbBtn').addEventListener('click',()=>{
     if(busy) return;
