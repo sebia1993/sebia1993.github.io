@@ -91,6 +91,7 @@ function setViewMode(mode,{openPanel=false,scroll=false}={}){
   }
   $$("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
   if(typeof updatePredictionControls==="function")updatePredictionControls();
+  if(typeof updateQuickNextBar==="function")updateQuickNextBar();
 }
 window.setArpViewMode=setViewMode;
 
@@ -107,11 +108,13 @@ $$('[data-open-device]').forEach(x=>x.onclick=()=>{if(isAdvancedMode())openDevic
 $("#drawerClose").onclick=()=>{$("#deviceDrawer").classList.remove("show");state.openDevice=null};
 $("#pingBtn").onclick=ping;
 $("#hintBtn").onclick=showHint;
-$("#nextBtn").onclick=()=>{
+function goNextLesson(){
   if(!state.completed[state.lesson])return;
   if(state.lesson<lessons.length-1)configureLesson(state.lesson+1);
   else $("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"});
-};
+}
+$("#nextBtn").onclick=goNextLesson;
+$("#quickNextBtn").onclick=goNextLesson;
 $("#resetBtn").onclick=()=>configureLesson(state.lesson);
 $("#applyBtn").onclick=()=>{
   const nextMask=+$("#maskInput").value,nextGw=$("#gwInput").value.trim();
@@ -140,7 +143,7 @@ setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-mode12";
+  const version="20260921-mode13";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
