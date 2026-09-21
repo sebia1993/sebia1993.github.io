@@ -17,10 +17,11 @@
       <a href="#beginner-first">처음 읽기</a>
       <a href="#topology">동작 그림</a>
       <a href="#results">실험 결과</a>
-      <a href="#practical-extension">실무 확장</a>
-      <a href="#operator-drills">실전 문제</a>
-      <a href="#cli-workflow">CLI 흐름</a>
-      <a href="#evidence">원본 자료</a>
+      <a href="#explanation">이해 확인</a>
+      <a href="#practical-extension" data-mode-link="advanced" hidden>실무 확장</a>
+      <a href="#operator-drills" data-mode-link="advanced" hidden>실전 문제</a>
+      <a href="#cli-workflow" data-mode-link="advanced" hidden>CLI 흐름</a>
+      <a href="#evidence" data-mode-link="advanced" hidden>원본 자료</a>
     </nav>
   </div>
 </header>
@@ -43,6 +44,23 @@
       <article><strong>1</strong><span>저장된 GNS3 Lab</span></article>
     </div>
     <p class="method-note"><b>처음부터 PCAP이나 FDB 명령을 해석할 필요는 없습니다.</b> 바로 아래 <b>00 · 처음 읽기</b>부터 보고, 그다음 실험은 “정말 그렇게 동작했는지 확인하는 증거”로 보면 됩니다.</p>
+  </div>
+</section>
+
+<section class="learning-mode-bar" aria-labelledby="learning-mode-title">
+  <div class="shell">
+    <div class="learning-mode-card">
+      <div>
+        <div class="eyebrow">LEARNING MODE · BEGINNER FIRST</div>
+        <h2 id="learning-mode-title">처음에는 기본 모드만 보세요.</h2>
+        <p>기본 흐름을 이해한 뒤 필요할 때 실무 확장·문제풀이·CLI를 추가로 펼칩니다.</p>
+      </div>
+      <div class="learning-mode-actions" role="group" aria-label="학습 모드 선택">
+        <button type="button" data-learning-mode="basic" aria-pressed="true">기본 모드 <small>처음 학습 권장</small></button>
+        <button type="button" data-learning-mode="advanced" aria-pressed="false">고급 모드 <small>실무·CLI 확장</small></button>
+      </div>
+      <p class="learning-mode-note" id="learning-mode-note" aria-live="polite">기본 모드: Source MAC Learning → Destination MAC 조회 → Known/Unknown/Broadcast → ARP와 FDB 분리 순서만 먼저 봅니다.</p>
+    </div>
   </div>
 </section>
 
@@ -109,8 +127,8 @@
       </article>
       <article>
         <span>③ 내보낼 곳을 결정</span>
-        <h3>알면 한 곳, 모르면 여러 곳</h3>
-        <p>PC2 위치를 알면 그 포트로만 보냅니다. 모르면 동일 VLAN/Broadcast Domain의 다른 전달 가능 포트로 <b>Flooding</b>합니다.</p>
+        <h3>다른 전달 포트를 알면 한 곳, 모르면 여러 곳</h3>
+        <p>PC2 MAC이 수신 포트가 아닌 특정 전달 포트에 학습되어 있으면 그 포트로만 보냅니다. FDB에 없으면 동일 VLAN/Broadcast Domain의 다른 전달 가능 포트로 <b>Flooding</b>합니다.</p>
       </article>
     </div>
 
@@ -257,7 +275,7 @@
       </table>
     </div>
     <div class="note practice-note">
-      <b>실무 정확도 · VLAN도 함께 생각하기:</b> 실제 Ethernet Switch의 동적 FDB는 하나의 전역 <code>MAC → Port</code> 표라기보다 <b>VLAN(Forwarding Domain)별로 MAC의 위치를 학습</b>한다고 이해하는 것이 정확합니다. 즉 실무에서는 <b>VLAN + MAC → Port</b> 관점이 중요합니다. 이 Lab은 단일 Broadcast Domain만 사용하므로 초급 설명에서는 <b>MAC → Port</b>로 단순화했습니다.
+      <b>실무 정확도 · VLAN도 함께 생각하기:</b> 실무에서는 MAC 주소만 단독으로 보지 않고 <b>VLAN/Forwarding Domain의 문맥과 함께</b> 확인해야 합니다. 많은 Enterprise Switch는 MAC Table 출력에서 VLAN·MAC·Port를 함께 보여주며, 내부 FDB 구조와 학습 범위는 장비 구현에 따라 달라질 수 있습니다. 이 Lab은 단일 Broadcast Domain만 사용하므로 초급 설명에서는 <b>MAC → Port</b>로 단순화했습니다.
     </div>
     <div class="test-guide">
       <h3>그래서 ARP에는 있는데 MAC Table에는 없을 수도 있습니다.</h3>
@@ -290,8 +308,13 @@
     <p class="method-note"><b>보는 순서:</b> 받은 프레임의 Source/Destination MAC → MAC Table 상태 → 스위치의 출력 결정.</p>
 
     <div class="lab-scope">
-      <b>이 Lab의 범위:</b> 단일 VLAN/Broadcast Domain · 모든 링크 Forwarding 상태 · Port Isolation 없음 · Gateway/NAT 없음. 실제 네트워크에서는 VLAN, STP 상태, 보안 기능 등에 따라 Flooding 가능한 포트 범위가 달라질 수 있습니다.
+      <b>이 Lab의 범위:</b> 단일 VLAN/Broadcast Domain · 모든 링크 Forwarding 상태 · Port Isolation 없음 · Unknown-Unicast 차단/억제 없음 · Gateway/NAT 없음. 실제 네트워크에서는 VLAN, STP 상태, 보안 기능 등에 따라 Flooding 가능한 포트 범위가 달라질 수 있습니다.
     </div>
+    <details class="test-commands scope-details">
+      <summary>이 동작 그림이 모델링하지 않는 항목</summary>
+      <p>VLAN/Trunk 구성 변경, STP Blocking/Topology Change, Port-Security·MAC 제한, Static MAC, Unknown-Unicast Suppression, 링크 장애, 실시간 FDB Aging 상태 전이는 이 그림에서 시뮬레이션하지 않습니다.</p>
+      <p>06번 Aging은 별도의 실제 Linux Bridge 실험 결과로 검증했으며, 아래 동작 그림 자체가 Aging 타이머를 재현하는 것은 아닙니다.</p>
+    </details>
 
     <div class="prediction-card" id="unknown-prediction">
       <span class="eyebrow">PREDICT BEFORE CHECKING</span>
@@ -313,8 +336,8 @@
     <div class="mobile-path-flow" aria-live="polite" aria-atomic="true">
       <div class="mobile-flow-node source">
         <small>INGRESS</small>
-        <strong>PC1</strong>
-        <span>프레임을 SW1으로 전송</span>
+        <strong id="mobile-source-device">PC1</strong>
+        <span id="mobile-source-detail">프레임을 SW1으로 전송</span>
       </div>
       <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
       <div class="mobile-flow-node switch">
@@ -325,11 +348,11 @@
       <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
       <div class="mobile-flow-branches">
         <div class="mobile-flow-node">
-          <small>PC2 링크</small>
+          <small id="mobile-primary-label">PC2 링크</small>
           <strong id="mobile-pc2-state">전달</strong>
         </div>
         <div class="mobile-flow-node">
-          <small>PC3 링크</small>
+          <small id="mobile-secondary-label">PC3 링크</small>
           <strong id="mobile-pc3-state">전달하지 않음</strong>
         </div>
       </div>
@@ -361,7 +384,7 @@
       <a id="path-evidence" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc2-sw1">PC2 전달 패킷 확인 →</a>
       <a id="path-compare" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 미전달 비교 →</a>
     </div>
-    <p class="method-note">갈색 점선은 선택한 프레임의 이동 방향입니다. 실제 PCAP에 근거한 설명 그림이며 실시간 애니메이션은 아닙니다.</p>
+    <p class="method-note">갈색 점선은 <b>현재 선택한 프레임의 이동 방향</b>을 뜻하며 ARP/ICMP 같은 프로토콜 종류를 색으로 구분한 것이 아닙니다. 실제 PCAP에 근거한 설명 그림이며 실시간 애니메이션은 아닙니다.</p>
   </div>
 </section>
 
@@ -456,7 +479,20 @@
   </div>
 </section>
 
-<section id="practical-extension">
+<section id="advanced-entry" class="advanced-entry" data-basic-only>
+  <div class="shell">
+    <div class="advanced-entry-card">
+      <div>
+        <div class="eyebrow">NEXT · OPTIONAL</div>
+        <h2>기본 흐름이 이해됐다면 실무 확장으로 넘어가세요.</h2>
+        <p>MAC Move·Flapping, 운영 판단 문제, Aruba/Cisco CLI 흐름, 원본 검증 자료는 고급 모드에서 확인할 수 있습니다.</p>
+      </div>
+      <button type="button" id="enable-advanced">고급 모드로 전환해 계속 보기 →</button>
+    </div>
+  </div>
+</section>
+
+<section id="practical-extension" data-learning-level="advanced" hidden>
   <div class="shell">
     <div class="section-head">
       <div>
@@ -514,7 +550,7 @@
   </div>
 </section>
 
-<section id="operator-drills">
+<section id="operator-drills" data-learning-level="advanced" hidden>
   <div class="shell">
     <div class="section-head">
       <div>
@@ -665,7 +701,7 @@
   </div>
 </section>
 
-<section id="cli-workflow">
+<section id="cli-workflow" data-learning-level="advanced" hidden>
   <div class="shell">
     <div class="section-head">
       <div>
@@ -788,7 +824,7 @@ AA:AA:AA:AA:AA:01  18     20</pre>
   </div>
 </section>
 
-<section id="evidence">
+<section id="evidence" data-learning-level="advanced" hidden>
   <div class="shell">
     <div class="section-head"><div><div class="eyebrow">05 · ORIGINAL EVIDENCE</div><h2>이해한 뒤 필요하면 원본까지 확인하세요.</h2></div><p>설명을 믿는 데서 끝내지 않고<br>실제 콘솔·FDB·PCAP으로 다시 확인할 수 있습니다.</p></div>
     <div class="download-grid">
@@ -799,7 +835,7 @@ AA:AA:AA:AA:AA:01  18     20</pre>
   </div>
 </section>
 
-<section id="verification-map">
+<section id="verification-map" data-learning-level="advanced" hidden>
   <div class="shell">
     <div class="eyebrow">VALIDATION MAP</div>
     <h2>무엇을 어떤 실험으로 검증했는가?</h2>
