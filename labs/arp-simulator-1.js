@@ -34,7 +34,7 @@ const lessons=[
     dest:"pc2",title:"장애 실습 · Subnet Mask가 잘못됐습니다",text:"PC1이 PC2를 같은 네트워크로 착각합니다. 패킷이 누구를 ARP하는지 보세요.",type:"mask",
     hints:[
       "실패한 패킷에서 PC1이 Gateway가 아니라 PC2를 직접 ARP하는지 보세요.",
-      "PC1이 192.168.20.10을 Local로 판단한 이유는 IP 자체보다 Subnet Mask에 있습니다.",
+      "PC1이 192.168.20.10을 on-link로 판단한 이유는 IP 자체보다 Subnet Mask에 있습니다.",
       "PC1의 정상 Prefix는 /24입니다. 현재 /16을 /24로 복구하세요."
     ]
   },
@@ -111,7 +111,7 @@ function resetFlow(){
   clearTracePaths();$("#routeLookupCard").classList.remove("show");
   setLiveEvent("ready","패킷 이벤트 대기","PING을 보내면 장비별 처리 내용을 이 영역에서 순서대로 설명합니다.");
   ["s1","s2","s3","s4"].forEach(id=>{$("#"+id).className="flow-step"});
-  $("#s1").innerHTML='<div class="n">STEP 1</div><strong>네트워크 판단</strong><p>목적지가 Local인지 Remote인지 확인합니다.</p>';
+  $("#s1").innerHTML='<div class="n">STEP 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p>';
   $("#s2").innerHTML='<div class="n">STEP 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p>';
   $("#s3").innerHTML='<div class="n">STEP 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p>';
   $("#s4").innerHTML='<div class="n">STEP 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p>';
