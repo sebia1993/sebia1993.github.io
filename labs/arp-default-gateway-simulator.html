@@ -55,8 +55,8 @@
     <div class="coach">
       <div class="coach-icon" id="coachIcon">1</div>
       <div>
-        <div class="coach-title" id="coachTitle">PC3로 PING을 보내보세요</div>
-        <div class="coach-text" id="coachText">PC3는 PC1과 같은 LAN A에 있습니다. 지금은 정답을 몰라도 됩니다.</div>
+        <div class="coach-title" id="coachTitle">같은 네트워크면 누구를 ARP할까요?</div>
+        <div class="coach-text" id="coachText">PC3는 PC1과 같은 네트워크에 있습니다. 먼저 결과를 예상한 뒤 확인하세요.</div>
       </div>
       <button class="hint-trigger" id="hintBtn">막혔나요? 힌트 1/3</button>
     </div>
@@ -80,7 +80,7 @@
         <b id="liveEventTitle">패킷 이벤트 대기</b>
         <p id="liveEventDetail">PING을 보내면 현재 패킷이 어느 장비에 있고, 그 장비가 무엇을 하고 있는지 여기에 표시됩니다.</p>
       </div>
-      <span id="liveEventKind" class="live-event-kind">READY</span>
+      <span id="liveEventKind" class="live-event-kind">대기</span>
     </div>
 
     <div class="topology-tip"><b>장비/링크 조작:</b> PC1 · PC2 · PC3 · R2의 <b>⚙ 설정</b>에서 주소를 바꿀 수 있고, <b>케이블 선 자체를 클릭</b>하면 Cable 상태를 바꿀 수 있습니다. 정상 UP 표시는 숨기고 장애가 있을 때만 상태 Badge를 표시해 토폴로지를 단순하게 유지합니다.</div>
@@ -130,7 +130,7 @@
 
     <div class="lesson-status">
       <div class="lesson-status-head">
-        <strong>현재 실습 완료 조건</strong>
+        <strong>현재 학습 상태</strong>
         <span class="status-badge" id="lessonBadge">진행 전</span>
       </div>
       <div class="check-list" id="checkList"></div>
@@ -154,8 +154,8 @@
       <div class="completion-card"><b>Router 통과</b><span>NAT 없는 Lab에서는 출발지·목적지 IP 주소를 유지하고, 라우터가 새 L2 Frame으로 재캡슐화하며 TTL을 감소</span></div>
     </div>
     <div class="next-lab-actions">
-      <a class="primary" href="https://sebia1993.github.io/labs/ethernet-mac-table-simulator.html" target="_blank" rel="noopener">다음 Lab · Ethernet / MAC Table 실습 →</a>
-      <a href="https://sebia1993.github.io/labs/arp-default-gateway.html" target="_blank" rel="noopener">ARP / Gateway 원문 가이드</a>
+      <a class="primary" href="https://sebia1993.github.io/labs/ethernet-mac-table-simulator.html" target="_blank" rel="noopener">다음 실습 · Ethernet / MAC Table →</a>
+      <a href="https://sebia1993.github.io/labs/arp-default-gateway.html" target="_blank" rel="noopener">ARP / Gateway 학습 페이지</a>
       <a href="https://sebia1993.github.io/roadmap.html" target="_blank" rel="noopener">학습 로드맵</a>
     </div>
   </section>
