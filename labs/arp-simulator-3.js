@@ -2,15 +2,25 @@ function applyDeviceConfig(){
   const d=state.openDevice;
   if(d==="pc1"||d==="pc2"||d==="pc3"){
     const ip=$("#cfgIp").value.trim(), prefix=+$("#cfgPrefix").value, gw=$("#cfgGw").value.trim();
-    if(!isValidIp(ip)||!isValidIp(gw)){alert("IP 주소와 Gateway 형식을 확인하세요.");return}
+    if(!isUsableInterfaceIp(ip,prefix)){
+      alert("Host IP는 현재 Prefix에서 사용 가능한 unicast 주소여야 합니다. Network/Broadcast/Loopback/Multicast 주소는 지원하지 않습니다.");return;
+    }
+    if(!isUnicastIpv4(gw)){alert("Gateway는 유효한 unicast IPv4 주소여야 합니다.");return}
+    if(duplicateInterfaceIp(ip,d)){alert("같은 토폴로지에서 중복된 인터페이스 IP는 지원하지 않습니다.");return}
     if(d==="pc1"){state.pc1Ip=ip;state.mask=prefix;state.gw=gw}
     if(d==="pc3"){state.pc3Ip=ip;state.pc3Mask=prefix;state.pc3Gw=gw}
     if(d==="pc2"){state.pc2Ip=ip;state.pc2Mask=prefix;state.pc2Gw=gw}
   }else if(d==="r2"){
     const e0=$("#cfgR2e0Ip").value.trim(),e1=$("#cfgR2e1Ip").value.trim();
-    if(!isValidIp(e0)||!isValidIp(e1)){alert("R2 인터페이스 IP 형식을 확인하세요.");return}
-    state.r2e0Ip=e0;state.r2e0Mask=+$("#cfgR2e0Mask").value;
-    state.r2e1Ip=e1;state.r2e1Mask=+$("#cfgR2e1Mask").value;
+    const m0=+$("#cfgR2e0Mask").value,m1=+$("#cfgR2e1Mask").value;
+    if(!isUsableInterfaceIp(e0,m0)||!isUsableInterfaceIp(e1,m1)){
+      alert("R2 인터페이스 IP는 각 Prefix에서 사용 가능한 unicast 주소여야 합니다.");return;
+    }
+    if(e0===e1||duplicateInterfaceIp(e0,"r2e0")||duplicateInterfaceIp(e1,"r2e1")){
+      alert("R2/Host 간 중복 인터페이스 IP는 지원하지 않습니다.");return;
+    }
+    state.r2e0Ip=e0;state.r2e0Mask=m0;
+    state.r2e1Ip=e1;state.r2e1Mask=m1;
   }
   state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderArp();renderState();renderLessonStatus();
   log(`${d.toUpperCase()} 설정 적용 · 다음 PING부터 새 구성 사용`);
