@@ -16,9 +16,10 @@ function configureLesson(i){
   $("#coachIcon").textContent=i+1;$("#coachTitle").textContent=l.title;$("#coachText").textContent=l.text;
   $("#recoveryNudge").classList.remove("show");$("#recoveryNudge").innerHTML="";
   $$(".lesson-tab").forEach((b,idx)=>b.classList.toggle("active",idx===i));
-  $("#advancedNote").innerHTML=i<2?
-    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 바꿀 수 있습니다. 다음 PING에서는 PC1의 on-link 판단, Gateway 유효성, R2 Connected Route와 PC1·PC2·PC3·R2의 독립 Neighbor Cache를 사용합니다. Reply 방향에서도 Cache가 없으면 ARP Request/Reply를 수행합니다. Proxy ARP·Static Route·NAT·ARP aging/state transition은 범위 밖입니다.":
-    `<b>복구 목표:</b> 장애를 재현한 뒤 토폴로지 장비 설정을 직접 수정하고 다시 PING하여 성공시키세요.`;
+  $("#advancedNote").innerHTML=(i<2?
+    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 바꿀 수 있습니다. 다음 PING에서는 PC1의 on-link 판단, Gateway 유효성, R2 Connected Route와 PC1·PC2·PC3·R2의 독립 Neighbor Cache를 사용합니다. Reply 방향에서도 Cache가 없으면 ARP Request/Reply를 수행합니다. ":
+    "<b>복구 목표:</b> 장애를 재현한 뒤 토폴로지 장비 설정을 직접 수정하고 다시 PING하여 성공시키세요. ")+
+    "<b>지원 범위:</b> IPv4/Ethernet · R2 Connected Route · LAN A/B는 각각 하나의 L2 Broadcast Domain(VLAN 미사용). PC1/PC2/PC3는 End Host이며 IP forwarding을 하지 않습니다. Switch MAC learning·Unknown Unicast·VLAN/Trunk·STP, Proxy ARP·Static Route·NAT·동적 라우팅, ICMP Redirect·Destination Unreachable·Time Exceeded, ARP aging/state transition은 모델링하지 않습니다.";
   setExplain(i===0?"먼저 <b>PC3</b>가 선택된 상태에서 <b>PING 보내기</b>를 눌러보세요.":
              i===1?"이번에는 <b>PC2</b>로 PING을 보내 Gateway를 거치는지 확인하세요.":
              "먼저 <b>PING 보내기</b>로 장애를 재현하세요. 이후 해당 장비의 ⚙ 설정에서 실제 값을 수정할 수 있습니다.",
@@ -90,7 +91,7 @@ $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.targe
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-accuracy7";
+  const version="20260921-accuracy8";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
