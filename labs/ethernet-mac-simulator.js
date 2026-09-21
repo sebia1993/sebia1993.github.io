@@ -549,7 +549,24 @@
     const badge=$('lessonBadge');
     badge.classList.toggle('success',all||already);
     badge.textContent=manualDirty?'자유 조작 중':all?'완료':already?'완료 기록':'진행 중';
-    $('nextBtn').disabled=!(all||already);
+    const canContinue=all||already;
+    $('nextBtn').disabled=!canContinue;
+    const quickBar=$('quickNextBar');
+    const quickBtn=$('quickNextBtn');
+    const quickLabel=$('quickNextLabel');
+    const basicMode=document.body.dataset.simMode==='basic';
+    if(quickBar){
+      quickBar.hidden=!(canContinue&&basicMode);
+      document.body.classList.toggle('quick-next-visible',canContinue&&basicMode);
+    }
+    if(quickBtn){
+      quickBtn.textContent=lesson===lessons.length-1?'전체 완료 보기 →':'다음 실습 →';
+    }
+    if(quickLabel){
+      quickLabel.textContent=lesson===lessons.length-1
+        ? '마지막 실습까지 완료했습니다.'
+        : '스크롤하지 않고 바로 다음 실습으로 이동할 수 있습니다.';
+    }
     $('verdictBox').className='verdict'+(all?' success':'');
     if(manualDirty){
       $('verdictBox').innerHTML='<b>고급 자유 조작 상태:</b> 현재 상태는 표준 실습 시작 조건과 다를 수 있습니다. 완료 판정을 다시 받으려면 실습 기본 상태로 복원하세요.';
@@ -889,8 +906,9 @@
       btn.setAttribute('aria-pressed',String(on));
     });
     $('viewModeSummary').textContent=mode==='basic'
-      ? '기본 모드 · 처음에는 Frame과 FDB의 핵심 변화만 확인하세요.'
+      ? '기본 모드 · 처음에는 Ethernet Frame과 FDB의 핵심 변화만 확인하세요.'
       : '고급 모드 · SW1 FDB, PC1/PC2 ARP 캐시와 현재 실습 상태를 직접 바꾸는 자유 조작을 표시합니다.';
+    renderChecks();
   }
 
   document.querySelectorAll('[data-lesson]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -912,11 +930,14 @@
   $('ageBtn').addEventListener('click',ageLesson);
   $('resetBtn').addEventListener('click',()=>{ if(!busy) loadLesson(lesson); });
   $('resetLabStateBtn').addEventListener('click',()=>{ if(!busy) loadLesson(lesson); });
-  $('nextBtn').addEventListener('click',()=>{
+  function goNextLesson(){
     if(busy) return;
     if(lesson<lessons.length-1) loadLesson(lesson+1);
     else $('courseComplete').scrollIntoView({behavior:'smooth',block:'center'});
-  });
+  }
+
+  $('nextBtn').addEventListener('click',goNextLesson);
+  $('quickNextBtn').addEventListener('click',goNextLesson);
 
   $('clearFdbBtn').addEventListener('click',()=>{
     if(busy) return;
