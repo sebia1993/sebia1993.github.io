@@ -161,6 +161,15 @@
     clearReplyTimers();
     if (!autoFollow || !mq.matches) return;
 
+    if (kind === "reply" && title.includes("PC3")) {
+      scrollToElement(mobile.querySelector("#mtPc3"), { force: true, label: "Reply 시작 · PC3" });
+      replyTimers.push(setTimeout(() => {
+        if (Date.now() < userPauseUntil) return;
+        scrollToElement(mobile.querySelector("#mtPc1"), { label: "Reply 도착 · PC1" });
+      }, 700));
+      return;
+    }
+
     if (kind === "reply" && title.includes("PC2")) {
       scrollToElement(mobile.querySelector("#mtPc2"), { force: true, label: "Reply 시작 · PC2" });
       replyTimers.push(setTimeout(() => {
@@ -244,6 +253,9 @@
     }
     if (title.includes("R2 → PC2")) {
       return scrollToRegion(["#mtSw2", "#mtPc2"], { force, label: "ICMP · PC2 방향" });
+    }
+    if (title.includes("R2 → PC3")) {
+      return scrollToRegion(["#mtSw1", "#mtPc3"], { force, label: "ICMP · PC3 방향" });
     }
 
     const errorNode = mobile.querySelector(".error-active");
