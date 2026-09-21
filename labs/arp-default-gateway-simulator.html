@@ -78,11 +78,11 @@
     <div class="controls">
       <div class="destination-choice">
         <button class="dest-btn same active" data-dest="pc3">
-          <strong>PC3 · 같은 네트워크</strong>
+          <strong>PC3 · LAN A</strong>
           <span id="destPc3Ip">192.168.10.20 · LAN A</span>
         </button>
         <button class="dest-btn remote" data-dest="pc2">
-          <strong>PC2 · 다른 네트워크</strong>
+          <strong>PC2 · LAN B</strong>
           <span id="destPc2Ip">192.168.20.10 · LAN B</span>
         </button>
       </div>
@@ -94,7 +94,7 @@
       <span id="resultHint">PING을 보내면 순서대로 표시됩니다.</span>
     </div>
     <div class="flow">
-      <div class="flow-step" id="s1"><div class="n">STEP 1</div><strong>네트워크 판단</strong><p>목적지가 Local인지 Remote인지 확인합니다.</p></div>
+      <div class="flow-step" id="s1"><div class="n">STEP 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p></div>
       <div class="flow-step" id="s2"><div class="n">STEP 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p></div>
       <div class="flow-step" id="s3"><div class="n">STEP 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p></div>
       <div class="flow-step" id="s4"><div class="n">STEP 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p></div>
@@ -122,9 +122,9 @@
     <h2>ARP / Default Gateway 실습을 모두 완료했습니다.</h2>
     <p>같은 Subnet, 다른 Subnet, 잘못된 Gateway/Mask, Gateway/Link 장애까지 직접 확인하고 복구했습니다.</p>
     <div class="completion-grid">
-      <div class="completion-card"><b>Local vs Remote</b><span>Subnet Mask로 목적지가 같은 네트워크인지 판단</span></div>
-      <div class="completion-card"><b>ARP / Next-hop</b><span>같은 LAN은 목적지, 원격 LAN은 Gateway MAC을 찾음</span></div>
-      <div class="completion-card"><b>Router 통과</b><span>IP는 유지되고 MAC은 링크마다 바뀌며 TTL은 감소</span></div>
+      <div class="completion-card"><b>On-link vs Gateway</b><span>송신 Host의 Prefix와 경로 판단으로 직접 전달인지 Gateway 경유인지 결정</span></div>
+      <div class="completion-card"><b>ARP / Next-hop</b><span>Host와 Router가 각 Ethernet 구간에서 자신의 next-hop IPv4→MAC 매핑을 확인</span></div>
+      <div class="completion-card"><b>Router 통과</b><span>NAT 없는 Lab에서는 출발지·목적지 IP 주소를 유지하고, 라우터가 새 L2 Frame으로 재캡슐화하며 TTL을 감소</span></div>
     </div>
     <div class="next-lab-actions">
       <a class="primary" href="https://sebia1993.github.io/labs/ethernet-mac-table.html" target="_blank" rel="noopener">다음 Lab · Ethernet / MAC Table →</a>
@@ -205,22 +205,28 @@
               <tbody>
                 <tr><td>Source IP</td><td id="cmpSrcIpA">—</td><td id="cmpSrcIpB">—</td><td class="same-value">그대로</td></tr>
                 <tr><td>Destination IP</td><td id="cmpDstIpA">—</td><td id="cmpDstIpB">—</td><td class="same-value">그대로</td></tr>
-                <tr><td>Source MAC</td><td id="cmpSrcMacA">—</td><td id="cmpSrcMacB">—</td><td class="changed-value">링크마다 변경</td></tr>
-                <tr><td>Destination MAC</td><td id="cmpDstMacA">—</td><td id="cmpDstMacB">—</td><td class="changed-value">링크마다 변경</td></tr>
+                <tr><td>Source MAC</td><td id="cmpSrcMacA">—</td><td id="cmpSrcMacB">—</td><td class="changed-value">라우터 경계에서 변경</td></tr>
+                <tr><td>Destination MAC</td><td id="cmpDstMacA">—</td><td id="cmpDstMacB">—</td><td class="changed-value">라우터 경계에서 변경</td></tr>
                 <tr><td>TTL</td><td id="cmpTtlA">—</td><td id="cmpTtlB">—</td><td class="changed-value">64 → 63</td></tr>
               </tbody>
             </table>
             <div class="compare-takeaway">
-              <b>핵심:</b> IP는 “최종 목적지 PC2”를 계속 가리키지만, Ethernet MAC은 각 LAN에서 다음에 받을 장비에 맞게 새로 만들어집니다.
+              <b>핵심:</b> 이 NAT 없는 Lab에서 출발지·목적지 IP 주소는 유지됩니다. 같은 L2 Segment를 스위치가 전달할 때 MAC pair가 바뀌는 것이 아니라, R2가 라우팅 후 출력 링크용 새 Ethernet Frame을 만들 때 Source/Destination MAC이 달라집니다.
             </div>
           </div>
 
           <div class="arp-help">
-            <strong>PC1 ARP Table = “같은 LAN에서 IP를 어떤 MAC으로 보낼지 적어둔 주소록”</strong>
+            <strong>PC1 Neighbor(ARP) Table = “현재 Ethernet 구간에서 next-hop IPv4를 어떤 MAC으로 보낼지 저장한 매핑”</strong>
             <p id="arpHelpText">ARP를 수행하면 결과가 아래 표에 쌓입니다. 원격 네트워크에서는 보통 최종 목적지 PC가 아니라 Default Gateway 항목이 생기는 점을 보세요.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="arpBody"><tr><td colspan="3" style="color:#7a90a3">아직 학습한 ARP 항목이 없습니다.</td></tr></tbody>
+            </table>
+            <strong style="display:block;margin-top:18px">R2 Neighbor(ARP) Table = “라우터가 출력 링크의 next-hop MAC을 확인한 결과”</strong>
+            <p>원격 통신에서는 PC1만 ARP하는 것이 아닙니다. R2도 선택한 출력 링크에서 최종 Host 또는 다음 홉의 MAC을 알아야 Ethernet Frame을 만들 수 있습니다.</p>
+            <table class="arp-table">
+              <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
+              <tbody id="r2ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 R2가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -230,7 +236,7 @@
     <details class="panel" id="advancedPanel">
       <summary>고급 실습 · 장비 설정 / 터미널 <span style="font-weight:500;color:#7b8fa1;font-size:12px">토폴로지 설정과 완전히 연동</span></summary>
       <div class="panel-body">
-        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 모든 변경값은 다음 PING의 Subnet 판단·ARP·Next-hop·라우팅·Reply 경로에 실제 반영됩니다.</div>
+        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 경로에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet, R2의 Connected Route, Proxy ARP 비활성. Static Route·NAT·동적 라우팅은 모델링하지 않습니다.</div>
 
         <div class="device-quick-grid">
           <button class="device-quick" data-open-device="pc1"><b>PC1 설정</b><span id="quickPc1">192.168.10.10/24 · GW 192.168.10.1</span></button>
@@ -258,6 +264,7 @@
           <button id="applyBtn">PC1 빠른 설정 적용</button>
           <button id="ethBtn">R2 eth0: UP</button>
           <button id="clearArpBtn">PC1 ARP 비우기</button>
+          <button id="clearR2ArpBtn">R2 ARP 비우기</button>
         </div>
 
         <div class="terminal">
@@ -269,7 +276,7 @@
     </details>
   </div>
 
-  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라, 현재 페이지에서 검증된 ARP / Default Gateway 동작을 인터랙티브하게 재현합니다.</div>
+  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라, 검증된 IPv4/Ethernet ARP / Default Gateway 동작을 학습용으로 재현합니다. Proxy ARP·Static Route·NAT·동적 라우팅은 범위 밖입니다.</div>
 </div>
 
 <script src="arp-topology-1.js"></script>
