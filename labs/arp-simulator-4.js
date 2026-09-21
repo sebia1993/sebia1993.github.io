@@ -51,7 +51,7 @@ function revealPrediction(){
   if(box){
     box.hidden=false;
     box.className="prediction-feedback "+(correct?"correct":"incorrect");
-    box.innerHTML="<b>"+(correct?"예상이 맞았습니다.":"예상과 실제 동작이 달랐습니다.")+"</b>"
+    box.innerHTML='<div class="prediction-feedback-title">③ 내 예상과 실제 비교</div>'+"<b>"+(correct?"예상이 맞았습니다.":"예상과 실제 동작이 달랐습니다.")+"</b>"
       +"<span>내 예상: "+(picked?picked[1]:"—")+"</span>"
       +"<span>실제: "+(expected?expected[1]:"—")+"</span>"
       +"<p>"+l.prediction.explain+"</p>";
