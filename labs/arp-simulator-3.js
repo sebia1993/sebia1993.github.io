@@ -72,6 +72,7 @@ function renderComparison(){
   $("#cmpTtlA").textContent=a.ttl;$("#cmpTtlB").textContent=b.ttl;
 }
 function addArpSnapshot(target,local){
+  const dest=selectedDestination();
   addSnapshot({
     key:"arp-request",protocol:"ARP",short:"MAC 주소 질문",
     hop:local?"PC1 → LAN A 전체":"PC1 → LAN A 전체",
@@ -83,11 +84,11 @@ function addArpSnapshot(target,local){
     nextHop:target,ttl:"해당 없음",
     ipMeaning:"ARP의 Sender IP와 Target IP입니다. ARP Frame 자체에는 IPv4/ICMP Header가 없으며, 필요한 neighbor resolution이 끝난 뒤 IPv4 Packet을 Ethernet Frame에 실어 전송합니다.",
     macMeaning:"ARP Request는 같은 LAN의 모든 장비가 볼 수 있도록 목적지 MAC ff:ff:ff:ff:ff:ff(Broadcast)를 사용합니다.",
-    nextHopMeaning:local?"같은 LAN이므로 최종 목적지 자신이 Next-hop입니다.":"다른 네트워크이므로 Default Gateway가 현재 LAN에서의 Next-hop입니다.",
-    ttlMeaning:"TTL은 IPv4 헤더의 필드입니다. ARP 프레임에는 IPv4 TTL이 없습니다.",
+    nextHopMeaning:local?"PC1이 목적지를 on-link로 판단했으므로 최종 목적지 자신이 next-hop입니다.":"목적지가 on-link가 아니므로 Default Gateway가 현재 LAN에서의 next-hop입니다.",
+    ttlMeaning:"TTL은 IPv4 헤더의 필드입니다. ARP Frame에는 IPv4 TTL이 없습니다.",
     why:local
-      ?`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 목적지가 <b>같은 네트워크</b>라고 판단했습니다. 그래서 Gateway가 아니라 목적지 ${target}의 MAC을 직접 찾습니다.`
-      :`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 목적지가 <b>다른 네트워크</b>라고 판단했습니다. 따라서 최종 목적지 PC2가 아니라 <b>Default Gateway ${target}</b>의 MAC부터 찾습니다.`
+      ?`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 ${dest.name}(${dest.ip})을 <b>on-link</b>로 판단했습니다. 그래서 Gateway가 아니라 목적지 IPv4 주소의 MAC을 직접 찾습니다.`
+      :`PC1은 ${state.pc1Ip}/${state.mask} 계산으로 ${dest.name}(${dest.ip})이 <b>on-link가 아니라고</b> 판단했습니다. 따라서 최종 목적지 Host가 아니라 <b>Default Gateway ${target}</b>의 MAC부터 찾습니다.`
   });
 }
 function addArpReplySnapshot(target,local,responderName,responderMac){
@@ -117,7 +118,7 @@ function addRouterArpRequestSnapshot(dest,route){
     macMeaning:"R2의 ARP Request도 Ethernet Broadcast로 해당 L2 Segment에 전파됩니다.",
     nextHopMeaning:`R2가 선택한 Connected Route ${route.network}의 출력 인터페이스는 ${route.egress}입니다.`,
     ttlMeaning:"ARP Frame에는 IPv4 TTL이 없습니다.",
-    why:"PC1이 Gateway MAC을 알아냈다고 해서 R2가 PC2 MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자기 next-hop의 MAC을 확인합니다."
+    why:`PC1이 Gateway MAC을 알아냈다고 해서 R2가 ${dest.name} MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자기 next-hop의 MAC을 확인합니다.`
   });
 }
 function addRouterArpReplySnapshot(dest,route){
