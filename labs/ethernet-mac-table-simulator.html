@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — 인터랙티브 실습</title>
-<meta name="description" content="Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-4">
+<meta name="description" content="Source MAC 학습, Known/Unknown Unicast, Broadcast, Aging과 재학습을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-5">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
@@ -21,11 +21,11 @@
   </header>
 
   <nav class="lesson-tabs" id="lessonTabs" aria-label="Ethernet MAC Table 실습 선택">
-    <button class="lesson-tab active" data-lesson="0">1 · Source Learning</button>
+    <button class="lesson-tab active" data-lesson="0">1 · Source MAC 학습</button>
     <button class="lesson-tab" data-lesson="1">2 · Known Unicast</button>
     <button class="lesson-tab" data-lesson="2">3 · Unknown Unicast</button>
     <button class="lesson-tab" data-lesson="3">4 · Broadcast</button>
-    <button class="lesson-tab" data-lesson="4">5 · Aging / Re-learning</button>
+    <button class="lesson-tab" data-lesson="4">5 · Aging / 재학습</button>
   </nav>
 
   <div class="course-progress">
@@ -48,7 +48,7 @@
   <section class="lab-scope-strip advanced-only" aria-label="시뮬레이터 범위와 가정">
     <b>이 실습의 기본 가정</b>
     <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 Forwarding · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
-    <span><b>Aging 기준 = 300초</b>는 이 시뮬레이터와 검증 GNS3 Linux Bridge의 학습 조건이며 모든 스위치의 고정값이 아닙니다. Age는 실제 시간에 자동 증가하지 않고 실습의 시간 경과 버튼으로만 진행됩니다.</span>
+    <span><b>Aging 기준 = 300초</b>는 이 시뮬레이터와 검증 GNS3 Linux Bridge의 학습 조건이며 모든 스위치의 고정값이 아닙니다. 경과 시간은 실제 시간에 자동 증가하지 않고 실습의 시간 경과 버튼으로만 진행됩니다.</span>
   </section>
 
   <section class="card lab-card">
@@ -107,7 +107,7 @@
           <text x="36" y="42" fill="#40546c" font-size="14" letter-spacing="2">ETHERNET / MAC TABLE · 실습 토폴로지</text>
           <text x="1364" y="42" text-anchor="end" fill="#40546c" font-size="14">Source MAC 학습 → Destination MAC 조회 → Forwarding</text>
           <text x="58" y="113" fill="#075a43" font-size="20" font-weight="bold">단일 Ethernet L2 Broadcast Domain</text>
-          <text class="topology-detail" x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 Forwarding</text>
+          <text class="topology-detail" x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 전달 상태</text>
 
           <!-- Physical links -->
           <g fill="none" stroke="#08765d" stroke-width="4">
@@ -134,7 +134,7 @@
           <!-- SW1 -->
           <use href="#macSwitchIcon" x="480" y="224" width="200" height="120" filter="url(#macShadow)"/>
           <text x="580" y="378" text-anchor="middle" fill="#172b43" font-size="30" font-weight="900">SW1</text>
-          <text x="580" y="404" text-anchor="middle" fill="#334a63" font-size="15">Ethernet Switch</text>
+          <text x="580" y="404" text-anchor="middle" fill="#334a63" font-size="15">Ethernet 스위치</text>
           <g class="port-chip"><rect x="675" y="246" width="91" height="28" rx="6"/><text x="720.5" y="266" text-anchor="middle">port 2</text></g>
           <g class="port-chip"><rect x="675" y="344" width="91" height="28" rx="6"/><text x="720.5" y="364" text-anchor="middle">port 3</text></g>
 
@@ -175,20 +175,20 @@
           <g id="packetIngress" class="packet-sprite" transform="translate(-100 -100)">
             <rect x="-50" y="-18" width="100" height="36" rx="18"/>
             <circle cx="-34" cy="0" r="7"/>
-            <text id="packetIngressText" x="7" y="5" text-anchor="middle">FRAME</text>
+            <text id="packetIngressText" x="7" y="5" text-anchor="middle">프레임</text>
           </g>
           <g id="packetOut2" class="packet-sprite out" transform="translate(-100 -100)">
             <rect x="-50" y="-18" width="100" height="36" rx="18"/>
             <circle cx="-34" cy="0" r="7"/>
-            <text id="packetOut2Text" x="7" y="5" text-anchor="middle">FRAME</text>
+            <text id="packetOut2Text" x="7" y="5" text-anchor="middle">프레임</text>
           </g>
           <g id="packetOut3" class="packet-sprite out flood" transform="translate(-100 -100)">
             <rect x="-50" y="-18" width="100" height="36" rx="18"/>
             <circle cx="-34" cy="0" r="7"/>
-            <text id="packetOut3Text" x="7" y="5" text-anchor="middle">FRAME</text>
+            <text id="packetOut3Text" x="7" y="5" text-anchor="middle">프레임</text>
           </g>
 
-          <text id="traceModeLabel" x="835" y="115" fill="#08765d" font-size="13" font-weight="900">READY · FRAME을 실행하세요</text>
+          <text id="traceModeLabel" x="835" y="115" fill="#08765d" font-size="13" font-weight="900">대기 · 프레임을 실행하세요</text>
         </g>
       </svg>
     </div>
@@ -234,12 +234,12 @@
         <span>FDB에서 출력 포트를 조회</span>
       </article>
       <article>
-        <small>FDB Lookup</small>
+        <small>FDB 조회</small>
         <strong id="switchLookup">대기</strong>
         <span id="switchLookupDetail">Destination MAC을 받으면 조회합니다.</span>
       </article>
       <article>
-        <small>SW1 Action</small>
+        <small>SW1 동작</small>
         <strong id="switchAction">대기</strong>
         <span id="switchActionDetail">Known / Flooding / Broadcast 결과가 표시됩니다.</span>
       </article>
@@ -248,10 +248,10 @@
     <div class="arp-field-strip advanced-only" id="arpFieldStrip" hidden>
       <div class="arp-field-head"><b>ARP Request 필드 구분</b><span>Ethernet Destination MAC과 ARP Target Hardware는 서로 다른 필드입니다.</span></div>
       <div class="arp-field-grid">
-        <div><small>Ethernet Destination</small><strong id="arpEthDst">—</strong></div>
-        <div><small>ARP Sender Hardware</small><strong id="arpSenderHw">—</strong></div>
-        <div><small>ARP Target IPv4</small><strong id="arpTargetIp">—</strong></div>
-        <div><small>ARP Target Hardware</small><strong id="arpTargetHw">—</strong></div>
+        <div><small>Ethernet 목적지 MAC</small><strong id="arpEthDst">—</strong></div>
+        <div><small>ARP Sender Hardware · 송신자 MAC</small><strong id="arpSenderHw">—</strong></div>
+        <div><small>ARP Target IPv4 · 대상 IP</small><strong id="arpTargetIp">—</strong></div>
+        <div><small>ARP Target Hardware · 대상 MAC</small><strong id="arpTargetHw">—</strong></div>
       </div>
     </div>
 
@@ -264,10 +264,10 @@
       <span id="resultHint">Source Learning과 Destination Lookup을 분리해서 보세요.</span>
     </div>
     <div class="flow advanced-only">
-      <div class="flow-step" id="s1"><div class="n">STEP 1</div><strong>프레임 수신</strong><p>어느 포트로 프레임이 들어왔는지 확인합니다.</p></div>
-      <div class="flow-step" id="s2"><div class="n">STEP 2</div><strong>Source Learning</strong><p>Source MAC → 수신 Port를 학습/갱신합니다.</p></div>
-      <div class="flow-step" id="s3"><div class="n">STEP 3</div><strong>Destination Lookup</strong><p>Destination MAC의 출력 포트를 FDB에서 찾습니다.</p></div>
-      <div class="flow-step" id="s4"><div class="n">STEP 4</div><strong>Forwarding</strong><p>Known 또는 Flooding/Broadcast 결과를 확인합니다.</p></div>
+      <div class="flow-step" id="s1"><div class="n">단계 1</div><strong>프레임 수신</strong><p>어느 포트로 프레임이 들어왔는지 확인합니다.</p></div>
+      <div class="flow-step" id="s2"><div class="n">단계 2</div><strong>Source MAC 학습</strong><p>Source MAC → 수신 Port를 학습/갱신합니다.</p></div>
+      <div class="flow-step" id="s3"><div class="n">단계 3</div><strong>Destination MAC 조회</strong><p>Destination MAC의 출력 포트를 FDB에서 찾습니다.</p></div>
+      <div class="flow-step" id="s4"><div class="n">단계 4</div><strong>전달</strong><p>Known 또는 Flooding/Broadcast 결과를 확인합니다.</p></div>
     </div>
     <div class="explain" id="explainBox">먼저 <b>첫 PING 실행</b>을 눌러보세요.</div>
     <div class="evidence-link-row advanced-only">
@@ -291,14 +291,14 @@
   </section>
 
   <section class="course-complete" id="courseComplete">
-    <div class="eyebrow2">FOUNDATION · COMPLETE</div>
+    <div class="eyebrow2">기초 실습 완료</div>
     <h2>Ethernet / MAC Table 실습을 모두 완료했습니다.</h2>
     <p>Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning의 차이를 직접 확인했습니다.</p>
     <div class="completion-grid">
       <div class="completion-card"><b>Source MAC</b><span>수신 포트와 함께 FDB 학습/갱신</span></div>
       <div class="completion-card"><b>Destination MAC</b><span>출력 포트를 결정하기 위한 FDB 조회</span></div>
       <div class="completion-card"><b>Unknown ≠ Broadcast</b><span>Unknown Unicast는 실제 목적지 MAC을 그대로 유지</span></div>
-      <div class="completion-card"><b>Aging / Re-learning</b><span>엔트리 소멸 뒤 Flooding과 Source Learning으로 정상 전달 상태 회복</span></div>
+      <div class="completion-card"><b>Aging / 재학습</b><span>엔트리 소멸 뒤 Flooding과 Source Learning으로 정상 전달 상태 회복</span></div>
     </div>
     <div class="next-lab-actions">
       <a class="primary" href="ethernet-mac-table.html">Ethernet / MAC Table 학습 페이지 →</a>
@@ -313,7 +313,7 @@
       <div class="panel-body">
         <div class="table-title"><strong>SW1 · Dynamic FDB</strong><button type="button" id="clearFdbBtn">FDB 전체 비우기</button></div>
         <table class="state-table">
-          <thead><tr><th>MAC</th><th>Port</th><th>Age</th></tr></thead>
+          <thead><tr><th>MAC</th><th>Port</th><th>경과 시간</th></tr></thead>
           <tbody id="fdbBody"></tbody>
         </table>
 
@@ -323,7 +323,7 @@
           <tbody id="arpBody"></tbody>
         </table>
 
-        <div class="table-title spaced"><strong>PC2 · ARP Cache</strong><span>독립된 Host 상태</span></div>
+        <div class="table-title spaced"><strong>PC2 · ARP Cache</strong><span>독립된 호스트 상태</span></div>
         <table class="state-table">
           <thead><tr><th>IPv4</th><th>MAC</th></tr></thead>
           <tbody id="pc2ArpBody"></tbody>
@@ -346,7 +346,7 @@
         </div>
         <div class="scope-note">
           <b>Simulator 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 300초 기준의 단순 Aging, Same-port Filtering과 Re-learning을 모델링합니다.
-          Aging Age는 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 범위 밖입니다.
+          Aging 경과 시간은 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 범위 밖입니다.
         </div>
       </div>
     </details>
