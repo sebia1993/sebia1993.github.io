@@ -208,3 +208,51 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #d9
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* V3 · ARP simulator visual language for MAC topology */
+.topology-shell{position:relative;overflow:hidden;border-radius:18px;border:1px solid #cbd8e4;background:#f4f7fb}
+.topology-shell svg{display:block;width:100%;height:auto}
+.topology-link{transition:stroke .2s,stroke-width .2s,opacity .2s,filter .2s;stroke-linecap:round}
+.topology-link.link-up{opacity:1}
+.topology-link.ingress{stroke:#12a57e!important;stroke-width:7!important;filter:drop-shadow(0 0 5px rgba(18,165,126,.28))}
+.topology-link.egress{stroke:#2f7fd0!important;stroke-width:7!important;filter:drop-shadow(0 0 5px rgba(47,127,208,.24))}
+.topology-link.flood{stroke:#b86300!important;stroke-width:7!important;filter:drop-shadow(0 0 5px rgba(184,99,0,.22))}
+.mac-trace{display:none;fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;opacity:.78}
+.mac-trace.show{display:block}
+.mac-trace.trace-in{stroke:#12a57e;marker-end:url(#traceArrowIn)}
+.mac-trace.trace-out{stroke:#2f7fd0;marker-end:url(#traceArrowOut)}
+.mac-trace.flood{stroke:#b86300;marker-end:url(#traceArrowFlood)}
+.port-chip rect{fill:#fff;stroke:#a7b8ca;stroke-width:1.3}
+.port-chip text{fill:#172b43;font-size:13px;font-family:Consolas,monospace;font-weight:800}
+.svg-fdb-panel rect{fill:#fff;stroke:#7f99b5;stroke-width:2}
+.svg-fdb-title{fill:#405a70;font-size:12px;font-weight:900;letter-spacing:.06em}
+.svg-fdb-row{fill:#172b43;font-size:13px;font-family:Consolas,monospace;font-weight:700}
+.svg-lookup-row{fill:#08765d;font-size:12px;font-family:Consolas,monospace;font-weight:900}
+.receive-badge rect{fill:#e7f6ef;stroke:#88ccb6;stroke-width:1.5}
+.receive-badge text{fill:#08765d;font-size:10px;font-weight:1000}
+.receive-badge.muted rect{fill:#eef3f7;stroke:#c9d5df}
+.receive-badge.muted text{fill:#657b8d}
+.receive-badge.active rect{fill:#e9f2ff;stroke:#8fb8e1;stroke-width:2}
+.receive-badge.active text{fill:#175da8}
+.receive-badge.flood rect{fill:#fff4e5;stroke:#e2ad61;stroke-width:2}
+.receive-badge.flood text{fill:#9a5b0d}
+.packet-sprite{display:none;pointer-events:none;filter:url(#packetGlow)}
+.packet-sprite.show{display:block}
+.packet-sprite rect{fill:#e0f5ed;stroke:#0ea77d;stroke-width:2}
+.packet-sprite circle{fill:#0ea77d}
+.packet-sprite text{fill:#075a43;font-size:11px;font-weight:1000}
+.packet-sprite.out rect{fill:#e7f0ff;stroke:#2f7fd0}
+.packet-sprite.out circle{fill:#2f7fd0}
+.packet-sprite.out text{fill:#175da8}
+.packet-sprite.out.flood rect{fill:#fff0d5;stroke:#b86300}
+.packet-sprite.out.flood circle{fill:#b86300}
+.packet-sprite.out.flood text{fill:#8b530e}
+
+@media(max-width:760px){
+  .topology-shell{overflow-x:auto;overscroll-behavior-x:contain}
+  .topology-shell svg{width:1080px;max-width:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .packet-sprite{filter:none}
+}
