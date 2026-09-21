@@ -193,6 +193,14 @@
       </svg>
     </div>
 
+    <div class="mobile-flow" id="mobileFlow" aria-live="polite">
+      <div><small>SOURCE</small><strong id="mobileSource">대기</strong></div>
+      <i>→</i>
+      <div><small>SW1 ACTION</small><strong id="mobileSwitch">프레임 대기</strong></div>
+      <i>→</i>
+      <div class="mobile-egress"><span><small>PC1 링크</small><b id="mobilePc1">—</b></span><span><small>PC2 링크</small><b id="mobilePc2">—</b></span><span><small>PC3 링크</small><b id="mobilePc3">—</b></span></div>
+    </div>
+
     <div class="controls">
       <button type="button" class="age-btn" id="ageBtn" hidden>⏱ +5초 경과</button>
       <button type="button" class="run-btn" id="runBtn">▶ 첫 PING 실행</button>
@@ -203,14 +211,6 @@
       <span><i class="legend-line ingress"></i>현재 프레임이 SW1으로 들어오는 링크</span>
       <span><i class="legend-line egress"></i>SW1이 현재 프레임을 내보내는 링크</span>
       <span><b>색은 프로토콜 종류가 아니라 현재 전달 방향을 표시합니다.</b></span>
-    </div>
-
-    <div class="mobile-flow" id="mobileFlow" aria-live="polite">
-      <div><small>SOURCE</small><strong id="mobileSource">대기</strong></div>
-      <i>→</i>
-      <div><small>SW1 ACTION</small><strong id="mobileSwitch">프레임 대기</strong></div>
-      <i>→</i>
-      <div class="mobile-egress"><span><small>PC1 링크</small><b id="mobilePc1">—</b></span><span><small>PC2 링크</small><b id="mobilePc2">—</b></span><span><small>PC3 링크</small><b id="mobilePc3">—</b></span></div>
     </div>
 
     <div id="liveEventStrip" class="live-event-strip">
