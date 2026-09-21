@@ -2,20 +2,6 @@
   if (window.__arpMobilePolishLoaded) return;
   window.__arpMobilePolishLoaded = true;
 
-  const hero=document.querySelector(".hero");
-  const guide=document.querySelector(".start-guide");
-  if(hero&&guide){
-    const help=document.createElement("button");
-    help.type="button";
-    help.className="mobile-help-toggle";
-    help.textContent="처음인가요? 사용 방법 보기";
-    help.addEventListener("click",()=>{
-      const open=guide.classList.toggle("mobile-expanded");
-      help.textContent=open?"사용 방법 접기":"처음인가요? 사용 방법 보기";
-    });
-    hero.appendChild(help);
-  }
-
   function syncPingLabel(){
     const btn=document.querySelector("#pingBtn");
     if(!btn)return;
