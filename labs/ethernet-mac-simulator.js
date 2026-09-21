@@ -205,6 +205,15 @@
     }
   }
 
+  function setSvgDecision(learn,lookup,action){
+    const l=$('svgLearnDecision');
+    const q=$('svgLookupDecision');
+    const a=$('svgActionDecision');
+    if(l) l.textContent='LEARN  · '+(learn||'—');
+    if(q) q.textContent='LOOKUP · '+(lookup||'—');
+    if(a) a.textContent='ACTION · '+(action||'READY');
+  }
+
   function focusTopologyPort(port){
     const shell=$('topologyShell');
     if(!shell||shell.scrollWidth<=shell.clientWidth) return;
@@ -520,6 +529,7 @@
     }
 
     setBasic(null,{title:'대기',detail:'Destination MAC을 받으면 FDB에서 조회합니다.'},{title:'대기',detail:'아직 전달할 프레임이 없습니다.'});
+    setSvgDecision('—','—','READY');
     setLive('', '프레임 이벤트 대기','실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.','READY');
     renderMobileFlow(null,'프레임 대기',[],'',null);
     renderReceiveBadges([],'',null);
@@ -558,12 +568,14 @@
     setLinks(ingress,[],'');
     renderMobileFlow(srcDev,'프레임 수신',[],'',dstMac);
     setBasic(frame,{title:'아직 조회 전',detail:'먼저 Source Learning을 수행합니다.'},{title:'수신 중',detail:'port '+ingress+'로 프레임이 들어왔습니다.'});
+    setSvgDecision('대기','대기','FRAME IN · port '+ingress);
     setLive('learning',frameType+' · FRAME IN',srcDev.name+'의 프레임이 port '+ingress+'로 SW1에 들어왔습니다.','FRAME IN');
     await animateIngress(ingress,frameType);
 
     learn(srcDev);
     renderTables();
     setFlow(2);
+    setSvgDecision(srcDev.name+' → port '+ingress,'대기','SOURCE LEARNED');
     setLive('learning','Source MAC Learning',srcDev.name+' MAC → port '+ingress+'을 Dynamic FDB에 학습/갱신했습니다.','LEARNING');
     addLog('LEARN '+srcDev.name+' '+srcDev.mac+' -> port '+ingress);
     await sleep(420);
@@ -614,6 +626,21 @@
     }
 
     setBasic(frame,{title:lookupTitle,detail:lookupDetail},{title:actionTitle,detail:actionDetail});
+    const lookupShort=kind==='known'
+      ? macName(dstMac)+' → HIT '+(egress[0]?'port '+egress[0]:'SAME PORT')
+      : kind==='filter'
+        ? macName(dstMac)+' → SAME PORT'
+        : kind==='broadcast'
+          ? 'DST = BROADCAST'
+          : macName(dstMac)+' → MISS';
+    const actionShort=kind==='known'
+      ? (egress.length?'KNOWN → '+portList(egress):'FILTER · no egress')
+      : kind==='filter'
+        ? 'SAME-PORT FILTER'
+        : kind==='broadcast'
+          ? 'BROADCAST → '+portList(egress)
+          : 'FLOOD → '+portList(egress);
+    setSvgDecision(srcDev.name+' → port '+ingress,lookupShort,actionShort);
     await sleep(430);
 
     setFlow(4);
@@ -703,6 +730,7 @@
     renderTables();
     setLive('aging','PC2 Dynamic FDB Aged Out','이 Lab의 300초 기준을 넘은 PC2 엔트리는 사라졌지만 PC1 ARP Cache의 PC2 IP → MAC은 그대로 남아 있습니다.','AGING');
     setBasic({src:DEV.pc1.mac,dst:DEV.pc2.mac},{title:'PC2 FDB 없음',detail:'ARP는 남아 있지만 SW1은 PC2의 출력 포트를 모릅니다.'},{title:'다음 프레임 대기',detail:'이제 PC1 → PC2를 실행하세요.'});
+    setSvgDecision('—','PC2 → MISS','NEXT FRAME · FLOOD 예상');
     renderMobileFlow(DEV.pc1,'다음 프레임 대기',[],'',DEV.pc2.mac);
     addTimeline('aging','FDB Aging','PC2 dynamic entry 삭제 · PC1 ARP 유지 · 자동 시간 경과는 모델링하지 않음');
     setExplain('PC2 FDB 엔트리만 사라졌습니다. <b>PC1의 ARP Cache는 유지</b>되어 있으므로 다음 전송은 새 ARP가 아니라 PC2 목적지 Unicast로 시작합니다. 이 Simulator의 Age는 실제 시계가 아니라 실습 버튼으로만 증가합니다.','flood');
