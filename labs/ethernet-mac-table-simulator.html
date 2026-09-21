@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — 인터랙티브 실습</title>
 <meta name="description" content="Source MAC 학습, Known/Unknown Unicast, Broadcast, Aging과 재학습을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-6">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-7">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
@@ -73,9 +73,9 @@
 
     <section class="prediction-card" id="predictionCard" aria-labelledby="predictionTitle">
       <div class="prediction-copy">
-        <small>실행하기 전에 먼저 생각해 보세요</small>
+        <small>① 예상하기 · 정답은 실행 후 공개됩니다</small>
         <h2 id="predictionTitle">SW1은 처음 들어온 프레임에서 무엇을 기억할까요?</h2>
-        <p id="predictionHelp">정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 동작과 비교하는 것이 이 실습의 목적입니다.</p>
+        <p id="predictionHelp">정답을 몰라도 괜찮습니다. 틀려도 불이익은 없습니다. 먼저 예상한 뒤 실제 동작과 비교하는 것이 이 실습의 목적입니다.</p>
       </div>
       <div class="prediction-options" id="predictionOptions" role="group" aria-label="예상 답 선택"></div>
       <div class="prediction-feedback" id="predictionFeedback" aria-live="polite" hidden></div>
@@ -218,7 +218,7 @@
 
     <div class="controls">
       <button type="button" class="age-btn" id="ageBtn" hidden>⏱ +5초 경과</button>
-      <button type="button" class="run-btn" id="runBtn" disabled>▶ 결과 확인하기</button>
+      <button type="button" class="run-btn" id="runBtn" disabled>② 실행해서 확인하기</button>
     </div>
 
 
@@ -379,6 +379,6 @@
     기본 모드는 핵심 흐름만, 고급 모드는 FDB/ARP 상태와 직접 조작을 추가로 보여줍니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20260921-6"></script>
+<script src="ethernet-mac-simulator.js?v=20260921-7"></script>
 </body>
 </html>
