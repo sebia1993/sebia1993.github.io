@@ -6,7 +6,7 @@ function configureLesson(i){
   state.r2e0Ip=GOOD.r2e0Ip;state.r2e0Mask=GOOD.r2e0Mask;state.eth0=true;
   state.r2e1Ip=GOOD.r2e1Ip;state.r2e1Mask=GOOD.r2e1Mask;state.eth1=true;
   state.cables={pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true};
-  state.arp={};state.last=null;state.failureSeen[i]=false;resetHint();
+  state.arp={};state.r2Arp={};state.last=null;state.failureSeen[i]=false;resetHint();
   const l=lessons[i];
   if(l.type==="gw")state.gw="192.168.10.254";
   if(l.type==="mask")state.mask=16;
@@ -17,7 +17,7 @@ function configureLesson(i){
   $("#recoveryNudge").classList.remove("show");$("#recoveryNudge").innerHTML="";
   $$(".lesson-tab").forEach((b,idx)=>b.classList.toggle("active",idx===i));
   $("#advancedNote").innerHTML=i<2?
-    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 자유롭게 바꿀 수 있습니다. 변경값은 다음 PING의 실제 시뮬레이션 상태로 사용됩니다.":
+    "토폴로지 장비의 ⚙ 설정을 눌러 주소를 바꿀 수 있습니다. 다음 PING에서는 PC1의 on-link 판단, Gateway 유효성, R2 Connected Route, PC1/R2 ARP cache를 실제 시뮬레이션 상태로 사용합니다. Proxy ARP·Static Route·NAT는 범위 밖입니다.":
     `<b>복구 목표:</b> 장애를 재현한 뒤 토폴로지 장비 설정을 직접 수정하고 다시 PING하여 성공시키세요.`;
   setExplain(i===0?"먼저 <b>PC3</b>가 선택된 상태에서 <b>PING 보내기</b>를 눌러보세요.":
              i===1?"이번에는 <b>PC2</b>로 PING을 보내 Gateway를 거치는지 확인하세요.":
@@ -65,11 +65,12 @@ $("#resetBtn").onclick=()=>configureLesson(state.lesson);
 $("#applyBtn").onclick=()=>{
   state.mask=+$("#maskInput").value;state.gw=$("#gwInput").value.trim();
   if(!isValidIp(state.gw)){alert("Gateway 형식을 확인하세요.");return}
-  state.arp={};state.last=null;resetPacketStudy();renderState();renderArp();
+  state.arp={};state.r2Arp={};state.last=null;resetPacketStudy();renderState();renderArp();
   log(`PC1 빠른 설정 적용: ${state.pc1Ip}/${state.mask}, GW ${state.gw}`);renderLessonStatus()
 };
 $("#ethBtn").onclick=()=>{state.eth0=!state.eth0;state.last=null;renderState();log(`R2 eth0 → ${state.eth0?"UP":"DOWN"}`);renderLessonStatus()};
-$("#clearArpBtn").onclick=()=>{state.arp={};renderArp();log("ARP cache cleared")};
+$("#clearArpBtn").onclick=()=>{state.arp={};renderArp();log("PC1 ARP cache cleared")};
+$("#clearR2ArpBtn").onclick=()=>{state.r2Arp={};renderArp();log("R2 ARP cache cleared")};
 $("#termInput").onkeydown=e=>{if(e.key==="Enter"){const v=e.target.value;e.target.value="";runCmd(v)}};
 
 configureLesson(0);
