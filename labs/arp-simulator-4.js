@@ -60,6 +60,20 @@ function revealPrediction(){
   updatePredictionControls();
 }
 
+function updateQuickNextBar(){
+  const bar=$("#quickNextBar"),btn=$("#quickNextBtn"),label=$("#quickNextLabel");
+  if(!bar||!btn||!label)return;
+  const basic=typeof isAdvancedMode==="function"?!isAdvancedMode():document.body.dataset.simMode!=="advanced";
+  const done=!!state.completed[state.lesson];
+  const show=basic&&done;
+  bar.hidden=!show;
+  document.body.classList.toggle("quick-next-visible",show);
+  btn.textContent=state.lesson===lessons.length-1?"전체 완료 보기 →":"다음 실습 →";
+  label.textContent=state.lesson===lessons.length-1
+    ?"마지막 실습까지 완료했습니다."
+    :"스크롤하지 않고 바로 다음 실습으로 이동할 수 있습니다.";
+}
+
 function renderLessonStatus(){
   const items=checklistState();
   $("#checkList").innerHTML=items.map(([title,desc,done])=>`
@@ -96,6 +110,7 @@ function renderLessonStatus(){
     next.disabled=true;next.textContent="완료 후 다음 실습 →";
   }
   renderCourseProgress();
+  updateQuickNextBar();
 }
 function completeCurrentLessonIfReady(){
   const i=state.lesson;
