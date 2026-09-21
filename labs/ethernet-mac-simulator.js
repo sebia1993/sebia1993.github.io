@@ -484,6 +484,7 @@
     const cfg=lessons[lesson];
     predictionChoice=null;
     lessonRan=false;
+    document.body.classList.remove('prediction-selected');
     $('predictionTitle').textContent=cfg.prediction.question;
     $('predictionHelp').textContent=lesson===4
       ? '먼저 결과를 예상하고, +5초 경과로 PC2 FDB 엔트리를 지운 뒤 결과를 확인하세요.'
@@ -500,6 +501,7 @@
       btn.addEventListener('click',()=>{
         if(busy||lessonRan) return;
         predictionChoice=id;
+        document.body.classList.add('prediction-selected');
         document.querySelectorAll('[data-prediction]').forEach(b=>{
           const on=b.dataset.prediction===id;
           b.classList.toggle('selected',on);
