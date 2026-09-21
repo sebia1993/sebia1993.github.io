@@ -1,3 +1,5 @@
+let primaryActionVisible=true;
+
 function renderPrediction(){
   const l=lessons[state.lesson];
   state.predictionChoice=null;
@@ -39,6 +41,7 @@ function updatePredictionControls(){
   }else{
     btn.disabled=state.busy||!state.predictionChoice;
   }
+  updateQuickActionBar();
 }
 function revealPrediction(){
   const l=lessons[state.lesson];
@@ -60,18 +63,38 @@ function revealPrediction(){
   updatePredictionControls();
 }
 
-function updateQuickNextBar(){
+function updateQuickActionBar(){
   const bar=$("#quickNextBar"),btn=$("#quickNextBtn"),label=$("#quickNextLabel");
   if(!bar||!btn||!label)return;
   const basic=typeof isAdvancedMode==="function"?!isAdvancedMode():document.body.dataset.simMode!=="advanced";
   const done=!!state.completed[state.lesson];
-  const show=basic&&done;
+  let action="",eyebrow="",copy="",buttonText="",disabled=false;
+
+  if(basic&&done){
+    action="next";
+    eyebrow="현재 실습 완료";
+    copy=state.lesson===lessons.length-1
+      ?"마지막 실습까지 완료했습니다."
+      :"바로 다음 실습으로 이동할 수 있습니다.";
+    buttonText=state.lesson===lessons.length-1?"전체 완료 보기 →":"다음 실습 →";
+  }else if(basic&&!primaryActionVisible&&state.predictionChoice&&!state.predictionLocked){
+    action="run";
+    eyebrow="예상 선택 완료";
+    copy="스크롤하지 않고 여기서 바로 결과를 확인할 수 있습니다.";
+    buttonText="② 실행해서 확인하기";
+    disabled=!!state.busy;
+  }
+
+  const show=Boolean(action);
   bar.hidden=!show;
   document.body.classList.toggle("quick-next-visible",show);
-  btn.textContent=state.lesson===lessons.length-1?"전체 완료 보기 →":"다음 실습 →";
-  label.textContent=state.lesson===lessons.length-1
-    ?"마지막 실습까지 완료했습니다."
-    :"스크롤하지 않고 바로 다음 실습으로 이동할 수 있습니다.";
+  if(!show)return;
+  bar.dataset.quickAction=action;
+  const small=bar.querySelector(".quick-next-copy small");
+  if(small)small.textContent=eyebrow;
+  label.textContent=copy;
+  btn.textContent=buttonText;
+  btn.disabled=disabled;
 }
 
 function renderLessonStatus(){
@@ -110,7 +133,7 @@ function renderLessonStatus(){
     next.disabled=true;next.textContent="완료 후 다음 실습 →";
   }
   renderCourseProgress();
-  updateQuickNextBar();
+  updateQuickActionBar();
 }
 function completeCurrentLessonIfReady(){
   const i=state.lesson;
