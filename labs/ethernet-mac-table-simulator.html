@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — 인터랙티브 실습</title>
 <meta name="description" content="Source MAC 학습, Known/Unknown Unicast, Broadcast, Aging과 재학습을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-5">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-6">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
@@ -14,18 +14,18 @@
     <h1>Ethernet / MAC Table</h1>
     <p>프레임이 스위치에 들어왔을 때 <b>Source MAC으로 무엇을 배우고</b>, <b>Destination MAC으로 어느 포트에 전달하는지</b> 직접 확인합니다.</p>
     <div class="start-guide">
-      <div class="guide-step"><b>1</b><span><strong>실습 선택</strong>위에서부터 순서대로 진행하세요.</span></div>
-      <div class="guide-step"><b>2</b><span><strong>프레임 실행</strong>큰 실행 버튼을 누릅니다.</span></div>
-      <div class="guide-step"><b>3</b><span><strong>FDB 변화 확인</strong>누가 어느 포트에 학습됐는지 봅니다.</span></div>
+      <div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 실습에서 확인할 한 가지를 먼저 봅니다.</span></div>
+      <div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>프레임을 보내기 전에 결과를 골라보세요.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>내 예상과 SW1의 실제 판단을 비교합니다.</span></div>
     </div>
   </header>
 
   <nav class="lesson-tabs" id="lessonTabs" aria-label="Ethernet MAC Table 실습 선택">
-    <button class="lesson-tab active" data-lesson="0">1 · Source MAC 학습</button>
-    <button class="lesson-tab" data-lesson="1">2 · Known Unicast</button>
-    <button class="lesson-tab" data-lesson="2">3 · Unknown Unicast</button>
-    <button class="lesson-tab" data-lesson="3">4 · Broadcast</button>
-    <button class="lesson-tab" data-lesson="4">5 · Aging / 재학습</button>
+    <button class="lesson-tab active" data-lesson="0">1 · 스위치는 무엇을 기억할까?</button>
+    <button class="lesson-tab" data-lesson="1">2 · 목적지 위치를 안다면?</button>
+    <button class="lesson-tab" data-lesson="2">3 · 목적지 위치를 모른다면?</button>
+    <button class="lesson-tab" data-lesson="3">4 · Broadcast는 무엇이 다를까?</button>
+    <button class="lesson-tab" data-lesson="4">5 · 기억이 사라지면?</button>
   </nav>
 
   <div class="course-progress">
@@ -44,6 +44,11 @@
       <button type="button" class="view-mode-btn" data-view-mode="advanced" aria-pressed="false"><b>고급 모드</b><small>FDB · ARP · 직접 조작</small></button>
     </div>
   </section>
+
+  <div class="beginner-key">
+    <b>처음이라면 이것만 기억하세요.</b>
+    <span><strong>MAC Table(FDB)</strong>은 스위치가 “어떤 MAC 주소가 어느 포트 쪽에 있는지” 기억하는 표입니다.</span>
+  </div>
 
   <section class="lab-scope-strip advanced-only" aria-label="시뮬레이터 범위와 가정">
     <b>이 실습의 기본 가정</b>
@@ -65,6 +70,16 @@
       <button class="hint-trigger" id="hintBtn" type="button">막혔나요? 힌트 1/3</button>
     </div>
     <div class="hint-box" id="hintBox" aria-live="polite"></div>
+
+    <section class="prediction-card" id="predictionCard" aria-labelledby="predictionTitle">
+      <div class="prediction-copy">
+        <small>실행하기 전에 먼저 생각해 보세요</small>
+        <h2 id="predictionTitle">SW1은 처음 들어온 프레임에서 무엇을 기억할까요?</h2>
+        <p id="predictionHelp">정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 동작과 비교하는 것이 이 실습의 목적입니다.</p>
+      </div>
+      <div class="prediction-options" id="predictionOptions" role="group" aria-label="예상 답 선택"></div>
+      <div class="prediction-feedback" id="predictionFeedback" aria-live="polite" hidden></div>
+    </section>
 
     <div class="topology-shell" id="topologyShell">
       <svg id="macTopology" viewBox="0 0 1400 620" role="img" aria-label="PC1, SW1, PC2, PC3이 하나의 Ethernet L2 Broadcast Domain에 연결된 MAC Table 학습 토폴로지">
@@ -203,7 +218,7 @@
 
     <div class="controls">
       <button type="button" class="age-btn" id="ageBtn" hidden>⏱ +5초 경과</button>
-      <button type="button" class="run-btn" id="runBtn">▶ 첫 PING 실행</button>
+      <button type="button" class="run-btn" id="runBtn" disabled>▶ 결과 확인하기</button>
     </div>
 
 
@@ -364,6 +379,6 @@
     기본 모드는 핵심 흐름만, 고급 모드는 FDB/ARP 상태와 직접 조작을 추가로 보여줍니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20260921-5"></script>
+<script src="ethernet-mac-simulator.js?v=20260921-6"></script>
 </body>
 </html>
