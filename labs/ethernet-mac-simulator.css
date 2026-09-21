@@ -509,3 +509,16 @@ body[data-sim-mode="basic"] .explain{
 }
 .prediction-feedback.correct .prediction-feedback-title{color:#08765d}
 .prediction-feedback.incorrect .prediction-feedback-title{color:#9a620e}
+
+/* V8 · L2 frame is primary; encapsulated protocol is secondary */
+.packet-sprite .frame-title{
+  font-size:11px!important;
+  font-weight:1000!important;
+}
+.packet-sprite .frame-sub{
+  font-size:8.5px!important;
+  font-weight:800!important;
+  opacity:.86;
+}
+.packet-sprite.out .frame-sub{fill:#356fa6}
+.packet-sprite.out.flood .frame-sub{fill:#8b5a1b}
