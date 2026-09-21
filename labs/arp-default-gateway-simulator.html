@@ -65,7 +65,7 @@
       <span style="color:#08765d;font-weight:800">━━ REQUEST →</span>
       <span style="color:#175da8;font-weight:800">┅┅ REPLY ←</span>
     </div>
-    <div class="physical-logical-note"><span><b>Physical Segment</b> = 실제 스위치에 연결된 위치</span><span><b>NET</b> = 각 장비가 자신의 IP/Prefix로 계산한 논리 Network</span></div>
+    <div class="physical-logical-note"><span><b>LAN A / LAN B</b> = 이 Lab에서 각각 하나의 Ethernet L2 Broadcast Domain · VLAN 미사용</span><span><b>Physical Segment</b> = 실제 스위치에 연결된 위치 · <b>NET</b> = 각 장비가 자신의 IP/Prefix로 계산한 논리 Network</span></div>
 
     <div class="device-drawer" id="deviceDrawer">
       <div class="device-drawer-head">
@@ -259,7 +259,7 @@
     <details class="panel" id="advancedPanel">
       <summary>고급 실습 · 장비 설정 / 터미널 <span style="font-weight:500;color:#7b8fa1;font-size:12px">토폴로지 설정과 완전히 연동</span></summary>
       <div class="panel-body">
-        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 방향 Neighbor Resolution에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet, R2의 Connected Route, Proxy ARP 비활성. PC1/PC2/PC3는 일반 End Host로 IP forwarding을 하지 않습니다. Static Route·NAT·동적 라우팅과 ARP cache aging/state transition은 모델링하지 않습니다.</div>
+        <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 방향 Neighbor Resolution에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet과 R2의 Connected Route를 모델링합니다. 이 Lab에서 LAN A와 LAN B는 각각 하나의 Ethernet L2 Broadcast Domain이며 VLAN은 사용하지 않습니다. PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Switch는 ARP Broadcast Flooding과 필요한 Frame 경로만 시각화하며 MAC Table learning·Unknown Unicast Flooding·VLAN/Trunk·STP는 모델링하지 않습니다. Proxy ARP·Static Route·NAT·동적 라우팅·ICMP Redirect·ICMP Destination Unreachable·ICMP Time Exceeded·ARP cache aging/state transition도 범위 밖입니다. 동일 인터페이스로 다시 forwarding되는 고급 구성에서도 Route/ARP/Frame 전달만 표시합니다.</div>
 
         <div class="device-quick-grid">
           <button class="device-quick" data-open-device="pc1"><b>PC1 설정</b><span id="quickPc1">192.168.10.10/24 · GW 192.168.10.1</span></button>
@@ -298,17 +298,17 @@
     </details>
   </div>
 
-  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라, 검증된 IPv4/Ethernet ARP / Default Gateway 동작을 학습용으로 재현합니다. Simulator 초기 TTL은 64이며, PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Proxy ARP·Static Route·NAT·동적 라우팅·ARP cache aging/state transition은 범위 밖입니다.</div>
+  <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라 검증된 ARP / Default Gateway 동작을 학습용으로 재현합니다. Simulator 초기 TTL은 64입니다. <b>모델링 범위:</b> IPv4/Ethernet과 R2의 Connected Route를 모델링합니다. 이 Lab에서 LAN A와 LAN B는 각각 하나의 Ethernet L2 Broadcast Domain이며 VLAN은 사용하지 않습니다. PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Switch는 ARP Broadcast Flooding과 필요한 Frame 경로만 시각화하며 MAC Table learning·Unknown Unicast Flooding·VLAN/Trunk·STP는 모델링하지 않습니다. Proxy ARP·Static Route·NAT·동적 라우팅·ICMP Redirect·ICMP Destination Unreachable·ICMP Time Exceeded·ARP cache aging/state transition도 범위 밖입니다. 동일 인터페이스로 다시 forwarding되는 고급 구성에서도 Route/ARP/Frame 전달만 표시합니다.</div>
 </div>
 
-<script src="arp-topology-1.js?v=20260921-accuracy7"></script>
-<script src="arp-topology-2.js?v=20260921-accuracy7"></script>
-<script src="arp-topology-init.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-1.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-2.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-3.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-4.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-5.js?v=20260921-accuracy7"></script>
-<script src="arp-simulator-6.js?v=20260921-accuracy7"></script>
+<script src="arp-topology-1.js?v=20260921-accuracy8"></script>
+<script src="arp-topology-2.js?v=20260921-accuracy8"></script>
+<script src="arp-topology-init.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-1.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-2.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-3.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-4.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-5.js?v=20260921-accuracy8"></script>
+<script src="arp-simulator-6.js?v=20260921-accuracy8"></script>
 </body>
 </html>
