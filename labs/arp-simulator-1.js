@@ -8,45 +8,111 @@ const GOOD={
 };
 const lessons=[
   {
-    dest:"pc3",title:"PC3로 PING을 보내보세요",text:"PC3는 PC1과 같은 LAN A에 있습니다. 지금은 정답을 몰라도 됩니다.",type:"normal",
+    dest:"pc3",
+    title:"같은 네트워크면 누구를 ARP할까요?",
+    text:"PC3는 PC1과 같은 192.168.10.0/24에 있습니다. 이번 실습에서는 PC1이 누구의 MAC 주소를 알아내는지만 확인합니다.",
+    type:"normal",
+    prediction:{
+      question:"PC3가 PC1과 같은 네트워크(on-link)에 있다면 PC1은 누구의 MAC 주소를 ARP로 알아낼까요?",
+      options:[
+        ["pc3","PC3의 MAC 주소"],
+        ["gw","Default Gateway의 MAC 주소"],
+        ["pc2","PC2의 MAC 주소"]
+      ],
+      correct:"pc3",
+      explain:"같은 네트워크(on-link) 목적지는 Gateway를 거치지 않습니다. PC1은 최종 목적지 PC3의 MAC 주소를 직접 ARP로 알아냅니다."
+    },
     hints:[
-      "PC1과 PC3의 주소에서 /24 기준 네트워크 부분이 같은지 먼저 보세요.",
-      "같은 네트워크라면 Default Gateway를 거치지 않고 목적지 장비의 MAC을 직접 알아냅니다.",
-      "PC3를 선택한 뒤 PING을 보내고, PC1 Neighbor(ARP) Table에 192.168.10.20이 생기는지 확인하세요."
+      "PC1과 PC3는 모두 192.168.10.0/24에 있습니다.",
+      "같은 네트워크(on-link)라면 Default Gateway를 거치지 않습니다.",
+      "따라서 PC1은 PC3의 IPv4 주소 192.168.10.20에 대한 MAC 주소를 ARP로 확인합니다."
     ]
   },
   {
-    dest:"pc2",title:"이번에는 PC2로 보내보세요",text:"PC2는 다른 LAN B에 있습니다. 같은 방법으로 PING만 눌러 차이를 보세요.",type:"normal",
+    dest:"pc2",
+    title:"다른 네트워크면 누구를 ARP할까요?",
+    text:"PC2는 192.168.20.0/24에 있습니다. 이번에는 최종 목적지 PC2가 아니라 현재 LAN에서 누구에게 먼저 프레임을 넘기는지 확인합니다.",
+    type:"normal",
+    prediction:{
+      question:"PC2가 다른 네트워크에 있다면 PC1은 누구의 MAC 주소를 먼저 ARP로 알아낼까요?",
+      options:[
+        ["pc2","최종 목적지 PC2의 MAC 주소"],
+        ["gw","Default Gateway 192.168.10.1의 MAC 주소"],
+        ["r2e1","R2 eth1 192.168.20.1의 MAC 주소"]
+      ],
+      correct:"gw",
+      explain:"원격 목적지는 PC1의 현재 Ethernet 구간에 직접 있지 않습니다. PC1은 next-hop인 Default Gateway 192.168.10.1의 MAC 주소를 ARP로 확인합니다."
+    },
     hints:[
-      "PC1은 192.168.10.0/24, PC2는 192.168.20.0/24입니다. 서로 같은 네트워크인지 보세요.",
-      "원격 네트워크라면 PC1은 최종 목적지 PC2보다 먼저 Default Gateway에게 프레임을 넘겨야 합니다.",
-      "PC1 Neighbor(ARP) Table에서 PC2가 아니라 192.168.10.1(Default Gateway)의 MAC이 생기는지 확인하세요."
+      "PC1은 192.168.10.0/24, PC2는 192.168.20.0/24입니다.",
+      "원격 목적지로 갈 때 현재 LAN에서의 next-hop은 Default Gateway입니다.",
+      "PC1이 ARP하는 주소는 PC2가 아니라 192.168.10.1입니다."
     ]
   },
   {
-    dest:"pc2",title:"장애 실습 · Gateway가 잘못됐습니다",text:"PING이 실패합니다. 먼저 실패 과정을 보고, 고급 실습에서 Gateway를 고쳐보세요.",type:"gw",
+    dest:"pc2",
+    title:"Gateway 주소가 틀리면 어디서 실패할까요?",
+    text:"PC1의 Default Gateway가 192.168.10.254로 잘못 설정되어 있습니다. 이 주소는 같은 LAN에 있지만 실제 장비가 사용하지 않습니다.",
+    type:"gw",
+    prediction:{
+      question:"PC1이 원격 PC2로 보내려 할 때, 잘못 설정된 Gateway 192.168.10.254 때문에 어떤 일이 먼저 일어날까요?",
+      options:[
+        ["badgw","192.168.10.254를 ARP하지만 Reply가 없어 실패"],
+        ["pc2","PC2 192.168.20.10을 직접 ARP"],
+        ["route","ARP 없이 R2가 자동으로 전달"]
+      ],
+      correct:"badgw",
+      explain:"PC1은 설정된 Default Gateway를 next-hop으로 믿습니다. 192.168.10.254를 ARP하지만 그 주소의 소유자가 없으므로 ARP Reply를 받지 못하고 전송이 중단됩니다."
+    },
     hints:[
-      "PING 실패 시 ARP가 어떤 IP를 찾으려 했는지 먼저 확인하세요.",
-      "고급 실습에서 `show ip` 또는 PC1 Default Gateway 값을 확인해 보세요.",
-      "정상 Default Gateway는 192.168.10.1입니다."
+      "원격 목적지이면 PC1은 설정된 Default Gateway를 next-hop으로 사용합니다.",
+      "현재 Gateway 값은 192.168.10.254입니다.",
+      "LAN A에 그 주소를 가진 장비가 없으므로 ARP Reply를 받을 수 없습니다."
     ]
   },
   {
-    dest:"pc2",title:"장애 실습 · Subnet Mask가 잘못됐습니다",text:"PC1이 PC2를 같은 네트워크로 착각합니다. 패킷이 누구를 ARP하는지 보세요.",type:"mask",
+    dest:"pc2",
+    title:"Subnet Mask가 틀리면 판단이 어떻게 달라질까요?",
+    text:"PC1의 Prefix가 /16으로 잘못 설정되어 PC2를 같은 네트워크라고 착각합니다. 이번 실습은 잘못된 on-link 판단이 ARP 대상까지 바꾸는 과정을 봅니다.",
+    type:"mask",
+    prediction:{
+      question:"PC1이 /16 때문에 PC2를 on-link로 잘못 판단하면 누구를 ARP할까요?",
+      options:[
+        ["pc2","PC2 192.168.20.10을 직접 ARP"],
+        ["gw","Default Gateway 192.168.10.1을 ARP"],
+        ["none","ARP를 하지 않고 즉시 실패"]
+      ],
+      correct:"pc2",
+      explain:"잘못된 /16은 PC2를 같은 네트워크(on-link)로 보이게 합니다. 그래서 PC1은 Gateway가 아니라 PC2의 IPv4 주소를 LAN A에서 직접 ARP하고 Reply를 받지 못합니다."
+    },
     hints:[
-      "실패한 패킷에서 PC1이 Gateway가 아니라 PC2를 직접 ARP하는지 보세요.",
-      "PC1이 192.168.20.10을 on-link로 판단한 이유는 IP 자체보다 Subnet Mask에 있습니다.",
-      "PC1의 정상 Prefix는 /24입니다. 현재 /16을 /24로 복구하세요."
+      "PC1의 현재 Prefix는 /16입니다.",
+      "/16 기준에서는 192.168.10.10과 192.168.20.10이 같은 네트워크로 판단됩니다.",
+      "그래서 PC1은 Gateway가 아니라 PC2를 직접 ARP합니다."
     ]
   },
   {
-    dest:"pc2",title:"장애 실습 · R2 eth0가 DOWN입니다",text:"주소 설정은 정상입니다. Gateway가 응답할 수 없는 상태를 확인해 보세요.",type:"link",
+    dest:"pc2",
+    title:"Gateway가 응답하지 않으면 무엇이 달라질까요?",
+    text:"주소와 Gateway 설정은 정상이고 ARP 대상도 맞습니다. 하지만 R2 eth0가 Down이라 Gateway가 ARP Reply를 보낼 수 없습니다.",
+    type:"link",
+    prediction:{
+      question:"ARP 대상 192.168.10.1은 맞지만 R2 eth0가 Down이면 결과는 어떻게 될까요?",
+      options:[
+        ["noreply","Gateway를 ARP하지만 Reply가 없어 실패"],
+        ["pc2","PC2를 대신 직접 ARP"],
+        ["success","기존 설정만으로 정상 통신"]
+      ],
+      correct:"noreply",
+      explain:"경로 판단과 ARP 대상 선택은 맞지만 실제 Gateway 인터페이스가 응답할 수 없습니다. 따라서 192.168.10.1에 대한 ARP Reply를 얻지 못해 다음 Ethernet 전송으로 진행하지 못합니다."
+    },
     hints:[
-      "ARP Target은 올바르게 192.168.10.1인데 Reply가 오지 않는지 확인하세요.",
-      "고급 실습의 R2 상태 또는 `show r2`로 eth0 상태를 확인하세요.",
-      "R2 eth0를 UP으로 복구해야 합니다."
+      "이번 실습의 ARP Target은 정상적으로 192.168.10.1입니다.",
+      "문제는 주소가 아니라 R2 eth0의 상태입니다.",
+      "Gateway 인터페이스가 Down이면 ARP Reply를 보낼 수 없습니다."
     ]
-  },]
+  }
+]
 const state={
   lesson:0,dest:"pc3",
   pc1Ip:GOOD.pc1Ip,mask:GOOD.pc1Mask,gw:GOOD.pc1Gw,
@@ -56,6 +122,7 @@ const state={
   r2e1Ip:GOOD.r2e1Ip,r2e1Mask:GOOD.r2e1Mask,eth1:true,
   arp:{},pc2Arp:{},pc3Arp:{},r2Arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
   completed:Array(5).fill(false),failureSeen:Array(5).fill(false),hintLevel:0,openDevice:null,
+  predictionChoice:null,predictionLocked:false,
   cables:{pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true}
 };
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -147,7 +214,7 @@ function destinationIsOnPhysicalSegment(dest,segment){return dest.segment===segm
 function setLiveEvent(kind,title,detail){
   const strip=$("#liveEventStrip");
   const iconMap={arp:"ARP",icmp:"ICMP",route:"R",reply:"↩",error:"!",ready:"●"};
-  const labelMap={arp:"ARP",icmp:"ICMP",route:"ROUTE",reply:"REPLY",error:"ERROR",ready:"READY"};
+  const labelMap={arp:"ARP",icmp:"ICMP",route:"경로 판단",reply:"응답",error:"오류",ready:"대기"};
   strip.className="live-event-strip "+(kind==="ready"?"":kind);
   $("#liveEventIcon").textContent=iconMap[kind]||"●";
   $("#liveEventTitle").textContent=title;
@@ -159,10 +226,10 @@ function resetFlow(){
   clearTracePaths();$("#routeLookupCard").classList.remove("show");
   setLiveEvent("ready","패킷 이벤트 대기","PING을 보내면 장비별 처리 내용을 이 영역에서 순서대로 설명합니다.");
   ["s1","s2","s3","s4"].forEach(id=>{$("#"+id).className="flow-step"});
-  $("#s1").innerHTML='<div class="n">STEP 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p>';
-  $("#s2").innerHTML='<div class="n">STEP 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p>';
-  $("#s3").innerHTML='<div class="n">STEP 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p>';
-  $("#s4").innerHTML='<div class="n">STEP 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p>';
+  $("#s1").innerHTML='<div class="n">단계 1</div><strong>라우팅 판단</strong><p>목적지가 on-link인지, Gateway를 거쳐야 하는지 확인합니다.</p>';
+  $("#s2").innerHTML='<div class="n">단계 2</div><strong>ARP 대상 선택</strong><p>누구의 MAC 주소가 필요한지 결정합니다.</p>';
+  $("#s3").innerHTML='<div class="n">단계 3</div><strong>Ethernet 전송</strong><p>현재 링크에서 받을 장비의 MAC으로 보냅니다.</p>';
+  $("#s4").innerHTML='<div class="n">단계 4</div><strong>통신 결과</strong><p>PING 성공/실패와 원인을 확인합니다.</p>';
   $("#resultHint").textContent="PING을 보내면 순서대로 표시됩니다.";
 }
 function setStep(id,title,text,status="done"){
