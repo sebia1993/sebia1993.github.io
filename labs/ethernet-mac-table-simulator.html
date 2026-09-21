@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — Interactive Lab</title>
 <meta name="description" content="Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-2">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-3">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
@@ -68,49 +68,119 @@
     </div>
 
     <div class="topology-shell" id="topologyShell">
-      <svg viewBox="0 0 1000 510" role="img" aria-label="PC1, 스위치 SW1, PC2, PC3이 연결된 단일 Ethernet Broadcast Domain">
+      <svg id="macTopology" viewBox="0 0 1400 620" role="img" aria-label="PC1, SW1, PC2, PC3이 하나의 Ethernet L2 Broadcast Domain에 연결된 MAC Table 학습 토폴로지">
         <defs>
-          <filter id="softShadow"><feDropShadow dx="0" dy="5" stdDeviation="6" flood-opacity=".12"/></filter>
+          <pattern id="macGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="#21364d"/>
+          </pattern>
+          <linearGradient id="macDevice" x2="0" y2="1">
+            <stop stop-color="#284e70"/>
+            <stop offset="1" stop-color="#122e49"/>
+          </linearGradient>
+          <filter id="macShadow"><feDropShadow dy="6" stdDeviation="8" flood-opacity=".24"/></filter>
+          <filter id="packetGlow"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#0ea77d" flood-opacity=".5"/></filter>
+          <marker id="traceArrowIn" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#12a57e"/></marker>
+          <marker id="traceArrowOut" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#2f7fd0"/></marker>
+          <marker id="traceArrowFlood" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#b86300"/></marker>
+          <symbol id="macPcIcon" viewBox="0 0 100 85">
+            <rect x="10" y="5" width="80" height="54" rx="6" fill="url(#macDevice)" stroke="#78bce9" stroke-width="2"/>
+            <rect x="17" y="12" width="66" height="38" rx="2" fill="#0b1c2c"/>
+            <path d="M30 30l9 7-9 7M48 44h20" fill="none" stroke="#6be0c0" stroke-width="3"/>
+            <path d="M45 59v15h-17m27-15v15h17" fill="none" stroke="#78bce9" stroke-width="4"/>
+          </symbol>
+          <symbol id="macSwitchIcon" viewBox="0 0 150 90">
+            <path d="M10 27l20-16h100l12 16v45H10Z" fill="url(#macDevice)" stroke="#77b8df" stroke-width="2"/>
+            <path d="M10 27h132" stroke="#77b8df"/>
+            <g fill="#071725" stroke="#6eafd3">
+              <rect x="24" y="41" width="14" height="15"/><rect x="44" y="41" width="14" height="15"/>
+              <rect x="64" y="41" width="14" height="15"/><rect x="84" y="41" width="14" height="15"/>
+            </g>
+            <g fill="#6ce0bb"><circle cx="31" cy="63" r="2"/><circle cx="51" cy="63" r="2"/><circle cx="71" cy="63" r="2"/></g>
+            <path d="M52 18h36m-8-5l8 5-8 5" stroke="#9ed9fa" fill="none"/>
+          </symbol>
         </defs>
 
-        <path id="link-p1" class="topology-link" d="M250 255 H430"/>
-        <path id="link-p2" class="topology-link" d="M570 235 C700 235 735 145 815 145"/>
-        <path id="link-p3" class="topology-link" d="M570 275 C700 275 735 365 815 365"/>
+        <rect width="1400" height="620" rx="18" fill="#f4f7fb"/>
+        <rect width="1400" height="620" fill="url(#macGrid)" opacity=".08"/>
+        <rect x="34" y="78" width="1332" height="500" rx="20" fill="#eef8f4" stroke="#25826b" stroke-width="2" stroke-dasharray="7 6"/>
 
-        <text class="port-label" x="330" y="238">port 1</text>
-        <text class="port-label" x="682" y="190">port 2</text>
-        <text class="port-label" x="682" y="335">port 3</text>
+        <g font-family="Segoe UI,Arial,sans-serif">
+          <text x="36" y="42" fill="#40546c" font-size="14" letter-spacing="2">ETHERNET / MAC TABLE · INTERACTIVE LAB TOPOLOGY</text>
+          <text x="1364" y="42" text-anchor="end" fill="#40546c" font-size="14">Source Learning → Destination Lookup → Forwarding</text>
+          <text x="58" y="113" fill="#075a43" font-size="20" font-weight="bold">SINGLE ETHERNET L2 BROADCAST DOMAIN</text>
+          <text x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 Forwarding</text>
 
-        <g class="device host" transform="translate(75 190)" filter="url(#softShadow)">
-          <rect width="175" height="130" rx="18"/>
-          <text class="device-title" x="87" y="38" text-anchor="middle">PC1</text>
-          <text x="87" y="65" text-anchor="middle">192.168.10.10</text>
-          <text class="device-mac" x="87" y="90" text-anchor="middle">00:50:79:66:68:00</text>
-          <text class="device-sub" x="87" y="111" text-anchor="middle">Sender</text>
-        </g>
+          <!-- Physical links -->
+          <g fill="none" stroke="#08765d" stroke-width="4">
+            <path id="pathP1Sw" class="topology-link link-up" d="M248 307H505"/>
+            <path id="pathSwP2" class="topology-link link-up" d="M654 286H795V194H1112"/>
+            <path id="pathSwP3" class="topology-link link-up" d="M654 328H795V450H1112"/>
+          </g>
 
-        <g class="device switch" transform="translate(430 190)" filter="url(#softShadow)">
-          <rect width="140" height="130" rx="18"/>
-          <text class="device-title" x="70" y="38" text-anchor="middle">SW1</text>
-          <text x="70" y="66" text-anchor="middle">Ethernet Switch</text>
-          <text class="device-sub" x="70" y="92" text-anchor="middle">FDB / MAC Table</text>
-          <text id="switchBadge" class="switch-badge" x="70" y="113" text-anchor="middle">READY</text>
-        </g>
+          <!-- Dynamic trace overlays -->
+          <path id="traceP1Sw" class="mac-trace trace-in" d="M248 307H505"/>
+          <path id="traceSwP1" class="mac-trace trace-out" d="M505 307H248"/>
+          <path id="traceSwP2" class="mac-trace trace-out" d="M654 286H795V194H1112"/>
+          <path id="traceP2Sw" class="mac-trace trace-in" d="M1112 194H795V286H654"/>
+          <path id="traceSwP3" class="mac-trace trace-out" d="M654 328H795V450H1112"/>
+          <path id="traceP3Sw" class="mac-trace trace-in" d="M1112 450H795V328H654"/>
 
-        <g class="device host" transform="translate(815 80)" filter="url(#softShadow)">
-          <rect width="175" height="130" rx="18"/>
-          <text class="device-title" x="87" y="38" text-anchor="middle">PC2</text>
-          <text x="87" y="65" text-anchor="middle">192.168.10.20</text>
-          <text class="device-mac" x="87" y="90" text-anchor="middle">00:50:79:66:68:01</text>
-          <text class="device-sub" x="87" y="111" text-anchor="middle">Destination</text>
-        </g>
+          <!-- PC1 -->
+          <use href="#macPcIcon" x="112" y="258" width="112" height="96" filter="url(#macShadow)"/>
+          <text x="168" y="384" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC1</text>
+          <text x="168" y="410" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.10/24</text>
+          <text x="168" y="432" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:00</text>
+          <g class="port-chip"><rect x="270" y="275" width="91" height="28" rx="6"/><text x="315.5" y="295" text-anchor="middle">port 1 · IN</text></g>
 
-        <g class="device host" transform="translate(815 300)" filter="url(#softShadow)">
-          <rect width="175" height="130" rx="18"/>
-          <text class="device-title" x="87" y="38" text-anchor="middle">PC3</text>
-          <text x="87" y="65" text-anchor="middle">192.168.10.30</text>
-          <text class="device-mac" x="87" y="90" text-anchor="middle">00:50:79:66:68:02</text>
-          <text class="device-sub" x="87" y="111" text-anchor="middle">Observer</text>
+          <!-- SW1 -->
+          <use href="#macSwitchIcon" x="505" y="252" width="150" height="90" filter="url(#macShadow)"/>
+          <text x="580" y="375" text-anchor="middle" fill="#172b43" font-size="26" font-weight="800">SW1</text>
+          <text x="580" y="400" text-anchor="middle" fill="#334a63" font-size="15">Ethernet Switch</text>
+          <g class="port-chip"><rect x="675" y="246" width="91" height="28" rx="6"/><text x="720.5" y="266" text-anchor="middle">port 2</text></g>
+          <g class="port-chip"><rect x="675" y="344" width="91" height="28" rx="6"/><text x="720.5" y="364" text-anchor="middle">port 3</text></g>
+
+          <!-- SW1 state panel -->
+          <g id="svgFdbPanel" class="svg-fdb-panel">
+            <rect x="430" y="430" width="395" height="126" rx="13"/>
+            <text x="451" y="454" class="svg-fdb-title">SW1 · DYNAMIC FDB / CURRENT LOOKUP</text>
+            <text id="svgFdbRow1" x="451" y="480" class="svg-fdb-row">—</text>
+            <text id="svgFdbRow2" x="451" y="502" class="svg-fdb-row">—</text>
+            <text id="svgFdbRow3" x="451" y="524" class="svg-fdb-row">—</text>
+            <text id="svgLookupText" x="451" y="548" class="svg-lookup-row">LOOKUP · READY</text>
+          </g>
+
+          <!-- PC2 -->
+          <use href="#macPcIcon" x="1130" y="145" width="112" height="96" filter="url(#macShadow)"/>
+          <text x="1186" y="272" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC2</text>
+          <text x="1186" y="298" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.20/24</text>
+          <text x="1186" y="320" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:01</text>
+          <g id="pc2ReceiveBadge" class="receive-badge"><rect x="1042" y="155" width="105" height="27" rx="13"/><text x="1094.5" y="173" text-anchor="middle">DESTINATION</text></g>
+
+          <!-- PC3 -->
+          <use href="#macPcIcon" x="1130" y="400" width="112" height="96" filter="url(#macShadow)"/>
+          <text x="1186" y="527" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC3</text>
+          <text x="1186" y="553" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.30/24</text>
+          <text x="1186" y="575" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:02</text>
+          <g id="pc3ReceiveBadge" class="receive-badge muted"><rect x="1042" y="410" width="105" height="27" rx="13"/><text x="1094.5" y="428" text-anchor="middle">OBSERVER</text></g>
+
+          <!-- Packet sprites -->
+          <g id="packetIngress" class="packet-sprite" transform="translate(-100 -100)">
+            <rect x="-50" y="-18" width="100" height="36" rx="18"/>
+            <circle cx="-34" cy="0" r="7"/>
+            <text id="packetIngressText" x="7" y="5" text-anchor="middle">FRAME</text>
+          </g>
+          <g id="packetOut2" class="packet-sprite out" transform="translate(-100 -100)">
+            <rect x="-50" y="-18" width="100" height="36" rx="18"/>
+            <circle cx="-34" cy="0" r="7"/>
+            <text id="packetOut2Text" x="7" y="5" text-anchor="middle">FRAME</text>
+          </g>
+          <g id="packetOut3" class="packet-sprite out flood" transform="translate(-100 -100)">
+            <rect x="-50" y="-18" width="100" height="36" rx="18"/>
+            <circle cx="-34" cy="0" r="7"/>
+            <text id="packetOut3Text" x="7" y="5" text-anchor="middle">FRAME</text>
+          </g>
+
+          <text id="traceModeLabel" x="835" y="115" fill="#08765d" font-size="13" font-weight="900">READY · FRAME을 실행하세요</text>
         </g>
       </svg>
     </div>
@@ -285,6 +355,6 @@
     기본 모드는 핵심 흐름만, 고급 모드는 FDB/ARP 상태와 직접 조작을 추가로 보여줍니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20260921-2"></script>
+<script src="ethernet-mac-simulator.js?v=20260921-3"></script>
 </body>
 </html>
