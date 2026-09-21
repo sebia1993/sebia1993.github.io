@@ -70,8 +70,28 @@ function isValidIp(ip){
   const p=String(ip).trim().split(".");
   return p.length===4 && p.every(x=>/^\d+$/.test(x) && +x>=0 && +x<=255);
 }
+function isUnicastIpv4(ip){
+  if(!isValidIp(ip))return false;
+  const first=+ip.split(".")[0];
+  return first!==0 && first!==127 && first<224;
+}
+function isUsableInterfaceIp(ip,prefix){
+  if(!isUnicastIpv4(ip))return false;
+  if(prefix>=31)return true;
+  const n=ipToInt(ip),m=maskInt(prefix),net=(n&m)>>>0,bcast=(net|(~m>>>0))>>>0;
+  return n!==net && n!==bcast;
+}
+function interfaceIpList(exclude=null){
+  return [
+    ["pc1",state.pc1Ip],["pc3",state.pc3Ip],["pc2",state.pc2Ip],
+    ["r2e0",state.r2e0Ip],["r2e1",state.r2e1Ip]
+  ].filter(([name])=>name!==exclude);
+}
+function duplicateInterfaceIp(ip,exclude=null){
+  return interfaceIpList(exclude).some(([,existing])=>existing===ip);
+}
 function gatewayLooksValid(ip,prefix,gw,routerIp){
-  return isValidIp(gw) && sameSubnet(ip,gw,prefix) && gw===routerIp;
+  return isUnicastIpv4(gw) && sameSubnet(ip,gw,prefix) && gw===routerIp;
 }
 function selectedDestination(){
   return state.dest==="pc3"
