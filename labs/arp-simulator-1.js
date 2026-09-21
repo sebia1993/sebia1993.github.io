@@ -1,3 +1,4 @@
+const SIM_INITIAL_TTL=64;
 const MAC={pc1:"00:50:79:66:68:00",pc2:"00:50:79:66:68:02",pc3:"00:50:79:66:68:03",r2e0:"02:42:d4:39:68:00",r2e1:"02:42:d4:39:68:01"};
 const GOOD={
   pc1Ip:"192.168.10.10",pc1Mask:24,pc1Gw:"192.168.10.1",
@@ -53,7 +54,7 @@ const state={
   pc2Ip:GOOD.pc2Ip,pc2Mask:GOOD.pc2Mask,pc2Gw:GOOD.pc2Gw,
   r2e0Ip:GOOD.r2e0Ip,r2e0Mask:GOOD.r2e0Mask,eth0:true,
   r2e1Ip:GOOD.r2e1Ip,r2e1Mask:GOOD.r2e1Mask,eth1:true,
-  arp:{},r2Arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
+  arp:{},pc2Arp:{},pc3Arp:{},r2Arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
   completed:Array(5).fill(false),failureSeen:Array(5).fill(false),hintLevel:0,openDevice:null,
   cables:{pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true}
 };
@@ -93,10 +94,37 @@ function duplicateInterfaceIp(ip,exclude=null){
 function gatewayLooksValid(ip,prefix,gw,routerIp){
   return isUnicastIpv4(gw) && sameSubnet(ip,gw,prefix) && gw===routerIp;
 }
-function selectedDestination(){
-  return state.dest==="pc3"
-    ?{key:"pc3",name:"PC3",ip:state.pc3Ip,prefix:state.pc3Mask,gw:state.pc3Gw,mac:MAC.pc3,segment:"A",accessLink:"sw1pc3"}
-    :{key:"pc2",name:"PC2",ip:state.pc2Ip,prefix:state.pc2Mask,gw:state.pc2Gw,mac:MAC.pc2,segment:"B",accessLink:"sw2pc2"};
+function hostByKey(key){
+  if(key==="pc1")return {key:"pc1",name:"PC1",ip:state.pc1Ip,prefix:state.mask,gw:state.gw,mac:MAC.pc1,segment:"A",accessLink:"pc1sw1"};
+  if(key==="pc3")return {key:"pc3",name:"PC3",ip:state.pc3Ip,prefix:state.pc3Mask,gw:state.pc3Gw,mac:MAC.pc3,segment:"A",accessLink:"sw1pc3"};
+  if(key==="pc2")return {key:"pc2",name:"PC2",ip:state.pc2Ip,prefix:state.pc2Mask,gw:state.pc2Gw,mac:MAC.pc2,segment:"B",accessLink:"sw2pc2"};
+  return null;
+}
+function selectedDestination(){return hostByKey(state.dest)}
+function neighborCacheFor(key){
+  if(key==="pc1")return state.arp;
+  if(key==="pc2")return state.pc2Arp;
+  if(key==="pc3")return state.pc3Arp;
+  if(key==="r2")return state.r2Arp;
+  return null;
+}
+function learnNeighbor(key,ip,mac){
+  const cache=neighborCacheFor(key);
+  if(cache)cache[ip]=mac;
+}
+function clearNeighborCache(key){
+  const cache=neighborCacheFor(key);
+  if(cache)Object.keys(cache).forEach(ip=>delete cache[ip]);
+}
+function clearAllNeighborCaches(){
+  state.arp={};state.pc2Arp={};state.pc3Arp={};state.r2Arp={};
+}
+function physicalHostByIp(ip,segment){
+  return ["pc1","pc3","pc2"].map(hostByKey).find(h=>h&&h.segment===segment&&h.ip===ip)||null;
+}
+function lanAEndpointByIp(ip){
+  if(ip===state.r2e0Ip&&state.eth0)return {key:"r2",name:"R2 eth0",ip:state.r2e0Ip,mac:MAC.r2e0,segment:"A",accessLink:"sw1r2"};
+  return physicalHostByIp(ip,"A");
 }
 function routerInterfaceForSegment(segment){
   return segment==="A"
@@ -142,22 +170,28 @@ function setStep(id,title,text,status="done"){
   e.innerHTML=`<div class="n">${e.querySelector(".n")?.textContent||""}</div><strong>${title}</strong><p>${text}</p>`;
 }
 function renderArp(){
-  const rows=Object.entries(state.arp);
-  $("#arpBody").innerHTML=rows.length?rows.map(([ip,mac])=>{
-    const meaning=ip===state.r2e0Ip?"원격 목적지로 보낼 때 PC1이 사용할 Default Gateway":
-                  ip===state.pc3Ip?"LAN A에서 PC1이 직접 전달할 수 있는 PC3":"PC1이 현재 Ethernet 구간에서 학습한 이웃";
-    return `<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaning}</td></tr>`;
-  }).join(""):`<tr><td colspan="3" style="color:#7a90a3">아직 PC1이 학습한 ARP 항목이 없습니다.</td></tr>`;
-  const r2Body=$("#r2ArpBody");
-  if(r2Body){
-    const r2Rows=Object.entries(state.r2Arp);
-    r2Body.innerHTML=r2Rows.length?r2Rows.map(([ip,mac])=>{
-      const meaning=ip===state.pc1Ip?"LAN A의 PC1":
-                    ip===state.pc2Ip?"LAN B의 PC2":
-                    ip===state.pc3Ip?"LAN A의 PC3":"R2가 출력 링크에서 학습한 이웃";
-      return `<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaning}</td></tr>`;
-    }).join(""):`<tr><td colspan="3" style="color:#7a90a3">아직 R2가 학습한 ARP 항목이 없습니다.</td></tr>`;
-  }
+  const renderBody=(selector,rows,emptyText,meaningFn)=>{
+    const body=$(selector);if(!body)return;
+    body.innerHTML=rows.length?rows.map(([ip,mac])=>`<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaningFn(ip)}</td></tr>`).join("")
+      :`<tr><td colspan="3" style="color:#7a90a3">${emptyText}</td></tr>`;
+  };
+  renderBody("#arpBody",Object.entries(state.arp),"아직 PC1이 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.r2e0Ip?"원격 목적지로 보낼 때 PC1이 사용할 R2 eth0":
+    ip===state.pc3Ip?"LAN A의 PC3":
+    "PC1이 LAN A에서 학습한 이웃");
+  renderBody("#pc3ArpBody",Object.entries(state.pc3Arp),"아직 PC3가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.pc1Ip?"LAN A의 PC1":
+    ip===state.r2e0Ip?"PC3가 remote Reply에 사용할 R2 eth0":
+    "PC3가 LAN A에서 학습한 이웃");
+  renderBody("#pc2ArpBody",Object.entries(state.pc2Arp),"아직 PC2가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.r2e1Ip?"PC2가 remote Reply에 사용할 R2 eth1":
+    ip===state.pc1Ip?"PC2가 on-link로 판단한 PC1":
+    "PC2가 LAN B에서 학습한 이웃");
+  renderBody("#r2ArpBody",Object.entries(state.r2Arp),"아직 R2가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.pc1Ip?"LAN A의 PC1":
+    ip===state.pc2Ip?"LAN B의 PC2":
+    ip===state.pc3Ip?"LAN A의 PC3":
+    "R2가 출력 링크에서 학습한 이웃");
 }
 
 const LINK_UI={
@@ -249,8 +283,20 @@ async function animateLinks(keys){
   return {ok:true};
 }
 
-const TRACE_REQ={pc1sw1:"traceReqPc1Sw1",sw1pc3:"traceReqSw1Pc3",sw1r2:"traceReqSw1R2",r2sw1:"traceReqR2Sw1",r2sw2:"traceReqR2Sw2",sw2pc2:"traceReqSw2Pc2"};
-const TRACE_REP={pc3sw1:"traceRepPc3Sw1",pc2sw2:"traceRepPc2Sw2",sw2r2:"traceRepSw2R2",sw1r2:"traceRepSw1R2",r2sw1:"traceRepR2Sw1",sw1pc1:"traceRepSw1Pc1"};
+const TRACE_REQ={
+  pc1sw1:"traceReqPc1Sw1",sw1pc1:"traceReqSw1Pc1",
+  pc3sw1:"traceReqPc3Sw1",sw1pc3:"traceReqSw1Pc3",
+  pc2sw2:"traceReqPc2Sw2",sw2pc2:"traceReqSw2Pc2",
+  sw1r2:"traceReqSw1R2",r2sw1:"traceReqR2Sw1",
+  sw2r2:"traceReqSw2R2",r2sw2:"traceReqR2Sw2"
+};
+const TRACE_REP={
+  pc1sw1:"traceRepPc1Sw1",sw1pc1:"traceRepSw1Pc1",
+  pc3sw1:"traceRepPc3Sw1",sw1pc3:"traceRepSw1Pc3",
+  pc2sw2:"traceRepPc2Sw2",sw2pc2:"traceRepSw2Pc2",
+  sw2r2:"traceRepSw2R2",r2sw2:"traceRepR2Sw2",
+  sw1r2:"traceRepSw1R2",r2sw1:"traceRepR2Sw1"
+};
 function clearTracePaths(){
   $$(".trace-path").forEach(x=>x.classList.remove("show"));
   $$(".trace-label").forEach(x=>x.classList.remove("show"));
