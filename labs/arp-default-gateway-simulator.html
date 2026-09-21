@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="arp-simulator-2.css">
 <link rel="stylesheet" href="arp-simulator-3.css">
 </head>
-<body>
+<body data-sim-mode="basic">
 <div class="wrap">
   <header class="hero">
     <small>FOUNDATION · INTERACTIVE LAB</small>
@@ -34,6 +34,17 @@
     <div class="course-bar"><div id="courseBar"></div></div>
     <div class="course-count" id="courseCount">0 / 5 완료</div>
   </div>
+
+  <section class="view-mode-card" aria-label="학습 보기 모드">
+    <div class="view-mode-copy">
+      <strong>보기 모드</strong>
+      <span id="viewModeSummary">기본 모드 · 처음에는 핵심 흐름만 보고, 필요할 때 고급 정보를 열어보세요.</span>
+    </div>
+    <div class="view-mode-actions" role="group" aria-label="기본 또는 고급 모드 선택">
+      <button type="button" class="view-mode-btn active" data-view-mode="basic" aria-pressed="true"><b>기본 모드</b><small>추천 · 핵심 흐름</small></button>
+      <button type="button" class="view-mode-btn" data-view-mode="advanced" aria-pressed="false"><b>고급 모드</b><small>패킷 · Neighbor · 설정</small></button>
+    </div>
+  </section>
 
   <section class="card lab-card">
     <div class="coach">
@@ -64,6 +75,7 @@
       <span>🟠 실선 = Interface DOWN · 케이블은 연결됨</span>
       <span style="color:#08765d;font-weight:800">━━ REQUEST →</span>
       <span style="color:#175da8;font-weight:800">┅┅ REPLY ←</span>
+      <span class="legend-direction-note">초록/파랑은 <b>요청/응답 방향</b> 표시이며 ARP/ICMP 프로토콜 색상 구분이 아닙니다.</span>
     </div>
     <div class="physical-logical-note"><span><b>LAN A / LAN B</b> = 이 Lab에서 각각 하나의 Ethernet L2 Broadcast Domain · VLAN 미사용</span><span><b>Physical Segment</b> = 실제 스위치에 연결된 위치 · <b>NET</b> = 각 장비가 자신의 IP/Prefix로 계산한 논리 Network</span></div>
 
@@ -134,7 +146,7 @@
   </section>
 
   <div class="details-grid">
-    <details class="panel" id="packetStudyPanel">
+    <details class="panel advanced-only" id="packetStudyPanel">
       <summary>패킷을 이해해 보기 <span style="font-weight:500;color:#7b8fa1;font-size:12px">값뿐 아니라 “왜?”까지 설명</span></summary>
       <div class="panel-body">
         <div id="packetEmpty" class="empty-study">
@@ -224,27 +236,27 @@
           </div>
 
           <div class="arp-help">
-            <strong>PC1 Neighbor(ARP) Table = “현재 Ethernet 구간에서 next-hop IPv4를 어떤 MAC으로 보낼지 저장한 매핑”</strong>
+            <div class="neighbor-table-head"><strong>PC1 Neighbor(ARP) Table = “현재 Ethernet 구간에서 next-hop IPv4를 어떤 MAC으로 보낼지 저장한 매핑”</strong><button type="button" class="neighbor-clear-btn" data-clear-neighbor="pc1">PC1 비우기</button></div>
             <p id="arpHelpText">ARP를 수행하면 결과가 아래 표에 쌓입니다. 원격 네트워크에서는 보통 최종 목적지 PC가 아니라 Default Gateway 항목이 생기는 점을 보세요.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="arpBody"><tr><td colspan="3" style="color:#7a90a3">아직 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
-            <strong style="display:block;margin-top:18px">PC3 Neighbor(ARP) Table</strong>
+            <div class="neighbor-table-head spaced"><strong>PC3 Neighbor(ARP) Table</strong><button type="button" class="neighbor-clear-btn" data-clear-neighbor="pc3">PC3 비우기</button></div>
             <p>PC3가 직접 Reply하거나 Gateway를 사용할 때 필요한 LAN A의 IPv4→MAC 매핑입니다.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="pc3ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 PC3가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
 
-            <strong style="display:block;margin-top:18px">PC2 Neighbor(ARP) Table</strong>
+            <div class="neighbor-table-head spaced"><strong>PC2 Neighbor(ARP) Table</strong><button type="button" class="neighbor-clear-btn" data-clear-neighbor="pc2">PC2 비우기</button></div>
             <p>PC2가 Echo Reply를 보낼 때 자신의 Gateway 또는 on-link 상대를 확인하는 매핑입니다.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
               <tbody id="pc2ArpBody"><tr><td colspan="3" style="color:#7a90a3">아직 PC2가 학습한 ARP 항목이 없습니다.</td></tr></tbody>
             </table>
 
-            <strong style="display:block;margin-top:18px">R2 Neighbor(ARP) Table = “라우터가 출력 링크의 next-hop MAC을 확인한 결과”</strong>
+            <div class="neighbor-table-head spaced"><strong>R2 Neighbor(ARP) Table = “라우터가 출력 링크의 next-hop MAC을 확인한 결과”</strong><button type="button" class="neighbor-clear-btn" data-clear-neighbor="r2">R2 비우기</button></div>
             <p>원격 통신에서는 PC1만 ARP하는 것이 아닙니다. R2도 선택한 출력 링크에서 최종 Host 또는 다음 홉의 MAC을 알아야 Ethernet Frame을 만들 수 있습니다.</p>
             <table class="arp-table">
               <thead><tr><th>IP 주소</th><th>알아낸 MAC 주소</th><th>이 항목의 의미</th></tr></thead>
@@ -256,7 +268,7 @@
       </div>
     </details>
 
-    <details class="panel" id="advancedPanel">
+    <details class="panel advanced-only" id="advancedPanel">
       <summary>고급 실습 · 장비 설정 / 터미널 <span style="font-weight:500;color:#7b8fa1;font-size:12px">토폴로지 설정과 완전히 연동</span></summary>
       <div class="panel-body">
         <div id="advancedNote" class="lesson-goal">토폴로지에서 장비를 클릭해 설정하거나 아래 빠른 장비 버튼을 사용하세요. 변경값은 다음 PING의 on-link 판단·ARP·next-hop·Connected Route·Reply 방향 Neighbor Resolution에 반영됩니다. <b>지원 범위:</b> IPv4/Ethernet과 R2의 Connected Route를 모델링합니다. 이 Lab에서 LAN A와 LAN B는 각각 하나의 Ethernet L2 Broadcast Domain이며 VLAN은 사용하지 않습니다. PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Switch는 ARP Broadcast Flooding과 필요한 Frame 경로만 시각화하며 MAC Table learning·Unknown Unicast Flooding·VLAN/Trunk·STP는 모델링하지 않습니다. Proxy ARP·Static Route·NAT·동적 라우팅·ICMP Redirect·ICMP Destination Unreachable·ICMP Time Exceeded·ARP cache aging/state transition도 범위 밖입니다. 동일 인터페이스로 다시 forwarding되는 고급 구성에서도 Route/ARP/Frame 전달만 표시합니다.</div>
@@ -301,14 +313,14 @@
   <div class="footer">이 프로토타입은 실제 GNS3를 브라우저에서 구동하는 것이 아니라 검증된 ARP / Default Gateway 동작을 학습용으로 재현합니다. Simulator 초기 TTL은 64입니다. <b>모델링 범위:</b> IPv4/Ethernet과 R2의 Connected Route를 모델링합니다. 이 Lab에서 LAN A와 LAN B는 각각 하나의 Ethernet L2 Broadcast Domain이며 VLAN은 사용하지 않습니다. PC1/PC2/PC3는 IP forwarding을 하지 않는 End Host입니다. Switch는 ARP Broadcast Flooding과 필요한 Frame 경로만 시각화하며 MAC Table learning·Unknown Unicast Flooding·VLAN/Trunk·STP는 모델링하지 않습니다. Proxy ARP·Static Route·NAT·동적 라우팅·ICMP Redirect·ICMP Destination Unreachable·ICMP Time Exceeded·ARP cache aging/state transition도 범위 밖입니다. 동일 인터페이스로 다시 forwarding되는 고급 구성에서도 Route/ARP/Frame 전달만 표시합니다.</div>
 </div>
 
-<script src="arp-topology-1.js?v=20260921-accuracy8"></script>
-<script src="arp-topology-2.js?v=20260921-accuracy8"></script>
-<script src="arp-topology-init.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-1.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-2.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-3.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-4.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-5.js?v=20260921-accuracy8"></script>
-<script src="arp-simulator-6.js?v=20260921-accuracy8"></script>
+<script src="arp-topology-1.js?v=20260921-mode9"></script>
+<script src="arp-topology-2.js?v=20260921-mode9"></script>
+<script src="arp-topology-init.js?v=20260921-mode9"></script>
+<script src="arp-simulator-1.js?v=20260921-mode9"></script>
+<script src="arp-simulator-2.js?v=20260921-mode9"></script>
+<script src="arp-simulator-3.js?v=20260921-mode9"></script>
+<script src="arp-simulator-4.js?v=20260921-mode9"></script>
+<script src="arp-simulator-5.js?v=20260921-mode9"></script>
+<script src="arp-simulator-6.js?v=20260921-mode9"></script>
 </body>
 </html>
