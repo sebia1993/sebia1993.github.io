@@ -161,58 +161,23 @@
     clearReplyTimers();
     if (!autoFollow || !mq.matches || kind !== "reply") return;
 
-    // ARP Reply는 해당 L2 교환 구간까지만 추적한다.
-    if (title.includes("ARP Reply")) {
-      if (title.startsWith("PC2 → R2")) {
-        scrollToRegion(["#mtPc2", "#mtR2"], { force: true, label: "ARP Reply · PC2 → R2" });
-        return;
-      }
-      if (title.startsWith("PC3 → R2")) {
-        scrollToRegion(["#mtPc3", "#mtR2"], { force: true, label: "ARP Reply · PC3 → R2" });
-        return;
-      }
-      if (title.startsWith("PC3 → PC1")) {
-        scrollToRegion(["#mtPc3", "#mtPc1"], { force: true, label: "ARP Reply · PC3 → PC1" });
-        return;
-      }
-      if (title.startsWith("R2") && title.includes("→ PC1")) {
-        scrollToRegion(["#mtR2", "#mtPc1"], { force: true, label: "ARP Reply · R2 → PC1" });
-        return;
-      }
-      if (title.startsWith("R2") && title.includes("→ PC2")) {
-        scrollToRegion(["#mtR2", "#mtPc2"], { force: true, label: "ARP Reply · R2 → PC2" });
-        return;
-      }
-      if (title.startsWith("R2") && title.includes("→ PC3")) {
-        scrollToRegion(["#mtR2", "#mtPc3"], { force: true, label: "ARP Reply · R2 → PC3" });
-        return;
-      }
+    if (title.startsWith("PC2 → R2")) {
+      return scrollToRegion(["#mtPc2", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC2 → R2" : "Echo Reply · PC2 → R2" });
     }
-
-    // ICMP Echo Reply는 실제 return path를 순서대로 따라간다.
-    if (title.includes("Echo Reply") && title.includes("PC3")) {
-      scrollToElement(mobile.querySelector("#mtPc3"), { force: true, label: "Echo Reply 시작 · PC3" });
-      replyTimers.push(setTimeout(() => {
-        if (Date.now() < userPauseUntil) return;
-        scrollToElement(mobile.querySelector("#mtR2"), { label: "Echo Reply · R2" });
-      }, 650));
-      replyTimers.push(setTimeout(() => {
-        if (Date.now() < userPauseUntil) return;
-        scrollToElement(mobile.querySelector("#mtPc1"), { label: "Echo Reply 도착 · PC1" });
-      }, 1300));
-      return;
+    if (title.startsWith("PC3 → R2")) {
+      return scrollToRegion(["#mtPc3", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC3 → R2" : "Echo Reply · PC3 → R2" });
     }
-
-    if (title.includes("Echo Reply") && title.includes("PC2")) {
-      scrollToElement(mobile.querySelector("#mtPc2"), { force: true, label: "Echo Reply 시작 · PC2" });
-      replyTimers.push(setTimeout(() => {
-        if (Date.now() < userPauseUntil) return;
-        scrollToElement(mobile.querySelector("#mtR2"), { label: "Echo Reply · R2" });
-      }, 650));
-      replyTimers.push(setTimeout(() => {
-        if (Date.now() < userPauseUntil) return;
-        scrollToElement(mobile.querySelector("#mtPc1"), { label: "Echo Reply 도착 · PC1" });
-      }, 1350));
+    if (title.startsWith("PC3 → PC1")) {
+      return scrollToRegion(["#mtPc3", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC3 → PC1" : "Echo Reply · PC3 → PC1" });
+    }
+    if (title.startsWith("R2") && title.includes("→ PC1")) {
+      return scrollToRegion(["#mtR2", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · R2 → PC1" : "Echo Reply · R2 → PC1" });
+    }
+    if (title.startsWith("R2") && title.includes("→ PC2")) {
+      return scrollToRegion(["#mtR2", "#mtPc2"], { force: true, label: "ARP Reply · R2 → PC2" });
+    }
+    if (title.startsWith("R2") && title.includes("→ PC3")) {
+      return scrollToRegion(["#mtR2", "#mtPc3"], { force: true, label: "ARP Reply · R2 → PC3" });
     }
   }
 
