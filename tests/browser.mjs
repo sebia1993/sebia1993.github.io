@@ -8,14 +8,13 @@ import { chromium } from 'playwright';
 const repo = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(repo, 'test-results');
 await mkdir(output, { recursive: true });
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain; charset=utf-8' };
+const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain; charset=utf-8', '.ico': 'image/x-icon' };
 let server;
 let base = process.env.BASE_URL;
 if (!base) {
   server = createServer(async (req, res) => {
     try {
       const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-      if (pathname === '/favicon.ico') { res.writeHead(204).end(); return; }
       const file = resolve(repo, '.' + (pathname === '/' ? '/index.html' : pathname));
       if (!file.startsWith(resolve(repo) + sep)) { res.writeHead(403).end(); return; }
       const body = await readFile(file);

@@ -39,3 +39,9 @@ GitHub Actions는 Ubuntu/Windows의 동일 테스트와 Chromium 검사를 실�
 ### 다음 작업
 
 IP 교육/UI 검토 → Windows read-only preflight 재확인 → 격리 프로젝트와 합법적 이미지 준비 → 정상 2종·장애 2종·각 복구의 실제 근거 수집 → 완료 11개 gate 검토. 실제 검증 전 `completed`로 바꾸거나 ICMP 과정 구현을 시작하지 않는다.
+
+## 공개 배포 readback 보완
+
+[PR #6](https://github.com/sebia1993/sebia1993.github.io/pull/6)을 `28248fd`로 병합했다. [PR CI](https://github.com/sebia1993/sebia1993.github.io/actions/runs/35601794258)는 Ubuntu/Windows 모두 성공했고 [Pages 배포](https://github.com/sebia1993/sebia1993.github.io/actions/runs/35602331308)도 성공했다. 공개된 교육·설계·결과 파일 20개는 PR head의 바이트/SHA-256과 일치했다.
+
+공개 브라우저 재검사에서 24/25 조합은 통과했고 첫 로드맵 방문의 `/favicon.ico` 404 한 건을 확인했다. 학습 스크립트 오류는 아니지만 console 무오류 조건을 위해 정적 아이콘을 추가했다. 로컬 test server가 이 경로를 204로 대신 응답하던 처리도 제거하여 동일 문제가 로컬에서도 검출되도록 했다. 실제 Lab 상태와 Evidence 수치는 변경하지 않는다.

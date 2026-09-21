@@ -27,6 +27,9 @@ def check(condition, message):
         raise AssertionError(message)
 
 
+icon = (ROOT / "favicon.ico").read_bytes()
+check(icon[:4] == b"\x00\x00\x01\x00", "Missing valid browser icon")
+
 data = json.loads((ROOT / "learning-data.json").read_text(encoding="utf-8"))
 check(len(data["topics"]) == 27 and len(data["stages"]) == 9, "Curriculum inventory changed")
 ids = [t["id"] for t in data["topics"]]
