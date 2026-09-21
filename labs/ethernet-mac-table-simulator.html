@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — Interactive Lab</title>
 <meta name="description" content="Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-3">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-4">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap">
@@ -45,7 +45,7 @@
     </div>
   </section>
 
-  <section class="lab-scope-strip" aria-label="Simulator 범위와 가정">
+  <section class="lab-scope-strip advanced-only" aria-label="Simulator 범위와 가정">
     <b>이 Lab의 기본 가정</b>
     <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 Forwarding · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
     <span><b>Aging 기준 = 300초</b>는 이 Simulator와 검증 GNS3 Linux Bridge의 학습 조건이며 모든 스위치의 고정값이 아닙니다. Age는 실제 시간에 자동 증가하지 않고 실습의 시간 경과 버튼으로만 진행됩니다.</span>
@@ -54,18 +54,17 @@
   <section class="card lab-card">
     <div class="coach">
       <div class="coach-icon" id="coachIcon">1</div>
-      <div>
+      <div class="coach-main">
         <div class="coach-title" id="coachTitle">첫 Ping에서 스위치가 언제 MAC을 배우는지 확인하세요.</div>
         <div class="coach-text" id="coachText">처음에는 FDB와 PC1 ARP Cache가 비어 있습니다.</div>
+        <div class="coach-state" aria-live="polite">
+          <span><b>HOST</b><strong id="startArpState">PC1/PC2 ARP · 비어 있음</strong></span>
+          <span><b>SW1</b><strong id="startFdbState">FDB · 동적 PC 엔트리 없음</strong></span>
+        </div>
       </div>
       <button class="hint-trigger" id="hintBtn" type="button">막혔나요? 힌트 1/3</button>
     </div>
     <div class="hint-box" id="hintBox" aria-live="polite"></div>
-
-    <div class="start-state-strip" aria-live="polite">
-      <div><small>START STATE · HOST</small><strong id="startArpState">PC1 ARP Cache · 비어 있음</strong></div>
-      <div><small>START STATE · SWITCH</small><strong id="startFdbState">SW1 FDB · 동적 PC 엔트리 없음</strong></div>
-    </div>
 
     <div class="topology-shell" id="topologyShell">
       <svg id="macTopology" viewBox="0 0 1400 620" role="img" aria-label="PC1, SW1, PC2, PC3이 하나의 Ethernet L2 Broadcast Domain에 연결된 MAC Table 학습 토폴로지">
@@ -108,7 +107,7 @@
           <text x="36" y="42" fill="#40546c" font-size="14" letter-spacing="2">ETHERNET / MAC TABLE · INTERACTIVE LAB TOPOLOGY</text>
           <text x="1364" y="42" text-anchor="end" fill="#40546c" font-size="14">Source Learning → Destination Lookup → Forwarding</text>
           <text x="58" y="113" fill="#075a43" font-size="20" font-weight="bold">SINGLE ETHERNET L2 BROADCAST DOMAIN</text>
-          <text x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 Forwarding</text>
+          <text class="topology-detail" x="58" y="137" fill="#526d62" font-size="13">VLAN / STP / Port-Security / Unknown-Unicast Suppression 미사용 · 모든 링크 Forwarding</text>
 
           <!-- Physical links -->
           <g fill="none" stroke="#08765d" stroke-width="4">
@@ -128,40 +127,49 @@
           <!-- PC1 -->
           <use href="#macPcIcon" x="112" y="258" width="112" height="96" filter="url(#macShadow)"/>
           <text x="168" y="384" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC1</text>
-          <text x="168" y="410" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.10/24</text>
-          <text x="168" y="432" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:00</text>
+          <text class="topology-detail" x="168" y="410" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.10/24</text>
+          <text class="topology-detail" x="168" y="432" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:00</text>
           <g class="port-chip"><rect x="270" y="275" width="91" height="28" rx="6"/><text x="315.5" y="295" text-anchor="middle">port 1 · IN</text></g>
 
           <!-- SW1 -->
-          <use href="#macSwitchIcon" x="505" y="252" width="150" height="90" filter="url(#macShadow)"/>
-          <text x="580" y="375" text-anchor="middle" fill="#172b43" font-size="26" font-weight="800">SW1</text>
-          <text x="580" y="400" text-anchor="middle" fill="#334a63" font-size="15">Ethernet Switch</text>
+          <use href="#macSwitchIcon" x="480" y="224" width="200" height="120" filter="url(#macShadow)"/>
+          <text x="580" y="378" text-anchor="middle" fill="#172b43" font-size="30" font-weight="900">SW1</text>
+          <text x="580" y="404" text-anchor="middle" fill="#334a63" font-size="15">Ethernet Switch</text>
           <g class="port-chip"><rect x="675" y="246" width="91" height="28" rx="6"/><text x="720.5" y="266" text-anchor="middle">port 2</text></g>
           <g class="port-chip"><rect x="675" y="344" width="91" height="28" rx="6"/><text x="720.5" y="364" text-anchor="middle">port 3</text></g>
 
-          <!-- SW1 state panel -->
-          <g id="svgFdbPanel" class="svg-fdb-panel">
-            <rect x="430" y="430" width="395" height="126" rx="13"/>
-            <text x="451" y="454" class="svg-fdb-title">SW1 · DYNAMIC FDB / CURRENT LOOKUP</text>
-            <text id="svgFdbRow1" x="451" y="480" class="svg-fdb-row">—</text>
-            <text id="svgFdbRow2" x="451" y="502" class="svg-fdb-row">—</text>
-            <text id="svgFdbRow3" x="451" y="524" class="svg-fdb-row">—</text>
-            <text id="svgLookupText" x="451" y="548" class="svg-lookup-row">LOOKUP · READY</text>
+          <!-- SW1 current decision: beginner-first -->
+          <g id="svgDecisionPanel" class="svg-decision-panel">
+            <rect x="405" y="430" width="455" height="120" rx="14"/>
+            <text x="428" y="455" class="svg-decision-title">SW1 · CURRENT DECISION</text>
+            <text id="svgLearnDecision" x="428" y="482" class="svg-decision-row">LEARN  · —</text>
+            <text id="svgLookupDecision" x="428" y="508" class="svg-decision-row">LOOKUP · —</text>
+            <text id="svgActionDecision" x="428" y="534" class="svg-decision-action">ACTION · READY</text>
+          </g>
+
+          <!-- Full FDB: advanced mode only -->
+          <g id="svgFdbPanel" class="svg-fdb-panel topology-detail">
+            <rect x="870" y="430" width="395" height="126" rx="13"/>
+            <text x="891" y="454" class="svg-fdb-title">SW1 · DYNAMIC FDB</text>
+            <text id="svgFdbRow1" x="891" y="480" class="svg-fdb-row">—</text>
+            <text id="svgFdbRow2" x="891" y="502" class="svg-fdb-row">—</text>
+            <text id="svgFdbRow3" x="891" y="524" class="svg-fdb-row">—</text>
+            <text id="svgLookupText" x="891" y="548" class="svg-lookup-row">LOOKUP · READY</text>
           </g>
 
           <!-- PC2 -->
           <use href="#macPcIcon" x="1130" y="145" width="112" height="96" filter="url(#macShadow)"/>
           <text x="1186" y="272" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC2</text>
-          <text x="1186" y="298" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.20/24</text>
-          <text x="1186" y="320" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:01</text>
-          <g id="pc2ReceiveBadge" class="receive-badge"><rect x="1042" y="155" width="105" height="27" rx="13"/><text x="1094.5" y="173" text-anchor="middle">DESTINATION</text></g>
+          <text class="topology-detail" x="1186" y="298" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.20/24</text>
+          <text class="topology-detail" x="1186" y="320" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:01</text>
+          <g id="pc2ReceiveBadge" class="receive-badge"><rect x="1010" y="155" width="145" height="27" rx="13"/><text x="1082.5" y="173" text-anchor="middle">DESTINATION</text></g>
 
           <!-- PC3 -->
           <use href="#macPcIcon" x="1130" y="400" width="112" height="96" filter="url(#macShadow)"/>
           <text x="1186" y="527" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC3</text>
-          <text x="1186" y="553" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.30/24</text>
-          <text x="1186" y="575" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:02</text>
-          <g id="pc3ReceiveBadge" class="receive-badge muted"><rect x="1042" y="410" width="105" height="27" rx="13"/><text x="1094.5" y="428" text-anchor="middle">OBSERVER</text></g>
+          <text class="topology-detail" x="1186" y="553" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.30/24</text>
+          <text class="topology-detail" x="1186" y="575" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:02</text>
+          <g id="pc3ReceiveBadge" class="receive-badge muted"><rect x="1010" y="410" width="145" height="27" rx="13"/><text x="1082.5" y="428" text-anchor="middle">OBSERVER</text></g>
 
           <!-- Packet sprites -->
           <g id="packetIngress" class="packet-sprite" transform="translate(-100 -100)">
@@ -184,6 +192,12 @@
         </g>
       </svg>
     </div>
+
+    <div class="controls">
+      <button type="button" class="age-btn" id="ageBtn" hidden>⏱ +5초 경과</button>
+      <button type="button" class="run-btn" id="runBtn">▶ 첫 PING 실행</button>
+    </div>
+
 
     <div class="link-legend">
       <span><i class="legend-line ingress"></i>현재 프레임이 SW1으로 들어오는 링크</span>
@@ -208,7 +222,7 @@
       <span id="liveEventKind" class="live-event-kind">READY</span>
     </div>
 
-    <div class="basic-state-grid" aria-live="polite">
+    <div class="basic-state-grid advanced-only" aria-live="polite">
       <article>
         <small>현재 Source MAC</small>
         <strong id="frameSrc">—</strong>
@@ -231,7 +245,7 @@
       </article>
     </div>
 
-    <div class="arp-field-strip" id="arpFieldStrip" hidden>
+    <div class="arp-field-strip advanced-only" id="arpFieldStrip" hidden>
       <div class="arp-field-head"><b>ARP Request 필드 구분</b><span>Ethernet Destination MAC과 ARP Target Hardware는 서로 다른 필드입니다.</span></div>
       <div class="arp-field-grid">
         <div><small>Ethernet Destination</small><strong id="arpEthDst">—</strong></div>
@@ -241,27 +255,22 @@
       </div>
     </div>
 
-    <div class="controls">
-      <button type="button" class="age-btn" id="ageBtn" hidden>⏱ +5초 경과</button>
-      <button type="button" class="run-btn" id="runBtn">▶ 첫 PING 실행</button>
-    </div>
-
-    <div class="event-timeline" id="eventTimeline" aria-live="polite">
+    <div class="event-timeline advanced-only" id="eventTimeline" aria-live="polite">
       <div class="timeline-empty">실행하면 프레임 순서가 여기에 쌓입니다.</div>
     </div>
 
-    <div class="result-title">
+    <div class="result-title advanced-only">
       <h2>무슨 일이 일어났을까요?</h2>
       <span id="resultHint">Source Learning과 Destination Lookup을 분리해서 보세요.</span>
     </div>
-    <div class="flow">
+    <div class="flow advanced-only">
       <div class="flow-step" id="s1"><div class="n">STEP 1</div><strong>프레임 수신</strong><p>어느 포트로 프레임이 들어왔는지 확인합니다.</p></div>
       <div class="flow-step" id="s2"><div class="n">STEP 2</div><strong>Source Learning</strong><p>Source MAC → 수신 Port를 학습/갱신합니다.</p></div>
       <div class="flow-step" id="s3"><div class="n">STEP 3</div><strong>Destination Lookup</strong><p>Destination MAC의 출력 포트를 FDB에서 찾습니다.</p></div>
       <div class="flow-step" id="s4"><div class="n">STEP 4</div><strong>Forwarding</strong><p>Known 또는 Flooding/Broadcast 결과를 확인합니다.</p></div>
     </div>
     <div class="explain" id="explainBox">먼저 <b>첫 PING 실행</b>을 눌러보세요.</div>
-    <div class="evidence-link-row">
+    <div class="evidence-link-row advanced-only">
       <a id="evidenceLink" href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">실제 GNS3 FDB·패킷 근거 보기 →</a>
       <span>Simulator의 학습 모델과 실제 GNS3/PCAP 관찰 증거를 분리해서 확인합니다.</span>
     </div>
@@ -355,6 +364,6 @@
     기본 모드는 핵심 흐름만, 고급 모드는 FDB/ARP 상태와 직접 조작을 추가로 보여줍니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20260921-3"></script>
+<script src="ethernet-mac-simulator.js?v=20260921-4"></script>
 </body>
 </html>
