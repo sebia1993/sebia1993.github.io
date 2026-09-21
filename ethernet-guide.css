@@ -265,3 +265,33 @@
  .cli-stepper{grid-template-columns:1fr}
  .cli-command-tabs{grid-template-columns:1fr}
 }
+
+
+/* Beginner-first mode switch */
+.learning-mode-bar{padding:18px 0 0}
+.learning-mode-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;align-items:center;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.learning-mode-card h2{margin:6px 0 8px;font-size:1.25rem}
+.learning-mode-card>div>p{margin:0;color:var(--muted);line-height:1.7}
+.learning-mode-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:330px}
+.learning-mode-actions button{padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit;font-weight:800;line-height:1.35}
+.learning-mode-actions button small{display:block;margin-top:4px;color:var(--muted);font-weight:500}
+.learning-mode-actions button[aria-pressed="true"]{border-color:var(--mint);background:rgba(107,224,192,.07)}
+.learning-mode-actions button:focus-visible,#enable-advanced:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.learning-mode-note{grid-column:1/-1;margin:0;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);line-height:1.7}
+.scope-details{margin:-4px 0 18px}
+.advanced-entry{padding-top:8px}
+.advanced-entry-card{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px;border:1px dashed var(--mint);border-radius:16px;background:rgba(107,224,192,.04)}
+.advanced-entry-card h2{margin:6px 0 8px;font-size:1.2rem}
+.advanced-entry-card p{margin:0;color:var(--muted);line-height:1.7}
+#enable-advanced{flex:0 0 auto;padding:12px 16px;border:1px solid var(--mint);border-radius:11px;background:transparent;color:inherit;cursor:pointer;font:inherit;font-weight:800}
+[data-learning-level="advanced"][hidden],[data-mode-link="advanced"][hidden],[data-basic-only][hidden]{display:none!important}
+
+@media(max-width:800px){
+ .learning-mode-card{grid-template-columns:1fr}
+ .learning-mode-actions{min-width:0}
+ .advanced-entry-card{display:block}
+ #enable-advanced{width:100%;margin-top:14px}
+}
+@media(max-width:460px){
+ .learning-mode-actions{grid-template-columns:1fr}
+}
