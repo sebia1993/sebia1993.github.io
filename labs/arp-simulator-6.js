@@ -91,7 +91,7 @@ function setViewMode(mode,{openPanel=false,scroll=false}={}){
   }
   $$("[data-m-device],[data-m-link]").forEach(el=>el.setAttribute("aria-disabled",String(!advanced)));
   if(typeof updatePredictionControls==="function")updatePredictionControls();
-  if(typeof updateQuickNextBar==="function")updateQuickNextBar();
+  if(typeof updateQuickActionBar==="function")updateQuickActionBar();
 }
 window.setArpViewMode=setViewMode;
 
@@ -114,7 +114,22 @@ function goNextLesson(){
   else $("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"});
 }
 $("#nextBtn").onclick=goNextLesson;
-$("#quickNextBtn").onclick=goNextLesson;
+$("#quickNextBtn").onclick=()=>{
+  const action=$("#quickNextBar")?.dataset.quickAction;
+  if(action==="next")goNextLesson();
+  else if(action==="run")ping();
+};
+const primaryControls=document.querySelector(".controls");
+if(primaryControls&&"IntersectionObserver" in window){
+  const observer=new IntersectionObserver(entries=>{
+    primaryActionVisible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.2);
+    if(typeof updateQuickActionBar==="function")updateQuickActionBar();
+  },{threshold:[0,.2,.6]});
+  observer.observe(primaryControls);
+}else{
+  primaryActionVisible=false;
+  window.addEventListener("scroll",()=>{if(typeof updateQuickActionBar==="function")updateQuickActionBar()},{passive:true});
+}
 $("#resetBtn").onclick=()=>configureLesson(state.lesson);
 $("#applyBtn").onclick=()=>{
   const nextMask=+$("#maskInput").value,nextGw=$("#gwInput").value.trim();
@@ -143,7 +158,7 @@ setViewMode("basic");
 configureLesson(0);
 
 (function loadMobileSimulatorLayer(){
-  const version="20260921-mode13";
+  const version="20260921-mode14";
   const css=document.createElement("link");
   css.rel="stylesheet";
   css.href=`arp-simulator-mobile.css?v=${version}`;
