@@ -150,6 +150,7 @@
 .packet-stage-type.arp-request{background:#e0f5ed;color:#08765d!important}
 .packet-stage-type.arp-reply{background:#e7f0ff;color:#175da8!important}
 .packet-stage-type.icmp-request{background:#f4edff;color:#6945a2!important}
+.packet-stage-type.icmp-reply{background:#eef0ff;color:#4a58a8!important}
 .packet-stage-name{display:block!important;margin-top:5px!important;color:#1f3f56!important;font-size:11px!important;font-weight:900!important}
 .packet-stage-hop{display:block!important;margin-top:2px!important;color:#8093a5!important;font-size:9px!important;font-weight:600!important}
 
