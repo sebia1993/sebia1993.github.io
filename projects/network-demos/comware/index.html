@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HPE Comware Change Validator | sebia1993 Network Demo</title>
+<style>
+:root{--bg:#08101d;--panel:#101b2d;--panel2:#0c1626;--line:#293b56;--text:#eef4ff;--muted:#9fb0c6;--blue:#6ba6ff;--cyan:#62dfd1;--green:#71dc98;--amber:#ffd27a;--red:#ff8f9d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#12305a 0,transparent 30rem),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;line-height:1.55}
+main{width:min(1120px,calc(100% - 28px));margin:auto;padding:28px 0 60px}a{color:#b9d5ff}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:30px}.top a{text-decoration:none;font-weight:800}.kicker{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--cyan);font-size:.78rem;font-weight:850}
+h1{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.05em;margin:14px 0}.lead{max-width:850px;color:var(--muted);font-size:1.05rem}.notice{margin:20px 0;padding:13px 15px;border:1px solid #5b4821;background:#231c0d;color:#efd18f;border-radius:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:17px;padding:18px}.card h2,.card h3{margin-top:0}.field{margin:11px 0}.field label{display:block;font-size:.84rem;color:var(--muted);margin-bottom:5px;font-weight:750}
+input,select,textarea{width:100%;background:#07111f;color:var(--text);border:1px solid #38506f;border-radius:10px;padding:10px;font:inherit}textarea{min-height:190px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;resize:vertical}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:850;cursor:pointer;background:var(--blue);color:#07111f;margin:5px 6px 5px 0}.secondary{background:#182842;color:#dbe9ff;border:1px solid #38506f}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.flow span{padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#0a1525;font-size:.82rem;font-weight:760}.arrow{color:var(--blue)}
+.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.78rem;font-weight:850;border:1px solid var(--line)}.ok{color:#aaf0c0;border-color:#326b47;background:#10291a}.warn{color:#ffe09e;border-color:#735b29;background:#2b220e}.bad{color:#ffb0b8;border-color:#7b3942;background:#32141a}.unk{color:#c5d4e7;border-color:#4b5d75;background:#172235}
+.result{padding:13px;border-radius:12px;border:1px solid var(--line);background:#091525;margin-top:10px}.result b{display:block;margin-bottom:4px}.muted{color:var(--muted)}.small{font-size:.85rem}.list{display:grid;gap:8px}.row{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0a1422}.kv{display:grid;grid-template-columns:150px 1fr;gap:7px;font-size:.9rem}.kv div:nth-child(odd){color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#c8d7eb}.footer{margin-top:24px;color:#72859e;font-size:.82rem}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:110px 1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main>
+<div class="top"><a href="../">← Network Demo Hub</a><a href="https://github.com/sebia1993" target="_blank" rel="noopener">GitHub ↗</a></div>
+<span class="kicker">PRE / POST CHANGE VALIDATION · LIVE FIXTURE</span>
+<h1>HPE Comware Change Validator</h1>
+<p class="lead">작업 전·후 Snapshot을 바꾸면서 Interface, LACP, OSPF, VRRP, CPU, Memory 변화가 어떤 Finding으로 분류되는지 확인합니다.</p>
+<div class="notice"><b>데모 경계:</b> 실제 운영 장비에는 연결하지 않습니다. 공개 가능한 비식별 샘플과 원 프로젝트의 핵심 판단 규칙을 브라우저 JavaScript로 축약 재현합니다.</div>
+
+<div class="grid">
+<section class="card">
+<h2>Snapshot 입력</h2>
+<div class="field"><label>샘플 시나리오</label><select id="vpreset"><option value="normal">변경 없음</option><option value="network">Interface + OSPF 이상</option><option value="vrrp">VRRP 역할 이동</option><option value="resource">CPU / Memory 임계</option><option value="lacp">LACP Selected 감소</option></select></div>
+<div class="field"><label>작업 전 Snapshot JSON</label><textarea id="pre"></textarea></div>
+<div class="field"><label>작업 후 Snapshot JSON</label><textarea id="post"></textarea></div>
+<button onclick="runDiff()">전·후 비교 실행</button>
+</section>
+<section class="card">
+<h2>Findings</h2><div id="vsummary" class="result"></div><div id="findings" class="list" style="margin-top:12px"></div>
+</section>
+</div>
+<section class="card" style="margin-top:16px"><h2>판단 기준</h2><div class="kv"><div>CPU</div><div>50% 이상 Warning / 70% 이상 Critical</div><div>Memory FreeRatio</div><div>40% 이하 Warning / 30% 이하 Critical</div><div>Interface</div><div>Up → Down이면 Critical</div><div>LACP</div><div>Selected member 감소면 Critical</div><div>OSPF</div><div>Full 이탈이면 Critical</div><div>VRRP</div><div>Master/Backup 변화는 별도 Finding</div></div><p class="muted small">실제 프로젝트의 analysis_rules.yaml과 diff 판단을 이해하기 쉽게 축약한 공개 fixture 데모입니다.</p><a href="https://github.com/sebia1993/hpe-comware-change-validator" target="_blank" rel="noopener">원 프로젝트 저장소 →</a></section>
+<div class="footer">sebia1993 · Network Operations × Automation · Interactive Public Demo</div>
+</main>
+<script>
+var base={interfaces:{"Ten1/0/1":"UP","Ten1/0/2":"UP"},lacp_selected:2,ospf:"Full",vrrp:"Master",cpu:32,memory_free_ratio:58,power:"Normal"};
+var variants={
+ normal:base,
+ network:{interfaces:{"Ten1/0/1":"DOWN","Ten1/0/2":"UP"},lacp_selected:2,ospf:"Init",vrrp:"Master",cpu:35,memory_free_ratio:55,power:"Normal"},
+ vrrp:{interfaces:{"Ten1/0/1":"UP","Ten1/0/2":"UP"},lacp_selected:2,ospf:"Full",vrrp:"Backup",cpu:31,memory_free_ratio:57,power:"Normal"},
+ resource:{interfaces:{"Ten1/0/1":"UP","Ten1/0/2":"UP"},lacp_selected:2,ospf:"Full",vrrp:"Master",cpu:74,memory_free_ratio:28,power:"Normal"},
+ lacp:{interfaces:{"Ten1/0/1":"UP","Ten1/0/2":"UP"},lacp_selected:1,ospf:"Full",vrrp:"Master",cpu:30,memory_free_ratio:56,power:"Normal"}
+};
+function loadV(){pre.value=JSON.stringify(base,null,2);post.value=JSON.stringify(variants[vpreset.value],null,2);runDiff();}
+function finding(level,title,why){return {level:level,title:title,why:why};}
+function runDiff(){
+ var a,b;try{a=JSON.parse(pre.value);b=JSON.parse(post.value);}catch(e){vsummary.innerHTML="<span class='badge bad'>JSON 오류</span><div style='margin-top:8px'>"+e.message+"</div>";findings.innerHTML="";return;}
+ var f=[];
+ Object.keys(a.interfaces||{}).forEach(function(k){if(a.interfaces[k]!=="DOWN"&&b.interfaces&&b.interfaces[k]==="DOWN")f.push(finding("Critical","인터페이스 Down 감지",k+" : "+a.interfaces[k]+" → DOWN"));});
+ if(Number(b.lacp_selected)<Number(a.lacp_selected))f.push(finding("Critical","LACP selected 감소",a.lacp_selected+" → "+b.lacp_selected));
+ if(a.ospf==="Full"&&b.ospf!=="Full")f.push(finding("Critical","OSPF 인접 상태 이탈","Full → "+b.ospf));
+ if(a.vrrp!==b.vrrp)f.push(finding("Warning","VRRP 역할 변화",a.vrrp+" → "+b.vrrp));
+ if(Number(b.cpu)>=70)f.push(finding("Critical","CPU 사용률 긴급",b.cpu+"%"));else if(Number(b.cpu)>=50)f.push(finding("Warning","CPU 사용률 주의",b.cpu+"%"));
+ if(Number(b.memory_free_ratio)<=30)f.push(finding("Critical","메모리 FreeRatio 긴급",b.memory_free_ratio+"%"));else if(Number(b.memory_free_ratio)<=40)f.push(finding("Warning","메모리 FreeRatio 주의",b.memory_free_ratio+"%"));
+ if(b.power&&b.power!=="Normal")f.push(finding("Critical","전원 상태 비정상",String(b.power)));
+ var critical=f.filter(function(x){return x.level==="Critical";}).length, warning=f.filter(function(x){return x.level==="Warning";}).length;
+ vsummary.innerHTML="<b>"+(f.length?f.length+"개 Finding":"의미 있는 변경 없음")+"</b><span class='muted small'>Critical "+critical+" · Warning "+warning+"</span>";
+ findings.innerHTML=f.length?f.map(function(x){return "<div class='row'><span class='badge "+(x.level==="Critical"?"bad":"warn")+"'>"+x.level+"</span><b style='margin:8px 0 3px'>"+x.title+"</b><div class='muted small'>"+x.why+"</div></div>";}).join(""):"<div class='row'><span class='badge ok'>Unchanged</span><div class='muted small' style='margin-top:6px'>현재 Snapshot 사이에 지정된 위험 변화가 없습니다.</div></div>";
+}
+vpreset.addEventListener("change",loadV);loadV();</script>
+</body></html>
