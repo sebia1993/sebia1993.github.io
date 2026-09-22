@@ -88,13 +88,15 @@ windows-lab-runner/README.md        # 장기 설계만, 실행 코드 미구현
 
 아직 사용할 24개 과정의 빈 HTML/가짜 결과를 만들지 않는다. 기존 `learning/` Evidence는 안정된 레거시 경로로 유지한다.
 
-## 6. 호스트 역할과 Tailscale
+## 6. 호스트 역할, PNETLab, Tailscale
 
-MacBook: Git/GitHub, 교육 코드, Plan/명령 템플릿, PCAP 분석, 결과 검토, UI 검증, Pages 배포. Windows: GNS3 격리 실습, 부팅, CLI/Ping/Traceroute, GNS3 내부 링크 Capture, 장애/복구. Windows 일반 빌드·테스트는 저장소의 GitHub Actions Windows 러너를 사용하며 실제 노드나 GUI 동작 증거와 분리한다.
+MacBook: Git/GitHub, 교육 코드, Plan/명령 템플릿, 결과 검토, UI 검증, Pages 배포. Windows: VMware Workstation에서 PNETLab VM 실행, Cisco/Aruba 가상 노드 부팅, CLI/Ping/Traceroute, PNETLab 링크 Capture, Wireshark 분석, 장애·복구 검증을 담당한다. Windows 일반 빌드·테스트는 저장소의 GitHub Actions Windows 러너를 사용하며 실제 PNETLab 노드나 GUI 동작 증거와 분리한다.
 
-관리 경로는 Mac → Tailscale → 기존에 확인한 SSH alias → Windows의 로컬 GNS3 API/파일이다. GNS3 API를 인터넷에 열지 않고 SSH 포트 포워딩 또는 SSH 내부 localhost 호출을 우선한다. Tailscale 주소·실제 사용자 경로·비밀은 로컬 설정만 사용한다. SSH host key 검증을 끄지 않는다. API 버전을 확인한 뒤 읽기 전용 `/v2/version`, `/v2/projects`, `/v2/computes`부터 점검한다. GNS3 버전이 다르면 경로와 응답을 재확인한다.
+관리 경로는 Mac → Tailscale → Windows 관리 접속을 사용하되, PNETLab Web UI나 관리 포트를 인터넷에 직접 노출하지 않는다. PNETLab 내부 자동화는 문서화되지 않은 private API에 의존하지 않고, 우선 사람이 Web UI/Console에서 Lab을 제어하고 Evidence 수집 자동화는 파일·CLI 결과·PCAP 후처리부터 시작한다. Tailscale 주소·실제 사용자 경로·비밀은 로컬 설정만 사용하며 SSH host key 검증을 끄지 않는다.
 
-교육 데이터 경로는 PC1—SW1—R1—SW2—PC2이며 Tailscale/NAT Cloud/회사 NIC와 연결하지 않는다. Capture는 GNS3 해당 링크에서 수행한다. 관리 인터페이스 전체를 캡처하지 않는다. 파일 전송 후 SHA-256을 비교하고 공개 전 검토한 복사본만 저장소에 넣는다.
+교육 데이터 경로는 기본적으로 PC1—SW1—R1—SW2—PC2 같은 격리 topology를 사용한다. 회사 NIC, 회사망, Tailscale subnet route, 실제 운영 장비와 Lab 데이터 plane을 연결하지 않는다. Capture는 PNETLab의 대상 링크에서 시작하고 Windows Wireshark로 분석한다. 관리 인터페이스 전체를 캡처하지 않으며 파일 전송 후 SHA-256을 비교하고 공개 전 검토한 복사본만 저장소에 넣는다.
+
+Vendor 실행 우선순위는 Cisco → Aruba → Linux/FRR/VyOS다. Cisco는 사용 권한이 확인된 Nexus 9000v/9300v 계열 또는 Catalyst 8000V를 우선 후보로 하고, Aruba는 AOS-CX Switch Simulator로 핵심 L2/L3 원리를 교차검증한다. 32 GB 호스트에서 고메모리 노드를 여러 대 동시에 실행해 swap/thrashing이 발생하면 topology 규모를 줄이고 해당 실행을 성능 Evidence로 사용하지 않는다.
 
 ## 7. 사람이 할 일 / 자동화할 일
 
@@ -118,9 +120,13 @@ MacBook: Git/GitHub, 교육 코드, Plan/명령 템플릿, PCAP 분석, 결과 �
 
 새 결과는 아직 자동으로 로드맵 숫자에 합산하지 않는다. 후속 수집기가 증거 유무·해시·review를 확인한 후 Topic별 결과를 합산하는 방식으로 이관한다. 브라우저 정답·재생 횟수·CI 통과는 Lab/PCAP/장애/복구 수치를 증가시키지 않는다. 빈 패킷 캡처는 수집 성공과 검증 구간을 확인한 경우에만 부재의 근거가 된다.
 
-## 9. Vendor·주소·보안 기준
+## 9. Vendor·이미지·주소·보안 기준
 
-Cisco → Aruba → Linux/FRR/VyOS 순으로 사용 가능한 합법적 플랫폼을 선정한다. 라이선스/이미지가 없으면 계획 또는 시뮬레이션만 진행하고 검증했다고 쓰지 않는다. 기능별 명령/포트 이름은 해당 버전에서 검토한다. NOS 이미지, 디스크, 라이선스 파일은 Git에 넣지 않는다.
+Cisco → Aruba → Linux/FRR/VyOS 순으로 사용 가능한 합법적 플랫폼을 선정한다. 라이선스/이미지가 없으면 계획 또는 시뮬레이션만 진행하고 검증했다고 쓰지 않는다. 기능별 명령/포트 이름은 해당 버전에서 검토한다. NOS 이미지, OVA/QCOW2/VMDK, 디스크, 라이선스 파일은 Git에 넣지 않는다.
+
+Cisco L3는 Catalyst 8000V의 KVM용 qcow2를 우선 후보로 사용하고, L2/L3 Switching은 별도 사용 권한과 PNETLab 호환성이 확인된 Nexus 9000v/9300v 계열을 우선 검토한다. Cisco CML reference platform ISO에 포함된 Cisco VM 이미지는 CML 외부 사용 권한이 별도로 확인되지 않는 한 PNETLab로 옮겨 사용하지 않는다. PNETLab의 IOL/vIOS/NX-OS 지원 목록은 기술 호환성 참고일 뿐 이미지 취득 권한의 근거로 사용하지 않는다.
+
+Aruba는 AOS-CX Switch Simulator를 2순위 교차검증 플랫폼으로 사용한다. 선택한 OVA 버전의 공식 릴리스 노트에서 CPU/RAM과 feature caveat를 확인한 뒤 사용한다. Cisco에서 먼저 정상/장애/복구를 검증한 핵심 L2/L3 과정은 Aruba CX에서 같은 원리를 다시 검증해 Vendor CLI 차이와 표준 프로토콜 공통점을 기록한다.
 
 문서/브라우저 예시는 RFC 5737의 TEST-NET 주소, 실제 격리 Lab은 충돌을 확인한 RFC 1918 주소를 사용한다. TEST-NET은 실서비스 또는 로컬 네트워크용 주소 할당을 권장하는 규격이 아님을 구분한다. 공개 자료에는 합성 MAC과 Lab 이름만 사용하고 실제 회사 IP/MAC/Hostname/VLAN/SSID, RADIUS/ClearPass, Controller/ACL, 운영 로그, 자격증명은 포함하지 않는다. 기존 PCAP을 재활용할 때도 공개 범위를 다시 검토한다.
 
