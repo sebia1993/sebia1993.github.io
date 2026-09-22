@@ -1,6 +1,6 @@
 # Network Learning Journey — Master Plan
 
-기준: 2026-09-21, `main`의 `aaaa4098e13fbf702617ec081b76c9759e8ecfca`. 본 문서는 구현 계획이며 실험 성공 기록이 아니다. 작업 결과는 [진행 기록](docs/IMPLEMENTATION-LOG.md), 엔진 계약은 [Framework 설계](LAB-FRAMEWORK-DESIGN.md), 첫 실습은 [IP/Subnetting Lab Plan](lab-plans/ip-subnetting.md)에서 관리한다.
+기준: 2026-09-22. 본 문서는 구현 계획이며 실험 성공 기록이 아니다. 작업 결과는 [진행 기록](docs/IMPLEMENTATION-LOG.md), 엔진 계약은 [Framework 설계](LAB-FRAMEWORK-DESIGN.md), 실제 L2/L3 실행 환경은 [PNETLab 실습 표준](docs/PNETLAB-LAB-STANDARD.md), 첫 실습은 [IP/Subnetting Lab Plan](lab-plans/ip-subnetting.md)에서 관리한다.
 
 ## 1. 현재 프로젝트 구조와 기준선
 
@@ -57,7 +57,7 @@ ARP 보고서는 IP 목적지 유지, 홉마다 Ethernet 재캡슐화, ARP 캐�
 | 24 / 8 / `aws-network` | VPC/Subnet/Route/IGW/NATGW/SG/NACL/TGW / 13,19 | 우선 시뮬레이션, Route·정책 오류 | VLAN≠Subnet, ACL≠NACL, Stateful SG 차이; 유료 리소스는 별도 명시 승인 후 |
 | 25 / 8 / `dc-fabric` | Clos, Leaf/Spine, Underlay/Overlay, VTEP/VNI/VXLAN/EVPN / 20,19 | Underlay 장애, VNI/EVPN Route 오류 | Host1→Host2 내·외부 Header, underlay/overlay 분리 |
 
-RF·Cloud 시뮬레이션은 학습 산출물로 공개할 수 있지만 실제 RF/Cloud Lab 검증의 대체 근거로 세지 않는다. 장비 제약이 있으면 상태를 유지하고 제약을 기록한다.
+RF·Cloud 시뮬레이션은 학습 산출물로 공개할 수 있지만 실제 RF/Cloud Lab 검증의 대체 근거로 세지 않는다. 장비 제약이 있으면 상태를 유지하고 제약을 기록한다.\n\n장비 기반 L2/L3 과정의 실제 실행 기준은 **Windows PC → PNETLab → Cisco 1차 검증 → Aruba AOS-CX 교차검증 → Wireshark Evidence**다. Cisco/Aruba 이미지의 사용 권한과 버전별 자원 요구사항을 먼저 확인하며, PNETLab이 특정 이미지 형식을 지원한다는 사실만으로 해당 이미지의 배포·사용 권한이 확보된 것으로 보지 않는다. 세부 기준은 [PNETLab 실습 표준](docs/PNETLAB-LAB-STANDARD.md)을 따른다.
 
 ## 4. 교육 구조와 UX
 
@@ -100,13 +100,13 @@ MacBook: Git/GitHub, 교육 코드, Plan/명령 템플릿, PCAP 분석, 결과 �
 
 | 단계 | 자동화 가능한 범위 | 사람이 확인할 것 |
 |---|---|---|
-| 사전 점검 | SSH, API GET, 버전·경로·용량·시간 조회 | 사용자 라이선스, 사용 가능한 Cisco/Aruba 이미지, 회사망 미연결 |
-| 구성 | 승인된 별도 프로젝트 ID에 정의 적용, CLI 템플릿 | 기존 프로젝트 보호, 부팅/콘솔 최초 접근, 장치 기능 차이 |
+| 사전 점검 | Windows/VM 상태, PNETLab·Wireshark 버전, CPU·RAM·디스크, 시간 조회 | 이미지 사용 권한, Cisco/Aruba 버전·자원 요구사항, 회사망 미연결 |
+| 구성 | Lab 이름·노드·링크·CLI 템플릿·Evidence 디렉터리 준비 | 기존 Lab 보호, 최초 부팅/콘솔, 이미지별 기능·인터페이스 차이 |
 | 실험 | 기준 수집, 순차 Ping, Capture 시작/종료, 장애·rollback | 비정상 시 안전 중단, 정확한 링크/캡처 범위, RF/실장비 |
 | 분석 | PCAP 필터·해시, expected/actual 비교, Timeline | 무응답 해석, 누락 근거, 모델과 실제 차이 |
 | 공개 | 검증된 JSON/HTML 생성, 링크/UI 테스트 | 비밀·개인정보·라이선스 검토, 최종 설명 확인 |
 
-현재 작업은 실제 Windows Lab을 생성하거나 기존 장비 설정을 변경하지 않는다. 연결 가능 여부는 작업 기록에 당일 관측으로 남긴다. 불가 시 [Windows 체크리스트](docs/WINDOWS-LAB-CHECKLIST.md)로 이어간다.
+현재 작업은 실제 PNETLab 노드를 자동 생성하거나 기존 Lab을 변경하지 않는다. Windows/PNETLab 준비 상태는 [Windows 체크리스트](docs/WINDOWS-LAB-CHECKLIST.md)로 확인하고, 이미지 선정·Capture·Vendor 교차검증은 [PNETLab 실습 표준](docs/PNETLAB-LAB-STANDARD.md)을 따른다.
 
 ## 8. Evidence 표준과 완료 게이트
 
@@ -126,9 +126,9 @@ Cisco → Aruba → Linux/FRR/VyOS 순으로 사용 가능한 합법적 플랫�
 
 ## 10. 자동화 단계와 우선순위
 
-P0: 현재 구조/중복/Evidence 조사 → 본 계획 → Framework 설계. P1: IP Lab Plan → 순수 엔진/첫 교육 파일럿 → 로컬 회귀/UI → PR/Pages. P2: Windows 사전 점검과 격리 프로젝트 준비 → 정상·잘못된 Mask·잘못된 Gateway·각 복구의 실제 근거 수집 → 결과 검토. P3: IP 완료 게이트 검토 후에만 ICMP 구현 여부를 결정한다.
+P0: 현재 구조/중복/Evidence 조사 → 본 계획 → Framework 설계. P1: IP Lab Plan → 순수 엔진/첫 교육 파일럿 → 로컬 회귀/UI → PR/Pages. P2: Windows/PNETLab 사전 점검과 격리 Lab 준비 → Cisco 우선 정상·잘못된 Mask·잘못된 Gateway·각 복구의 실제 근거 수집 → Wireshark 분석 → 결과 검토. P3: IP 완료 게이트 검토 후에만 ICMP 구현 여부를 결정한다.
 
-Runner는 Plan validate → read-only preflight → allowlisted isolated project → baseline → capture/test → fault → observed failure → guaranteed recovery → recovery verification → manifest 순서다. timeout, 중복 run ID 거부, 프로젝트 allowlist, 취소 시 rollback, 비밀 제거, 해시 검증을 먼저 설계한다. 복구 자체가 실패하면 FAIL과 실제 상태를 남기고 자동 다음 실험을 막는다. 실행 코드가 생길 때 최소 `windows-latest` CI로 검증하며 GUI·드라이버·실장비는 별도 수동 증거가 필요하다.
+Runner는 Plan validate → read-only preflight → allowlisted isolated Lab 확인 → baseline → capture/test → fault → observed failure → guaranteed recovery → recovery verification → manifest 순서다. timeout, 중복 run ID 거부, 프로젝트 allowlist, 취소 시 rollback, 비밀 제거, 해시 검증을 먼저 설계한다. 복구 자체가 실패하면 FAIL과 실제 상태를 남기고 자동 다음 실험을 막는다. 실행 코드가 생길 때 최소 `windows-latest` CI로 검증하며 GUI·드라이버·실장비는 별도 수동 증거가 필요하다.
 
 ## 11. 위험과 해결
 
@@ -139,7 +139,7 @@ Runner는 Plan validate → read-only preflight → allowlisted isolated project
 | 작은 화면에서 패킷을 놓침 | 내부 topology viewport 확대/축소, opt-in 가로 따라가기, 세로 문서 강제 스크롤 금지 |
 | 계산은 맞지만 설명이 틀림 | /0,/31,/32 예외, 한 호스트 Mask 관점과 왕복 통신 구분 |
 | 가짜 Evidence 또는 중복 집계 | provenance, NOT_RUN, capture session/file 수 구분, 결과 검토 gate |
-| 장비/라이선스/버전 불일치 | capability preflight와 대체 플랫폼, 미검증 명시 |
+| 장비/라이선스/버전 불일치 | 공식 취득 경로·사용 권한·버전 확인, 대체 플랫폼 사용, 미검증 명시 |\n| 32 GB 호스트 메모리 고갈 | 고메모리 Cisco 노드 수 제한, topology 축소, Aruba/경량 대체 플랫폼 사용, swap/thrashing 실행은 성능 근거에서 제외 |
 | AWS 비용/RF 제약 | 시뮬레이션 우선, 유료/실장비 작업은 별도 명시 범위 |
 | 민감정보 공개 | 수집 최소화, 로컬 원본/공개본 분리, 공개 전 내용 검토 |
 | Pages 캐시·상대경로 | 로컬 HTTP + 공개 URL 재확인, 배포 SHA와 주요 파일 hash 비교 |
@@ -148,4 +148,4 @@ Runner는 Plan validate → read-only preflight → allowlisted isolated project
 
 새 계산/상태 전이는 Node 테스트, UI는 Desktop 1440px / Tablet 768px / Mobile 390px와 320px에서 확인한다. 예측, 오답 피드백, 모드, 시나리오 변경, 재생/Reset/재실행, 확대/축소, 따라가기, Packet 상세를 확인한다. 기존 보고서·시뮬레이터·Viewer·로드맵의 링크/JS 오류/페이지 overflow도 비교한다. 통과한 작은 변경만 기능 단위 commit으로 남긴다. 배포 성공 이후 공개 페이지 내용과 인터랙션을 확인한다.
 
-공식 참고: [RFC 5737](https://www.rfc-editor.org/rfc/rfc5737), [RFC 1918](https://www.rfc-editor.org/rfc/rfc1918), [RFC 3021](https://www.rfc-editor.org/rfc/rfc3021), [GNS3 API 문서](https://gns3-server.readthedocs.io/en/stable/).
+공식 참고: [RFC 5737](https://www.rfc-editor.org/rfc/rfc5737), [RFC 1918](https://www.rfc-editor.org/rfc/rfc1918), [RFC 3021](https://www.rfc-editor.org/rfc/rfc3021), [PNETLab Supported Images](https://www.pnetlab.com/pages/documentation?slug=PNETLab-Supported-Images), [PNETLab Wireshark Capture](https://www.pnetlab.com/pages/documentation?slug=wireshark-docker), [Cisco Catalyst 8000V KVM](https://www.cisco.com/c/en/us/td/docs/routers/C8000V/Configuration/c8000v-installation-configuration-guide/install-cisco-catalyst-8000v-in-kvm-environment.html), [Cisco CML-Free image license note](https://developer.cisco.com/docs/modeling-labs/cml-free/), [Aruba AOS-CX Simulator Release Notes](https://www.arubanetworks.com/techdocs/AOS-CX/10.13/OVA/RN/rn_ova_10.13.1000.pdf).
