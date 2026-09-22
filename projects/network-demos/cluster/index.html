@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aruba Cluster Health Dashboard | sebia1993 Network Demo</title>
+<style>
+:root{--bg:#08101d;--panel:#101b2d;--panel2:#0c1626;--line:#293b56;--text:#eef4ff;--muted:#9fb0c6;--blue:#6ba6ff;--cyan:#62dfd1;--green:#71dc98;--amber:#ffd27a;--red:#ff8f9d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#12305a 0,transparent 30rem),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;line-height:1.55}
+main{width:min(1120px,calc(100% - 28px));margin:auto;padding:28px 0 60px}a{color:#b9d5ff}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:30px}.top a{text-decoration:none;font-weight:800}.kicker{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--cyan);font-size:.78rem;font-weight:850}
+h1{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.05em;margin:14px 0}.lead{max-width:850px;color:var(--muted);font-size:1.05rem}.notice{margin:20px 0;padding:13px 15px;border:1px solid #5b4821;background:#231c0d;color:#efd18f;border-radius:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:17px;padding:18px}.card h2,.card h3{margin-top:0}.field{margin:11px 0}.field label{display:block;font-size:.84rem;color:var(--muted);margin-bottom:5px;font-weight:750}
+input,select,textarea{width:100%;background:#07111f;color:var(--text);border:1px solid #38506f;border-radius:10px;padding:10px;font:inherit}textarea{min-height:190px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;resize:vertical}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:850;cursor:pointer;background:var(--blue);color:#07111f;margin:5px 6px 5px 0}.secondary{background:#182842;color:#dbe9ff;border:1px solid #38506f}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.flow span{padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#0a1525;font-size:.82rem;font-weight:760}.arrow{color:var(--blue)}
+.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.78rem;font-weight:850;border:1px solid var(--line)}.ok{color:#aaf0c0;border-color:#326b47;background:#10291a}.warn{color:#ffe09e;border-color:#735b29;background:#2b220e}.bad{color:#ffb0b8;border-color:#7b3942;background:#32141a}.unk{color:#c5d4e7;border-color:#4b5d75;background:#172235}
+.result{padding:13px;border-radius:12px;border:1px solid var(--line);background:#091525;margin-top:10px}.result b{display:block;margin-bottom:4px}.muted{color:var(--muted)}.small{font-size:.85rem}.list{display:grid;gap:8px}.row{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0a1422}.kv{display:grid;grid-template-columns:150px 1fr;gap:7px;font-size:.9rem}.kv div:nth-child(odd){color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#c8d7eb}.footer{margin-top:24px;color:#72859e;font-size:.82rem}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:110px 1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main>
+<div class="top"><a href="../">← Network Demo Hub</a><a href="https://github.com/sebia1993" target="_blank" rel="noopener">GitHub ↗</a></div>
+<span class="kicker">CLUSTER OBSERVABILITY · LIVE FIXTURE</span>
+<h1>Aruba Cluster Health Dashboard</h1>
+<p class="lead">Poll을 반복해 Client 분배 이상이 3회 연속일 때 확정되고, 2회 연속 정상일 때 복구되는 debounce 동작을 확인합니다.</p>
+<div class="notice"><b>데모 경계:</b> 실제 운영 장비에는 연결하지 않습니다. 공개 가능한 비식별 샘플과 원 프로젝트의 핵심 판단 규칙을 브라우저 JavaScript로 축약 재현합니다.</div>
+
+<div class="grid">
+<section class="card">
+<h2>Poll 입력</h2>
+<div class="field"><label>샘플 시나리오</label><select id="cpreset">
+<option value="normal">정상 분배</option><option value="anomaly">특정 WLC Client 급감</option><option value="low">전체 저사용량</option><option value="incomplete">수집 불완전</option><option value="down">MM 명시 Down</option>
+</select></div>
+<div class="field"><label>WLC-A Active / Standby</label><div class="grid"><input id="a1" type="number"><input id="s1" type="number"></div></div>
+<div class="field"><label>WLC-B Active / Standby</label><div class="grid"><input id="a2" type="number"><input id="s2" type="number"></div></div>
+<div class="field"><label>MM State</label><select id="mm"><option>UP</option><option>DOWN</option></select></div>
+<div class="field"><label><input id="complete" type="checkbox" style="width:auto"> 수집 데이터 완전</label></div>
+<button onclick="poll()">Poll 1회 실행</button><button class="secondary" onclick="resetState()">상태 초기화</button>
+</section>
+<section class="card">
+<h2>상관분석 결과</h2><div id="overall" class="result"></div>
+<div class="kv" style="margin-top:14px"><div>Poll 횟수</div><div id="polls">0</div><div>이상 확정</div><div>3회 연속</div><div>복구 확정</div><div>2회 연속</div><div>저사용량 기준</div><div>Cluster Active &lt; 50</div></div>
+<h3 style="margin-top:18px">WLC별 Debounce</h3><div id="devices" class="list"></div>
+</section>
+</div>
+<section class="card" style="margin-top:16px"><h2>판단 규칙</h2><p class="muted">기본값은 원 프로젝트의 AnomalySettings를 따릅니다: low client ≤10, peer median의 25% 이하, peer median ≥30, cluster active 합계 ≥50, 이상 3회 연속 확정, 복구 2회 연속 확정. 수집이 불완전하면 미확정 streak을 끊고 회복으로 간주하지 않습니다.</p><a href="https://github.com/sebia1993/aruba-cluster-health-dashboard" target="_blank" rel="noopener">원 프로젝트 저장소 →</a></section>
+<div class="footer">sebia1993 · Network Operations × Automation · Interactive Public Demo</div>
+</main>
+<script>
+var state={polls:0,A:{a:0,r:0,active:false},B:{a:0,r:0,active:false}};
+var cpresets={normal:[80,60,75,55,"UP",true],anomaly:[5,4,80,70,"UP",true],low:[5,4,6,5,"UP",true],incomplete:[5,4,80,70,"UP",false],down:[80,60,75,55,"DOWN",true]};
+function loadC(){var p=cpresets[document.getElementById("cpreset").value];["a1","s1","a2","s2"].forEach(function(id,i){document.getElementById(id).value=p[i];});document.getElementById("mm").value=p[4];document.getElementById("complete").checked=p[5];}
+function advance(c,cond,complete){
+ if(!complete){if(c.active)c.r=0;else{c.a=0;c.r=0;}return;}
+ if(cond){c.r=0;c.a++;if(!c.active&&c.a>=3)c.active=true;}
+ else if(c.active){c.r++;if(c.r>=2){c.active=false;c.a=0;c.r=0;}}
+ else{c.a=0;c.r=0;}
+}
+function poll(){
+ state.polls++;var A={x:+a1.value,y:+s1.value},B={x:+a2.value,y:+s2.value},comp=complete.checked,total=A.x+B.x,low=comp&&total<50;
+ function cond(me,peer){return !low&&me.x<=10&&me.y<=10&&peer.x>=30&&peer.y>=30&&me.x<=peer.x*.25&&me.y<=peer.y*.25;}
+ advance(state.A,cond(A,B),comp);advance(state.B,cond(B,A),comp);
+ var label,cls,reason;
+ if(mm.value==="DOWN"){label="장애";cls="bad";reason="MM이 Controller Down을 명시적으로 보고했습니다.";}
+ else if(!comp){label="확인 불가";cls="unk";reason="수집 데이터가 불완전하여 Client 분배 판단을 보류합니다.";}
+ else if(low){label="판단 보류";cls="unk";reason="전체 Client 사용량이 낮아 특정 구성원 이상으로 단정하지 않습니다.";}
+ else if(state.A.active||state.B.active){label="주의";cls="warn";reason="Client 분배 이상이 연속 관측 기준을 충족했습니다.";}
+ else{label="정상";cls="ok";reason="현재 확정된 이상 신호가 없습니다.";}
+ overall.innerHTML="<span class='badge "+cls+"'>"+label+"</span><div style='margin-top:8px'>"+reason+"</div>";
+ polls.textContent=state.polls;
+ devices.innerHTML=device("WLC-A",A,state.A)+device("WLC-B",B,state.B);
+}
+function device(name,v,c){return "<div class='row'><b>"+name+"</b><div class='muted small'>Active "+v.x+" / Standby "+v.y+" · anomaly streak "+c.a+" · recovery streak "+c.r+" · confirmed "+(c.active?"YES":"NO")+"</div></div>";}
+function resetState(){state={polls:0,A:{a:0,r:0,active:false},B:{a:0,r:0,active:false}};polls.textContent="0";devices.innerHTML="";overall.innerHTML="<span class='muted'>Poll을 실행하세요.</span>";}
+cpreset.addEventListener("change",function(){loadC();resetState();});loadC();resetState();</script>
+</body></html>
