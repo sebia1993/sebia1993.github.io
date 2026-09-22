@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Aruba Wireless Policy Mapper original Python runtime demo">
+<title>Wireless Policy Mapper · Original Python Runtime Demo</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.js"></script>
+<style>
+:root{--bg:#07101c;--panel:#0e192a;--panel2:#0a1422;--line:#2a3c57;--text:#edf4ff;--muted:#9fb0c5;--blue:#70a9ff;--cyan:#61dfd1;--green:#75dda0;--amber:#ffd37a;--red:#ff909f}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#12315d 0,transparent 32rem),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;line-height:1.55}
+main{width:min(1180px,calc(100% - 28px));margin:auto;padding:30px 0 70px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{color:#bed8ff;text-decoration:none;font-weight:800}.tag{display:inline-flex;margin-top:28px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--cyan);font-size:.78rem;font-weight:850}
+h1{font-size:clamp(2.4rem,6vw,4.8rem);line-height:1;letter-spacing:-.055em;margin:14px 0}.lead{max-width:900px;color:var(--muted);font-size:1.04rem}
+.runtime{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0}.rt{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0a1524}.rt b{display:block}.rt span{color:var(--muted);font-size:.82rem;word-break:break-all}
+.notice{padding:13px 15px;border:1px solid #5f4a21;border-radius:12px;background:#241d0d;color:#efd18f;margin:18px 0}.grid{display:grid;grid-template-columns:1.02fr .98fr;gap:16px}.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px}.card h2,.card h3{margin-top:0}
+textarea{width:100%;min-height:520px;resize:vertical;background:#050d18;color:#eaf2ff;border:1px solid #3b5271;border-radius:11px;padding:13px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+button,select{font:inherit}select{width:100%;background:#07111f;color:var(--text);border:1px solid #3b5271;border-radius:10px;padding:10px;margin-bottom:9px}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:850;cursor:pointer;background:var(--blue);color:#06101d;margin:5px 6px 5px 0}.secondary{background:#172842;color:#dceaff;border:1px solid #3a5271}.disabled{opacity:.55;cursor:not-allowed}
+.status{padding:12px;border:1px solid var(--line);border-radius:12px;background:#081423;margin-bottom:12px}.status.ok{border-color:#326d49;color:#b8f0ca}.status.warn{border-color:#735b29;color:#ffe2a1}.status.bad{border-color:#7b3944;color:#ffc0c7}
+.flow{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.flow span{padding:7px 9px;border-radius:9px;background:#091525;border:1px solid var(--line);font-size:.82rem;font-weight:750}.arrow{color:var(--blue)}
+.result{padding:12px;border:1px solid var(--line);border-radius:12px;background:#081423;margin-top:10px}.result b{display:block}.muted{color:var(--muted)}.small{font-size:.84rem}.list{display:grid;gap:9px}.row{padding:11px;border:1px solid var(--line);border-radius:11px;background:#091423}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:.74rem;font-weight:850;border:1px solid var(--line);color:#bcd7ff}.unresolved{color:#ffdca0;border-color:#765d2a}.source{margin-top:16px;padding:12px;border-left:3px solid var(--cyan);background:#0a1723;border-radius:8px;color:var(--muted);font-size:.88rem}.footer{margin-top:28px;color:#72869e;font-size:.82rem}
+@media(max-width:880px){.grid,.runtime{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}textarea{min-height:430px}}
+</style>
+</head>
+<body><main>
+<div class="top"><a href="../../network-demos/">← 데모 목록</a><a href="https://github.com/sebia1993/aruba-wireless-policy-mapper" target="_blank" rel="noopener">원 저장소 ↗</a></div>
+<span class="tag">ORIGINAL PYTHON RUNTIME · PYODIDE</span>
+<h1>Aruba Wireless Policy Mapper</h1>
+<p class="lead">AOS8 설정 텍스트를 넣고 실행하면, <b>원 저장소의 Python Parser와 Access Summary 코드</b>가 브라우저 안에서 그대로 실행되어 SSID → AAA → Role → ACL 관계를 계산합니다.</p>
+<div class="runtime">
+<div class="rt"><b>Source commit</b><span><a style="color:#bcd7ff" href="https://github.com/sebia1993/aruba-wireless-policy-mapper/commit/cf66f9991662e1d347130bd8561aaa17d527878d" target="_blank">cf66f9991662</a></span></div>
+<div class="rt"><b>Executed Python</b><span>models.py · access_summary.py · aos8_parser.py</span></div>
+<div class="rt"><b>Runtime</b><span id="runtimeInfo">Python 로딩 중…</span></div>
+</div>
+<div class="notice"><b>실행 경계:</b> 실제 WLC에는 접속하지 않습니다. 대신 실제 프로그램의 Parser/분석 코드를 비식별 AOS8 구성에 실행합니다. 계정·내부 IP·운영 로그는 브라우저 밖으로 전송하지 않습니다.</div>
+<div class="grid">
+<section class="card">
+<h2>Raw AOS8 구성</h2>
+<select id="preset">
+<option value="internet">샘플 1 · 내부망 차단 + 인터넷 중심</option>
+<option value="broad">샘플 2 · 전체 허용</option>
+<option value="unresolved">샘플 3 · ACL 누락 / 판정 불가</option>
+</select>
+<textarea id="config"></textarea>
+<div>
+<button id="runBtn" class="disabled" disabled>원 Python 코드 실행</button>
+<button id="resetBtn" class="secondary">샘플 복원</button>
+</div>
+</section>
+<section class="card">
+<h2>실제 Parser 결과</h2>
+<div id="status" class="status warn">Python Runtime 초기화 중…</div>
+<h3>SSID → Role 경로</h3><div id="mappings" class="list"><div class="row muted">실행 후 결과가 표시됩니다.</div></div>
+<h3 style="margin-top:18px">Role / ACL 분석</h3><div id="policies" class="list"></div>
+<h3 style="margin-top:18px">Unresolved</h3><div id="unresolved" class="list"></div>
+<div class="source"><b>실행 사실 확인:</b> 이 페이지는 JavaScript에서 Access 결과를 다시 계산하지 않습니다. 입력 문자열을 Pyodide Python에 전달한 뒤 <code>parse_controller_config()</code>가 반환한 객체를 JSON으로 직렬화해 화면에 표시합니다.</div>
+</section>
+</div>
+<div class="footer">sebia1993 · Network Operations × Automation · Original Python Runtime Demo</div>
+</main>
+<script>
+const COMMIT="cf66f9991662e1d347130bd8561aaa17d527878d";
+const BASE="https://raw.githubusercontent.com/sebia1993/aruba-wireless-policy-mapper/"+COMMIT+"/src/wlc_role_acl_collector/";
+const SOURCES=["models.py","access_summary.py","aos8_parser.py"];
+const samples={
+internet:`ap-group LAB-GROUP
+ virtual-ap corp-vap
+!
+wlan virtual-ap corp-vap
+ aaa-profile corp-aaa
+ ssid-profile corp-ssid
+ vlan 100
+ forward-mode tunnel
+!
+wlan ssid-profile corp-ssid
+ essid CORP-WIFI
+!
+aaa profile corp-aaa
+ initial-role employee-internet
+ dot1x-default-role employee-internet
+ radius-accounting-server-group cppm
+!
+user-role employee-internet
+ access-list session employee-acl
+ vlan 100
+!
+ip access-list session employee-acl
+ any alias RFC1918 any deny
+ user any any src-nat
+!
+netdestination RFC1918
+ network 10.0.0.0 255.0.0.0
+ network 172.16.0.0 255.240.0.0
+ network 192.168.0.0 255.255.0.0
+!`,
+broad:`ap-group LAB-GROUP
+ virtual-ap open-vap
+!
+wlan virtual-ap open-vap
+ aaa-profile open-aaa
+ ssid-profile open-ssid
+ vlan 200
+ forward-mode tunnel
+!
+wlan ssid-profile open-ssid
+ essid LAB-OPEN
+!
+aaa profile open-aaa
+ initial-role open-role
+!
+user-role open-role
+ access-list session open-acl
+ vlan 200
+!
+ip access-list session open-acl
+ user any any permit
+!`,
+unresolved:`ap-group LAB-GROUP
+ virtual-ap secure-vap
+!
+wlan virtual-ap secure-vap
+ aaa-profile secure-aaa
+ ssid-profile secure-ssid
+ vlan 300
+ forward-mode tunnel
+!
+wlan ssid-profile secure-ssid
+ essid LAB-SECURE
+!
+aaa profile secure-aaa
+ dot1x-default-role secure-role
+ dot1x-server-group CPPM
+!
+user-role secure-role
+ access-list session missing-acl
+ vlan 300
+!`
+};
+let pyodide=null;
+const el=id=>document.getElementById(id);
+function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function loadSample(){el("config").value=samples[el("preset").value];clearResult();}
+function clearResult(){el("mappings").innerHTML='<div class="row muted">실행 후 결과가 표시됩니다.</div>';el("policies").innerHTML="";el("unresolved").innerHTML="";}
+async function bootstrap(){
+ try{
+  pyodide=await loadPyodide();
+  pyodide.FS.mkdirTree("/home/pyodide/wlc_role_acl_collector");
+  pyodide.FS.writeFile("/home/pyodide/wlc_role_acl_collector/__init__.py","");
+  for(const name of SOURCES){
+    const res=await fetch(BASE+name,{cache:"no-store"});
+    if(!res.ok)throw new Error(name+" source load failed: HTTP "+res.status);
+    const text=await res.text();
+    pyodide.FS.writeFile("/home/pyodide/wlc_role_acl_collector/"+name,text);
+  }
+  await pyodide.runPythonAsync(`
+import sys
+if "/home/pyodide" not in sys.path:
+    sys.path.insert(0, "/home/pyodide")
+from wlc_role_acl_collector.models import Controller
+from wlc_role_acl_collector.aos8_parser import parse_controller_config
+import json
+
+def web_analyze(config_text):
+    parsed = parse_controller_config(
+        controller=Controller(name="DEMO-WLC", host="192.0.2.10"),
+        config_text=config_text,
+    )
+    payload = {
+        "mappings": [
+            {
+                "ssid": m.ssid,
+                "aaa_profile": m.aaa_profile,
+                "role_type": m.role_type,
+                "role": m.role,
+                "vlan": m.vlan,
+                "forward_mode": m.forward_mode,
+                "access_summary": m.access_summary,
+                "dynamic_role_possible": m.dynamic_role_possible,
+                "dynamic_role_reason": m.dynamic_role_reason,
+            }
+            for m in parsed.ssid_role_mappings
+        ],
+        "policies": [
+            {
+                "role": name,
+                "acl_names": policy.acl_names,
+                "access_summary": policy.access_summary,
+                "access_flags": policy.access_flags,
+                "rules": [
+                    {
+                        "sequence": r.sequence,
+                        "raw": r.raw,
+                        "action": r.action,
+                        "source": r.source,
+                        "destination": r.destination,
+                        "service": r.service,
+                        "source_detail": r.source_detail,
+                        "destination_detail": r.destination_detail,
+                    }
+                    for r in policy.rules
+                ],
+            }
+            for name, policy in sorted(parsed.role_policies.items())
+        ],
+        "aliases": {
+            name: [{"type": e.entry_type, "value": e.value} for e in entries]
+            for name, entries in sorted(parsed.netdestination_aliases.items())
+        },
+        "unresolved": parsed.unresolved,
+    }
+    return json.dumps(payload, ensure_ascii=False)
+`);
+  el("runtimeInfo").textContent="Python "+pyodide.runPython("import sys; sys.version.split()[0]")+" · Pyodide 314.0.7";
+  el("status").className="status ok";el("status").textContent="원 저장소 Python 소스 로드 완료";
+  el("runBtn").disabled=false;el("runBtn").classList.remove("disabled");
+ }catch(err){
+  el("runtimeInfo").textContent="초기화 실패";
+  el("status").className="status bad";el("status").textContent="Runtime 초기화 실패: "+err.message;
+  console.error(err);
+ }
+}
+async function runOriginal(){
+ if(!pyodide)return;
+ el("runBtn").disabled=true;el("status").className="status warn";el("status").textContent="원 Python Parser 실행 중…";
+ try{
+   pyodide.globals.set("WEB_CONFIG",el("config").value);
+   const jsonText=pyodide.runPython("web_analyze(WEB_CONFIG)");
+   const data=JSON.parse(jsonText);
+   render(data);
+   el("status").className="status ok";el("status").textContent="실행 완료 · parse_controller_config() 결과";
+ }catch(err){
+   el("status").className="status bad";el("status").textContent="Python 실행 오류: "+err.message;
+   clearResult();console.error(err);
+ }finally{el("runBtn").disabled=false;}
+}
+function render(data){
+ el("mappings").innerHTML=data.mappings.length?data.mappings.map(m=>`
+  <div class="row">
+   <div class="flow"><span>${esc(m.ssid||"(SSID 미확인)")}</span><span class="arrow">→</span><span>${esc(m.aaa_profile)}</span><span class="arrow">→</span><span>${esc(m.role_type)}</span><span class="arrow">→</span><span>${esc(m.role)}</span></div>
+   <div class="muted small" style="margin-top:7px">VLAN ${esc(m.vlan||"-")} · ${esc(m.forward_mode||"-")} · Access: <b style="color:#edf4ff">${esc(m.access_summary)}</b></div>
+   ${m.dynamic_role_possible?'<div class="small" style="color:#ffd99a;margin-top:5px">동적 Role 가능성: '+esc(m.dynamic_role_reason)+'</div>':""}
+  </div>`).join(""):'<div class="row muted">SSID→Role 매핑이 없습니다.</div>';
+ el("policies").innerHTML=data.policies.length?data.policies.map(p=>`
+  <div class="row"><b>${esc(p.role)} · ${esc(p.access_summary)}</b>
+   <div class="small muted">ACL: ${esc((p.acl_names||[]).join(", ")||"(없음)")}</div>
+   <div style="margin:6px 0">${(p.access_flags||[]).map(f=>'<span class="badge">'+esc(f)+'</span>').join(" ")}</div>
+   ${(p.rules||[]).map(r=>'<div class="small" style="font-family:ui-monospace,monospace;margin-top:5px">'+esc(r.sequence+". "+r.raw)+'</div>').join("")}
+  </div>`).join(""):'<div class="row muted">Role Policy가 없습니다.</div>';
+ el("unresolved").innerHTML=data.unresolved.length?data.unresolved.map(u=>`
+  <div class="row"><span class="badge unresolved">${esc(u.type)}</span><div style="margin-top:6px"><b>${esc(u.name)}</b></div><div class="muted small">${esc(u.context)}</div></div>`).join(""):'<div class="row"><span class="badge">0</span> unresolved 없음</div>';
+}
+el("preset").addEventListener("change",loadSample);
+el("resetBtn").addEventListener("click",loadSample);
+el("runBtn").addEventListener("click",runOriginal);
+loadSample();bootstrap();
+</script>
+</body></html>
