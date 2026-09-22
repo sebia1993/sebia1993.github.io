@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aruba Wireless Policy Mapper | sebia1993 Network Demo</title>
+<style>
+:root{--bg:#08101d;--panel:#101b2d;--panel2:#0c1626;--line:#293b56;--text:#eef4ff;--muted:#9fb0c6;--blue:#6ba6ff;--cyan:#62dfd1;--green:#71dc98;--amber:#ffd27a;--red:#ff8f9d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#12305a 0,transparent 30rem),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;line-height:1.55}
+main{width:min(1120px,calc(100% - 28px));margin:auto;padding:28px 0 60px}a{color:#b9d5ff}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:30px}.top a{text-decoration:none;font-weight:800}.kicker{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--cyan);font-size:.78rem;font-weight:850}
+h1{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.05em;margin:14px 0}.lead{max-width:850px;color:var(--muted);font-size:1.05rem}.notice{margin:20px 0;padding:13px 15px;border:1px solid #5b4821;background:#231c0d;color:#efd18f;border-radius:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:17px;padding:18px}.card h2,.card h3{margin-top:0}.field{margin:11px 0}.field label{display:block;font-size:.84rem;color:var(--muted);margin-bottom:5px;font-weight:750}
+input,select,textarea{width:100%;background:#07111f;color:var(--text);border:1px solid #38506f;border-radius:10px;padding:10px;font:inherit}textarea{min-height:190px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;resize:vertical}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:850;cursor:pointer;background:var(--blue);color:#07111f;margin:5px 6px 5px 0}.secondary{background:#182842;color:#dbe9ff;border:1px solid #38506f}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.flow span{padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#0a1525;font-size:.82rem;font-weight:760}.arrow{color:var(--blue)}
+.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.78rem;font-weight:850;border:1px solid var(--line)}.ok{color:#aaf0c0;border-color:#326b47;background:#10291a}.warn{color:#ffe09e;border-color:#735b29;background:#2b220e}.bad{color:#ffb0b8;border-color:#7b3942;background:#32141a}.unk{color:#c5d4e7;border-color:#4b5d75;background:#172235}
+.result{padding:13px;border-radius:12px;border:1px solid var(--line);background:#091525;margin-top:10px}.result b{display:block;margin-bottom:4px}.muted{color:var(--muted)}.small{font-size:.85rem}.list{display:grid;gap:8px}.row{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0a1422}.kv{display:grid;grid-template-columns:150px 1fr;gap:7px;font-size:.9rem}.kv div:nth-child(odd){color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#c8d7eb}.footer{margin-top:24px;color:#72859e;font-size:.82rem}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:110px 1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main>
+<div class="top"><a href="../">← Network Demo Hub</a><a href="https://github.com/sebia1993" target="_blank" rel="noopener">GitHub ↗</a></div>
+<span class="kicker">WLAN POLICY · LIVE FIXTURE</span>
+<h1>Aruba Wireless Policy Mapper</h1>
+<p class="lead">ACL Rule을 직접 바꾸면서 SSID → AAA → Role → ACL 관계와 Access Summary 분류가 어떻게 달라지는지 확인할 수 있습니다.</p>
+<div class="notice"><b>데모 경계:</b> 실제 운영 장비에는 연결하지 않습니다. 공개 가능한 비식별 샘플과 원 프로젝트의 핵심 판단 규칙을 브라우저 JavaScript로 축약 재현합니다.</div>
+
+<div class="grid">
+<section class="card">
+<h2>입력</h2>
+<div class="field"><label>샘플 시나리오</label><select id="preset">
+<option value="internet">내부망 차단 + 인터넷 중심</option>
+<option value="portal">포털/DNS/DHCP 중심</option>
+<option value="broad">전체 허용</option>
+<option value="deny">대부분 차단</option>
+<option value="custom">직접 입력</option>
+</select></div>
+<div class="field"><label>SSID</label><input id="ssid" value="CORP-WIFI"></div>
+<div class="field"><label>AAA Profile</label><input id="aaa" value="corp-aaa"></div>
+<div class="field"><label>User Role</label><input id="role" value="employee-internet"></div>
+<div class="field"><label>ACL Rule 원문 — 한 줄에 하나</label><textarea id="rules"></textarea></div>
+<button onclick="runPolicy()">분석 실행</button><button class="secondary" onclick="loadPreset()">샘플 다시 불러오기</button>
+</section>
+<section class="card">
+<h2>정책 관계</h2><div id="path" class="flow"></div>
+<h3>Access Summary</h3><div id="summary" class="result"></div>
+<h3 style="margin-top:18px">판단 근거</h3><div id="flags" class="list"></div>
+</section>
+</div>
+<section class="card" style="margin-top:16px"><h2>이 데모가 보여주는 것</h2><p class="muted">원 프로젝트의 <code>classify_access()</code>와 같은 우선순위로 broad permit, 내부망 deny, NAT, DNS/DHCP/Web, deny-only 여부를 평가합니다. 동적 RADIUS Role이나 불완전 ACL은 이 데모에서 임의로 실제 적용 Role로 추정하지 않습니다.</p><a href="https://github.com/sebia1993/aruba-wireless-policy-mapper" target="_blank" rel="noopener">원 프로젝트 저장소 →</a></section>
+<div class="footer">sebia1993 · Network Operations × Automation · Interactive Public Demo</div>
+</main>
+<script>
+var presets={
+ internet:["any alias RFC1918 any deny","user any any src-nat"],
+ portal:["user any svc-dns permit","user any svc-dhcp permit","user any svc-http dst-nat"],
+ broad:["user any any permit"],
+ deny:["user any any deny"]
+};
+function loadPreset(){var p=document.getElementById("preset").value;if(p!=="custom")document.getElementById("rules").value=presets[p].join("\n");runPolicy();}
+function broad(line){var c=line.trim().replace(/\s+/g," ");return /^(any|user)\s+any\s+any\s+(permit|src-nat|route)\b/i.test(c);}
+function runPolicy(){
+ var lines=document.getElementById("rules").value.split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean);
+ var low=lines.map(function(x){return x.toLowerCase();}), all=low.join("\n"), flags=[];
+ var anyPermit=low.some(broad), srcNat=all.indexOf("src-nat")>=0, dstNat=all.indexOf("dst-nat")>=0;
+ var dns=all.indexOf("svc-dns")>=0||/\b53\b/.test(all), dhcp=all.indexOf("svc-dhcp")>=0||/\b(67|68)\b/.test(all);
+ var web=["svc-http","svc-https","svc-http-proxy"].some(function(x){return all.indexOf(x)>=0;});
+ var deny=low.some(function(x){return /(^|\s)deny(\s|$)/.test(x);});
+ var internalDeny=low.some(function(x){return /(^|\s)deny(\s|$)/.test(x)&&(/\b10\./.test(x)||/\b172\.(1[6-9]|2\d|3[0-1])\./.test(x)||/\b192\.168\./.test(x)||/rfc1918|internal|inside/i.test(x));});
+ var onlyDeny=lines.length>0&&low.every(function(x){return /(^|\s)deny(\s|$)/.test(x);});
+ if(internalDeny)flags.push(["internal_network_deny","RFC1918/내부망 deny 규칙이 확인됨"]);
+ if(srcNat)flags.push(["source_nat","src-nat 규칙이 확인됨"]); if(dstNat)flags.push(["destination_nat","dst-nat 규칙이 확인됨"]);
+ if(dns)flags.push(["dns","DNS 관련 허용 신호"]); if(dhcp)flags.push(["dhcp","DHCP 관련 허용 신호"]); if(web)flags.push(["web","Web 관련 허용 신호"]);
+ if(anyPermit)flags.push(["broad_permit","any/user → any → any broad permit"]); if(deny)flags.push(["deny","deny 규칙 존재"]);
+ var label="명확하지 않음";
+ if(!lines.length)label="명확하지 않음";
+ else if(onlyDeny)label="대부분 차단";
+ else if(internalDeny&&(srcNat||anyPermit||web))label="내부망 차단, 인터넷 중심";
+ else if(anyPermit&&!internalDeny)label="전체 허용";
+ else if(dstNat&&(dns||dhcp||web))label="포털/DNS/DHCP 중심";
+ else if(dns||dhcp||web||deny)label="제한적 허용";
+ document.getElementById("path").innerHTML="<span>"+esc(document.getElementById("ssid").value)+"</span><span class='arrow'>→</span><span>"+esc(document.getElementById("aaa").value)+"</span><span class='arrow'>→</span><span>"+esc(document.getElementById("role").value)+"</span><span class='arrow'>→</span><span>ACL "+lines.length+" rules</span>";
+ document.getElementById("summary").innerHTML="<b>"+label+"</b><span class='muted small'>원 프로젝트 Access Summary 분류 규칙 기반</span>";
+ document.getElementById("flags").innerHTML=flags.length?flags.map(function(f){return "<div class='row'><b>"+f[0]+"</b><div class='muted small'>"+f[1]+"</div></div>";}).join(""):"<div class='row muted'>분류 가능한 신호가 부족합니다.</div>";
+}
+function esc(v){return String(v).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+document.getElementById("preset").addEventListener("change",loadPreset);loadPreset();</script>
+</body></html>
