@@ -166,6 +166,28 @@ try {
       } finally { await page.close(); }
     });
   }
+  await check('Wireless Policy Mapper original Python runtime', async () => {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 960 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    page.on('console', m => {
+      if (m.type() === 'error' && !m.text().includes('favicon')) errors.push(m.text());
+    });
+    try {
+      const response = await page.goto(`${base}/projects/runtime-demos/wireless-policy-mapper/index.html`, { waitUntil: 'domcontentloaded' });
+      assert.equal(response.status(), 200);
+      await page.locator('#status').filter({ hasText: '원 저장소 Python 소스 로드 완료' }).waitFor({ timeout: 120000 });
+      assert.equal(await page.locator('#runBtn').isEnabled(), true);
+      await page.locator('#runBtn').click();
+      await page.locator('#status').filter({ hasText: '실행 완료' }).waitFor({ timeout: 30000 });
+      assert.ok((await page.locator('#policies').innerText()).includes('내부망 차단, 인터넷 중심'));
+      assert.ok((await page.locator('#mappings').innerText()).includes('CORP-WIFI'));
+      assert.ok((await page.locator('#mappings').innerText()).includes('employee-internet'));
+      assert.ok((await page.locator('#runtimeInfo').innerText()).includes('Python 3.14'));
+      assert.deepEqual(errors, [], 'runtime or console errors');
+      await page.screenshot({ path: resolve(output, 'wireless-policy-mapper-runtime.png'), fullPage: true });
+    } finally { await page.close(); }
+  });
 } finally {
   await browser.close();
   if (server) await new Promise(r => server.close(r));
