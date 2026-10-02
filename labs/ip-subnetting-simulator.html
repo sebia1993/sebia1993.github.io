@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IP 주소 / Subnetting — 인터랙티브 실습</title>
+<meta name="description" content="IPv4 Prefix와 Subnet Mask를 바꾸며 같은 Subnet 판단을 예상하고 계산 결과와 비교하는 Interactive Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+:root{--ok:#7ee0c2;--warn:#ffbf69}
+body{min-height:100vh}.lab-wrap{width:min(1120px,calc(100% - 32px));margin:auto;padding:36px 0 64px}.hero{padding:26px 0 18px}.hero small,.eyebrow2{color:var(--blue);font-weight:900;letter-spacing:.08em}.hero h1{margin:8px 0;font-size:clamp(2rem,5vw,3.5rem)}.hero p{color:var(--muted);max-width:820px}.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-right:8px}.guide strong{display:block;margin:8px 0 4px}.guide span{color:var(--muted);font-size:.86rem}
+.back{display:inline-flex;margin-bottom:16px;color:var(--blue);text-decoration:none;font-weight:800}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:18px 0}.tab{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);cursor:pointer;text-align:left}.tab.active{border-color:#3e6a91;background:rgba(88,184,255,.09)}.tab small{display:block;color:var(--muted);margin-top:4px}
+.card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.question small{color:var(--blue);font-weight:900}.question h2{margin:7px 0}.question p{color:var(--muted)}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.choice{min-height:72px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);cursor:pointer;text-align:left}.choice.selected{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset}.choice.correct{border-color:#347968;background:rgba(126,224,194,.08)}.choice.wrong{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.run-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.run{padding:12px 16px;border:0;border-radius:11px;background:var(--blue);color:#07131f;font-weight:900;cursor:pointer}.run:disabled{opacity:.45;cursor:not-allowed}.reset{padding:12px 16px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);cursor:pointer}.feedback{color:var(--muted);font-size:.88rem}
+.calc{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin-top:20px}.endpoint{padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.endpoint small{display:block;color:var(--muted)}.endpoint strong{display:block;margin:6px 0;font-size:1.12rem}.endpoint code{font-size:.92rem}.arrow{display:grid;place-items:center;color:var(--blue);font-size:1.8rem;font-weight:900}.network-strip{display:flex;min-height:88px;margin:18px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel3)}.segment{display:grid;place-items:center;align-content:center;text-align:center;min-width:0}.segment.a{flex:1;border-right:1px solid var(--line)}.segment.b{flex:1}.segment.active{background:rgba(88,184,255,.08)}.segment strong{font-size:.9rem}.segment span{color:var(--muted);font-size:.75rem;margin-top:4px}.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.result{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.result small{display:block;color:var(--muted);font-size:.76rem}.result strong{display:block;margin-top:6px}.result.good strong{color:var(--ok)}.result.alert strong{color:var(--warn)}
+.explain{margin-top:16px;padding:16px;border-left:3px solid var(--blue);border-radius:10px;background:var(--panel3)}.explain b{display:block;margin-bottom:5px}.explain p{margin:0;color:var(--muted)}.lab-evidence{margin-top:14px;padding:14px;border:1px solid #347968;border-radius:12px;background:rgba(126,224,194,.05)}.lab-evidence b{color:var(--mint)}.lab-evidence p{margin:5px 0 0;color:var(--muted)}
+.progress{display:flex;gap:8px;align-items:center;margin:16px 0}.dots{display:flex;gap:6px}.dot{width:11px;height:11px;border-radius:50%;border:1px solid var(--line)}.dot.done{background:var(--mint);border-color:var(--mint)}.complete{display:none;margin-top:18px;padding:22px;border:1px solid #347968;border-radius:16px;background:rgba(126,224,194,.07)}.complete.show{display:block}.complete h2{margin:5px 0}.complete p{color:var(--muted)}.scope{margin-top:18px;color:var(--muted);font-size:.82rem}.scope details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel3)}.scope summary{cursor:pointer;font-weight:800;color:var(--text)}
+@media(max-width:860px){.start-guide,.tabs,.choices,.result-grid{grid-template-columns:1fr 1fr}.calc{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
+@media(max-width:600px){.lab-wrap{width:min(100% - 22px,1120px);padding-top:20px}.start-guide,.tabs,.choices,.result-grid{grid-template-columns:1fr}.network-strip{height:auto;display:grid}.segment{min-height:80px}.segment.a{border-right:0;border-bottom:1px solid var(--line)}.run-row{display:grid}.run,.reset{width:100%}}
+</style>
+</head>
+<body>
+<div class="lab-wrap">
+  <a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
+  <header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>정답을 먼저 보지 말고 <b>같은 Subnet인지 먼저 예상</b>하세요. 그 다음 Prefix를 적용한 실제 계산 결과와 검증 Lab의 관측을 비교합니다.</p>
+    <div class="start-guide"><div class="guide"><b>1</b><strong>질문 읽기</strong><span>Source, Destination, Prefix를 확인합니다.</span></div><div class="guide"><b>2</b><strong>먼저 예상</strong><span>on-link인지 gateway 경유인지 고릅니다.</span></div><div class="guide"><b>3</b><strong>실행 후 비교</strong><span>Network Prefix 계산과 실제 관측을 확인합니다.</span></div></div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Subnetting 실습 선택"></nav>
+  <div class="progress"><strong id="progressText">0 / 4 완료</strong><div class="dots" id="dots"></div></div>
+
+  <main class="card">
+    <section class="question"><small id="lessonNo">실습 1</small><h2 id="question">질문</h2><p id="questionHelp"></p></section>
+    <div class="choices" id="choices" role="group" aria-label="결과 예상"></div>
+    <div class="run-row"><button class="run" id="runBtn" disabled>② 실행해서 확인하기</button><button class="reset" id="resetBtn">현재 실습 다시 시작</button><span class="feedback" id="feedback">먼저 예상 답을 선택하세요.</span></div>
+
+    <section id="resultArea" hidden>
+      <div class="calc">
+        <div class="endpoint"><small>송신자</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow">→</div><div class="endpoint"><small>목적지</small><strong id="dstIp"></strong><code id="dstNet"></code></div>
+      </div>
+      <div class="network-strip" id="networkStrip"></div>
+      <div class="result-grid">
+        <div class="result"><small>Prefix</small><strong id="prefixOut"></strong></div>
+        <div class="result"><small>판단</small><strong id="decisionOut"></strong></div>
+        <div class="result"><small>첫 전달 대상</small><strong id="nextHopOut"></strong></div>
+        <div class="result"><small>검증 결과</small><strong id="validatedOut"></strong></div>
+      </div>
+      <div class="explain"><b id="explainTitle"></b><p id="explainText"></p></div>
+      <div class="lab-evidence"><b>실제 PNETLab 관측</b><p id="evidenceText"></p></div>
+    </section>
+  </main>
+
+  <section class="complete" id="complete"><div class="eyebrow2">2단계 완료</div><h2>Subnet 판단의 핵심 흐름을 모두 확인했습니다.</h2><p>/25 정상 → on-link/off-link 구분 → /24 오설정 → /25 복구를 직접 비교했습니다. 이제 Prefix/Mask가 ARP보다 먼저 전달 판단을 바꾼다는 점을 설명할 수 있으면 됩니다.</p><div class="run-row"><a class="btn primary" href="ip-subnetting.html">개념서 다시 보기</a><a class="btn" href="../roadmap.html">로드맵으로 돌아가기</a></div></section>
+
+  <div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
+</div>
+<script>
+(function(){
+  var lessons=[
+    {title:'같은 /25라면?',label:'1 · 같은 Subnet',src:'10.77.10.10',dst:'10.77.10.20',prefix:25,answer:'on',choices:[['on','같은 Subnet · 직접 전달'],['gw','다른 Subnet · gateway 경유'],['drop','주소가 달라서 전달 불가']],next:'목적지 .20',decision:'ON-LINK',validated:'PASS',explain:'두 주소 모두 10.77.10.0/25에 속합니다.',evidence:'CP1에서 PC1이 10.77.10.20에 직접 ARP했고 ICMP 3/3이 성공했습니다.'},
+    {title:'다른 /25라면?',label:'2 · 다른 Subnet',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','같은 Subnet · .140 직접 전달'],['gw','다른 Subnet · gateway .1 경유'],['rewrite','목적지 IP를 gateway .1로 변경']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'.10은 10.77.10.0/25, .140은 10.77.10.128/25입니다. IP 목적지는 .140을 유지하고 L2 next-hop만 gateway가 됩니다.',evidence:'CP1에서 gateway .1 ARP/Reply가 관측됐고, 원격 ICMP의 IPv4 Destination은 .140으로 유지되었습니다. 같은 설정의 추가 정상 시험은 3/3 성공했습니다.'},
+    {title:'PC1 Mask만 /24면?',label:'3 · 잘못된 Mask',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','기존 gateway .1을 계속 사용'],['on','같은 Subnet으로 오판 · .140 직접 ARP'],['drop','Mask가 다르면 즉시 패킷 폐기']],next:'목적지 .140 직접',decision:'ON-LINK로 오판',validated:'PASS',explain:'/24에서는 .10과 .140이 모두 10.77.10.0/24로 계산됩니다. 그래서 gateway를 선택하기 전에 목적지를 on-link로 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
+    {title:'다시 /25로 복구하면?',label:'4 · 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 .140 직접 ARP'],['gw','다시 gateway .1 경유'],['none','ARP 없이 바로 ICMP 전송']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'Mask를 /25로 되돌리면 .140은 다시 다른 Prefix가 되어 정상 next-hop 판단으로 복구됩니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
+  ];
+  var idx=0,selected=null,done={};
+  var tabs=document.getElementById('tabs'),choices=document.getElementById('choices'),runBtn=document.getElementById('runBtn'),resetBtn=document.getElementById('resetBtn');
+  function ipToInt(ip){return ip.split('.').reduce(function(a,v){return ((a<<8)>>>0)+Number(v)},0)>>>0}
+  function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.')}
+  function mask(prefix){return prefix===0?0:(0xffffffff << (32-prefix))>>>0}
+  function net(ip,prefix){return intToIp(ipToInt(ip)&mask(prefix))+'/'+prefix}
+  function renderTabs(){tabs.innerHTML='';lessons.forEach(function(l,i){var b=document.createElement('button');b.className='tab'+(i===idx?' active':'');b.type='button';b.innerHTML='<b>'+l.label+'</b><small>'+l.title+'</small>';b.onclick=function(){idx=i;selected=null;render()};tabs.appendChild(b)})}
+  function renderDots(){var d=document.getElementById('dots');d.innerHTML='';lessons.forEach(function(_,i){var x=document.createElement('span');x.className='dot'+(done[i]?' done':'');d.appendChild(x)});document.getElementById('progressText').textContent=Object.keys(done).length+' / 4 완료'}
+  function render(){var l=lessons[idx];renderTabs();renderDots();document.getElementById('lessonNo').textContent='실습 '+(idx+1);document.getElementById('question').textContent=l.title;document.getElementById('questionHelp').textContent=l.src+'/'+l.prefix+'에서 '+l.dst+'로 보낼 때 송신자는 목적지를 어떻게 판단할까요?';choices.innerHTML='';l.choices.forEach(function(c){var b=document.createElement('button');b.className='choice';b.type='button';b.dataset.value=c[0];b.textContent=c[1];b.onclick=function(){selected=c[0];Array.prototype.forEach.call(choices.children,function(x){x.classList.toggle('selected',x===b);x.classList.remove('correct','wrong')});runBtn.disabled=false;document.getElementById('feedback').textContent='예상을 선택했습니다. 이제 실행해서 비교하세요.'};choices.appendChild(b)});runBtn.disabled=true;document.getElementById('resultArea').hidden=true;document.getElementById('feedback').textContent='먼저 예상 답을 선택하세요.'}
+  function run(){if(selected===null)return;var l=lessons[idx];Array.prototype.forEach.call(choices.children,function(b){if(b.dataset.value===l.answer)b.classList.add('correct');else if(b.dataset.value===selected)b.classList.add('wrong')});document.getElementById('feedback').textContent=selected===l.answer?'예상이 맞았습니다. 계산 근거를 확인하세요.':'예상과 달랐습니다. Network Prefix 계산을 기준으로 다시 보세요.';document.getElementById('srcIp').textContent=l.src+'/'+l.prefix;document.getElementById('dstIp').textContent=l.dst+'/'+l.prefix;var sn=net(l.src,l.prefix),dn=net(l.dst,l.prefix);document.getElementById('srcNet').textContent='Network · '+sn;document.getElementById('dstNet').textContent='Network · '+dn;document.getElementById('prefixOut').textContent='/'+l.prefix;document.getElementById('decisionOut').textContent=l.decision;document.getElementById('nextHopOut').textContent=l.next;document.getElementById('validatedOut').textContent=l.validated;document.getElementById('explainTitle').textContent=sn===dn?'Network Prefix가 같습니다.':'Network Prefix가 다릅니다.';document.getElementById('explainText').textContent=l.explain;document.getElementById('evidenceText').textContent=l.evidence;var strip=document.getElementById('networkStrip');if(l.prefix===25){strip.innerHTML='<div class="segment a '+((sn.indexOf('.0/25')>-1)?'active':'')+'"><strong>10.77.10.0/25</strong><span>.0 ~ .127</span></div><div class="segment b '+((dn.indexOf('.128/25')>-1)?'active':'')+'"><strong>10.77.10.128/25</strong><span>.128 ~ .255</span></div>'}else{strip.innerHTML='<div class="segment a active"><strong>10.77.10.0/24</strong><span>.0 ~ .255 · 두 주소가 같은 블록</span></div>'}document.getElementById('resultArea').hidden=false;done[idx]=true;renderDots();if(Object.keys(done).length===4)document.getElementById('complete').classList.add('show')}
+  runBtn.addEventListener('click',run);resetBtn.addEventListener('click',function(){selected=null;render()});render();
+})();
+</script>
+</body>
+</html>
