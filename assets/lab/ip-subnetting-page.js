@@ -270,3 +270,89 @@ document.querySelectorAll('[data-drill]').forEach(button => {
     document.querySelectorAll(`[data-case="${id}"]`).forEach(item => item.setAttribute('aria-pressed', String(item === button)));
   });
 });
+
+
+const evidenceTitle = document.querySelector('#evidence-title');
+const evidenceSummary = document.querySelector('#evidence-summary');
+const evidenceEnvironment = document.querySelector('#evidence-environment');
+const evidenceRun = document.querySelector('#evidence-run');
+const evidenceTableBody = document.querySelector('#evidence-table-body');
+const labStatusBadge = document.querySelector('#lab-status-badge');
+
+function phaseResultSummary(scenarios, phase) {
+  const rows = scenarios.filter(item => item.phase === phase);
+  if (!rows.length) return '—';
+  const counts = new Map();
+  for (const row of rows) counts.set(row.result || 'UNKNOWN', (counts.get(row.result || 'UNKNOWN') || 0) + 1);
+  return [...counts.entries()].map(([status, count]) => rows.length === 1 ? status : `${status} ${count}/${rows.length}`).join(' · ');
+}
+
+function evidenceArtifactCount(result) {
+  const values = [...(result.artifacts || [])];
+  for (const scenario of result.scenarios || []) values.push(...(scenario.artifacts || []));
+  return values.length;
+}
+
+async function loadEvidenceStatus() {
+  if (!evidenceTableBody) return;
+  try {
+    const response = await fetch('../results/ip-subnetting.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+    const status = result.status || 'UNKNOWN';
+    const labStatus = result.labStatus || 'unknown';
+    const scenarios = Array.isArray(result.scenarios) ? result.scenarios : [];
+    const artifactCount = evidenceArtifactCount(result);
+
+    if (labStatusBadge) labStatusBadge.textContent = `실제 Lab · ${status}`;
+
+    if (evidenceTitle) {
+      evidenceTitle.textContent = labStatus === 'not-run'
+        ? '교육 콘텐츠 준비 · 실제 PNETLab 검증 대기'
+        : labStatus === 'completed'
+          ? 'PNETLab 실제 검증 완료'
+          : 'PNETLab 실제 검증 진행 상태';
+    }
+
+    if (evidenceSummary) {
+      evidenceSummary.textContent = labStatus === 'not-run'
+        ? '아직 실제 PNETLab Lab을 실행하지 않았습니다. 정상·장애·복구의 actual은 비어 있고 PCAP/CLI artifact도 없습니다. 시뮬레이션 결과는 실제 Evidence로 승격하지 않습니다.'
+        : '이 표는 results/ip-subnetting.json의 실제 실행 상태를 표시합니다. PASS/FAIL/INCONCLUSIVE는 연결된 CLI·PCAP Evidence와 함께 해석해야 합니다.';
+    }
+
+    const environment = result.environment || {};
+    if (evidenceEnvironment) {
+      const kind = environment.kind === 'isolated-pnetlab' ? '격리 PNETLab' : (environment.kind || '환경 미기록');
+      const platform = [environment.platform, environment.version].filter(Boolean).join(' ');
+      evidenceEnvironment.textContent = platform ? `${kind} · ${platform}` : `${kind} · ${environment.verified ? '환경 확인됨' : '실행 전'}`;
+    }
+    if (evidenceRun) evidenceRun.textContent = `${result.runId || '미실행'} · artifact ${artifactCount}`;
+
+    const rows = [
+      ['정상', '같은 Subnet / 다른 Subnet', phaseResultSummary(scenarios, 'normal')],
+      ['장애', '잘못된 Mask / 잘못된 Gateway', phaseResultSummary(scenarios, 'failure')],
+      ['복구', 'Mask 복원 / Gateway 복원 후 재검증', phaseResultSummary(scenarios, 'recovery')]
+    ];
+    evidenceTableBody.replaceChildren();
+    for (const values of rows) {
+      const tr = document.createElement('tr');
+      for (const value of values) {
+        const td = document.createElement('td');
+        td.textContent = value;
+        tr.append(td);
+      }
+      evidenceTableBody.append(tr);
+    }
+  } catch (error) {
+    if (evidenceTitle) evidenceTitle.textContent = '실제 Lab 상태를 불러오지 못했습니다.';
+    if (evidenceSummary) evidenceSummary.textContent = '결과 manifest를 읽지 못했습니다. 교육 시뮬레이션을 실제 검증 결과로 해석하지 마세요.';
+    evidenceTableBody.replaceChildren();
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 3;
+    td.textContent = `상태 확인 실패: ${error.message}`;
+    tr.append(td);
+    evidenceTableBody.append(tr);
+  }
+}
+loadEvidenceStatus();
