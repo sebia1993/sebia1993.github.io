@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ethernet / MAC Table — 초급자 실습 가이드</title>
+<meta name="description" content="초급 네트워크 엔지니어를 위한 Ethernet MAC Table 학습 페이지. Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging을 실제 GNS3·FDB·PCAP으로 검증합니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<link rel="stylesheet" href="../ethernet-guide.css">
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#beginner-first">처음 읽기</a>
+      <a href="#topology">동작 그림</a>
+      <a href="#results">실험 결과</a>
+      <a href="#explanation">이해 확인</a>
+      <a href="#practical-extension" data-mode-link="advanced" hidden>실무 확장</a>
+      <a href="#operator-drills" data-mode-link="advanced" hidden>실전 문제</a>
+      <a href="#cli-workflow" data-mode-link="advanced" hidden>CLI 흐름</a>
+      <a href="#evidence" data-mode-link="advanced" hidden>원본 자료</a>
+    </nav>
+  </div>
+</header>
+<main>
+
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">FOUNDATION · BEGINNER FIRST · VERIFIED LAB</div>
+    <h1>Ethernet / <em>MAC Table</em></h1>
+    <p>이 Lab의 목표는 하나입니다.<br><b>스위치가 MAC 주소를 어떻게 배우고, 프레임을 어느 포트로 보낼지 어떻게 결정하는지</b> 이해하는 것입니다.</p>
+    <div class="status-row">
+      <span class="tag prod">구성·검증 완료</span>
+      <span class="tag learn">초급자 설명 우선</span>
+      <span class="tag proj">GNS3 · 실제 PCAP 근거</span>
+    </div>
+    <div class="result-metrics">
+      <article><strong>6</strong><span>전체 실험 · 패킷 5 + Aging 1</span></article>
+      <article><strong>15</strong><span>원본 PCAP · 5개 실험 × 3지점</span></article>
+      <article><strong>7</strong><span>핵심 동작 검증 항목</span></article>
+      <article><strong>1</strong><span>저장된 GNS3 Lab</span></article>
+    </div>
+    <p class="method-note"><b>처음부터 PCAP이나 FDB 명령을 해석할 필요는 없습니다.</b> 바로 아래 <b>00 · 처음 읽기</b>부터 보고, 그다음 실험은 “정말 그렇게 동작했는지 확인하는 증거”로 보면 됩니다.</p>
+    <div class="status-row">
+      <a class="btn primary" href="ethernet-mac-table-simulator.html">▶ Interactive Lab에서 직접 실습하기</a>
+    </div>
+  </div>
+</section>
+
+<section class="learning-mode-bar" aria-labelledby="learning-mode-title">
+  <div class="shell">
+    <div class="learning-mode-card">
+      <div>
+        <div class="eyebrow">LEARNING MODE · BEGINNER FIRST</div>
+        <h2 id="learning-mode-title">처음에는 기본 모드만 보세요.</h2>
+        <p>기본 흐름을 이해한 뒤 필요할 때 실무 확장·문제풀이·CLI를 추가로 펼칩니다.</p>
+      </div>
+      <div class="learning-mode-actions" role="group" aria-label="학습 모드 선택">
+        <button type="button" data-learning-mode="basic" aria-pressed="true">기본 모드 <small>처음 학습 권장</small></button>
+        <button type="button" data-learning-mode="advanced" aria-pressed="false">고급 모드 <small>실무·CLI 확장</small></button>
+      </div>
+      <p class="learning-mode-note" id="learning-mode-note" aria-live="polite">기본 모드: Source MAC Learning → Destination MAC 조회 → Known/Unknown/Broadcast → ARP와 FDB 분리 순서만 먼저 봅니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="beginner-first">
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">00 · 처음 읽기 · BEGINNER FIRST</div>
+        <h2>실험보다 먼저, 이것만 이해하세요.</h2>
+      </div>
+      <p>처음에는 용어를 외우지 말고<br><b>스위치가 프레임 하나를 처리하는 순서</b>만 따라가면 됩니다.</p>
+    </div>
+
+    <div class="test-guide">
+      <h3>30초 요약 · 딱 두 문장</h3>
+      <p><b>① Source MAC(출발지 MAC) = 스위치가 “이 장비가 어느 포트에 있는지” 학습할 때 봅니다.</b></p>
+      <p><b>② Destination MAC(목적지 MAC) = 스위치가 “이 프레임을 어느 포트로 내보낼지” 결정할 때 봅니다.</b></p>
+      <p>한 줄로 줄이면 <b>출발지를 보고 학습하고, 목적지를 보고 전달합니다.</b></p>
+    </div>
+
+    <div class="frame-anatomy" aria-label="Ethernet 프레임에서 MAC 학습과 전달 판단에 사용하는 필드">
+      <div class="frame-anatomy-head">
+        <div>
+          <span class="eyebrow">FRAME ANATOMY</span>
+          <h3>스위치가 실제로 보는 Ethernet Frame</h3>
+        </div>
+        <p>프레임의 앞부분만 보면 <b>Learning</b>과 <b>Forwarding</b>을 분리해서 이해할 수 있습니다.</p>
+      </div>
+      <div class="frame-fields">
+        <div class="frame-field frame-dst">
+          <small>Destination MAC</small>
+          <strong>PC2 MAC</strong>
+          <span>FDB 조회 → 출력 포트 결정</span>
+        </div>
+        <div class="frame-field frame-src">
+          <small>Source MAC</small>
+          <strong>PC1 MAC</strong>
+          <span>Learning → 수신 포트와 함께 기록</span>
+        </div>
+        <div class="frame-field">
+          <small>EtherType</small>
+          <strong>IPv4 / ARP</strong>
+          <span>상위 프로토콜 종류</span>
+        </div>
+        <div class="frame-field">
+          <small>Payload</small>
+          <strong>IP · ARP 데이터</strong>
+          <span>상위 계층 데이터</span>
+        </div>
+      </div>
+      <p class="method-note">학습에 필요한 핵심은 <b>Source MAC</b>, 전달 판단에 필요한 핵심은 <b>Destination MAC</b>입니다. 이해를 위해 Preamble·FCS 등은 생략했습니다.</p>
+    </div>
+
+    <div class="path-facts">
+      <article>
+        <span>① 프레임이 들어옴</span>
+        <h3>Source MAC을 봅니다.</h3>
+        <p>PC1 프레임이 1번 포트로 들어왔다면 스위치는 <b>PC1 MAC → 1번 포트</b>라고 기억합니다.</p>
+      </article>
+      <article>
+        <span>② 목적지를 찾음</span>
+        <h3>Destination MAC을 조회합니다.</h3>
+        <p>목적지가 PC2라면 MAC Table에서 <b>PC2 MAC이 어느 포트인지</b> 찾아봅니다.</p>
+      </article>
+      <article>
+        <span>③ 내보낼 곳을 결정</span>
+        <h3>다른 전달 포트를 알면 한 곳, 모르면 여러 곳</h3>
+        <p>PC2 MAC이 수신 포트가 아닌 특정 전달 포트에 학습되어 있으면 그 포트로만 보냅니다. FDB에 없으면 동일 VLAN/Broadcast Domain의 다른 전달 가능 포트로 <b>Flooding</b>합니다.</p>
+      </article>
+    </div>
+
+    <div class="note">
+      <b>가장 중요한 오개념:</b> 스위치는 <b>목적지 MAC을 배우려고 Flooding하는 것이 아닙니다.</b><br>
+      Flooding은 목적지 MAC이 어느 포트에 있는지 모를 때 프레임을 여러 포트로 전달하는 동작입니다. 스위치가 PC2의 위치를 배우는 순간은 <b>PC2가 보낸 프레임이 들어왔을 때</b>입니다. 그때 Source MAC이 PC2이므로 <b>PC2 MAC → 들어온 포트</b>를 학습합니다.
+    </div>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">KNOWN · UNKNOWN · BROADCAST</div>
+        <h2>세 가지는 이렇게 구별하세요.</h2>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>상황</th><th>목적지 MAC</th><th>스위치 상태</th><th>동작</th><th>쉽게 말하면</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Known Unicast</th>
+            <td>PC2의 실제 MAC</td>
+            <td>PC2 MAC → 2번 포트를 알고 있음</td>
+            <td><b>2번 포트로만 전달</b></td>
+            <td>“PC2가 어디 있는지 안다.”</td>
+          </tr>
+          <tr>
+            <th scope="row">Unknown Unicast</th>
+            <td>PC2의 실제 MAC</td>
+            <td>PC2가 어느 포트인지 모름</td>
+            <td>동일 VLAN/Broadcast Domain의 전달 가능한 포트 중 수신 포트를 제외하고 <b>Flooding</b></td>
+            <td>“PC2에게 가는 건 맞는데 어느 문인지 모른다.”</td>
+          </tr>
+          <tr>
+            <th scope="row">Broadcast</th>
+            <td><code>ff:ff:ff:ff:ff:ff</code></td>
+            <td>특정 한 장비의 포트를 찾는 상황이 아님</td>
+            <td>동일 VLAN/Broadcast Domain의 전달 가능한 포트 중 수신 포트를 제외하고 전달</td>
+            <td>“처음부터 같은 LAN 모두에게 보내는 주소다.”</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="method-note"><b>Unknown Unicast ≠ Broadcast</b>입니다. 둘 다 여러 포트로 나갈 수 있지만, Unknown Unicast의 Destination MAC은 여전히 <b>PC2의 실제 MAC</b>입니다. Broadcast만 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">FIRST PING · FULL FLOW</div>
+        <h2>처음 Ping할 때 실제로는 어떤 순서일까요?</h2>
+      </div>
+      <p>PC1과 PC2가 같은 서브넷이고<br>ARP Cache와 MAC Table이 비어 있다고 가정합니다.</p>
+    </div>
+    <div class="grid grid3">
+      <article class="card">
+        <span class="tag learn">STEP 1</span>
+        <h3>PC1이 PC2의 MAC을 모릅니다.</h3>
+        <p>PC1은 먼저 <b>ARP Request</b>로 “192.168.10.20의 MAC 주소가 뭐야?”라고 묻습니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag learn">STEP 2</span>
+        <h3>ARP Request가 Switch에 들어옵니다.</h3>
+        <p>Source MAC은 PC1입니다. 스위치는 먼저 <b>PC1 MAC → 들어온 포트</b>를 학습합니다. ARP Request는 Broadcast이므로 다른 포트에도 전달합니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag learn">STEP 3</span>
+        <h3>PC2가 ARP Reply를 보냅니다.</h3>
+        <p>이번에는 Source MAC이 PC2입니다. 스위치는 <b>PC2 MAC → 들어온 포트</b>를 학습합니다.</p>
+      </article>
+      <article class="card">
+        <span class="tag prod">STEP 4</span>
+        <h3>이제 Ping은 Known Unicast가 됩니다.</h3>
+        <p>PC1은 PC2의 MAC을 알고, 스위치는 PC2의 포트를 압니다. 따라서 ICMP Echo Request는 <b>PC2 포트로만</b> 전달됩니다.</p>
+      </article>
+    </div>
+
+    <div class="first-ping-lab" id="first-ping-lab">
+      <div class="first-ping-head">
+        <div>
+          <span class="eyebrow">INTERACTIVE TIMELINE · FIRST PING</span>
+          <h3>FDB와 ARP Cache가 변하는 순간을 순서대로 보세요.</h3>
+        </div>
+        <div class="timeline-actions">
+          <button type="button" id="ping-autoplay">▶ 자동 재생</button>
+          <button type="button" id="ping-reset">처음으로</button>
+        </div>
+      </div>
+
+      <div class="timeline-steps" role="group" aria-label="첫 Ping 진행 단계">
+        <button type="button" data-ping-step="0" aria-pressed="true"><span>0</span>초기 상태</button>
+        <button type="button" data-ping-step="1" aria-pressed="false"><span>1</span>ARP Request</button>
+        <button type="button" data-ping-step="2" aria-pressed="false"><span>2</span>ARP Reply</button>
+        <button type="button" data-ping-step="3" aria-pressed="false"><span>3</span>ICMP Request</button>
+        <button type="button" data-ping-step="4" aria-pressed="false"><span>4</span>ICMP Reply</button>
+      </div>
+
+      <div class="timeline-progress" aria-hidden="true"><span id="ping-progress"></span></div>
+
+      <div class="timeline-scene" aria-live="polite" aria-atomic="true">
+        <article class="timeline-event">
+          <small id="ping-phase">READY</small>
+          <h4 id="ping-title">ARP Cache와 FDB가 비어 있습니다.</h4>
+          <p id="ping-description">PC1은 PC2의 MAC 주소를 모르고, SW1도 PC1·PC2의 위치를 아직 학습하지 않은 상태에서 시작합니다.</p>
+          <div class="timeline-frame" id="ping-frame">
+            <span>아직 전송된 프레임 없음</span>
+          </div>
+        </article>
+
+        <div class="timeline-state-grid">
+          <article>
+            <small>PC1 · ARP CACHE</small>
+            <strong id="ping-arp-state">PC2 항목 없음</strong>
+            <p id="ping-arp-detail">192.168.10.20의 MAC을 아직 모름</p>
+          </article>
+          <article>
+            <small>SW1 · FDB</small>
+            <strong id="ping-fdb-state">동적 PC 엔트리 없음</strong>
+            <p id="ping-fdb-detail">PC1·PC2가 어느 포트인지 아직 모름</p>
+          </article>
+          <article>
+            <small>SW1 · FORWARDING</small>
+            <strong id="ping-forward-state">대기</strong>
+            <p id="ping-forward-detail">프레임이 들어오면 Source 학습 후 Destination을 판단</p>
+          </article>
+        </div>
+      </div>
+
+      <p class="method-note"><b>핵심 관찰:</b> ARP는 PC의 <b>IP → MAC</b> 정보가 채워지는 과정이고, 동시에 스위치는 오가는 프레임의 <b>Source MAC → Port</b>를 학습합니다. 두 표는 서로 다른 장비가 서로 다른 목적으로 유지합니다.</p>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">ARP TABLE vs MAC TABLE</div>
+        <h2>PC가 아는 정보와 Switch가 아는 정보는 다릅니다.</h2>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>표</th><th>주로 누가 보유?</th><th>기억하는 관계</th><th>쉬운 질문</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">ARP Cache / ARP Table</th><td>PC, Router 등</td><td><b>IP → MAC</b></td><td>“192.168.10.20의 MAC이 뭐지?”</td></tr>
+          <tr><th scope="row">MAC Table / FDB</th><td>Switch / Bridge</td><td><b>MAC → Port</b></td><td>“이 MAC은 어느 포트 쪽에 있지?”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note practice-note">
+      <b>실무 정확도 · VLAN도 함께 생각하기:</b> 실무에서는 MAC 주소만 단독으로 보지 않고 <b>VLAN/Forwarding Domain의 문맥과 함께</b> 확인해야 합니다. 많은 Enterprise Switch는 MAC Table 출력에서 VLAN·MAC·Port를 함께 보여주며, 내부 FDB 구조와 학습 범위는 장비 구현에 따라 달라질 수 있습니다. 이 Lab은 단일 Broadcast Domain만 사용하므로 초급 설명에서는 <b>MAC → Port</b>로 단순화했습니다.
+    </div>
+    <div class="test-guide">
+      <h3>그래서 ARP에는 있는데 MAC Table에는 없을 수도 있습니다.</h3>
+      <p>PC1이 <b>PC2의 MAC 주소</b>를 알아도, 스위치가 <b>PC2가 어느 포트에 있는지</b> 모를 수 있습니다. 아래 04번 Unknown Unicast 실험이 바로 이 상태를 일부러 만든 것입니다.</p>
+    </div>
+
+    <details class="test-commands">
+      <summary>용어가 헷갈리면 여기만 펼쳐보세요</summary>
+      <p><b>MAC Table = FDB(Forwarding Database)</b> · 이 페이지에서는 같은 의미로 봐도 됩니다.</p>
+      <p><b>Learning</b> · 들어온 프레임의 Source MAC과 수신 포트를 기록하는 것.</p>
+      <p><b>Forwarding</b> · Destination MAC을 보고 적절한 출력 포트로 프레임을 보내는 것.</p>
+      <p><b>Flooding</b> · 출력 포트를 하나로 정할 수 없거나 Broadcast일 때 동일 VLAN/Broadcast Domain에서 전달 가능한 여러 포트로 프레임을 보내는 것.</p>
+      <p><b>Aging</b> · 일정 시간 동안 갱신되지 않은 동적 MAC Table 항목을 지우는 것.</p>
+    </details>
+    <p class="method-note">여기까지 읽었다면 아래부터는 새 개념이라기보다 <b>위 설명이 실제로 맞는지 GNS3·FDB·PCAP으로 확인하는 구간</b>입니다. 한 번에 전부 이해할 필요 없습니다.</p>
+  </div>
+</section>
+
+<section id="topology">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">01 · 그림으로 확인</div><h2>세 PC, 하나의 Broadcast Domain</h2></div>
+      <p>VPCS 3대 · Linux Bridge 1대<br>Gateway·NAT·외부 네트워크 연결 없음.</p>
+    </div>
+    <div class="filter-bar" role="group" aria-label="요청 프레임 경로 선택" id="path-controls">
+      <button type="button" data-path="known" aria-pressed="true">포트를 아는 유니캐스트<br><small>Known Unicast</small></button>
+      <button type="button" data-path="unknown" aria-pressed="false">포트를 모르는 유니캐스트<br><small>Unknown Unicast</small></button>
+      <button type="button" data-path="broadcast" aria-pressed="false">모두에게 보내는 주소<br><small>Broadcast</small></button>
+    </div>
+    <p class="method-note"><b>보는 순서:</b> 받은 프레임의 Source/Destination MAC → MAC Table 상태 → 스위치의 출력 결정.</p>
+
+    <div class="lab-scope">
+      <b>이 Lab의 범위:</b> 단일 VLAN/Broadcast Domain · 모든 링크 Forwarding 상태 · Port Isolation 없음 · Unknown-Unicast 차단/억제 없음 · Gateway/NAT 없음. 실제 네트워크에서는 VLAN, STP 상태, 보안 기능 등에 따라 Flooding 가능한 포트 범위가 달라질 수 있습니다.
+    </div>
+    <details class="test-commands scope-details">
+      <summary>이 동작 그림이 모델링하지 않는 항목</summary>
+      <p>VLAN/Trunk 구성 변경, STP Blocking/Topology Change, Port-Security·MAC 제한, Static MAC, Unknown-Unicast Suppression, 링크 장애, 실시간 FDB Aging 상태 전이는 이 그림에서 시뮬레이션하지 않습니다.</p>
+      <p>06번 Aging은 별도의 실제 Linux Bridge 실험 결과로 검증했으며, 아래 동작 그림 자체가 Aging 타이머를 재현하는 것은 아닙니다.</p>
+    </details>
+
+    <div class="prediction-card" id="unknown-prediction">
+      <span class="eyebrow">PREDICT BEFORE CHECKING</span>
+      <h3>먼저 예상해보세요 · PC3 링크에서도 보일까요?</h3>
+      <p>PC1의 ARP Cache에는 <b>PC2 MAC이 남아 있지만</b>, SW1의 FDB에서 <b>PC2 MAC 항목만 삭제</b>했습니다. 이 상태에서 PC1이 PC2로 Unicast를 보내면 PC3 연결 링크에서도 그 프레임이 관찰될까요?</p>
+      <div class="prediction-actions" role="group" aria-label="Unknown Unicast 예측 답변">
+        <button type="button" data-prediction="yes" aria-pressed="false">보인다</button>
+        <button type="button" data-prediction="no" aria-pressed="false">안 보인다</button>
+      </div>
+      <div class="prediction-result" id="prediction-result" aria-live="polite" hidden></div>
+    </div>
+
+    <div class="path-facts" aria-live="polite" aria-atomic="true">
+      <article><span>① 받은 프레임</span><h3 id="frame-destination">목적지 MAC: PC2</h3><p id="frame-source">출발지 MAC: PC1 · PC2행 ICMP 요청</p></article>
+      <article><span>② 스위치 MAC Table</span><h3 id="table-state">PC2 MAC → 2번 포트</h3><p id="source-learning">수신한 출발지 PC1 MAC → 1번 포트 학습·갱신</p></article>
+      <article><span>③ 출력 결정</span><h3 id="forward-state">2번 포트로만 전달</h3><p id="copy-state">목적지 MAC은 PC2 그대로</p></article>
+    </div>
+
+    <div class="mobile-path-flow" aria-live="polite" aria-atomic="true">
+      <div class="mobile-flow-node source">
+        <small>INGRESS</small>
+        <strong id="mobile-source-device">PC1</strong>
+        <span id="mobile-source-detail">프레임을 SW1으로 전송</span>
+      </div>
+      <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
+      <div class="mobile-flow-node switch">
+        <small>SW1 · FDB LOOKUP</small>
+        <strong id="mobile-switch-state">PC2 MAC → 2번 포트</strong>
+        <span>Source MAC 학습 후 Destination MAC 조회</span>
+      </div>
+      <div class="mobile-flow-arrow" aria-hidden="true">↓</div>
+      <div class="mobile-flow-branches">
+        <div class="mobile-flow-node">
+          <small id="mobile-primary-label">PC2 링크</small>
+          <strong id="mobile-pc2-state">전달</strong>
+        </div>
+        <div class="mobile-flow-node">
+          <small id="mobile-secondary-label">PC3 링크</small>
+          <strong id="mobile-pc3-state">전달하지 않음</strong>
+        </div>
+      </div>
+      <p>모바일에서는 위 흐름을 먼저 보고, 아래 상세 토폴로지는 필요할 때 좌우로 확인하세요.</p>
+    </div>
+
+    <div class="path-scroll">
+      <div class="path-diagram">
+        <img class="result-topology" src="../ethernet-topology.svg" alt="PC1 .10은 eth0, PC2 .20은 eth1, PC3 .30은 eth2에 연결된 Linux Bridge 구성">
+        <svg class="path-overlay" viewBox="0 0 1400 620" aria-hidden="true">
+          <defs><marker id="request-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#b45309"/></marker></defs>
+          <g><rect x="445" y="142" width="540" height="55" rx="10" fill="#fff" stroke="#b45309" stroke-width="2"/><text id="diagram-destination" x="715" y="178" text-anchor="middle" fill="#172b43" font-family="sans-serif" font-size="23" font-weight="bold">목적지 MAC: PC2 · 변경 없음</text></g>
+          <g fill="none" stroke="#b45309" stroke-width="5" stroke-dasharray="10 5" marker-end="url(#request-arrow)"><path id="path-pc1" d="M316 225H465V294H635"/><path id="path-pc2" d="M641 326H465V416H322"/><path id="path-pc3" d="M765 309H1040" visibility="hidden"/></g>
+        </svg>
+      </div>
+    </div>
+    <div class="path-observer"><b id="observer-state">PC3 링크: 이 요청을 전달하지 않음</b><p id="scope-state">PC1 → PC2 통신 · 근거 실험 02</p></div>
+    <div id="learning-steps" hidden>
+      <p><b>Unknown Unicast 이후를 한 단계씩 보기</b></p>
+      <div class="filter-bar" role="group" aria-label="재학습 단계">
+        <button type="button" data-step="request" aria-pressed="true">1. 요청 Flooding</button>
+        <button type="button" data-step="reply" aria-pressed="false">2. PC2 응답과 학습</button>
+        <button type="button" data-step="next" aria-pressed="false">3. 다음 요청</button>
+      </div>
+    </div>
+    <div class="path-caption" aria-live="polite" aria-atomic="true">
+      <h3 id="path-title">Known Unicast · PC2 포트로만 전달</h3>
+      <p id="path-detail">PC1 → SW1 eth0 / port 1 수신 → eth1 / port 2 송신. 목적지 MAC: 00:50:79:66:68:01.</p>
+      <a id="path-evidence" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc2-sw1">PC2 전달 패킷 확인 →</a>
+      <a id="path-compare" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 미전달 비교 →</a>
+    </div>
+    <p class="method-note">갈색 점선은 <b>현재 선택한 프레임의 이동 방향</b>을 뜻하며 ARP/ICMP 같은 프로토콜 종류를 색으로 구분한 것이 아닙니다. 실제 PCAP에 근거한 설명 그림이며 실시간 애니메이션은 아닙니다.</p>
+  </div>
+</section>
+
+<section id="fdb-timeline">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">FDB · BEFORE / AFTER</div><h2>실제로 Source MAC이 학습되는 순간</h2></div></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>관찰 시점</th><th>MAC Table 상태</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">① 초기화 직후</th><td>PC 동적 엔트리 없음</td><td>아직 PC 위치를 모름</td></tr>
+          <tr><th scope="row">② PC1 ARP Request 수신</th><td><code>PC1 MAC → port 1</code></td><td>PC1이 보낸 프레임을 받아 PC1 위치 학습</td></tr>
+          <tr><th scope="row">③ PC2 ARP Reply 수신</th><td><code>PC1 MAC → port 1</code><br><code>PC2 MAC → port 2</code></td><td>PC2가 보낸 응답을 받아 PC2 위치도 학습</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>핵심:</b> PC2를 찾기 위해 Flooding했다고 PC2 위치를 자동으로 배우는 것이 아닙니다. <b>PC2가 응답을 보내고 그 프레임이 들어와야</b> PC2의 Source MAC과 수신 포트를 학습합니다.</div>
+    <p><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">01번 실제 FDB·콘솔 기록 보기 →</a></p>
+  </div>
+</section>
+
+<section id="results">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">02 · 실제 실험</div><h2>이제 설명이 실제로 맞는지 확인합니다.</h2></div>
+      <p>처음에는 번호 · 확인 목적 · 결과만 보세요.<br>명령과 PCAP은 필요할 때 펼쳐보면 됩니다.</p>
+    </div>
+    <div class="filter-bar" role="group" aria-label="실험 종류 필터">
+      <button type="button" data-filter="all" aria-pressed="true">전체 6</button>
+      <button type="button" data-filter="learning" aria-pressed="false">학습·재학습 2</button>
+      <button type="button" data-filter="forward" aria-pressed="false">전달·Flooding 3</button>
+      <button type="button" data-filter="aging" aria-pressed="false">Aging 1</button>
+    </div>
+    <div class="table-scroll scenario-table">
+      <table>
+        <thead><tr><th>번호</th><th>무엇을 확인?</th><th>쉽게 말하면</th><th>실제 결과</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr data-kind="learning">
+            <td>01</td><td><b>Source MAC Learning</b></td><td>스위치는 누구의 MAC을 보고 배우나?</td><td>PC1 프레임을 받자 PC1→port1 학습. PC2 응답을 받은 뒤 PC2→port2 추가.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">FDB·콘솔 ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>02</td><td><b>Known Unicast</b></td><td>PC2 위치를 알고 있으면?</td><td>PC2 포트로만 요청 전달. PC3 링크에는 요청 0개.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">PC3 PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>03</td><td><b>Broadcast</b></td><td>ARP Request처럼 처음부터 모두에게 보내면?</td><td>목적지 MAC <code>ff:ff:ff:ff:ff:ff</code>인 ARP Request가 PC2·PC3 링크에 전달.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=03-broadcast&amp;point=pc3-sw1">Broadcast PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="forward">
+            <td>04</td><td><b>Unknown Unicast</b></td><td>PC1은 PC2 MAC을 아는데 스위치만 PC2 포트를 모르면?</td><td>목적지 MAC은 PC2 그대로지만 PC2와 PC3 포트 모두로 Flooding.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">PC3의 Unicast PCAP ↗</a></td>
+          </tr>
+          <tr data-kind="learning">
+            <td>05</td><td><b>MAC Re-learning</b></td><td>PC2가 응답하면 다시 배울까?</td><td>PC2 응답의 Source MAC으로 PC2→port2 재학습. 다음 요청은 PC3로 가지 않음.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">재학습 기록 ↗</a></td>
+          </tr>
+          <tr data-kind="aging">
+            <td>06</td><td><b>Aging</b></td><td>오래 통신하지 않으면 MAC Table은?</td><td>실험용 Aging 시간을 5초로 낮추자 동적 MAC 엔트리가 시간 경과 후 사라짐.<div class="pass result-pass">✓ PASS</div></td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">Aging 콘솔 ↗</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="packets">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · 제일 중요한 비교</div><h2>Known과 Unknown은 목적지 MAC이 같습니다.</h2></div></div>
+    <div class="packet-grid">
+      <article class="packet-card">
+        <span class="eyebrow">KNOWN UNICAST</span>
+        <h3>PC2 위치를 알고 있음</h3>
+        <dl><dt>목적지 MAC</dt><dd>PC2 실제 MAC</dd><dt>SW1 FDB</dt><dd class="unchanged">PC2 MAC → port 2 있음</dd><dt>결과</dt><dd>PC2 포트로만 전달</dd><dt>PC3</dt><dd class="unchanged">요청 0개</dd></dl>
+        <a class="btn" href="../ethernet-viewer.html?mode=packets&amp;scenario=02-known-unicast&amp;point=pc3-sw1">Known 실제 PCAP ↗</a>
+      </article>
+      <article class="packet-card">
+        <span class="eyebrow">UNKNOWN UNICAST</span>
+        <h3>PC2 위치를 모름</h3>
+        <dl><dt>목적지 MAC</dt><dd>PC2 실제 MAC · <b>그대로</b></dd><dt>SW1 FDB</dt><dd class="changed">PC2 MAC 없음</dd><dt>결과</dt><dd>PC2·PC3 포트로 Flooding</dd><dt>PC3</dt><dd class="changed">PC2 목적지 Unicast가 보임</dd></dl>
+        <a class="btn primary" href="../ethernet-viewer.html?mode=packets&amp;scenario=04-unknown-unicast&amp;point=pc3-sw1">Unknown 실제 PCAP ↗</a>
+      </article>
+    </div>
+    <div style="height:18px"></div>
+    <div class="note"><b>Unknown은 “목적지 MAC을 모른다”는 뜻이 아닙니다.</b> 정확히는 스위치의 FDB에 <b>그 목적지 MAC이 어느 포트에 있는지 정보가 없다</b>는 뜻입니다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · ARP와 FDB 분리</div><h2>ARP가 남아 있어도 Switch는 모를 수 있습니다.</h2></div></div>
+    <div class="grid grid3">
+      <article class="card"><span class="tag learn">ARP · IP → MAC</span><h3>PC1이 알고 있는 정보</h3><p>“192.168.10.20은 PC2 MAC을 사용한다.” 그래서 새 ARP 없이 PC2 목적지 Unicast 프레임을 만들 수 있습니다.</p></article>
+      <article class="card"><span class="tag learn">FDB · MAC → PORT</span><h3>Switch가 알고 있는 정보</h3><p>“PC2 MAC은 2번 포트에 있다.” 이 정보가 없으면 목적지 프레임을 어느 한 포트로 보낼지 결정할 수 없습니다.</p></article>
+      <article class="card"><span class="tag prod">04번 실험</span><h3>ARP만 남기고 FDB를 삭제</h3><p>PC1은 PC2 MAC을 알고 있지만 SW1은 PC2 포트를 모르는 상태를 만들어 Unknown Unicast Flooding을 직접 확인했습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="explanation">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">06 · 이해 확인</div><h2>이 네 문장을 자신의 말로 설명할 수 있으면 됩니다.</h2></div><span class="tag learn">초급 핵심</span></div>
+    <div class="learning-checks">
+      <article class="card"><h3>1. Switch는 어느 MAC을 보고 학습하나요?</h3><details class="test-commands"><summary>답 확인</summary><p><b>Source MAC</b>입니다. 그리고 그 프레임이 들어온 포트를 함께 기록합니다.</p></details></article>
+      <article class="card"><h3>2. Destination MAC을 FDB에서 못 찾으면?</h3><details class="test-commands"><summary>답 확인</summary><p>동일 VLAN/Broadcast Domain에서 전달 가능한 포트 중 수신 포트를 제외하고 <b>Unknown Unicast Flooding</b>합니다.</p></details></article>
+      <article class="card"><h3>3. Unknown Unicast와 Broadcast는 같은가요?</h3><details class="test-commands"><summary>답 확인</summary><p>아닙니다. Unknown Unicast의 목적지 MAC은 특정 장비의 실제 MAC이고, Broadcast는 <code>ff:ff:ff:ff:ff:ff</code>입니다.</p></details></article>
+      <article class="card"><h3>4. ARP Table과 MAC Table의 차이는?</h3><details class="test-commands"><summary>답 확인</summary><p>ARP는 <b>IP → MAC</b>, Switch MAC Table/FDB는 <b>MAC → Port</b>를 기억합니다.</p></details></article>
+    </div>
+    <p class="method-note">이 네 가지가 아직 헷갈리면 아래 주제로 넘어가지 않아도 됩니다. 이 페이지의 목표는 용어 암기가 아니라 <b>프레임이 왜 그 포트로 이동하는지 설명할 수 있게 되는 것</b>입니다.</p>
+  </div>
+</section>
+
+<section id="advanced-entry" class="advanced-entry" data-basic-only>
+  <div class="shell">
+    <div class="advanced-entry-card">
+      <div>
+        <div class="eyebrow">NEXT · OPTIONAL</div>
+        <h2>기본 흐름이 이해됐다면 실무 확장으로 넘어가세요.</h2>
+        <p>MAC Move·Flapping, 운영 판단 문제, Aruba/Cisco CLI 흐름, 원본 검증 자료는 고급 모드에서 확인할 수 있습니다.</p>
+      </div>
+      <button type="button" id="enable-advanced">고급 모드로 전환해 계속 보기 →</button>
+    </div>
+  </div>
+</section>
+
+<section id="practical-extension" data-learning-level="advanced" hidden>
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">PRACTICAL EXTENSION · NEXT STEP</div>
+        <h2>실무에서 MAC Table을 보면 여기까지 연결됩니다.</h2>
+      </div>
+      <p>기초 Learning을 이해한 뒤 자주 마주치는<br><b>MAC Move · Flapping · Trunk/Uplink</b>을 연결합니다.</p>
+    </div>
+
+    <div class="practical-grid">
+      <article class="practical-card">
+        <span class="tag learn">MAC MOVE</span>
+        <h3>같은 MAC이 다른 포트에서 들어오면?</h3>
+        <div class="practical-fdb">
+          <code>VLAN 10 · AA:AA → port 2</code>
+          <span>↓ 새 프레임의 Source MAC이 port 5에서 관찰</span>
+          <code>VLAN 10 · AA:AA → port 5</code>
+        </div>
+        <p>스위치는 일반적으로 같은 VLAN에서 해당 Source MAC을 새 포트에서 학습하면 <b>FDB의 위치를 새 포트로 갱신</b>합니다. 단말 이동, AP 로밍 뒤 유선 경로 변화, 토폴로지 변경 등 정상 상황에서도 발생할 수 있습니다.</p>
+      </article>
+
+      <article class="practical-card">
+        <span class="tag prod">MAC FLAPPING</span>
+        <h3>같은 MAC의 위치가 계속 왕복한다면?</h3>
+        <div class="flap-flow" aria-label="MAC flapping 예시">
+          <code>port 2</code><b>↔</b><code>port 5</code><b>↔</b><code>port 2</code>
+        </div>
+        <p>짧은 시간에 같은 VLAN·MAC 엔트리가 여러 포트 사이를 반복 이동하면 흔히 <b>MAC Flapping</b>이라고 부릅니다. L2 Loop, 잘못된 이중 연결, 가상화·Bonding 구성, 무선/유선 브리지 구조 등 여러 원인이 가능하므로 <b>로그와 토폴로지를 함께 확인</b>해야 합니다.</p>
+      </article>
+
+      <article class="practical-card">
+        <span class="tag proj">TRUNK / UPLINK</span>
+        <h3>한 포트에 MAC이 수십·수백 개 보이는 이유</h3>
+        <div class="trunk-visual">
+          <div><span>PC A</span><span>PC B</span><span>AP Clients</span></div>
+          <b>→ Access Switch →</b>
+          <code>Uplink / Trunk port</code>
+        </div>
+        <p>스위치는 <b>프레임이 실제로 들어온 포트</b>에 Source MAC을 학습합니다. 따라서 하위 스위치나 AP가 연결된 Uplink/Trunk에서는 그 뒤에 있는 여러 단말의 Source MAC이 <b>같은 물리 포트 방향</b>으로 학습되는 것이 정상입니다.</p>
+      </article>
+    </div>
+
+    <div class="table-scroll practical-table">
+      <table>
+        <thead><tr><th>MAC Table에서 본 현상</th><th>먼저 생각할 것</th><th>바로 장애인가?</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">MAC이 한 번 다른 포트로 이동</th><td>단말/경로가 실제 이동했는지 확인</td><td>아니요. 정상 MAC Move일 수 있음</td></tr>
+          <tr><th scope="row">같은 MAC이 포트 사이에서 반복 이동</th><td>Loop·이중 연결·Bonding·Bridge 구조와 로그 확인</td><td>원인 분석 필요</td></tr>
+          <tr><th scope="row">Uplink 한 포트에 MAC 다수</th><td>그 포트 뒤에 Switch/AP/Hypervisor 등이 있는지 확인</td><td>대개 정상적인 집선 결과</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>운영 관점:</b> MAC Table은 단순 주소 목록이 아니라 <b>“이 Source MAC이 어느 L2 경로에서 관찰되고 있는가”</b>를 보여주는 상태 정보입니다. 장애 분석에서는 VLAN, 포트 역할, STP 상태, 연결 토폴로지, 시간에 따른 MAC 이동을 함께 봐야 합니다.</div>
+  </div>
+</section>
+
+<section id="operator-drills" data-learning-level="advanced" hidden>
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">OPERATOR DRILLS · TROUBLESHOOTING</div>
+        <h2>MAC Table을 보고 먼저 무엇을 판단해야 할까요?</h2>
+      </div>
+      <p>정답보다 중요한 것은 <b>근거 없이 단정하지 않는 것</b>입니다.<br>각 상황에서 가장 먼저 할 판단을 골라보세요.</p>
+    </div>
+
+    <div class="drill-summary">
+      <div>
+        <small>진행 현황</small>
+        <strong><span id="drill-answered">0</span> / 5</strong>
+      </div>
+      <div>
+        <small>정답</small>
+        <strong><span id="drill-correct">0</span> / 5</strong>
+      </div>
+      <button type="button" id="drill-reset">전체 다시 풀기</button>
+    </div>
+
+    <div class="operator-drills">
+
+      <article class="drill-card" data-drill="1">
+        <div class="drill-head">
+          <span class="drill-number">01</span>
+          <div><small>MAC FLAPPING</small><h3>같은 MAC이 두 포트를 계속 왕복합니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>VLAN 20 · AA:AA:AA:AA:AA:01 → port 12</code>
+          <code>2초 후 → port 18</code>
+          <code>1초 후 → port 12</code>
+          <code>다시 → port 18</code>
+        </div>
+        <p class="drill-question">이 정보만 보고 가장 적절한 1차 판단은?</p>
+        <div class="drill-options" role="group" aria-label="문제 1 선택지">
+          <button type="button" data-choice="a">A. L2 Loop가 확실하므로 즉시 port 18을 Shutdown한다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. 비정상 가능성이 높지만 원인을 단정하지 말고 두 포트의 연결 대상·로그·STP·Bonding/Bridge 구조를 확인한다.</button>
+          <button type="button" data-choice="c">C. MAC Table은 원래 계속 바뀌므로 확인할 필요가 없다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 짧은 시간에 동일 VLAN의 같은 MAC이 포트 사이를 반복 이동하면 MAC Flapping으로 볼 수 있습니다. 하지만 원인은 L2 Loop뿐 아니라 이중 연결, NIC Teaming/Bonding, 가상화 Bridge, 특수한 무선·유선 구조 등도 가능합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> port 12/18의 LLDP·연결 장비, STP 상태/Topology Change, 인터페이스 로그, MAC Move 로그, 해당 단말의 이중 연결 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="2">
+        <div class="drill-head">
+          <span class="drill-number">02</span>
+          <div><small>UPLINK / TRUNK</small><h3>한 포트에 MAC 주소가 200개 보입니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>port 48 · trunk/uplink</code>
+          <code>learned dynamic MACs: 200+</code>
+          <code>downstream: access switch</code>
+        </div>
+        <p class="drill-question">가장 적절한 판단은?</p>
+        <div class="drill-options" role="group" aria-label="문제 2 선택지">
+          <button type="button" data-choice="a">A. 한 물리 포트에는 MAC 하나만 있어야 하므로 장애다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. 하위 스위치의 Uplink라면 여러 단말 MAC이 같은 포트 방향으로 학습되는 것이 정상일 수 있다.</button>
+          <button type="button" data-choice="c">C. 모든 MAC을 Static으로 변경해야 한다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 스위치는 Source MAC이 들어온 방향을 학습합니다. 하위 Access Switch, AP, Hypervisor 같은 집선 장비가 뒤에 있다면 많은 단말 MAC이 하나의 Uplink 방향으로 보이는 것은 자연스럽습니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 해당 포트의 역할(Access/Trunk/Uplink), LLDP Neighbor, 허용 VLAN, 하위 장비 종류, 평소 MAC 개수와 급격한 증감 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="3">
+        <div class="drill-head">
+          <span class="drill-number">03</span>
+          <div><small>ARP EXISTS · FDB MISSING</small><h3>PC는 목적지 MAC을 아는데 Switch에는 없습니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>PC1 ARP: 192.168.10.20 → PC2 MAC</code>
+          <code>SW1 FDB: PC2 MAC 없음</code>
+          <code>PC1 → PC2 Unicast 전송 시작</code>
+        </div>
+        <p class="drill-question">첫 Unicast Frame을 받은 SW1의 동작은?</p>
+        <div class="drill-options" role="group" aria-label="문제 3 선택지">
+          <button type="button" data-choice="a">A. PC1도 목적지를 모르므로 새 ARP Request로 바꿔서 보낸다.</button>
+          <button type="button" data-choice="b">B. Destination MAC을 Broadcast 주소로 변경한다.</button>
+          <button type="button" data-choice="c" data-correct="true">C. Destination MAC은 그대로 두고 동일 VLAN의 전달 가능한 다른 포트로 Unknown Unicast Flooding한다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> PC의 ARP Cache와 스위치의 FDB는 별개입니다. PC1은 이미 PC2 MAC을 알고 있으므로 Unicast Frame을 만듭니다. SW1은 그 Destination MAC의 출력 포트를 모르기 때문에 MAC을 변경하지 않고 Flooding합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> PC2가 응답하면 Source MAC으로 다시 학습되는지, 이후 동일 통신이 Known Unicast로 바뀌는지 확인.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="4">
+        <div class="drill-head">
+          <span class="drill-number">04</span>
+          <div><small>AGING</small><h3>통신이 한동안 없었던 뒤 FDB 엔트리만 사라졌습니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>PC1 ARP Cache: PC2 항목 유지</code>
+          <code>SW1 FDB: PC2 dynamic entry aged out</code>
+          <code>PC1이 다시 PC2로 패킷 전송</code>
+        </div>
+        <p class="drill-question">가장 가능성 높은 첫 L2 동작은?</p>
+        <div class="drill-options" role="group" aria-label="문제 4 선택지">
+          <button type="button" data-choice="a" data-correct="true">A. PC2 목적지 Unicast를 Unknown Unicast로 Flooding하고, PC2가 프레임을 보내면 다시 학습한다.</button>
+          <button type="button" data-choice="b">B. FDB가 Aging되면 PC1의 ARP Cache도 스위치가 함께 삭제한다.</button>
+          <button type="button" data-choice="c">C. Aging된 MAC은 재부팅 전까지 다시 학습하지 않는다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 동적 FDB Aging은 스위치가 MAC → Port 위치 정보를 잊는 동작입니다. PC의 ARP Cache가 아직 남아 있다면 새 ARP 없이 목적지 MAC을 그대로 사용한 Unicast가 생성될 수 있고, 스위치는 그 MAC의 포트를 모르면 Flooding합니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 실제 FDB Aging Timer, ARP Cache 유효 상태, 대상의 응답 여부, 응답 후 FDB 재학습 여부.</p>
+        </div>
+      </article>
+
+      <article class="drill-card" data-drill="5">
+        <div class="drill-head">
+          <span class="drill-number">05</span>
+          <div><small>VLAN + MAC</small><h3>같은 MAC이 서로 다른 VLAN에서 보입니다.</h3></div>
+        </div>
+        <div class="drill-console">
+          <code>VLAN 10 · BB:BB:BB:BB:BB:01 → port 5</code>
+          <code>VLAN 20 · BB:BB:BB:BB:BB:01 → port 24</code>
+        </div>
+        <p class="drill-question">MAC Table 관점에서 먼저 기억해야 할 것은?</p>
+        <div class="drill-options" role="group" aria-label="문제 5 선택지">
+          <button type="button" data-choice="a">A. 같은 MAC은 스위치 전체에서 반드시 하나의 포트에만 존재해야 한다.</button>
+          <button type="button" data-choice="b" data-correct="true">B. FDB는 VLAN/Forwarding Domain의 문맥을 함께 봐야 하므로 서로 다른 VLAN의 동일 MAC을 같은 엔트리로 단순 비교하면 안 된다.</button>
+          <button type="button" data-choice="c">C. VLAN은 MAC Learning과 무관하므로 VLAN 번호는 볼 필요가 없다.</button>
+        </div>
+        <div class="drill-feedback" aria-live="polite" hidden>
+          <strong class="drill-result"></strong>
+          <p><b>해설:</b> 실무에서는 단순한 전역 <code>MAC → Port</code>가 아니라 <b>VLAN(Forwarding Domain) + MAC → Port</b>의 문맥이 중요합니다. 장비 구현과 네트워크 설계에 따라 같은 MAC이 서로 다른 VLAN에서 관찰되는 상황이 있을 수 있으므로 VLAN을 빼고 바로 중복 장애로 단정하면 안 됩니다.</p>
+          <p class="drill-check"><b>다음 확인:</b> 각 VLAN의 목적과 경로, 해당 MAC을 사용하는 장비/가상 인터페이스, Trunk 허용 VLAN, 예상된 설계인지 여부.</p>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="drill-finish" id="drill-finish" hidden aria-live="polite">
+      <span class="eyebrow">REVIEW</span>
+      <h3 id="drill-finish-title">5문항을 모두 확인했습니다.</h3>
+      <p id="drill-finish-copy"></p>
+    </div>
+
+    <div class="note"><b>실무 판단 원칙:</b> MAC Table은 강력한 단서지만 단독으로 원인을 확정하는 자료는 아닙니다. <b>VLAN + Port 역할 + 시간 변화 + STP/인터페이스 로그 + 실제 연결 토폴로지</b>를 함께 확인해야 오판을 줄일 수 있습니다.</div>
+  </div>
+</section>
+
+<section id="cli-workflow" data-learning-level="advanced" hidden>
+  <div class="shell">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">CLI WORKFLOW · EVIDENCE FIRST</div>
+        <h2>MAC Table에서 시작해 어디까지 확인해야 할까요?</h2>
+      </div>
+      <p>명령어 암기가 아니라<br><b>증거를 좁혀가는 순서</b>를 연습합니다.</p>
+    </div>
+
+    <div class="cli-scenario">
+      <span class="tag prod">학습용 상황</span>
+      <h3>“단말 MAC이 port 12와 port 18 사이를 반복 이동한다.”</h3>
+      <p>바로 Loop라고 결론내리지 않고, 아래 순서대로 <b>MAC → Port → VLAN → Neighbor → STP → Log/Error → 종합 판단</b>을 확인합니다.</p>
+    </div>
+
+    <div class="cli-workflow-layout">
+      <nav class="cli-stepper" aria-label="MAC 장애분석 확인 단계">
+        <button type="button" data-cli-step="0" aria-pressed="true"><span>1</span><b>MAC 위치</b><small>어디서 학습?</small></button>
+        <button type="button" data-cli-step="1" aria-pressed="false"><span>2</span><b>포트 상태</b><small>Link·속도·에러</small></button>
+        <button type="button" data-cli-step="2" aria-pressed="false"><span>3</span><b>VLAN</b><small>같은 L2 문맥?</small></button>
+        <button type="button" data-cli-step="3" aria-pressed="false"><span>4</span><b>Neighbor</b><small>무엇이 연결?</small></button>
+        <button type="button" data-cli-step="4" aria-pressed="false"><span>5</span><b>STP</b><small>Loop 단서?</small></button>
+        <button type="button" data-cli-step="5" aria-pressed="false"><span>6</span><b>Log / Error</b><small>시간 변화?</small></button>
+        <button type="button" data-cli-step="6" aria-pressed="false"><span>7</span><b>종합 판단</b><small>조치 결정</small></button>
+      </nav>
+
+      <div class="cli-panel" aria-live="polite" aria-atomic="true">
+        <div class="cli-panel-head">
+          <div>
+            <small id="cli-kicker">STEP 1 · MAC LOCATION</small>
+            <h3 id="cli-title">먼저 MAC이 현재 어느 포트에서 학습되는지 확인합니다.</h3>
+          </div>
+          <div class="cli-progress"><span id="cli-progress-bar"></span></div>
+        </div>
+
+        <div class="cli-evidence-grid">
+          <article>
+            <small>확인 목적</small>
+            <strong id="cli-goal">현상이 실제 MAC Move인지 확인</strong>
+            <p id="cli-goal-detail">VLAN과 포트를 함께 보고 시간에 따라 위치가 바뀌는지 확인합니다.</p>
+          </article>
+          <article>
+            <small>예시 관찰</small>
+            <strong id="cli-observation">VLAN 20 · AA:AA → port 12 ↔ port 18</strong>
+            <p id="cli-observation-detail">한 번의 이동인지 반복 이동인지 구분합니다.</p>
+          </article>
+        </div>
+
+        <div class="cli-command-area">
+          <div class="cli-command-tabs" role="group" aria-label="명령어 벤더 선택">
+            <button type="button" data-cli-vendor="aruba" aria-pressed="true">Aruba AOS-Switch</button>
+            <button type="button" data-cli-vendor="cisco" aria-pressed="false">Cisco IOS XE</button>
+          </div>
+          <div class="cli-command-card">
+            <div>
+              <small id="cli-vendor-label">ARUBA AOS-SWITCH · 예시</small>
+              <code id="cli-command">show mac-address</code>
+            </div>
+            <button type="button" id="cli-copy-command">명령 복사</button>
+          </div>
+          <p class="cli-command-note" id="cli-command-note">출력에서 대상 MAC의 VLAN과 Port를 확인합니다. 필요하면 장비 버전에 맞는 필터를 추가합니다.</p>
+        </div>
+
+        <div class="cli-sim-output">
+          <div class="cli-terminal-head"><span></span><span></span><span></span><b>학습용 예시 출력</b></div>
+          <pre id="cli-output">MAC Address         Port   VLAN
+AA:AA:AA:AA:AA:01  12     20
+
+잠시 후 다시 확인:
+AA:AA:AA:AA:AA:01  18     20</pre>
+        </div>
+
+        <div class="cli-judgement">
+          <article>
+            <small>여기서 말할 수 있는 것</small>
+            <p id="cli-can-say"><b>같은 VLAN의 동일 MAC 위치가 시간에 따라 바뀌고 있다</b>는 사실입니다.</p>
+          </article>
+          <article>
+            <small>아직 말하면 안 되는 것</small>
+            <p id="cli-cannot-say"><b>“L2 Loop가 확실하다”</b>고 단정할 단계는 아닙니다.</p>
+          </article>
+          <article>
+            <small>다음 확인</small>
+            <p id="cli-next-check">port 12와 18의 상태와 역할을 확인합니다.</p>
+          </article>
+        </div>
+
+        <div class="cli-navigation">
+          <button type="button" id="cli-prev" disabled>← 이전</button>
+          <span><b id="cli-step-count">1</b> / 7</span>
+          <button type="button" id="cli-next-button">다음 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-decision-map">
+      <div><b>MAC</b><span>현재 위치·이동 여부</span></div>
+      <i>→</i>
+      <div><b>PORT</b><span>Link·Error·역할</span></div>
+      <i>→</i>
+      <div><b>VLAN</b><span>같은 Forwarding Domain</span></div>
+      <i>→</i>
+      <div><b>LLDP</b><span>연결 대상</span></div>
+      <i>→</i>
+      <div><b>STP</b><span>Role·State·변화</span></div>
+      <i>→</i>
+      <div><b>LOG</b><span>시간 상관관계</span></div>
+      <i>→</i>
+      <div><b>DECIDE</b><span>근거 기반 조치</span></div>
+    </div>
+
+    <details class="test-commands cli-reference">
+      <summary>명령어 참고 기준</summary>
+      <p><b>Aruba AOS-Switch:</b> 2930F/3810M 계열에서 사용하는 AOS-Switch 16.x 계열 명령 흐름을 기준으로 작성했습니다. <code>show mac-address</code>, <code>show interfaces brief</code>, <code>show vlan ports &lt;PORT&gt; detail</code>, <code>show lldp info remote-device</code>, <code>show spanning-tree</code>, <code>show logging</code> 등을 사용합니다.</p>
+      <p><b>Cisco IOS XE:</b> <code>show mac address-table</code>, <code>show interfaces</code>, <code>show lldp neighbors detail</code>, <code>show spanning-tree</code>, <code>show logging</code> 계열을 예시로 사용합니다.</p>
+      <p><b>주의:</b> 명령 구문과 지원 옵션은 모델·소프트웨어 릴리스마다 다를 수 있으므로 실제 장비에서는 <code>?</code>와 해당 버전 Command Guide로 최종 확인하세요.</p>
+    </details>
+
+    <div class="note"><b>운영 핵심:</b> 장애분석은 명령을 많이 치는 것이 아니라 <b>현재 가설을 검증하기 위해 다음에 어떤 증거가 필요한지 결정하는 과정</b>입니다. MAC Table은 출발점이고, 조치는 포트/VLAN/Neighbor/STP/로그의 증거가 서로 일치할 때 결정하는 편이 안전합니다.</div>
+  </div>
+</section>
+
+<section id="evidence" data-learning-level="advanced" hidden>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · ORIGINAL EVIDENCE</div><h2>이해한 뒤 필요하면 원본까지 확인하세요.</h2></div><p>설명을 믿는 데서 끝내지 않고<br>실제 콘솔·FDB·PCAP으로 다시 확인할 수 있습니다.</p></div>
+    <div class="download-grid">
+      <article class="card"><span class="eyebrow">REPORT</span><h3>전체 실험 보고서</h3><p>초기 상태, 조건 변경, 결과, 검증 한계를 정리한 상세 보고서입니다.</p><a class="btn" href="../learning/foundations/ethernet-mac-table/report.html">전체 보고서 읽기 ↗</a></article>
+      <article class="card"><span class="eyebrow">GNS3 PROJECT</span><h3>Lab 프로젝트 백업</h3><p>동일한 토폴로지를 다시 열어 직접 재현할 수 있는 프로젝트입니다.</p><a class="btn primary" download href="../learning/foundations/ethernet-mac-table/Ethernet-MAC-Table-Lab.gns3project">프로젝트 다운로드 ↓</a></article>
+      <article class="card"><span class="eyebrow">PACKETS & VALIDATION</span><h3>PCAP 15개와 검증 자료</h3><p>5개 패킷 실험 × 3개 캡처 지점의 원본 PCAP과 판정 자료입니다.</p><a class="btn" download href="../learning/foundations/ethernet-mac-table/ethernet-evidence.zip">전체 자료 ZIP ↓</a></article>
+    </div>
+  </div>
+</section>
+
+<section id="verification-map" data-learning-level="advanced" hidden>
+  <div class="shell">
+    <div class="eyebrow">VALIDATION MAP</div>
+    <h2>무엇을 어떤 실험으로 검증했는가?</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>핵심 개념</th><th>실험</th><th>검증 근거</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Source MAC Learning</th><td>01</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">PC1만 학습 → PC2 응답 후 PC2 추가 ↗</a></td></tr>
+          <tr><th scope="row">Known Unicast</th><td>02</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=02-known-unicast">PC3 요청 0개 ↗</a></td></tr>
+          <tr><th scope="row">Broadcast</th><td>03</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=03-broadcast">ARP Request가 PC2·PC3에 전달 ↗</a></td></tr>
+          <tr><th scope="row">Unknown Unicast</th><td>04</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=04-unknown-unicast">PC2 목적지 Unicast가 PC3 링크에도 존재 ↗</a></td></tr>
+          <tr><th scope="row">MAC Re-learning</th><td>05</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=05-mac-relearning">PC2 재학습 후 Flooding 종료 ↗</a></td></tr>
+          <tr><th scope="row">Aging</th><td>06</td><td><a href="../ethernet-viewer.html?mode=console&amp;scenario=06-aging">동적 엔트리 시간 경과 소멸 ↗</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+
+</main>
+<footer class="footer"><div class="shell">현상일 · Enterprise Network Learning Evidence</div></footer>
+<script>
+document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+  document.querySelectorAll('tr[data-kind]').forEach(row=>row.hidden=button.dataset.filter!=='all'&&row.dataset.kind!==button.dataset.filter);
+}));
+</script>
+<script src="../ethernet-guide.js"></script>
+</body>
+</html>
