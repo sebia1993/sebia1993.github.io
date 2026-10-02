@@ -65,8 +65,8 @@
     .subnet-course .decision{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}
     .subnet-course .boundary-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
     .subnet-course .boundary-controls input[type=range]{width:min(420px,100%);accent-color:var(--blue)}
-    .subnet-course .boundary-strip{display:flex;min-height:92px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel3)}
-    .subnet-course .boundary-block{display:grid;place-items:center;align-content:center;gap:3px;min-width:0;border-right:1px solid var(--line);padding:8px 3px;text-align:center}
+    .subnet-course .boundary-strip{display:flex;min-height:92px;border:1px solid var(--line);border-radius:12px;overflow-x:auto;background:var(--panel3)}
+    .subnet-course .boundary-block{display:grid;place-items:center;align-content:center;gap:3px;min-width:72px;border-right:1px solid var(--line);padding:8px 3px;text-align:center}
     .subnet-course .boundary-block:last-child{border-right:0}
     .subnet-course .boundary-block b{font-size:.78rem}
     .subnet-course .boundary-block span{font-size:.7rem;color:var(--muted)}
@@ -90,7 +90,7 @@
     .subnet-course .explain-prompts summary::after{counter-increment:explain;content:''}
     @media(max-width:900px){.subnet-course .workflow{grid-template-columns:repeat(3,minmax(0,1fr))}.subnet-course .workflow>div::after{display:none}.subnet-course .cli-tabs{grid-template-columns:1fr}}
     @media(max-width:800px){.subnet-course .subnet-form{grid-template-columns:2fr 1fr}.subnet-course .subnet-grid.three{grid-template-columns:1fr}.subnet-course .mental-flow{grid-template-columns:1fr}.subnet-course .mental-arrow{transform:rotate(90deg)}.subnet-course .answer-grid{grid-template-columns:1fr}}
-    @media(max-width:600px){.subnet-course .subnet-grid{grid-template-columns:1fr}.subnet-course .subnet-output{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-course .subnet-hero{padding-top:32px}}
+    @media(max-width:600px){.subnet-course .subnet-grid,.subnet-course .quick-summary,.subnet-course .decision-grid,.subnet-course .calc-decision{grid-template-columns:1fr}.subnet-course .subnet-output{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-course .workflow{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-course .subnet-hero{padding-top:32px}}
     @media(max-width:360px){.subnet-course .subnet-form,.subnet-course .subnet-output{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){html:has(.subnet-course){scroll-behavior:auto}}
   </style>
