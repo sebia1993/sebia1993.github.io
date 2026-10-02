@@ -113,11 +113,18 @@ try {
             const card = document.querySelector('main.card').getBoundingClientRect();
             return card.top < innerHeight * 0.9;
           }), true, 'current learning question is pushed below the first mobile viewport');
+          const beforeLessonTop = await page.evaluate(() => document.querySelector('main.card').getBoundingClientRect().top);
           await page.locator('.tab').nth(1).click();
-          await page.waitForTimeout(450);
-          assert.equal(await page.evaluate(() => document.querySelector('main.card').getBoundingClientRect().top < 90), true, 'mobile lesson selection should bring the current question into view');
+          await page.waitForTimeout(120);
+          const mobileLessonPosition = await page.evaluate(() => {
+            const card = document.querySelector('main.card').getBoundingClientRect();
+            const question = document.querySelector('#question').getBoundingClientRect();
+            return { cardTop: card.top, questionTop: question.top, viewport: innerHeight };
+          });
+          assert.ok(mobileLessonPosition.cardTop < beforeLessonTop - 40, 'mobile lesson selection did not move the current lesson toward the viewport');
+          assert.ok(mobileLessonPosition.questionTop >= 0 && mobileLessonPosition.questionTop < mobileLessonPosition.viewport * 0.75, 'mobile lesson selection should leave the current question visibly in the viewport');
           await page.locator('.tab').nth(0).click();
-          await page.waitForTimeout(450);
+          await page.waitForTimeout(120);
         }
         const run = page.locator('#runBtn');
         const expectedDecisions = ['ON-LINK', 'VIA GATEWAY', 'ON-LINK로 오판', 'VIA GATEWAY'];
