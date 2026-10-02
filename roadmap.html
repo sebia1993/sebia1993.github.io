@@ -1,80 +1,203 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="네트워크 엔지니어를 위한 실습·검증 중심 학습 로드맵">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="네트워크 개념을 짧게 이해하고 Interactive Lab으로 직접 확인하는 2단계 학습 로드맵">
 <title>네트워크 엔지니어 학습 로드맵</title>
 <link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./lab-ui.css">
 <style>
-.roadmap-hero{padding:82px 0 34px}.roadmap-hero p{max-width:980px;color:var(--muted);font-size:1.04rem}.roadmap-hero .hero-note{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);font-size:.9rem;color:var(--muted)}
-.metric-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:9px}.metric-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.metric-card b{display:block;font-size:1.45rem}.metric-card span{font-size:.76rem;color:var(--muted)}
-.focus{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.focus-main{padding:22px;border-radius:18px;border:1px solid #355d82;background:linear-gradient(135deg,#0d2034,#10283c)}.focus-main h2{margin:7px 0 8px}.focus-main p{margin-bottom:10px}.focus-next{margin-top:14px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(5,12,20,.22)}.focus-next b{display:block;margin-bottom:4px}
-.stage-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stage-card{position:relative;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.stage-card h3{margin:7px 0 8px;font-size:1rem}.stage-card p{font-size:.86rem;margin:0;color:var(--muted)}.stage-card details{margin-top:12px}.stage-card summary{cursor:pointer;color:var(--blue);font-size:.82rem;font-weight:800}.stage-card details p{margin-top:8px;font-size:.8rem}.stage-no{display:inline-flex;padding:4px 8px;border-radius:999px;border:1px solid #3d5c78;color:var(--blue);font-size:.7rem;font-weight:850}
-.topic-groups{display:grid;gap:30px}.topic-group{scroll-margin-top:78px}.topic-group-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:12px}.topic-group-head h3{margin:0}.topic-group-head p{margin:0;max-width:650px;color:var(--muted);font-size:.83rem}.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.topic{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(16,34,54,.97),rgba(13,27,42,.97));box-shadow:var(--shadow)}.topic.clickable{transition:.18s ease}.topic.clickable:hover{transform:translateY(-2px);border-color:#3e6a91}.topic h4{font-size:1.04rem;margin:0}.topic p{margin:0;color:var(--muted);font-size:.88rem}.topic-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.tiny{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel3)}.tiny b{display:block;font-size:.9rem}.tiny span{font-size:.68rem;color:var(--muted)}.topic-link{margin-top:auto;color:var(--blue);font-weight:800;text-decoration:none}.disabled{color:#6f8298;font-size:.8rem;margin-top:auto}.topic details{border-top:1px solid var(--line);padding-top:10px}.topic summary{cursor:pointer;color:#9fb4c9;font-size:.8rem;font-weight:800}.topic details div{margin-top:9px;display:grid;gap:8px}.topic details b{font-size:.77rem}.topic details p{font-size:.79rem}
-.badge{display:inline-flex;width:max-content;padding:5px 9px;border-radius:999px;border:1px solid;font-size:.72rem;font-weight:850}.badge.in-progress{color:var(--blue);border-color:#356d93;background:rgba(88,184,255,.08)}.badge.ready{color:var(--amber);border-color:#8f6a38;background:rgba(255,191,105,.07)}.badge.planned{color:#a8b6c6;border-color:#42566d;background:rgba(159,178,201,.05)}.badge.completed{color:var(--mint);border-color:#347968;background:rgba(126,224,194,.07)}
-.activity{border-left:2px solid var(--blue);padding-left:18px}.activity-item{margin-bottom:17px}.activity-item b{display:block}.activity-item span{font-size:.84rem;color:var(--muted)}
-.method{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}.step{padding:12px 8px;border:1px solid var(--line);border-radius:11px;text-align:center;background:var(--panel3)}.step b{display:block;font-size:.82rem}.step span{font-size:.69rem;color:var(--muted)}
-.principles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.principle{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.principle h3{margin:7px 0}.principle p{font-size:.86rem}.error{padding:16px;border:1px solid #7b4f4f;border-radius:12px;background:rgba(180,80,80,.08);color:#efc9c9}
-@media(max-width:1100px){.metric-grid{grid-template-columns:repeat(4,1fr)}.stage-flow,.topics{grid-template-columns:1fr 1fr}.method{grid-template-columns:repeat(4,1fr)}.principles{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.focus,.stage-flow,.topics,.principles{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr 1fr}.method{grid-template-columns:1fr 1fr}.topic-group-head{display:block}.topic-group-head p{margin-top:6px}}
+.roadmap-hero{padding:82px 0 34px}.roadmap-hero p{max-width:920px;color:var(--muted);font-size:1.04rem}
+.two-stage{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-top:22px}.stage-box{padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--panel3)}.stage-box.current{border-color:#3e6a91;background:rgba(88,184,255,.06)}.stage-box b{display:block;color:var(--blue);font-size:.78rem;letter-spacing:.08em}.stage-box h2{margin:6px 0 7px;font-size:1.18rem}.stage-box p{margin:0;font-size:.88rem}.stage-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.5rem;font-weight:900}
+.focus{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.focus-main{padding:22px;border-radius:18px;border:1px solid #355d82;background:linear-gradient(135deg,#0d2034,#10283c)}.focus-main h2{margin:7px 0 8px}.focus-main p{margin-bottom:12px}.focus-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.stage-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stage-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.stage-card h3{margin:7px 0 8px;font-size:1rem}.stage-card p{font-size:.86rem;margin:0;color:var(--muted)}.stage-no{display:inline-flex;padding:4px 8px;border-radius:999px;border:1px solid #3d5c78;color:var(--blue);font-size:.7rem;font-weight:850}
+.topic-groups{display:grid;gap:30px}.topic-group{scroll-margin-top:78px}.topic-group-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:12px}.topic-group-head h3{margin:0}.topic-group-head p{margin:0;max-width:650px;color:var(--muted);font-size:.83rem}
+.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.topic{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(16,34,54,.97),rgba(13,27,42,.97));box-shadow:var(--shadow)}.topic h4{font-size:1.04rem;margin:0}.topic p{margin:0;color:var(--muted);font-size:.88rem}.topic details{border-top:1px solid var(--line);padding-top:10px}.topic summary{cursor:pointer;color:#9fb4c9;font-size:.8rem;font-weight:800}.topic details p{margin-top:8px;font-size:.8rem}
+.topic-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}.topic-actions a{font-size:.8rem;text-decoration:none;font-weight:800}.disabled{color:#6f8298;font-size:.8rem;margin-top:auto}
+.badge{display:inline-flex;width:max-content;padding:5px 9px;border-radius:999px;border:1px solid;font-size:.72rem;font-weight:850}.badge.active{color:var(--mint);border-color:#347968;background:rgba(126,224,194,.07)}.badge.next{color:var(--amber);border-color:#8f6a38;background:rgba(255,191,105,.07)}.badge.planned{color:#a8b6c6;border-color:#42566d;background:rgba(159,178,201,.05)}
+.method{display:grid;grid-template-columns:1fr 1fr;gap:14px}.method-card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel3)}.method-card b{color:var(--blue);font-size:.78rem;letter-spacing:.08em}.method-card h3{margin:6px 0 8px}.method-card p{margin:0;color:var(--muted);font-size:.9rem}
+.principles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.principle{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.principle h3{margin:7px 0}.principle p{font-size:.86rem}
+@media(max-width:1100px){.stage-flow,.topics{grid-template-columns:1fr 1fr}.principles{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.two-stage{grid-template-columns:1fr}.stage-arrow{transform:rotate(90deg)}.focus,.stage-flow,.topics,.principles,.method{grid-template-columns:1fr}.topic-group-head{display:block}.topic-group-head p{margin-top:6px}}
 </style>
-<link rel="stylesheet" href="./lab-ui.css"></head>
+</head>
 <body>
-<header><div class="shell topbar"><span class="brand">학습 로드맵</span><div class="nav"><a href="#stages">학습 단계</a><a href="#topics">교육과정</a><a href="#method">학습 방식</a></div></div></header>
+<header>
+  <div class="shell topbar">
+    <span class="brand">학습 로드맵</span>
+    <div class="nav"><a href="#current">현재 학습</a><a href="#topics">교육과정</a><a href="#method">학습 방식</a></div>
+  </div>
+</header>
+
 <main>
-<section class="roadmap-hero"><div class="shell"><div class="eyebrow">네트워크 학습 여정</div><h1>기술 목록이 아니라 <em>패킷의 여정</em>을 따라 학습합니다.</h1><p>호스트가 목적지를 판단하는 기초부터 Campus LAN, 네트워크 서비스, Routing, 보안, Enterprise WLAN, 자동화, Cloud/Data Center까지 순서대로 연결합니다. 각 주제는 원리 이해에서 끝내지 않고 구성·정상 검증·장애 재현·복구·설명까지 남기는 것을 목표로 합니다.</p><div class="hero-note"><b>읽는 순서:</b> 처음 방문했다면 0단계부터 순서대로 보는 것을 권장합니다. 이미 알고 있는 기술도 패킷 흐름과 장애 원인을 자신의 말로 설명할 수 있는지 다시 확인합니다.</div></div></section>
+<section class="roadmap-hero">
+  <div class="shell">
+    <div class="eyebrow">NETWORK LEARNING ROADMAP</div>
+    <h1>개념을 짧게 이해하고,<br><em>직접 움직여 확인합니다.</em></h1>
+    <p>다양한 네트워크 개념을 한 주제에 너무 오래 머무르지 않고 연결해서 학습합니다. 각 주제는 <b>1단계 Concept Guide → 2단계 Interactive Lab</b>의 동일한 흐름으로 진행합니다.</p>
 
-<section id="evidence-summary"><div class="shell"><div class="section-head"><div><div class="eyebrow">누적 학습 증거</div><h2>실제로 검증한 내용만 집계합니다.</h2></div><p>계획된 주제는 숫자에 포함하지 않고, Lab·Packet Capture·장애 재현·복구 검증처럼 확인 가능한 결과만 누적합니다.</p></div><div id="summaryMetrics" class="metric-grid"><div class="metric-card"><b>—</b><span>불러오는 중</span></div></div></div></section>
+    <div class="two-stage" aria-label="공통 2단계 학습 방식">
+      <article class="stage-box current">
+        <b>STEP 1</b>
+        <h2>Concept Guide</h2>
+        <p>5~8분 안에 핵심 Mental Model을 만들고, 내 말로 원리를 설명합니다.</p>
+      </article>
+      <div class="stage-arrow">→</div>
+      <article class="stage-box">
+        <b>STEP 2</b>
+        <h2>Interactive Lab</h2>
+        <p>먼저 결과를 예상한 뒤 직접 실행하고, 실제 동작과 비교합니다.</p>
+      </article>
+    </div>
 
-<section><div class="shell focus"><article class="focus-main"><span class="badge ready">현재 위치 · 0단계</span><h2>네트워크 기초를 교육과정 순서로 다시 정리합니다.</h2><p>ARP / Default Gateway는 검증과 설명 확인을 완료했고, Ethernet / MAC Table은 실습 완료 후 일부 개념을 복습하고 있습니다.</p><div class="focus-next"><b>실제 Lab 실행 기준</b><span>Windows PC → PNETLab → Cisco 1차 검증 → Aruba AOS-CX 교차검증 → Wireshark Packet Evidence</span></div><div class="focus-next"><b>권장 다음 순서</b><span>IP 주소 / Subnetting 교육 파일럿 → Ethernet / MAC Table 설명 복습 완료 → ICMP / Ping / Traceroute → VLAN / Access / Trunk</span></div><div style="height:12px"></div><a class="btn primary" href="./labs/ip-subnetting.html">IP/Subnetting 연습 시작 →</a><a class="btn" href="./labs/arp-default-gateway.html">ARP / Default Gateway 학습자료 →</a><a class="btn" href="./labs/ethernet-mac-table.html">Ethernet / MAC Table 학습자료 →</a></article><article class="card"><div class="eyebrow">완료 기준</div><h3>“구성할 수 있다”보다 “왜 그렇게 동작하는지 설명할 수 있다”를 기준으로 합니다.</h3><p>정상 상태만 확인하지 않고 장애를 의도적으로 만들고, Packet·Log·상태 출력으로 원인을 좁힌 뒤 복구까지 확인해야 해당 주제를 완료한 것으로 봅니다.</p></article></div></section>
+    <div class="note" style="margin-top:16px"><b>현재 범위:</b> CLI, PCAP, 실제 장비 검증, 장애분석·Operator Drill은 이 로드맵의 필수 학습 단계에 포함하지 않습니다. 지금은 핵심 개념을 넓고 정확하게 연결하는 데 집중합니다.</div>
+  </div>
+</section>
 
-<section id="stages"><div class="shell"><div class="section-head"><div><div class="eyebrow">전체 학습 단계</div><h2>기초에서 Cloud까지 9단계로 연결합니다.</h2></div><p>앞 단계의 개념이 다음 단계의 진단 근거가 되도록 순서를 구성했습니다.</p></div><div id="stageFlow" class="stage-flow"></div></div></section>
+<section id="current">
+  <div class="shell focus">
+    <article class="focus-main">
+      <span class="badge active">2단계 구조 적용</span>
+      <h2>Ethernet / MAC Table</h2>
+      <p>첫 파일럿으로 개념 설명을 짧게 줄이고, Interactive Lab을 별도 2단계로 분리했습니다.</p>
+      <div class="focus-actions">
+        <a class="btn primary" href="./labs/ethernet-mac-table.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/ethernet-mac-table-simulator.html">2단계 · Interactive Lab →</a>
+      </div>
+    </article>
+    <article class="card">
+      <div class="eyebrow">학습 완료 기준</div>
+      <h3>깊게 파기보다 정확하게 연결합니다.</h3>
+      <p><b>개념을 내 말로 설명할 수 있고</b>, Interactive Lab에서 예상한 동작과 실제 결과를 비교할 수 있으면 현재 단계에서는 충분합니다.</p>
+    </article>
+  </div>
+</section>
 
-<section id="topics"><div class="shell"><div class="section-head"><div><div class="eyebrow">교육과정</div><h2>단계별 학습 주제와 완료 기준</h2></div><p>카드를 펼치면 해당 주제를 왜 배우는지와 어느 수준까지 이해해야 하는지 확인할 수 있습니다.</p></div><div id="topicGroups" class="topic-groups"></div></div></section>
+<section id="stages">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">전체 학습 영역</div><h2>기초에서 Cloud까지 개념을 연결합니다.</h2></div>
+      <p>각 영역의 모든 주제에 같은 2단계 방식을 적용합니다.</p>
+    </div>
+    <div id="stageFlow" class="stage-flow"></div>
+  </div>
+</section>
 
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">최근 학습 활동</div><h2>검증 기록</h2></div></div><div class="activity"><div class="activity-item"><b>2026-09-22 · PNETLab 실제 Lab 표준 추가</b><span>Windows PNETLab을 실제 L2/L3 검증 환경으로 지정하고 Cisco 우선, Aruba 교차검증, Wireshark Evidence 수집 기준을 추가했습니다.</span></div><div class="activity-item"><b>2026-09-21 · 전체 교육과정 재구성</b><span>네트워크 기초부터 Campus LAN, 서비스, Routing, 보안, Enterprise WLAN, 고급 엔터프라이즈, 자동화, Cloud/Data Center까지 9단계 구조로 확장했습니다.</span></div><div class="activity-item"><b>2026-09-13 · ARP / Default Gateway 검증 완료</b><span>정상 통신, 장애 조건, 복구와 심화 시나리오를 포함해 11개 실험을 검증하고 Packet Capture를 보관했습니다.</span></div><div class="activity-item"><b>2026-09-13 · Ethernet / MAC Table 구성·검증 완료</b><span>MAC Learning, Forwarding, Flooding, Aging을 확인했으며 일부 설명 개념을 복습 중입니다.</span></div></div></div></section>
+<section id="topics">
+  <div class="shell">
+    <div class="section-head">
+      <div><div class="eyebrow">교육과정</div><h2>단계별 학습 주제</h2></div>
+      <p>카드를 펼치면 왜 배워야 하는지만 확인할 수 있습니다. 세부 검증 절차와 증거 수집은 현재 로드맵에서 제외합니다.</p>
+    </div>
+    <div id="topicGroups" class="topic-groups"></div>
+  </div>
+</section>
 
-<section id="method"><div class="shell"><div class="section-head"><div><div class="eyebrow">학습 방식</div><h2>모든 주제에 같은 검증 절차를 적용합니다.</h2></div></div><div class="method"><div class="step"><b>1. 원리 이해</b><span>왜 필요한가</span></div><div class="step"><b>2. 직접 구성</b><span>최소 구성</span></div><div class="step"><b>3. 정상 검증</b><span>기준 상태</span></div><div class="step"><b>4. 장애 재현</b><span>의도적 실패</span></div><div class="step"><b>5. 원인 분석</b><span>근거 수집</span></div><div class="step"><b>6. 복구 검증</b><span>정상화 확인</span></div><div class="step"><b>7. 내 말로 설명</b><span>개념 정리</span></div><div class="step"><b>8. 자동화</b><span>반복 검증</span></div></div></div></section>
+<section id="method">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">학습 방식</div><h2>모든 주제는 두 단계만 사용합니다.</h2></div></div>
+    <div class="method">
+      <article class="method-card">
+        <b>STEP 1 · UNDERSTAND</b>
+        <h3>Concept Guide</h3>
+        <p>30초 요약 → 핵심 그림 → 정상 동작 → 헷갈리는 개념 비교 → 꼭 기억할 내용 → 내 말로 설명하기.</p>
+      </article>
+      <article class="method-card">
+        <b>STEP 2 · CHECK</b>
+        <h3>Interactive Lab</h3>
+        <p>질문 확인 → 먼저 예상 → 직접 실행 → 결과 비교. 설명을 반복하기보다 동작을 직접 확인합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
-<section><div class="shell"><div class="section-head"><div><div class="eyebrow">학습 설계 원칙</div><h2>로드맵을 운영하는 기준</h2></div></div><div class="principles"><article class="principle"><span class="stage-no">01</span><h3>선행 개념 우선</h3><p>OSPF보다 Routing Table, VLAN보다 Ethernet처럼 다음 기술을 이해하는 데 필요한 기반부터 정리합니다.</p></article><article class="principle"><span class="stage-no">02</span><h3>패킷 흐름 중심</h3><p>명령어 암기보다 실제 Frame/Packet이 어디로 왜 이동하는지 추적합니다.</p></article><article class="principle"><span class="stage-no">03</span><h3>장애까지 포함</h3><p>정상 구성만 만들지 않고 대표적인 잘못된 설정과 실패 조건을 반드시 재현합니다.</p></article><article class="principle"><span class="stage-no">04</span><h3>증거와 결과물</h3><p>PCAP, 구성, 다이어그램, 설명 노트, 자동화 도구처럼 다시 확인 가능한 결과물을 남깁니다.</p></article></div></div></section>
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">학습 설계 원칙</div><h2>정보량을 의도적으로 제한합니다.</h2></div></div>
+    <div class="principles">
+      <article class="principle"><span class="stage-no">01</span><h3>한 주제, 한 목표</h3><p>한 페이지에서 반드시 이해해야 하는 핵심 질문을 하나로 제한합니다.</p></article>
+      <article class="principle"><span class="stage-no">02</span><h3>5~8분 개념서</h3><p>예외사항과 실무 심화를 앞세우지 않고 핵심 Mental Model부터 만듭니다.</p></article>
+      <article class="principle"><span class="stage-no">03</span><h3>예상 후 실행</h3><p>Interactive Lab은 정답을 먼저 보여주지 않고 예상과 결과를 비교하게 합니다.</p></article>
+      <article class="principle"><span class="stage-no">04</span><h3>다음 개념으로 이동</h3><p>현재 목표를 설명하고 확인할 수 있으면 과도하게 깊어지지 않고 다음 주제로 연결합니다.</p></article>
+    </div>
+  </div>
+</section>
 
-<section><div class="shell"><div class="note"><b>구축 계획:</b> <a href="./NETWORK-LEARNING-MASTER-PLAN.md">전체 25과정 계획</a> · <a href="./docs/PNETLAB-LAB-STANDARD.md">PNETLab 실습 표준</a> · <a href="./docs/WINDOWS-LAB-CHECKLIST.md">Windows 준비 체크리스트</a> · <a href="./LAB-FRAMEWORK-DESIGN.md">공통 Framework 설계</a> · <a href="./docs/IMPLEMENTATION-LOG.md">변경·검증 기록</a><br><b>공개 원칙:</b> 학습 자료에는 개인 Lab용 주소와 가상·테스트 장비만 사용합니다. 회사의 실제 IP, Hostname, VLAN ID, SSID, 구성도, 로그 등 내부 정보는 공개하지 않습니다.</div></div></section>
+<section>
+  <div class="shell">
+    <div class="note"><b>공개 원칙:</b> 학습 자료에는 개인 Lab용 주소와 가상·테스트 장비만 사용합니다. 회사의 실제 IP, Hostname, VLAN ID, SSID, 구성도, 로그 등 내부 정보는 공개하지 않습니다.</div>
+  </div>
+</section>
 </main>
-<div class="footer"><div class="shell">Enterprise Network Learning Journey</div></div>
-<script>
-const metricLabels={completedTopics:'완료 주제',labs:'검증한 Lab',faultScenarios:'장애 재현',packetCaptures:'캡처 실험',recoveryValidations:'복구 검증',explainNotes:'설명 노트',automations:'검증 도구'};
-const metricShort={labs:'Lab',faultScenarios:'장애',packetCaptures:'캡처',recoveryValidations:'복구',explainNotes:'설명',automations:'도구'};
-function esc(v){return String(v??'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-fetch('./learning-data.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('data');return r.json();}).then(function(data){
-  const summary=document.getElementById('summaryMetrics');
-  summary.innerHTML=Object.entries(metricLabels).map(function(entry){const k=entry[0],label=entry[1];return '<div class="metric-card"><b>'+Number(data.summary[k]||0)+'</b><span>'+label+'</span></div>';}).join('');
 
+<div class="footer"><div class="shell">Network Learning · Concept Guide → Interactive Lab</div></div>
+
+<script>
+function esc(v){return String(v??'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+const interactiveUrls={
+  'ethernet-mac-table':'./labs/ethernet-mac-table-simulator.html',
+  'arp-default-gateway':'./labs/arp-default-gateway-simulator.html'
+};
+
+const summaryOverrides={
+  'ip-subnetting':'IP 주소, Subnet Mask, Prefix와 같은 네트워크 여부 판단을 핵심 개념부터 정리합니다.',
+  'ethernet-mac-table':'Source MAC Learning과 Destination MAC Forwarding, Known/Unknown Unicast와 Broadcast를 이해합니다.',
+  'arp-default-gateway':'같은 서브넷과 다른 서브넷에서 ARP와 Default Gateway가 어떤 MAC 주소를 선택하게 만드는지 이해합니다.'
+};
+
+fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
+  if(!r.ok) throw new Error('data');
+  return r.json();
+}).then(function(data){
   const stageFlow=document.getElementById('stageFlow');
   stageFlow.innerHTML=(data.stages||[]).map(function(s,index){
-    return '<article class="stage-card"><span class="stage-no">'+String(index).padStart(2,'0')+'</span><h3>'+esc(s.title)+'</h3><p>'+esc(s.goal)+'</p><details><summary>이 단계의 완료 기준</summary><p>'+esc(s.exitCriteria)+'</p></details></article>';
+    return '<article class="stage-card"><span class="stage-no">'+String(index).padStart(2,'0')+'</span><h3>'+esc(s.title)+'</h3><p>'+esc(s.goal)+'</p></article>';
   }).join('');
 
-  const stageByTitle={};(data.stages||[]).forEach(function(s){stageByTitle[s.title]=s;});
-  const groups={};(data.topics||[]).forEach(function(t){(groups[t.category]??=[]).push(t);});
-  const root=document.getElementById('topicGroups');root.innerHTML='';
+  const stageByTitle={};
+  (data.stages||[]).forEach(function(s){stageByTitle[s.title]=s;});
+  const groups={};
+  (data.topics||[]).forEach(function(t){(groups[t.category]??=[]).push(t);});
+
+  const root=document.getElementById('topicGroups');
+  root.innerHTML='';
+
   Object.entries(groups).forEach(function(entry){
     const category=entry[0],topics=entry[1],stage=stageByTitle[category];
-    const group=document.createElement('section');group.className='topic-group';
+    const group=document.createElement('section');
+    group.className='topic-group';
     group.innerHTML='<div class="topic-group-head"><h3>'+esc(category)+'</h3><p>'+esc(stage?stage.goal:'')+'</p></div><div class="topics"></div>';
     const grid=group.querySelector('.topics');
+
     topics.forEach(function(t){
-      const card=document.createElement('article');card.className='topic'+(t.detailUrl?' clickable':'');
-      const metrics=['labs','faultScenarios','packetCaptures','recoveryValidations','explainNotes','automations'].map(function(k){return '<div class="tiny"><b>'+Number(t[k]||0)+'</b><span>'+metricShort[k]+'</span></div>';}).join('');
-      const statusClass=t.status==='completed'?'completed':t.status==='ready'?'ready':t.status==='in-progress'?'in-progress':'planned';
-      const destination=t.detailUrl?'<a class="topic-link" href="'+esc(t.detailUrl)+'">'+esc(t.detailLabel||'학습자료 / 검증 결과 보기 →')+'</a>':'<span class="disabled">학습 순서에 따라 상세 페이지를 추가합니다.</span>';
-      const detail='<details><summary>왜 배우고, 어디까지 해야 하나요?</summary><div><p><b>학습 이유</b><br>'+esc(t.why||'')+'</p><p><b>완료 기준</b><br>'+esc(t.completeWhen||'')+'</p></div></details>';
-      card.innerHTML='<span class="badge '+statusClass+'">'+esc(t.statusLabel)+'</span><h4>'+esc(t.title)+'</h4><p>'+esc(t.summary)+'</p>'+detail+'<div class="topic-metrics">'+metrics+'</div>'+destination;
+      const card=document.createElement('article');
+      card.className='topic';
+
+      const hasPage=Boolean(t.detailUrl);
+      const hasInteractive=Boolean(interactiveUrls[t.id]);
+      const badgeClass=hasInteractive?'active':hasPage?'next':'planned';
+      const badgeText=hasInteractive?'2단계 학습 가능':hasPage?'학습 페이지 준비됨':esc(t.statusLabel||'예정');
+      const summary=summaryOverrides[t.id]||t.summary||'';
+
+      let actions='';
+      if(t.id==='ethernet-mac-table'){
+        actions='<div class="topic-actions"><a class="btn primary" href="'+esc(t.detailUrl)+'">1단계 · 개념서 →</a><a class="btn" href="'+esc(interactiveUrls[t.id])+'">2단계 · 실습 →</a></div>';
+      }else if(hasPage){
+        actions='<div class="topic-actions"><a class="btn" href="'+esc(t.detailUrl)+'">학습 페이지 →</a></div>';
+      }else{
+        actions='<span class="disabled">학습 순서에 따라 페이지를 추가합니다.</span>';
+      }
+
+      card.innerHTML='<span class="badge '+badgeClass+'">'+badgeText+'</span><h4>'+esc(t.title)+'</h4><p>'+esc(summary)+'</p><details><summary>왜 배우나요?</summary><p>'+esc(t.why||'')+'</p></details>'+actions;
       grid.appendChild(card);
     });
+
     root.appendChild(group);
   });
 }).catch(function(){
-  document.getElementById('summaryMetrics').innerHTML='<div class="error">학습 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</div>';
+  document.getElementById('stageFlow').innerHTML='<article class="card">학습 데이터를 불러오지 못했습니다.</article>';
 });
 </script>
 </body>
