@@ -10,9 +10,9 @@
 <body data-sim-mode="basic">
 <div class="wrap">
   <header class="hero">
-    <small>기초 · 인터랙티브 실습</small>
+    <small>2단계 · INTERACTIVE LAB</small>
     <h1>Ethernet / MAC Table</h1>
-    <p>프레임이 스위치에 들어왔을 때 <b>Source MAC으로 무엇을 배우고</b>, <b>Destination MAC으로 어느 포트에 전달하는지</b> 직접 확인합니다.</p>
+    <p>1단계 개념서에서 배운 내용을 직접 확인합니다. <b>먼저 결과를 예상하고</b>, 프레임을 실행한 뒤 <b>SW1의 Learning과 Forwarding 판단</b>을 비교하세요.</p>
     <div class="start-guide">
       <div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 실습에서 확인할 한 가지를 먼저 봅니다.</span></div>
       <div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>프레임을 보내기 전에 결과를 골라보세요.</span></div>
@@ -34,14 +34,13 @@
     <div class="course-count" id="courseCount">0 / 5 완료</div>
   </div>
 
-  <section class="view-mode-card" aria-label="학습 보기 모드">
+  <section class="view-mode-card" aria-label="2단계 학습 안내">
     <div class="view-mode-copy">
-      <strong>보기 모드</strong>
-      <span id="viewModeSummary">기본 모드 · 처음에는 프레임과 FDB의 핵심 변화만 확인하세요.</span>
+      <strong>2단계 · Interactive Lab</strong>
+      <span id="viewModeSummary">예상 → 실행 → 비교 순서로 핵심 동작만 확인합니다.</span>
     </div>
-    <div class="view-mode-actions" role="group" aria-label="기본 또는 고급 모드 선택">
-      <button type="button" class="view-mode-btn active" data-view-mode="basic" aria-pressed="true"><b>기본 모드</b><small>추천 · 핵심 흐름</small></button>
-      <button type="button" class="view-mode-btn" data-view-mode="advanced" aria-pressed="false"><b>고급 모드</b><small>FDB · ARP · 직접 조작</small></button>
+    <div class="view-mode-actions">
+      <a class="view-mode-btn active" href="ethernet-mac-table.html"><b>← 1단계 개념서</b><small>핵심 개념 다시 보기</small></a>
     </div>
   </section>
 
@@ -317,7 +316,7 @@
   </div>
 
   <section class="course-complete" id="courseComplete">
-    <div class="eyebrow2">기초 실습 완료</div>
+    <div class="eyebrow2">2단계 실습 완료</div>
     <h2>Ethernet / MAC Table 실습을 모두 완료했습니다.</h2>
     <p>Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning의 차이를 직접 확인했습니다.</p>
     <div class="completion-grid">
@@ -327,7 +326,7 @@
       <div class="completion-card"><b>Aging / 재학습</b><span>엔트리 소멸 뒤 Flooding과 Source Learning으로 정상 전달 상태 회복</span></div>
     </div>
     <div class="next-lab-actions">
-      <a class="primary" href="ethernet-mac-table.html">Ethernet / MAC Table 학습 페이지 →</a>
+      <a class="primary" href="ethernet-mac-table.html">1단계 개념서 다시 보기 →</a>
       <a href="arp-default-gateway-simulator.html">ARP / Default Gateway 실습 →</a>
       <a href="../roadmap.html">학습 로드맵 →</a>
     </div>
@@ -387,9 +386,9 @@
 
   <div class="footer">
     이 페이지는 실제 스위치를 브라우저에서 구동하는 것이 아니라 검증된 Ethernet/FDB 동작을 학습용 상태 머신으로 재현합니다.
-    기본 모드는 핵심 흐름만, 고급 모드는 FDB/ARP 상태와 직접 조작을 추가로 보여줍니다.
+    이 페이지에서는 개념 설명을 반복하지 않고 예상 → 실행 → 비교를 통해 핵심 동작을 확인합니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20260921-12"></script>
+<script src="ethernet-mac-simulator.js?v=20261002-1"></script>
 </body>
 </html>
