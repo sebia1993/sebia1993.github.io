@@ -47,7 +47,11 @@ try {
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'page overflows horizontally');
           if (path === 'roadmap.html') {
             assert.equal(await page.locator('.topic').count(), 27);
-            assert.deepEqual(await page.locator('#summaryMetrics b').allTextContents(), ['1', '2', '5', '16', '5', '1', '2']);
+            const roadmapText = await page.locator('body').innerText();
+            assert.ok(roadmapText.includes('Concept Guide'));
+            assert.ok(roadmapText.includes('Interactive Lab'));
+            assert.equal(await page.locator('#summaryMetrics').count(), 0);
+            assert.equal(roadmapText.includes('PNETLab'), false);
           }
           if (path.endsWith('-simulator.html')) {
             const action = page.locator(path.includes('arp-') ? '#pingBtn' : '#runBtn');
