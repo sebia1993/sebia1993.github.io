@@ -84,7 +84,7 @@
       "detailUrl": "./labs/ip-subnetting.html",
       "detailLabel": "IP/Subnetting 학습 연습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "pass"
+      "labStatus": "completed"
     },
     {
       "id": "ethernet-mac-table",
