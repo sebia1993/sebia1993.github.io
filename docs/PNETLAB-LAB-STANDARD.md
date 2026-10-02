@@ -52,6 +52,7 @@ PNETLab link capture → Wireshark → PCAP/분석 → GitHub 공개용 Evidence
 
 | Topic | Cisco 1차 | Aruba 2차 | 필수 Packet/Evidence |
 |---|---|---|---|
+| `ip-subnetting` | C8000V 등 L3 Router | 선택적 교차검증 | Same/Different Subnet, Wrong Mask/Gateway, ARP + ICMP + CLI |
 | `icmp-troubleshooting` | C8000V | CX | ICMP Echo/Unreachable/TTL |
 | `vlan-trunk` | Nexus | CX | Access/Trunk 양쪽 802.1Q 비교 |
 | `inter-vlan-routing` | Nexus/C8000V | CX | ARP + ICMP, L2/L3 경계 |
@@ -147,13 +148,14 @@ results/<topic>.json
 
 현재 로드맵의 선행 학습을 유지한다. 장비 기반 PNETLab 실습은 아래 순서로 착수한다.
 
-1. `icmp-troubleshooting`: 가장 작은 Cisco L3 topology로 PNETLab/Wireshark Evidence 파이프라인 검증
-2. `vlan-trunk`: Cisco L2에서 Access/Trunk/802.1Q
-3. `inter-vlan-routing`: L2와 L3 연결
-4. `stp`: 3-switch 구조가 자원상 가능할 때 Cisco 우선, 불가능하면 Aruba CX로 검증
-5. `lacp`
-6. `dhcp`
-7. `routing-table` → `ospf`
+1. `ip-subnetting`: 최소 L3 topology에서 Same/Different Subnet, Wrong Mask/Gateway와 복구를 검증해 PNETLab/Wireshark Evidence 파이프라인을 먼저 완성
+2. `icmp-troubleshooting`: IP/Subnetting에서 확보한 환경을 바탕으로 Echo/Unreachable/TTL 진단 확장
+3. `vlan-trunk`: Cisco L2에서 Access/Trunk/802.1Q
+4. `inter-vlan-routing`: L2와 L3 연결
+5. `stp`: 3-switch 구조가 자원상 가능할 때 Cisco 우선, 불가능하면 Aruba CX로 검증
+6. `lacp`
+7. `dhcp`
+8. `routing-table` → `ospf`
 
 첫 목표는 복잡한 토폴로지가 아니라 **정상 1개 + 장애 2개 + 각 복구 + Wireshark Evidence**를 한 과정에서 끝까지 완성하는 것이다.
 
