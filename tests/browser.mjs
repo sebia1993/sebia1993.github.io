@@ -103,6 +103,22 @@ try {
         const response = await page.goto(`${base}/labs/ip-subnetting-simulator.html`, { waitUntil: 'networkidle' });
         assert.equal(response.status(), 200);
         assert.equal(await page.locator('.tab').count(), 4);
+        if (width <= 390) {
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'mobile page overflows horizontally');
+          assert.equal(await page.evaluate(() => {
+            const tabs = document.querySelector('.tabs');
+            return tabs.scrollWidth > tabs.clientWidth;
+          }), true, 'mobile lesson selector should be compact horizontal scroll');
+          assert.equal(await page.evaluate(() => {
+            const card = document.querySelector('main.card').getBoundingClientRect();
+            return card.top < innerHeight * 0.9;
+          }), true, 'current learning question is pushed below the first mobile viewport');
+          await page.locator('.tab').nth(1).click();
+          await page.waitForTimeout(450);
+          assert.equal(await page.evaluate(() => document.querySelector('main.card').getBoundingClientRect().top < 90), true, 'mobile lesson selection should bring the current question into view');
+          await page.locator('.tab').nth(0).click();
+          await page.waitForTimeout(450);
+        }
         const run = page.locator('#runBtn');
         const expectedDecisions = ['ON-LINK', 'VIA GATEWAY', 'ON-LINK로 오판', 'VIA GATEWAY'];
         for (let i = 0; i < 4; i++) {
