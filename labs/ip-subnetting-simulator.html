@@ -53,7 +53,7 @@ body{min-height:100vh}.lab-wrap{width:min(1120px,calc(100% - 32px));margin:auto;
 
   <section class="complete" id="complete"><div class="eyebrow2">2단계 완료</div><h2>Subnet 판단의 핵심 흐름을 모두 확인했습니다.</h2><p>/25 정상 → on-link/off-link 구분 → /24 오설정 → /25 복구를 직접 비교했습니다. 이제 Prefix/Mask가 ARP보다 먼저 전달 판단을 바꾼다는 점을 설명할 수 있으면 됩니다.</p><div class="run-row"><a class="btn primary" href="ip-subnetting.html">개념서 다시 보기</a><a class="btn" href="../roadmap.html">로드맵으로 돌아가기</a></div></section>
 
-  <div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
+  <div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙으로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
 </div>
 <script>
 (function(){
