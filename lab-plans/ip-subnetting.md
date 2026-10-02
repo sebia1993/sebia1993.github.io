@@ -1,6 +1,6 @@
 # LAB-PLAN — IP 주소 / Subnetting
 
-상태: 계획 작성, 실제 Lab 미수행. 교육용 브라우저 시뮬레이션과 GNS3 검증은 별개다. 정상·장애·복구의 예상값은 관측값이 아니다. [Master Plan](../NETWORK-LEARNING-MASTER-PLAN.md)과 [Framework 계약](../LAB-FRAMEWORK-DESIGN.md)을 따른다.
+상태: 계획 작성, 실제 Lab 미수행. 교육용 브라우저 시뮬레이션과 PNETLab 검증은 별개다. 정상·장애·복구의 예상값은 관측값이 아니다. [Master Plan](../NETWORK-LEARNING-MASTER-PLAN.md), [Framework 계약](../LAB-FRAMEWORK-DESIGN.md), [PNETLab 실습 표준](../docs/PNETLAB-LAB-STANDARD.md)을 따른다.
 
 ## 학습 목표 / 선행
 
@@ -42,7 +42,7 @@ Cisco 읽기: `show ip interface brief`, `show ip route`, `show ip arp`, 대상 
 
 ## Capture 위치 / 예상 Packet
 
-GNS3 링크 PC1—SW1, SW1—R1, R1—SW2에서 캡처한다. 각 phase의 시작/종료 UTC, capture point, 원본 filename, SHA-256을 기록한다. Wireshark 분석 필터는 `arp || icmp`; 수집은 실험 링크 전체를 시작한 뒤 해당 구간으로 분석한다. Tailscale·호스트 Wi-Fi 인터페이스는 캡처하지 않는다.
+PNETLab 링크 PC1—SW1, SW1—R1, R1—SW2에서 캡처한다. 각 phase의 시작/종료 UTC, capture point, 원본 filename, SHA-256을 기록한다. Wireshark 분석 필터는 `arp || icmp`; 수집은 실험 링크 전체를 시작한 뒤 해당 구간으로 분석한다. Tailscale·호스트 Wi-Fi 인터페이스는 캡처하지 않는다.
 
 | 시나리오 ID | 적용 / 예상값 | 장애 근거 / 복구 |
 |---|---|---|
@@ -57,7 +57,7 @@ GNS3 링크 PC1—SW1, SW1—R1, R1—SW2에서 캡처한다. 각 phase의 시�
 
 ## 실제 수행 체크리스트 (현재 모두 미수행)
 
-- [ ] 별도 프로젝트 생성과 이미지 권한/외부망 미연결 확인
+- [ ] 별도 PNETLab Lab 생성과 이미지 권한/외부망 미연결 확인
 - [ ] Topology 구성, Device Boot 확인, 기본 Config와 초기 스냅샷
 - [ ] IP/VLAN/Route/Proxy ARP 기준 확인
 - [ ] 정상 상태, 같은/다른 subnet Ping/Test
@@ -75,9 +75,9 @@ GNS3 링크 PC1—SW1, SW1—R1, R1—SW2에서 캡처한다. 각 phase의 시�
 
 ## 교육 페이지 요소 / 진단 순서
 
-IPv4 calculator는 Prefix에 따른 Network/Broadcast/Host Range를 표시한다. /31은 P2P 특례, /32는 단일 host route로 고급 설명한다. 직접/Gateway 전달을 먼저 선택한 뒤 교육용 단계 흐름을 보여준다. 정상·Mask 장애·Gateway 장애와 각각의 복구를 선택할 수 있다. 초급은 IP/Mask/ARP 대상/다음 홉에 집중하고 상세 필드는 고급에서 펼친다.
+교육 페이지는 기본/고급 모드를 분리하고 30초 요약 → Mental Model → Subnet Boundary → Calculator → 반복 Trainer → 패킷 시뮬레이션 → Normal/Break/Recover → Operator Drill → CLI Workflow → Explain In My Own Words 순서로 구성한다. Calculator는 Source/Destination Network와 ON-LINK/OFF-LINK 판단을 보여 주며 고급 모드에서 Binary AND를 펼친다. /31, /32, Proxy ARP와 예외 조건은 고급 내용으로 분리한다.
 
-진단은 Source IP/Mask → Destination에 대한 on-link 판단 → 선택 Route → Gateway가 같은 LAN에 있는지 → ARP 대상/응답 → Router 입력/출력 → Return Route 순서다. UI의 마지막 단계 도달은 개인 연습 진도이며 실험 완료가 아니다.
+진단은 Source IP/Mask → Destination에 대한 on-link 판단 → 선택 Route → Gateway가 같은 LAN에 있는지 → ARP 대상/응답 → Router 입력/출력 → Return Route 순서다. 교육 시뮬레이션의 마지막 단계 도달이나 Quiz/Trainer 정답은 실제 실험 완료가 아니다. 실제 검증 상태는 `results/ip-subnetting.json`을 단일 Source of Truth로 사용해 페이지 Evidence 영역에 표시한다.
 
 ## 완료 조건 / 다음 과정
 
