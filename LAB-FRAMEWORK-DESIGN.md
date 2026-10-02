@@ -26,7 +26,7 @@ labs/ip-subnetting.html (17개 교육 구획, 결과 상태 표시)
              └─ core.js (순수 상태 전이, DOM/네트워크 없음)
 ```
 
-새 모듈은 build-free, 외부 CDN/프레임워크/계정/분석 추적 없음. 새 스타일은 `.nl-lab` 내부로 한정한다. DOM에는 데이터 문자열을 `textContent`로 넣고 arbitrary HTML/명령을 scenario에서 실행하지 않는다. 엔진은 SSH/GNS3를 호출하지 않는다.
+새 모듈은 build-free, 외부 CDN/프레임워크/계정/분석 추적 없음. 새 스타일은 `.nl-lab` 내부로 한정한다. DOM에는 데이터 문자열을 `textContent`로 넣고 arbitrary HTML/명령을 scenario에서 실행하지 않는다. 엔진은 PNETLab 관리 인터페이스를 호출하지 않는다.
 
 이번 최소 기능: 시나리오 선택, 예측/정오 피드백, 단계별 재생/한 단계, Device/Link/Packet 표시, Event Log, Packet 상세, 기본/고급, Reset/재실행, topology 줌과 선택적 가로 따라가기. 장애/복구는 각각 명시된 교육 시나리오로 선택한다. 실제 fault injection/Runner, persistence, 임의 장치 편집, 기존 Lab migration은 후속이다.
 
