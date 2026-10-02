@@ -38,27 +38,57 @@ for key, total in data["summary"].items():
     expected = sum(t["status"] == "completed" for t in data["topics"]) if key == "completedTopics" else sum(t[key] for t in data["topics"])
     check(total == expected, f"Roadmap sum mismatch: {key}")
 ip = next(t for t in data["topics"] if t["id"] == "ip-subnetting")
-check(ip["status"] != "completed", "IP Lab has no accepted runtime evidence yet")
-check(all(ip[k] == 0 for k in data["summary"] if k != "completedTopics"), "Simulation inflated lab evidence")
-for topic in data["topics"]:
-    if topic.get("detailUrl"):
-        check((ROOT / topic["detailUrl"]).is_file(), f"Missing topic page: {topic['id']}")
-
 result = json.loads((ROOT / "results/ip-subnetting.json").read_text(encoding="utf-8"))
-check(result["labStatus"] == "not-run", "Unexecuted Lab status changed")
-check(result.get("runId") is None, "Unexecuted Lab has a run ID")
-check(result["status"] == "NOT_RUN" and result["provenance"] is None, "Planned result claims observed provenance")
-check(result["plannedProvenance"] == "real-lab", "Expected isolated real lab plan")
-check(result["actual"] is None and result["artifacts"] == [], "Unexecuted Lab has actual evidence")
-check(result["startedAt"] is None and result["finishedAt"] is None, "Unexecuted Lab has execution timestamps")
 expected_ids = {"same-subnet", "different-subnet", "wrong-mask", "mask-recovery", "wrong-gateway", "gateway-recovery"}
+evidence_metric_keys = ("labs", "faultScenarios", "packetCaptures", "recoveryValidations", "explainNotes", "automations")
+
+check(result["plannedProvenance"] == "real-lab", "Expected isolated real lab plan")
+check(result["environment"]["kind"] == "isolated-pnetlab", "IP Lab planned environment must be PNETLab")
 check(len(result["scenarios"]) == 6 and {s["id"] for s in result["scenarios"]} == expected_ids, "Missing or duplicate planned scenarios")
 for scenario in result["scenarios"]:
-    check(scenario["result"] == "NOT_RUN" and scenario["actual"] is None and scenario["artifacts"] == [],
-          f"Simulation claimed actual evidence: {scenario['id']}")
     if scenario["phase"] == "recovery":
         check(scenario["recovers"] in {s["id"] for s in result["scenarios"] if s["phase"] == "failure"}, "Unpaired recovery")
-check(result["environment"]["verified"] is False and result["review"]["status"] == "not-reviewed", "Plan claims reviewed environment")
+
+lab_status = result["labStatus"]
+check(lab_status in {"not-run", "in-progress", "completed"}, f"Unknown IP Lab status: {lab_status}")
+
+if lab_status == "not-run":
+    check(ip["status"] != "completed", "IP Lab has no accepted runtime evidence yet")
+    check(all(ip[k] == 0 for k in evidence_metric_keys), "Simulation inflated lab evidence")
+    check(result.get("runId") is None, "Unexecuted Lab has a run ID")
+    check(result["status"] == "NOT_RUN" and result["provenance"] is None, "Planned result claims observed provenance")
+    check(result["actual"] is None and result["artifacts"] == [], "Unexecuted Lab has actual evidence")
+    check(result["startedAt"] is None and result["finishedAt"] is None, "Unexecuted Lab has execution timestamps")
+    check(result["environment"]["verified"] is False and result["review"]["status"] == "not-reviewed", "Plan claims reviewed environment")
+    for scenario in result["scenarios"]:
+        check(scenario["result"] == "NOT_RUN" and scenario["actual"] is None and scenario["artifacts"] == [],
+              f"Simulation claimed actual evidence: {scenario['id']}")
+else:
+    check(result["provenance"] == "real-lab", "Executed IP Lab must use real-lab provenance")
+    check(result.get("runId"), "Executed IP Lab requires runId")
+    check(result.get("startedAt"), "Executed IP Lab requires startedAt")
+    check(result["environment"]["verified"] is True, "Executed IP Lab requires verified environment")
+    observed = [s for s in result["scenarios"] if s["result"] != "NOT_RUN"]
+    check(observed, "Executed IP Lab has no observed scenarios")
+    for scenario in observed:
+        check(scenario["result"] in {"PASS", "FAIL", "INCONCLUSIVE"}, f"Invalid scenario result: {scenario['id']}")
+        check(scenario["actual"] is not None, f"Observed scenario missing actual: {scenario['id']}")
+        check(scenario["artifacts"], f"Observed scenario missing artifacts: {scenario['id']}")
+
+    if lab_status == "in-progress":
+        check(ip["status"] != "completed", "In-progress IP Lab marked completed")
+        check(result["status"] in {"IN_PROGRESS", "FAIL", "INCONCLUSIVE"}, "Invalid in-progress aggregate status")
+    else:
+        check(result["status"] == "PASS", "Completed IP Lab aggregate status must be PASS")
+        check(result.get("finishedAt"), "Completed IP Lab requires finishedAt")
+        check(all(s["result"] == "PASS" for s in result["scenarios"]), "Completed IP Lab contains non-PASS scenario")
+        check(ip["status"] == "completed", "Completed result not reflected in learning data")
+        check(ip["labs"] >= 1 and ip["faultScenarios"] >= 2 and ip["packetCaptures"] >= 1 and
+              ip["recoveryValidations"] >= 2 and ip["explainNotes"] >= 1,
+              "Completed IP Lab metrics do not reflect required evidence")
+        check(result["review"]["status"] != "not-reviewed", "Completed IP Lab requires review")
+        check(result["review"]["evidencePrivacyReviewed"] is True, "Completed IP Lab requires evidence privacy review")
+        check(result["review"]["learnerExplanationReviewed"] is True, "Completed IP Lab requires learner explanation review")
 
 # New framework pages plus stable learning entry points; unrelated portfolio apps
 # can contain backend routes and are outside this static learning-site check.
