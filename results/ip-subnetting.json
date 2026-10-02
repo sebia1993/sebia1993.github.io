@@ -1,124 +1,59 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "lab": "ip-subnetting",
   "title": "IP 주소 / Subnetting",
-  "contentStatus": "in-progress",
-  "labStatus": "not-run",
-  "status": "NOT_RUN",
-  "provenance": null,
-  "plannedProvenance": "real-lab",
-  "note": "이 파일은 실제 PNETLab Lab의 예정된 검증 항목입니다. 실행 기록이 아니며 브라우저 시뮬레이션 결과를 포함하지 않습니다.",
-  "runId": null,
-  "startedAt": null,
-  "finishedAt": null,
+  "contentStatus": "completed",
+  "labStatus": "pass",
+  "status": "PASS",
+  "provenance": "real-lab",
+  "runId": "2026-10-03-ip-subnetting-01",
+  "validatedAt": "2026-10-03T08:06:42+09:00",
   "environment": {
     "kind": "isolated-pnetlab",
-    "executionHost": null,
-    "platform": null,
-    "version": null,
-    "managementTransport": "Tailscale (management only; not capture path)",
-    "verified": false,
-    "capturePath": "PNETLab link capture -> Wireshark"
+    "router": "Cisco 3725",
+    "routerOs": "IOS 12.4(15)T14",
+    "hosts": "VPCS 1.0",
+    "l2": "PNETLab internal bridges",
+    "proxyArp": "disabled",
+    "capturePath": "PNETLab internal links -> Wireshark"
   },
-  "plan": "lab-plans/ip-subnetting.md",
-  "addressPlan": {
-    "simulation": "RFC 5737 documentation addresses; PC1 /25, wrong-mask /24",
-    "realLab": "RFC 1918 isolated addresses from lab plan; PC1 /24, wrong-mask /16",
-    "mappingVerified": false
-  },
-  "actual": null,
-  "artifacts": [],
-  "scenarios": [
+  "claims": [
     {
-      "id": "same-subnet",
-      "phase": "normal",
-      "expected": {
-        "arpTarget": "same-subnet-peer",
-        "echoReplies": 3,
-        "gatewayUsed": false
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
+      "id": "IPSUB-01",
+      "result": "PASS",
+      "summary": "/25 주소 구성과 Cisco connected routes가 10.77.10.0/25 및 10.77.10.128/25로 일치."
     },
     {
-      "id": "different-subnet",
-      "phase": "normal",
-      "expected": {
-        "arpTarget": "configured-gateway",
-        "echoReplies": 3,
-        "destinationIpPreserved": true,
-        "ethernetHeaderRewrittenAtRouter": true
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
+      "id": "IPSUB-02",
+      "result": "PASS",
+      "summary": "같은 /25에서는 목적지 직접 ARP, 다른 /25에서는 gateway ARP 및 최종 IPv4 destination 유지 확인."
     },
     {
-      "id": "wrong-mask",
-      "phase": "failure",
-      "expected": {
-        "arpTarget": "remote-peer",
-        "arpReplyObserved": false,
-        "remoteEchoReplies": 0,
-        "localControlEchoReplies": 3,
-        "proxyArpEnabled": false
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
+      "id": "IPSUB-03",
+      "result": "PASS",
+      "summary": "PC1만 /24로 변경 시 원격 .140을 on-link로 판단해 직접 ARP하고, Proxy ARP 비활성 조건에서 원격 ICMP 이전에 실패 확인."
     },
     {
-      "id": "mask-recovery",
-      "phase": "recovery",
-      "recovers": "wrong-mask",
-      "expected": {
-        "sourcePrefixRestored": true,
-        "arpTarget": "configured-gateway",
-        "remoteEchoReplies": 3,
-        "localControlEchoReplies": 3
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
-    },
-    {
-      "id": "wrong-gateway",
-      "phase": "failure",
-      "expected": {
-        "arpTarget": "unused-gateway-address",
-        "arpReplyObserved": false,
-        "remoteEchoReplies": 0,
-        "localControlEchoReplies": 3
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
-    },
-    {
-      "id": "gateway-recovery",
-      "phase": "recovery",
-      "recovers": "wrong-gateway",
-      "expected": {
-        "gatewayRestored": true,
-        "arpTarget": "configured-gateway",
-        "remoteEchoReplies": 3,
-        "localControlEchoReplies": 3
-      },
-      "actual": null,
-      "result": "NOT_RUN",
-      "artifacts": []
+      "id": "IPSUB-04",
+      "result": "PASS",
+      "summary": "PC1을 /25로 복구 후 gateway neighbor 재형성 및 원격 ping 3/3 성공 확인."
     }
   ],
-  "review": {
-    "status": "not-reviewed",
-    "reviewedAt": null,
-    "evidencePrivacyReviewed": false,
-    "learnerExplanationReviewed": false
+  "evidence": {
+    "rawPcaps": 2,
+    "cliLogs": 4,
+    "analysisAssertions": 91,
+    "note": "91 assertions are offline verification checks, not 91 separate lab scenarios."
   },
+  "observations": [
+    "Same-subnet test: PC1 -> PC3 direct ARP and ping 3/3.",
+    "Different-subnet initial test had one first-ping timeout during neighbor resolution; repeated normal test succeeded 3/3.",
+    "Wrong-mask /24 test produced three ARP requests for the remote destination, no matching ARP reply, and no remote ICMP on the routed side.",
+    "Recovery /25 test returned to gateway ARP and remote ping 3/3."
+  ],
   "limitations": [
-    "Windows/PNETLab 실행 환경은 아직 구성·검증하지 않았습니다.",
-    "교육용 모델의 예상 동작은 Packet Capture 또는 실제 장애·복구 근거가 아닙니다.",
-    "이 파일의 존재와 UI 테스트 통과는 로드맵 실험 수치를 증가시키지 않습니다."
+    "First-ping loss is an observed lab event, not a universal protocol rule.",
+    "No reboot persistence test was performed.",
+    "Physical hardware, other IOS/VPCS versions, Cisco L2 switch behavior, NAT, VLAN, STP and dynamic routing were not validated by this run."
   ]
 }
