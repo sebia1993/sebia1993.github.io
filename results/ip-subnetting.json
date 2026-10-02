@@ -1,59 +1,187 @@
 {
-  "schemaVersion": "2.0",
+  "schemaVersion": "2.1",
   "lab": "ip-subnetting",
   "title": "IP 주소 / Subnetting",
   "contentStatus": "completed",
-  "labStatus": "pass",
+  "labStatus": "completed",
   "status": "PASS",
+  "plannedProvenance": "real-lab",
   "provenance": "real-lab",
   "runId": "2026-10-03-ip-subnetting-01",
-  "validatedAt": "2026-10-03T08:06:42+09:00",
+  "startedAt": "2026-10-03T07:46:35.861403+09:00",
+  "finishedAt": "2026-10-03T08:06:42.580946+09:00",
   "environment": {
     "kind": "isolated-pnetlab",
+    "executionHost": "Windows PC",
+    "platform": "PNETLab",
     "router": "Cisco 3725",
-    "routerOs": "IOS 12.4(15)T14",
+    "version": "IOS 12.4(15)T14",
     "hosts": "VPCS 1.0",
-    "l2": "PNETLab internal bridges",
+    "l2": "two isolated PNETLab internal bridges",
     "proxyArp": "disabled",
-    "capturePath": "PNETLab internal links -> Wireshark"
+    "managementTransport": "Tailscale / Windows App (management only; not capture path)",
+    "verified": true,
+    "capturePath": "PNETLab internal link capture -> Wireshark"
   },
+  "addressPlan": {
+    "realLab": "10.77.10.0/24 split into two /25 networks; PC1 wrong-mask test /25 -> /24",
+    "mappingVerified": true
+  },
+  "actual": {
+    "claimsPassed": 4,
+    "claimsTotal": 4,
+    "rawPcaps": 2,
+    "cliLogs": 4,
+    "offlineAssertions": 91
+  },
+  "artifacts": [
+    "evidence/continuous/CP1.pcapng",
+    "evidence/continuous/CP2.pcapng",
+    "evidence/logs/R1.txt",
+    "evidence/logs/PC1.txt",
+    "evidence/logs/PC2.txt",
+    "evidence/logs/PC3.txt",
+    "evidence/analysis/packet-review.json"
+  ],
+  "scenarios": [
+    {
+      "id": "same-subnet",
+      "phase": "normal",
+      "expected": {
+        "arpTarget": "10.77.10.20",
+        "echoReplies": 3,
+        "gatewayUsed": false
+      },
+      "actual": {
+        "arpTarget": "10.77.10.20",
+        "echoReplies": 3,
+        "gatewayUsed": false
+      },
+      "result": "PASS",
+      "artifacts": [
+        "evidence/logs/PC1.txt",
+        "evidence/continuous/CP1.pcapng"
+      ]
+    },
+    {
+      "id": "different-subnet",
+      "phase": "normal",
+      "expected": {
+        "arpTarget": "10.77.10.1",
+        "destinationIp": "10.77.10.140",
+        "gatewayUsed": true
+      },
+      "actual": {
+        "arpTarget": "10.77.10.1",
+        "destinationIp": "10.77.10.140",
+        "firstTrialEchoReplies": 2,
+        "repeatTrialEchoReplies": 3,
+        "gatewayUsed": true
+      },
+      "result": "PASS",
+      "artifacts": [
+        "evidence/logs/PC1.txt",
+        "evidence/logs/R1.txt",
+        "evidence/continuous/CP1.pcapng",
+        "evidence/continuous/CP2.pcapng",
+        "evidence/analysis/packet-review.json"
+      ]
+    },
+    {
+      "id": "wrong-mask",
+      "phase": "failure",
+      "expected": {
+        "pc1Prefix": 24,
+        "arpTarget": "10.77.10.140",
+        "arpReplyObserved": false,
+        "remoteIcmpObserved": false,
+        "localControlEchoReplies": 3
+      },
+      "actual": {
+        "pc1Prefix": 24,
+        "arpRequests": 3,
+        "arpTarget": "10.77.10.140",
+        "arpReplyObserved": false,
+        "remoteIcmpObserved": false,
+        "localControlEchoReplies": 3
+      },
+      "result": "PASS",
+      "artifacts": [
+        "evidence/logs/PC1.txt",
+        "evidence/logs/R1.txt",
+        "evidence/continuous/CP1.pcapng",
+        "evidence/continuous/CP2.pcapng",
+        "evidence/analysis/packet-review.json"
+      ]
+    },
+    {
+      "id": "mask-recovery",
+      "phase": "recovery",
+      "recovers": "wrong-mask",
+      "expected": {
+        "pc1Prefix": 25,
+        "arpTarget": "10.77.10.1",
+        "remoteEchoReplies": 3
+      },
+      "actual": {
+        "pc1Prefix": 25,
+        "arpTarget": "10.77.10.1",
+        "remoteEchoReplies": 3,
+        "directArpForRemote": false
+      },
+      "result": "PASS",
+      "artifacts": [
+        "evidence/logs/PC1.txt",
+        "evidence/logs/R1.txt",
+        "evidence/continuous/CP1.pcapng",
+        "evidence/continuous/CP2.pcapng"
+      ]
+    }
+  ],
   "claims": [
     {
       "id": "IPSUB-01",
       "result": "PASS",
-      "summary": "/25 주소 구성과 Cisco connected routes가 10.77.10.0/25 및 10.77.10.128/25로 일치."
+      "summary": "/25 address configuration and Cisco connected routes matched 10.77.10.0/25 and 10.77.10.128/25."
     },
     {
       "id": "IPSUB-02",
       "result": "PASS",
-      "summary": "같은 /25에서는 목적지 직접 ARP, 다른 /25에서는 gateway ARP 및 최종 IPv4 destination 유지 확인."
+      "summary": "Same /25 used direct ARP; different /25 used gateway ARP while IPv4 destination remained the final host."
     },
     {
       "id": "IPSUB-03",
       "result": "PASS",
-      "summary": "PC1만 /24로 변경 시 원격 .140을 on-link로 판단해 직접 ARP하고, Proxy ARP 비활성 조건에서 원격 ICMP 이전에 실패 확인."
+      "summary": "Changing only PC1 /25 -> /24 made the remote .140 address appear on-link and caused direct unresolved ARP with Proxy ARP disabled."
     },
     {
       "id": "IPSUB-04",
       "result": "PASS",
-      "summary": "PC1을 /25로 복구 후 gateway neighbor 재형성 및 원격 ping 3/3 성공 확인."
+      "summary": "Restoring /25 restored gateway neighbor selection and remote ping 3/3."
     }
   ],
-  "evidence": {
-    "rawPcaps": 2,
-    "cliLogs": 4,
-    "analysisAssertions": 91,
-    "note": "91 assertions are offline verification checks, not 91 separate lab scenarios."
+  "review": {
+    "status": "content-reviewed",
+    "evidencePrivacyReviewed": true,
+    "learnerExplanationReviewed": false,
+    "contentQaReviewed": true
   },
-  "observations": [
-    "Same-subnet test: PC1 -> PC3 direct ARP and ping 3/3.",
-    "Different-subnet initial test had one first-ping timeout during neighbor resolution; repeated normal test succeeded 3/3.",
-    "Wrong-mask /24 test produced three ARP requests for the remote destination, no matching ARP reply, and no remote ICMP on the routed side.",
-    "Recovery /25 test returned to gateway ARP and remote ping 3/3."
-  ],
+  "contentQa": {
+    "layout": "PASS",
+    "interaction": "PASS",
+    "javascript": "PASS",
+    "viewports": [
+      "360x800",
+      "768x1024",
+      "1366x768",
+      "1920x1080"
+    ],
+    "note": "Local rendered QA passed; GitHub Pages deployment is checked separately."
+  },
   "limitations": [
-    "First-ping loss is an observed lab event, not a universal protocol rule.",
+    "The first different-subnet ping trial lost one initial echo while neighbor resolution occurred; a repeat with the same /25 configuration succeeded 3/3. This is not taught as a universal rule.",
     "No reboot persistence test was performed.",
-    "Physical hardware, other IOS/VPCS versions, Cisco L2 switch behavior, NAT, VLAN, STP and dynamic routing were not validated by this run."
+    "Physical hardware, other IOS/VPCS versions, Cisco L2 switch behavior, NAT, VLAN, STP and dynamic routing were not validated by this run.",
+    "Learner self-explanation has not been individually graded; the final Concept Guide includes a self-explanation prompt."
   ]
 }
