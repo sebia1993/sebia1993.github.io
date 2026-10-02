@@ -946,9 +946,7 @@
       btn.classList.toggle('active',on);
       btn.setAttribute('aria-pressed',String(on));
     });
-    $('viewModeSummary').textContent=mode==='basic'
-      ? '기본 모드 · 처음에는 Ethernet Frame과 FDB의 핵심 변화만 확인하세요.'
-      : '고급 모드 · SW1 FDB, PC1/PC2 ARP 캐시와 현재 실습 상태를 직접 바꾸는 자유 조작을 표시합니다.';
+    $('viewModeSummary').textContent='예상 → 실행 → 비교 순서로 Ethernet Frame과 FDB의 핵심 변화만 확인합니다.';
     renderChecks();
   }
 
