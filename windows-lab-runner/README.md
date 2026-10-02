@@ -1,17 +1,17 @@
 # Windows Lab Runner — 장기 설계
 
-**현재 상태: 설계만 작성, 실행 코드·패키지·Windows CI 미구현.** 이 디렉터리에는 Windows에서 실행할 runner가 없다. [Master Plan](../NETWORK-LEARNING-MASTER-PLAN.md), [Framework 계약](../LAB-FRAMEWORK-DESIGN.md), [IP/Subnetting Lab Plan](../lab-plans/ip-subnetting.md)을 기준으로 실제 실습 자동화의 경계를 정의한다. 브라우저 엔진은 시뮬레이션만 재생하며 SSH/GNS3 API나 이 runner를 호출하지 않는다.
+**현재 상태: 설계만 작성, 실행 코드·패키지·Windows CI 미구현.** 이 디렉터리에는 Windows에서 실행할 runner가 없다. [Master Plan](../NETWORK-LEARNING-MASTER-PLAN.md), [Framework 계약](../LAB-FRAMEWORK-DESIGN.md), [IP/Subnetting Lab Plan](../lab-plans/ip-subnetting.md)을 기준으로 실제 실습 자동화의 경계를 정의한다. 브라우저 엔진은 시뮬레이션만 재생하며 PNETLab 관리 인터페이스나 이 runner를 호출하지 않는다.
 
 ## 역할과 구성 요소
 
-Mac은 Plan·교육 코드·결과 검토·Pages 공개를 담당한다. Windows runner는 사용 권한을 확인한 격리 GNS3 실습에서만 동작한다. 운영 장비, 기존 프로젝트, 회사망, 실제 RF·Cloud 실험까지 자동 확장하지 않는다.
+Mac은 Plan·교육 코드·결과 검토·Pages 공개를 담당한다. Windows runner는 사용 권한을 확인한 격리 PNETLab 실습에서만 동작한다. 운영 장비, 기존 프로젝트, 회사망, 실제 RF·Cloud 실험까지 자동 확장하지 않는다.
 
 | 구성 요소 | 책임 / 경계 |
 |---|---|
 | Plan validator | schema, topic/scenario ID, 기대값, 필수 근거, 복구 명령 계약 검사 |
 | Read-only preflight | SSH/API 버전, 인증, compute, 도구, 선택된 저장 루트·용량·시간 확인 |
-| Project guard | 명시된 별도 project ID allowlist, 노드·링크 일치, 외부망 미연결, 중복 실행 방지 |
-| GNS3 adapter | 검증된 API 버전별 동작. 사전 점검은 GET만 허용 |
+| Lab guard | 명시된 별도 PNETLab Lab allowlist, 노드·링크 일치, 외부망 미연결, 중복 실행 방지 |
+| PNETLab adapter | 실제 환경에서 지원·권한이 확인된 관리 방식만 사용. 자동화 구현 전 read-only 접근 가능 범위를 먼저 검증 |
 | Device adapter | Vendor/버전별 허용 CLI, timeout, baseline 수집·복원·재검증 |
 | Capture controller | 지정한 내부 링크에서 시작·종료·파일 존재·관측 구간 확인 |
 | Evaluator | CLI·패킷·시간 근거로 expected/actual 비교. Ping 무응답만으로 원인 확정 금지 |
@@ -22,13 +22,13 @@ Mac은 Plan·교육 코드·결과 검토·Pages 공개를 담당한다. Windows
 ## 실행 수명
 
 ```text
-Plan validate → read-only preflight → project guard → baseline
+Plan validate → read-only preflight → Lab guard → baseline
   → 정상 capture/test → 장애 하나 적용 → 장애 관측
   → 원본 상태 복구 → 복구 capture/test → 다음 독립 장애
   → captures 종료·무결성 확인 → manifest → 사람 검토
 ```
 
-각 run은 유일한 `runId`와 시작/종료 UTC를 가진다. 중복 ID·기존 output 덮어쓰기·동일 프로젝트 병렬 실행은 거부한다. Project guard가 통과하기 전에는 생성·시작·설정·캡처 API를 호출하지 않는다. Plan이 지정한 새 프로젝트만 대상으로 삼고 기존 프로젝트 전체 삭제·중지·자동 정리 기능은 만들지 않는다.
+각 run은 유일한 `runId`와 시작/종료 UTC를 가진다. 중복 ID·기존 output 덮어쓰기·동일 프로젝트 병렬 실행은 거부한다. Lab guard가 통과하기 전에는 생성·시작·설정·캡처 API를 호출하지 않는다. Plan이 지정한 새 PNETLab Lab만 대상으로 삼고 기존 Lab 전체 삭제·중지·자동 정리 기능은 만들지 않는다.
 
 IP 파일럿은 `same-subnet`, `different-subnet` 기준을 확보한 뒤 `wrong-mask → mask-recovery`, 다시 정상 기준에서 `wrong-gateway → gateway-recovery` 순서로 수행한다. 장애를 누적하지 않는다. 시뮬레이션 주소와 실제 격리 Lab 주소의 대응 관계를 manifest에 명시한다.
 
@@ -51,9 +51,9 @@ IP 파일럿은 `same-subnet`, `different-subnet` 기준을 확보한 뒤 `wrong
 
 ## 관리 통신과 캡처
 
-관리 통신은 Tailscale의 기존 SSH 경로를 사용한다. SSH strict host key 검사를 유지하고 Windows의 localhost GNS3 API를 SSH 내부 호출하거나 Mac 루프백에만 바인딩한 SSH 터널로 접근한다. 루프백 수신 여부와 API 버전을 먼저 확인하며 서버·방화벽·tailnet 설정을 임의 변경하지 않는다. 401 응답은 인증 요구의 근거이며 Lab readiness PASS가 아니다.
+관리 통신이 필요하면 기존 Tailscale/SSH 경로와 PNETLab에서 실제로 지원되는 관리 방식을 별도로 검증한 뒤 사용한다. SSH strict host key 검사를 유지하며 서버·방화벽·tailnet 설정을 임의 변경하지 않는다. 확인되지 않은 API endpoint나 인증 방식을 가정해 자동화를 구현하지 않는다. 연결 성공이나 로그인 화면 확인만으로 Lab readiness PASS를 부여하지 않는다.
 
-학습 트래픽과 PCAP은 승인된 GNS3 내부 링크에 한정한다. 관리 인터페이스, 호스트 Wi-Fi, 회사 NIC 전체 캡처는 제외한다. 실습망을 Tailscale subnet route / exit node로 연결하지 않는다. 파일 전송 후 SHA-256을 원본과 비교하고 공개 전 검토한 복사본만 사이트에 연결한다.
+학습 트래픽과 PCAP은 승인된 PNETLab 내부 링크에 한정한다. 관리 인터페이스, 호스트 Wi-Fi, 회사 NIC 전체 캡처는 제외한다. 실습망을 Tailscale subnet route / exit node로 연결하지 않는다. 파일 전송 후 SHA-256을 원본과 비교하고 공개 전 검토한 복사본만 사이트에 연결한다.
 
 ## 결과 계약과 공개 게이트
 
@@ -69,4 +69,4 @@ JSON 생성·테스트 통과·API 연결 성공은 학습 완료가 아니다. 
 
 의미 있는 초기 테스트는 Plan/allowlist 거부, 중복 run 방지, 인증 정보 비노출, API 오류·timeout, 캡처 실패, 각 변경 단계에서의 취소·rollback·재개, 미검증 복구의 후속 실행 차단, manifest 상태·해시 검사다. 외부 Windows 호스트 자격 증명을 hosted CI에 넣지 않고 fixture/API 대역으로 자동화 계약을 검증한다.
 
-Hosted Windows CI는 실제 GNS3 노드 부팅·GUI·드라이버·관리자 권한/재부팅·RF·실장비를 증명하지 않는다. 그 범위는 승인된 실제 Windows 세션 또는 적절한 self-hosted 러너에서 별도 근거로 남긴다. macOS 로컬 테스트 결과도 Windows CI 및 실제 실습 결과와 각각 구분한다. 현재 문서만으로 통과했다고 주장하는 CI나 실습은 없다.
+Hosted Windows CI는 실제 PNETLab 노드 부팅·GUI·드라이버·관리자 권한/재부팅·RF·실장비를 증명하지 않는다. 그 범위는 승인된 실제 Windows 세션 또는 적절한 self-hosted 러너에서 별도 근거로 남긴다. macOS 로컬 테스트 결과도 Windows CI 및 실제 실습 결과와 각각 구분한다. 현재 문서만으로 통과했다고 주장하는 CI나 실습은 없다.
