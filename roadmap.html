@@ -58,12 +58,12 @@
 <section id="current">
   <div class="shell focus">
     <article class="focus-main">
-      <span class="badge active">2단계 구조 적용</span>
-      <h2>Ethernet / MAC Table</h2>
-      <p>첫 파일럿으로 개념 설명을 짧게 줄이고, Interactive Lab을 별도 2단계로 분리했습니다.</p>
+      <span class="badge active">검증·2단계 학습 완료</span>
+      <h2>IP 주소 / Subnetting</h2>
+      <p>Prefix/Mask로 같은 Subnet 여부를 판단하고, 잘못된 Mask가 on-link 판단을 어떻게 바꾸는지 실제 PNETLab 검증 결과로 정리했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/ethernet-mac-table.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/ethernet-mac-table-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/ip-subnetting.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/ip-subnetting-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -137,6 +137,7 @@
 function esc(v){return String(v??'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 const interactiveUrls={
+  'ip-subnetting':'./labs/ip-subnetting-simulator.html',
   'ethernet-mac-table':'./labs/ethernet-mac-table-simulator.html',
   'arp-default-gateway':'./labs/arp-default-gateway-simulator.html'
 };
@@ -182,7 +183,7 @@ fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
       const summary=summaryOverrides[t.id]||t.summary||'';
 
       let actions='';
-      if(t.id==='ethernet-mac-table'){
+      if(hasInteractive && hasPage){
         actions='<div class="topic-actions"><a class="btn primary" href="'+esc(t.detailUrl)+'">1단계 · 개념서 →</a><a class="btn" href="'+esc(interactiveUrls[t.id])+'">2단계 · 실습 →</a></div>';
       }else if(hasPage){
         actions='<div class="topic-actions"><a class="btn" href="'+esc(t.detailUrl)+'">학습 페이지 →</a></div>';
