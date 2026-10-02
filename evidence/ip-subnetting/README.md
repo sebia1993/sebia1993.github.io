@@ -1,11 +1,11 @@
 # IP / Subnetting Evidence — NOT_RUN
 
-실제 Windows/GNS3 Lab은 아직 수행하지 않았다. 정상·장애·복구의 실제값은 `null`, 근거 목록은 빈 배열이다. [교육 페이지](../../labs/ip-subnetting.html)의 애니메이션·퀴즈·계산 결과는 시뮬레이션이며 캡처나 실험 근거가 아니다.
+실제 Windows/PNETLab Lab은 아직 수행하지 않았다. 정상·장애·복구의 실제값은 `null`, 근거 목록은 빈 배열이다. [교육 페이지](../../labs/ip-subnetting.html)의 애니메이션·퀴즈·계산 결과는 시뮬레이션이며 캡처나 실험 근거가 아니다.
 
 - 계획: [LAB-PLAN](../../lab-plans/ip-subnetting.md)
 - 상태: [results/ip-subnetting.json](../../results/ip-subnetting.json)
 - 순서: `same-subnet` → `different-subnet` → `wrong-mask` → `mask-recovery` → `wrong-gateway` → `gateway-recovery`
-- 수행 준비: [Windows 체크리스트](../../docs/WINDOWS-LAB-CHECKLIST.md)
+- 수행 준비: [Windows 체크리스트](../../docs/WINDOWS-LAB-CHECKLIST.md) · [PNETLab 실습 표준](../../docs/PNETLAB-LAB-STANDARD.md)
 
 ## 수집 단위
 
@@ -23,7 +23,7 @@
 | failure / wrong-gateway | 정상 Mask·잘못된 Gateway, 미사용 Gateway ARP 무응답, 원격 실패·같은 LAN 성공 |
 | recovery / gateway-recovery | Gateway 복원, ARP 응답, 원격 및 같은 LAN 왕복, 관련 CLI/PCAP |
 
-GNS3 내부 `PC1—SW1`, `SW1—R1`, `R1—SW2` 링크를 캡처한다. Tailscale은 관리·파일 전달 전용이며 캡처 대상 인터페이스가 아니다. 실제 실험 주소와 문서 주소의 대응표를 함께 기록하고 서로 다른 주소 집합의 자료를 같은 실험으로 취급하지 않는다.
+PNETLab 내부 `PC1—SW1`, `SW1—R1`, `R1—SW2` 링크를 캡처한다. Tailscale은 관리·파일 전달 전용이며 캡처 대상 인터페이스가 아니다. 실제 실험 주소와 문서 주소의 대응표를 함께 기록하고 서로 다른 주소 집합의 자료를 같은 실험으로 취급하지 않는다.
 
 ## 공개 전 검토
 
