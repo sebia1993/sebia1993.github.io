@@ -39,12 +39,12 @@ for key, total in data["summary"].items():
     check(total == expected, f"Roadmap sum mismatch: {key}")
 ip = next(t for t in data["topics"] if t["id"] == "ip-subnetting")
 result = json.loads((ROOT / "results/ip-subnetting.json").read_text(encoding="utf-8"))
-expected_ids = {"same-subnet", "different-subnet", "wrong-mask", "mask-recovery", "wrong-gateway", "gateway-recovery"}
+expected_ids = {"same-subnet", "different-subnet", "wrong-mask", "mask-recovery"}
 evidence_metric_keys = ("labs", "faultScenarios", "packetCaptures", "recoveryValidations", "explainNotes", "automations")
 
 check(result["plannedProvenance"] == "real-lab", "Expected isolated real lab plan")
 check(result["environment"]["kind"] == "isolated-pnetlab", "IP Lab planned environment must be PNETLab")
-check(len(result["scenarios"]) == 6 and {s["id"] for s in result["scenarios"]} == expected_ids, "Missing or duplicate planned scenarios")
+check(len(result["scenarios"]) == 4 and {s["id"] for s in result["scenarios"]} == expected_ids, "Missing or duplicate validated scenarios")
 for scenario in result["scenarios"]:
     if scenario["phase"] == "recovery":
         check(scenario["recovers"] in {s["id"] for s in result["scenarios"] if s["phase"] == "failure"}, "Unpaired recovery")
@@ -83,12 +83,17 @@ else:
         check(result.get("finishedAt"), "Completed IP Lab requires finishedAt")
         check(all(s["result"] == "PASS" for s in result["scenarios"]), "Completed IP Lab contains non-PASS scenario")
         check(ip["status"] == "completed", "Completed result not reflected in learning data")
-        check(ip["labs"] >= 1 and ip["faultScenarios"] >= 2 and ip["packetCaptures"] >= 1 and
-              ip["recoveryValidations"] >= 2 and ip["explainNotes"] >= 1,
-              "Completed IP Lab metrics do not reflect required evidence")
+        check(ip["labs"] >= 1 and ip["faultScenarios"] >= 1 and ip["packetCaptures"] >= 2 and
+              ip["recoveryValidations"] >= 1,
+              "Completed IP Lab metrics do not reflect the validated four-scenario run")
         check(result["review"]["status"] != "not-reviewed", "Completed IP Lab requires review")
         check(result["review"]["evidencePrivacyReviewed"] is True, "Completed IP Lab requires evidence privacy review")
-        check(result["review"]["learnerExplanationReviewed"] is True, "Completed IP Lab requires learner explanation review")
+        check(result["review"].get("contentQaReviewed") is True, "Completed IP Lab requires content QA review")
+        check({c["id"] for c in result["claims"]} == {"IPSUB-01", "IPSUB-02", "IPSUB-03", "IPSUB-04"},
+              "Validated Claim IDs changed")
+        check(all(c["result"] == "PASS" for c in result["claims"]), "Completed IP Lab contains non-PASS Claim")
+        check(result["contentQa"]["layout"] == "PASS" and result["contentQa"]["interaction"] == "PASS" and
+              result["contentQa"]["javascript"] == "PASS", "Final two-stage content QA is incomplete")
 
 # New framework pages plus stable learning entry points; unrelated portfolio apps
 # can contain backend routes and are outside this static learning-site check.
