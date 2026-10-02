@@ -1,4 +1,4 @@
-"""Read-only checks: local HTML targets, roadmap accounting, unexecuted IP evidence."""
+"""Read-only checks: local HTML targets, roadmap accounting, and IP evidence state contracts."""
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
@@ -111,4 +111,4 @@ for page in pages:
         if not target.is_file():
             broken.append(f"{page.relative_to(ROOT)} -> {link}")
 check(not broken, "Broken static targets:\n" + "\n".join(broken))
-print(f"PASS: 27 topics, evidence totals unchanged, NOT_RUN result, {len(pages)} pages / {links_checked} local links")
+print(f"PASS: 27 topics, IP evidence state={lab_status}, {len(pages)} pages / {links_checked} local links")
