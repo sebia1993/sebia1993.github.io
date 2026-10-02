@@ -34,8 +34,6 @@ const labels = {
 
 const formatBinary = value => parseIPv4(value).toString(2).padStart(32, '0').replace(/(.{8})(?=.)/g, '$1.');
 const maskFromPrefix = prefix => prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
-const formatIPv4Number = value => [24, 16, 8, 0].map(shift => (value >>> shift) & 255).join('.');
-const networkNumber = (ip, prefix) => (parseIPv4(ip) & maskFromPrefix(prefix)) >>> 0;
 
 function calculate() {
   if (!form || !output || !message) return;
@@ -113,7 +111,7 @@ function calculate() {
       interpretation = '출발지와 목적지 주소가 같습니다. 이 주소가 자신에게 설정되어 있다면 로컬 처리가 우선합니다.';
     } else if (prefix === 31 || prefix === 32) {
       interpretation = `Mask 계산상 ${local ? '같은 Prefix' : '다른 Prefix'}입니다. /${prefix}는 일반 LAN 직접 전달·Gateway 규칙으로 단정하지 말고 인터페이스 종류와 Routing Table을 확인하세요.`;
-    } else if (target === info.network || target === info.broadcast || source === info.network || source === info.broadcast) {
+    } else if (target === targetInfo.network || target === targetInfo.broadcast || source === info.network || source === info.broadcast) {
       interpretation = '입력 주소에 Network 또는 Broadcast 주소가 포함됩니다. 일반 LAN의 Host 주소로 사용할 수 없으므로 직접 전달/왕복 성공을 판정하지 않습니다.';
     }
     message.textContent = `${interpretation} ${info.description || ''}`;
@@ -176,7 +174,7 @@ const pick = array => array[Math.floor(Math.random() * array.length)];
 
 function newTrainingQuestion() {
   if (!trainerQuestion || !trainerAnswers || !trainerFeedback) return;
-  const prefix = pick([24, 25, 26, 27]);
+  const prefix = pick([25, 26, 27]);
   const block = 2 ** (32 - prefix);
   const type = pick(['network', 'same', 'change']);
   let question;
