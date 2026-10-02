@@ -75,101 +75,57 @@ try {
   }
 
   for (const width of [320, 390, 768, 1440]) {
-    await check(`IP lesson ${width}px full interaction`, async () => {
+    await check(`IP concept ${width}px two-stage page`, async () => {
       const page = await browser.newPage({ viewport: { width, height: 960 } });
       const errors = [];
       page.on('pageerror', e => errors.push(e.message));
       page.on('console', m => { if (m.type() === 'error' && !m.text().includes('favicon')) errors.push(m.text()); });
       try {
-        await page.goto(`${base}/labs/ip-subnetting.html`, { waitUntil: 'networkidle' });
-        const root = page.locator('[data-phase]');
-        await root.waitFor();
-        assert.equal(await root.getAttribute('data-phase'), 'predicting');
-        assert.equal(await root.getByRole('button', { name: '기본 모드', exact: true }).getAttribute('aria-pressed'), 'true');
-        assert.equal(await root.getByRole('button', { name: '자동 재생', exact: true }).isDisabled(), true);
-        const scenarios = await page.evaluate(async () => (await import('/assets/lab/scenarios/ip-subnetting.js')).scenarios);
-        assert.ok(scenarios?.length === 6, 'six normal/failure/recovery scenarios');
-        for (const scenario of scenarios) {
-          await root.getByLabel('실습 시나리오', { exact: true }).selectOption(scenario.id);
-          // Deliberately wrong predictions remain usable and teach the correction.
-          const choice = scenario.choices.find(c => c.id !== scenario.correctId);
-          await root.getByRole('button', { name: choice.label, exact: true }).click();
-          for (let i = 0; i < scenario.steps.length; i++) await root.getByRole('button', { name: '한 단계', exact: true }).click();
-          assert.equal(await root.getAttribute('data-phase'), 'finished', scenario.id);
-          assert.equal(Number(await root.getAttribute('data-step')), scenario.steps.length - 1);
-          await root.getByRole('button', { name: '초기화', exact: true }).click();
-          assert.equal(await root.getAttribute('data-phase'), 'predicting');
-          assert.equal(Number(await root.getAttribute('data-step')), -1);
-        }
-        const first = scenarios[0];
-        await root.getByLabel('실습 시나리오', { exact: true }).selectOption(first.id);
-        await root.getByRole('button', { name: first.choices[0].label, exact: true }).click();
-        await root.getByRole('button', { name: '자동 재생', exact: true }).click();
-        await root.getByRole('button', { name: '초기화', exact: true }).click();
-        await page.waitForTimeout(1300); // Past one playback timer: old work must stay cancelled.
-        assert.equal(await root.getAttribute('data-phase'), 'predicting');
-        assert.equal(Number(await root.getAttribute('data-step')), -1);
-        await root.getByRole('button', { name: first.choices[0].label, exact: true }).click();
-        await root.getByRole('button', { name: '자동 재생', exact: true }).click();
-        await root.getByLabel('실습 시나리오', { exact: true }).selectOption(scenarios[1].id);
-        await page.waitForTimeout(1300);
-        assert.equal(await root.getAttribute('data-phase'), 'predicting');
-        assert.equal(Number(await root.getAttribute('data-step')), -1);
-        await root.getByRole('button', { name: '고급 모드', exact: true }).click();
-        assert.equal(await root.getByRole('button', { name: '고급 모드', exact: true }).getAttribute('aria-pressed'), 'true');
-        const follow = root.getByLabel('패킷 가로 따라가기', { exact: true });
-        assert.equal(await follow.isChecked(), false);
-        await follow.check();
-        await root.getByRole('button', { name: '확대', exact: true }).click();
-        await root.getByRole('button', { name: '축소', exact: true }).click();
-        await root.getByRole('button', { name: '보기 맞춤', exact: true }).click();
-        await root.getByRole('button', { name: '확대', exact: true }).click();
-        await page.emulateMedia({ reducedMotion: 'reduce' });
-        const routed = scenarios.find(s => s.id === 'different-subnet');
-        await root.getByLabel('실습 시나리오', { exact: true }).selectOption(routed.id);
-        await root.getByRole('button', { name: routed.choices.find(c => c.id === routed.correctId).label, exact: true }).click();
-        const viewport = root.locator('.nl-topology-viewport');
-        await viewport.scrollIntoViewIfNeeded();
-        const vertical = await page.evaluate(() => scrollY);
-        let maxHorizontal = 0;
-        for (const step of routed.steps) {
-          // Dispatch the control without Playwright scrolling it into view: test
-          // the engine's follow behavior independently from the driver's scroll.
-          await root.getByRole('button', { name: '한 단계', exact: true }).evaluate(button => button.click());
-          maxHorizontal = Math.max(maxHorizontal, await viewport.evaluate(el => el.scrollLeft));
-          assert.ok(Math.abs((await page.evaluate(() => scrollY)) - vertical) <= 1, 'packet follow moved document vertically');
-          if (step.packet?.destinationIp) assert.ok((await root.locator('.nl-packet-body').textContent()).includes(step.packet.destinationIp));
-        }
-        assert.ok(maxHorizontal > 0, 'zoomed packet follow never moved horizontally');
-        assert.equal(await root.getAttribute('data-phase'), 'finished');
-        assert.equal(await root.locator('.nl-packet-details').getAttribute('open'), '');
-        await root.getByRole('button', { name: '초기화', exact: true }).click();
-        await root.getByRole('button', { name: routed.choices[0].label, exact: true }).click();
-        await root.getByRole('button', { name: '자동 재생', exact: true }).click();
-        await page.waitForFunction(() => document.querySelector('.nl-lab').dataset.phase === 'finished');
-        assert.equal(await root.locator('.nl-event-log li').count(), routed.steps.length);
-        await root.getByRole('button', { name: '기본 모드', exact: true }).click();
-        assert.equal(await root.getByRole('button', { name: '기본 모드', exact: true }).getAttribute('aria-pressed'), 'true');
-        // Calculator: arithmetic, special-prefix semantics and invalid input.
-        await page.getByLabel('Prefix /', { exact: true }).fill('24');
-        await page.getByRole('button', { name: '계산하기', exact: true }).click();
-        assert.ok((await page.locator('#calculator-message').innerText()).includes('같은 Subnet'));
-        assert.ok((await page.locator('#calculator-result').innerText()).includes('192.0.2.255'));
-        await page.getByLabel('Prefix /', { exact: true }).fill('31');
-        await page.getByRole('button', { name: '계산하기', exact: true }).click();
-        assert.ok((await page.locator('#calculator-message').innerText()).includes('/31'));
-        await page.getByLabel('출발지 IPv4', { exact: true }).fill('999.0.2.10');
-        await page.getByRole('button', { name: '계산하기', exact: true }).click();
-        assert.equal(await page.getByLabel('출발지 IPv4', { exact: true }).getAttribute('aria-invalid'), 'true');
-        assert.equal(await page.locator('#calculator-result').innerText(), '');
-        await page.getByLabel('출발지 IPv4', { exact: true }).fill('192.0.2.10');
-        await page.getByLabel('Prefix /', { exact: true }).fill('25');
-        await page.getByRole('button', { name: '계산하기', exact: true }).click();
-        await page.getByRole('button', { name: 'IP 목적지: PC2 .140 · Ethernet 목적지: R1 왼쪽 MAC', exact: true }).click();
-        assert.ok((await page.locator('#quiz-feedback').innerText()).startsWith('맞습니다.'));
+        const response = await page.goto(`${base}/labs/ip-subnetting.html`, { waitUntil: 'networkidle' });
+        assert.equal(response.status(), 200);
+        const body = await page.locator('body').innerText();
+        assert.ok(body.includes('Mask를 적용한 Network Prefix가 같으면 on-link'));
+        assert.ok(body.includes('10.77.10.10/25'));
+        assert.ok(body.includes('10.77.10.140/25'));
+        assert.equal(await page.locator('a[href="ip-subnetting-simulator.html"]').count(), 1);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
         assert.deepEqual(errors, []);
-        await page.screenshot({ path: resolve(output, `ip-subnetting-${width}.png`), fullPage: true });
+        await page.screenshot({ path: resolve(output, `ip-subnetting-concept-${width}.png`), fullPage: true });
+      } finally { await page.close(); }
+    });
+
+    await check(`IP simulator ${width}px prediction and four scenarios`, async () => {
+      const page = await browser.newPage({ viewport: { width, height: 960 } });
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      page.on('console', m => { if (m.type() === 'error' && !m.text().includes('favicon')) errors.push(m.text()); });
+      try {
+        const response = await page.goto(`${base}/labs/ip-subnetting-simulator.html`, { waitUntil: 'networkidle' });
+        assert.equal(response.status(), 200);
+        assert.equal(await page.locator('.tab').count(), 4);
+        const run = page.locator('#runBtn');
+        const expectedDecisions = ['ON-LINK', 'VIA GATEWAY', 'ON-LINK로 오판', 'VIA GATEWAY'];
+        for (let i = 0; i < 4; i++) {
+          await page.locator('.tab').nth(i).click();
+          assert.equal(await run.isDisabled(), true, `lesson ${i + 1} must require prediction`);
+          await page.locator('#choices .choice').first().click();
+          assert.equal(await run.isEnabled(), true);
+          await run.click();
+          assert.equal(await page.locator('#resultArea').isVisible(), true);
+          assert.equal(await page.locator('#validatedOut').innerText(), 'PASS');
+          assert.equal(await page.locator('#decisionOut').innerText(), expectedDecisions[i]);
+          if (i === 2) {
+            assert.ok((await page.locator('#evidenceText').innerText()).includes('.140에 직접 ARP 3회'));
+          }
+        }
+        assert.equal(await page.locator('#progressText').innerText(), '4 / 4 완료');
+        assert.equal(await page.locator('#complete').isVisible(), true);
+        await page.locator('#resetBtn').click();
+        assert.equal(await run.isDisabled(), true);
+        assert.equal(await page.locator('#resultArea').isVisible(), false);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+        assert.deepEqual(errors, []);
+        await page.screenshot({ path: resolve(output, `ip-subnetting-simulator-${width}.png`), fullPage: true });
       } finally { await page.close(); }
     });
   }
