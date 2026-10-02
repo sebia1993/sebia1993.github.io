@@ -65,6 +65,9 @@ try {
               assert.ok(await page.locator('[data-m-device]').first().getAttribute('aria-disabled'));
             }
           }
+          if (path === 'labs/ethernet-mac-table.html') {
+            await page.screenshot({ path: resolve(output, `ethernet-mac-table-${width}.png`), fullPage: true });
+          }
           assert.deepEqual(errors, [], 'runtime or console errors');
         } finally { await page.close(); }
       });
