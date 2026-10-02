@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>IP 주소 / Subnetting — 먼저 판단하는 네트워크 Lab</title>
+  <meta name="description" content="IP와 Mask로 같은 Subnet인지 직접 판단하고 ARP 대상과 Gateway 전달을 배우는 교육용 시뮬레이션. 실제 PNETLab Lab은 미수행 상태로 별도 기록합니다.">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../assets/lab/lab.css">
+  <style>
+    .subnet-course{padding-bottom:2rem;overflow-wrap:anywhere}
+    .subnet-course section{padding:28px 0;scroll-margin-top:100px}
+    .subnet-course .subnet-hero{padding:52px 0 22px}
+    .subnet-course h1{font-size:clamp(2.1rem,6vw,4rem);line-height:1.12}
+    .subnet-course h2{font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.35;margin:0 0 14px}
+    .subnet-course h3{font-size:1.1rem;line-height:1.4;margin:0 0 10px}
+    .subnet-course p{max-width:80ch}
+    .subnet-course .subnet-lead{font-size:1.15rem;color:#d9e5f2}
+    .subnet-course .subnet-status,.subnet-course .subnet-links{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+    .subnet-course .subnet-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,26px);min-width:0}
+    .subnet-course .subnet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .subnet-course .subnet-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .subnet-course .subnet-muted{color:var(--muted)}
+    .subnet-course .subnet-number{font-size:.8rem;color:var(--blue);font-weight:800;letter-spacing:.07em}
+    .subnet-course .subnet-callout{border-left:3px solid var(--mint);padding:12px 16px;background:var(--panel3);border-radius:8px;margin:16px 0}
+    .subnet-course .subnet-callout.pending{border-color:var(--amber)}
+    .subnet-course code{color:#d2c7ff;font-size:.95em}
+    .subnet-course .subnet-toc{display:flex;gap:8px;flex-wrap:wrap;padding:0;list-style:none}
+    .subnet-course .subnet-toc a{display:inline-flex;align-items:center;min-height:44px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+    .subnet-course input,.subnet-course button{font:inherit}
+    .subnet-course .subnet-form{display:grid;grid-template-columns:2fr 1fr 2fr auto;align-items:end;gap:12px}
+    .subnet-course .subnet-form label{display:grid;gap:7px;min-width:0}
+    .subnet-course .subnet-form input{width:100%;min-width:0;min-height:46px;border:1px solid #4c647e;border-radius:9px;padding:10px;background:var(--bg);color:var(--text);font-size:16px}
+    .subnet-course button{min-height:44px;padding:10px 15px;cursor:pointer;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text)}
+    .subnet-course button[aria-pressed=true]{border-color:var(--mint);background:#153d39}
+    .subnet-course button:focus-visible,.subnet-course input:focus-visible,.subnet-course a:focus-visible,.subnet-course summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+    .subnet-course [aria-invalid=true]{border-color:#ff9292!important}
+    .subnet-course .subnet-output{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+    .subnet-course .subnet-output>div{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel3)}
+    .subnet-course dt{font-size:.85rem;color:var(--muted)}
+    .subnet-course dd{margin:4px 0 0;font-weight:750}
+    .subnet-course .is-error{color:#ffabab}
+    .subnet-course .subnet-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+    .subnet-course table{width:100%;border-collapse:collapse;text-align:left}
+    .subnet-course th,.subnet-course td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+    .subnet-course th{background:var(--panel2)}
+    .subnet-course tr:last-child td{border-bottom:0}
+    .subnet-course details{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--panel3)}
+    .subnet-course summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:750;gap:8px}
+    .subnet-course summary:before{content:'＋';color:var(--blue)}
+    .subnet-course details[open]>summary:before{content:'−'}
+    .subnet-course li{margin:7px 0}
+    .subnet-course .subnet-quiz{display:grid;gap:10px}
+    .subnet-course .subnet-quiz button{text-align:left}
+    .subnet-course .subnet-anchor{color:var(--blue)}
+    .subnet-course .mode-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0 0}
+    .subnet-course .mode-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .subnet-course[data-mode="basic"] .advanced-only{display:none}
+    .subnet-course .quick-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+    .subnet-course .quick-summary>div{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}
+    .subnet-course .mental-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:18px 0}
+    .subnet-course .mental-step{display:grid;place-items:center;text-align:center;min-height:112px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}
+    .subnet-course .mental-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.6rem;font-weight:900}
+    .subnet-course .decision-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .subnet-course .decision{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}
+    .subnet-course .boundary-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+    .subnet-course .boundary-controls input[type=range]{width:min(420px,100%);accent-color:var(--blue)}
+    .subnet-course .boundary-strip{display:flex;min-height:92px;border:1px solid var(--line);border-radius:12px;overflow-x:auto;background:var(--panel3)}
+    .subnet-course .boundary-block{display:grid;place-items:center;align-content:center;gap:3px;min-width:72px;border-right:1px solid var(--line);padding:8px 3px;text-align:center}
+    .subnet-course .boundary-block:last-child{border-right:0}
+    .subnet-course .boundary-block b{font-size:.78rem}
+    .subnet-course .boundary-block span{font-size:.7rem;color:var(--muted)}
+    .subnet-course .calc-decision{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+    .subnet-course .calc-decision>div{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}
+    .subnet-course .calc-decision strong{display:block;margin-top:5px}
+    .subnet-course .binary-box{white-space:pre-wrap;overflow-x:auto;padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--line);line-height:1.7}
+    .subnet-course .trainer-head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .subnet-course .trainer-question{font-size:1.08rem;font-weight:750;margin:16px 0}
+    .subnet-course .answer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .subnet-course .answer-grid button{text-align:left}
+    .subnet-course .operator-case{display:grid;gap:12px}
+    .subnet-course .case-data{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+    .subnet-course .workflow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:16px 0}
+    .subnet-course .workflow>div{position:relative;padding:14px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);text-align:center}
+    .subnet-course .workflow>div:not(:last-child)::after{content:'→';position:absolute;right:-11px;top:50%;transform:translateY(-50%);z-index:2;color:var(--blue);font-weight:900}
+    .subnet-course .cli-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .subnet-course .cli-tabs pre{white-space:pre-wrap;overflow:auto;margin:10px 0 0}
+    .subnet-course .explain-prompts{counter-reset:explain;display:grid;gap:10px}
+    .subnet-course .explain-prompts details{margin:0}
+    .subnet-course .explain-prompts summary::after{counter-increment:explain;content:''}
+    @media(max-width:900px){.subnet-course .workflow{grid-template-columns:repeat(3,minmax(0,1fr))}.subnet-course .workflow>div::after{display:none}.subnet-course .cli-tabs{grid-template-columns:1fr}}
+    @media(max-width:800px){.subnet-course .subnet-form{grid-template-columns:2fr 1fr}.subnet-course .subnet-grid.three{grid-template-columns:1fr}.subnet-course .mental-flow{grid-template-columns:1fr}.subnet-course .mental-arrow{transform:rotate(90deg)}.subnet-course .answer-grid{grid-template-columns:1fr}}
+    @media(max-width:600px){.subnet-course .subnet-grid,.subnet-course .quick-summary,.subnet-course .decision-grid,.subnet-course .calc-decision{grid-template-columns:1fr}.subnet-course .subnet-output{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-course .workflow{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-course .subnet-hero{padding-top:32px}}
+    @media(max-width:360px){.subnet-course .subnet-form,.subnet-course .subnet-output{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){html:has(.subnet-course){scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+      <nav class="nav" aria-label="주요 학습 위치"><a href="#mental-model">판단 모델</a><a href="#boundary">Subnet 경계</a><a href="#calculator">IP 계산</a><a href="#trainer">반복 연습</a><a href="#evidence">검증 상태</a></nav>
+    </div>
+  </header>
+  <main class="shell subnet-course" data-mode="basic">
+    <section class="subnet-hero" id="why" data-learning-section="1">
+      <div class="eyebrow">STAGE 0 · 01 · IP ADDRESS / SUBNETTING</div>
+      <h1>직접 보낼까,<br><em>Gateway에 맡길까?</em></h1>
+      <p class="subnet-lead">IP와 Mask로 같은 Subnet인지 판단하면, 패킷을 보낼 첫 상대가 보입니다.</p>
+      <div class="subnet-status"><span class="tag proj">교육용 시뮬레이션</span><span class="tag learn" id="lab-status-badge">실제 Lab · NOT_RUN</span><span class="tag plan">기본 개념부터</span></div>
+      <p>주소의 앞부분이 비슷하다고 같은 네트워크인 것은 아닙니다. <b>어디까지가 Network인지는 Mask가 정합니다.</b> 먼저 결과를 예상하고, 모델의 패킷 흐름으로 이유를 확인해 보세요.</p>
+      <ul class="subnet-toc" aria-label="이 페이지 학습 순서"><li><a href="#concepts">① 개념</a></li><li><a href="#mental-model">② 판단 모델</a></li><li><a href="#boundary">③ 경계 보기</a></li><li><a href="#calculator">④ 계산</a></li><li><a href="#trainer">⑤ 반복 연습</a></li><li><a href="#practice">⑥ 패킷 흐름</a></li><li><a href="#troubleshooting">⑦ 장애·복구</a></li><li><a href="#operator">⑧ 실무 판단</a></li><li><a href="#evidence">⑨ 근거 확인</a></li></ul>
+      <div class="quick-summary" aria-label="30초 핵심 요약">
+        <div><b>30초 요약 ①</b><br>내 IP와 목적지 IP에 <b>내 Mask</b>를 적용해 Network를 비교합니다.</div>
+        <div><b>30초 요약 ②</b><br>Network가 같으면 <b>직접 전달</b>, 다르면 <b>Route / Gateway</b>를 봅니다.</div>
+      </div>
+      <div class="mode-bar subnet-card" aria-label="학습 난이도 선택">
+        <div><b>학습 모드</b><div id="mode-description" class="subnet-muted">처음에는 핵심 판단과 정상·대표 장애만 봅니다.</div></div>
+        <div class="mode-actions"><button type="button" data-learning-mode="basic" aria-pressed="true">기본 모드</button><button type="button" data-learning-mode="advanced" aria-pressed="false">고급 모드</button></div>
+      </div>
+    </section>
+
+    <section id="concepts" aria-labelledby="concept-title">
+      <div class="subnet-grid">
+        <article class="subnet-card" data-learning-section="2"><div class="subnet-number">02 · 선행 개념</div><h2 id="concept-title">지금 필요한 용어는 세 가지</h2><p><b>IP</b>는 통신 상대를 식별하는 주소, <b>Mask</b>는 Network 부분을 나누는 기준, <b>Gateway</b>는 다른 망으로 가는 다음 전달 대상입니다.</p><p class="subnet-muted">ARP는 같은 LAN에서 다음 상대의 MAC을 알아내는 과정입니다. 처음에는 이 정도만 이해해도 시작할 수 있습니다.</p><div class="subnet-links"><a class="subnet-anchor" href="ethernet-mac-table.html">Ethernet / MAC 설명</a><a class="subnet-anchor" href="arp-default-gateway.html">ARP / Gateway 실제 근거</a></div></article>
+        <article class="subnet-card" data-learning-section="3"><div class="subnet-number">03 · 핵심 개념</div><h2>Prefix는 Network 부분의 길이</h2><p><code>/25</code>는 32비트 중 앞 25비트가 Network라는 뜻이며 Mask는 <code>255.255.255.128</code>입니다.</p><p><code>192.0.2.0/25</code>의 일반 Host 범위는 <code>.1 ~ .126</code>, Broadcast는 <code>.127</code>입니다. <code>.140</code>은 다음 망인 <code>192.0.2.128/25</code>에 속합니다.</p><p class="subnet-callout"><b>출발지와 목적지에 송신자의 Mask를 각각 적용한 Network 값</b>이 같으면 같은 Subnet으로 판단합니다.</p></article>
+      </div>
+    </section>
+
+    <section id="mental-model" aria-labelledby="mental-title">
+      <div class="subnet-number">MENTAL MODEL · 한 줄로 기억하기</div>
+      <h2 id="mental-title">IP + Mask → Network → Same / Different → Next-hop</h2>
+      <div class="mental-flow" aria-label="Subnet 판단 흐름">
+        <div class="mental-step"><b>내 IP + 내 Mask</b><span class="subnet-muted">내 Network 계산</span></div>
+        <div class="mental-arrow" aria-hidden="true">→</div>
+        <div class="mental-step"><b>목적지 IP + 같은 Mask</b><span class="subnet-muted">목적지 Network 계산</span></div>
+        <div class="mental-arrow" aria-hidden="true">→</div>
+        <div class="mental-step"><b>두 Network 비교</b><span class="subnet-muted">전달 방식 결정</span></div>
+      </div>
+      <div class="decision-grid">
+        <div class="decision"><b>같다 · ON-LINK</b><p>목적지를 같은 L2 영역의 이웃으로 판단합니다. 일반 LAN에서는 <b>목적지 IP의 MAC</b>을 직접 ARP로 찾습니다.</p></div>
+        <div class="decision"><b>다르다 · OFF-LINK</b><p>목적지를 직접 이웃으로 보지 않습니다. Routing Table을 보고 이 과정의 기본 모델에서는 <b>Default Gateway</b>를 다음 홉으로 사용합니다.</p></div>
+      </div>
+      <p class="subnet-callout"><b>핵심:</b> “주소가 비슷해 보이는가?”가 아니라 <b>Mask를 적용한 Network 값이 같은가?</b>를 판단합니다.</p>
+    </section>
+
+    <section id="boundary" aria-labelledby="boundary-title">
+      <div class="subnet-card">
+        <div class="subnet-number">SUBNET BOUNDARY · 경계를 눈으로 보기</div>
+        <h2 id="boundary-title">Prefix가 길어질수록 한 Subnet의 범위는 작아집니다.</h2>
+        <p><code>192.0.2.0/24</code> 한 블록이 <code>/25</code>, <code>/26</code>, <code>/27</code>, <code>/28</code>로 갈수록 어떻게 나뉘는지 확인하세요.</p>
+        <div class="boundary-controls">
+          <label for="boundary-prefix"><b>Prefix /<output id="boundary-prefix-value" for="boundary-prefix">25</output></b></label>
+          <input id="boundary-prefix" type="range" min="24" max="28" step="1" value="25">
+          <span id="boundary-summary" class="subnet-muted"></span>
+        </div>
+        <div id="boundary-strip" class="boundary-strip" aria-live="polite"></div>
+        <p class="subnet-muted">이 시각화는 마지막 Octet에서 경계가 나뉘는 /24~ /28 연습용입니다. /23 이하, /29 이상도 원리는 같고 고급 모드에서는 비트 계산으로 확인합니다.</p>
+      </div>
+    </section>
+
+    <section id="calculator" aria-labelledby="calculator-title">
+      <div class="subnet-card">
+        <div class="subnet-number">핵심 개념 연습 · 값이 바뀌면 판단도 바뀝니다</div><h2 id="calculator-title">직접 IP와 Prefix를 넣어 보세요</h2>
+        <p>기본값 <code>/25</code>를 <code>/24</code>로 바꾸면 .140을 바라보는 PC1의 판단이 달라집니다. 이 계산기는 주소 계산만 수행하며 실제 네트워크로 패킷을 보내지 않습니다.</p>
+        <form id="subnet-calculator" class="subnet-form" novalidate>
+          <label for="source-ip">출발지 IPv4<input id="source-ip" name="source" type="text" inputmode="decimal" value="192.0.2.10" autocomplete="off" spellcheck="false" aria-describedby="calculator-message" required></label>
+          <label for="prefix">Prefix /<input id="prefix" name="prefix" type="text" inputmode="numeric" value="25" autocomplete="off" aria-describedby="calculator-message" required></label>
+          <label for="destination-ip">목적지 IPv4<input id="destination-ip" name="destination" type="text" inputmode="decimal" value="192.0.2.140" autocomplete="off" spellcheck="false" aria-describedby="calculator-message" required></label>
+          <button type="submit">계산하기</button>
+        </form>
+        <dl id="calculator-result" class="subnet-output" aria-label="Subnet 계산 결과"></dl>
+        <div id="calculator-decision" class="calc-decision" aria-label="전달 판단 과정"></div>
+        <p id="calculator-message" class="subnet-callout" role="status" aria-live="polite">JavaScript가 켜지면 계산 결과를 표시합니다.</p>
+        <details class="advanced-only"><summary>고급 · Binary AND 과정 보기</summary><pre id="binary-result" class="binary-box">계산 후 Binary 결과를 표시합니다.</pre></details>
+        <p class="subnet-muted">이 판단은 송신자 한 대의 Mask 기준입니다. 상대편 Mask·경로·정책·링크를 확인하기 전에는 왕복 통신 성공을 보장할 수 없습니다. 예약·특수 주소의 실제 사용 가능 여부는 별도입니다.</p>
+      </div>
+    </section>
+
+    <section id="trainer" aria-labelledby="trainer-title">
+      <div class="subnet-card">
+        <div class="trainer-head"><div><div class="subnet-number">SUBNET TRAINER · 정답보다 먼저 예측</div><h2 id="trainer-title">반복해서 Network 경계를 판단해 보세요.</h2></div><button type="button" id="new-training-question">새 문제</button></div>
+        <p class="subnet-muted">Network 주소 계산, 같은 Subnet 판단, Prefix 변화에 따른 판단 문제를 섞어서 냅니다.</p>
+        <div id="training-question" class="trainer-question">문제를 준비하는 중입니다.</div>
+        <div id="training-answers" class="answer-grid" role="group" aria-label="Subnet 연습 답 선택"></div>
+        <p id="training-feedback" class="subnet-callout" role="status" aria-live="polite">먼저 답을 선택한 뒤 계산 근거를 확인하세요.</p>
+      </div>
+    </section>
+
+    <section id="practice" aria-labelledby="practice-title">
+      <div data-learning-section="4"><div class="subnet-number">04 · 토폴로지</div><h2 id="practice-title">두 LAN, 라우터 하나</h2><p>PC1과 PC3은 왼쪽 LAN, PC2는 오른쪽 LAN입니다. R1의 왼쪽 주소는 <code>.1/25</code>, 오른쪽 주소는 <code>.129/25</code>입니다. 그림의 주소는 정상 기준이며 장애 시 변경값은 시나리오 설명에 표시합니다.</p></div>
+      <div class="subnet-callout" data-learning-section="5"><b>05 · 흐름 예상</b> — 먼저 “누구를 ARP로 찾을까?”를 생각하세요. 원격 목적지로 갈 때도 <b>IP 목적지는 Gateway IP로 바뀌지 않습니다.</b></div>
+      <div data-learning-section="6"><p><b>06 · 직접 선택 / 실습</b> — 아래에서 답을 선택하면 단계 실행이 열립니다. 오답이어도 흐름을 확인할 수 있습니다. 장애는 한 번에 하나만 선택합니다.</p></div>
+      <div id="subnet-lab"><p>시뮬레이션을 불러오는 중입니다. 로드되지 않으면 아래 정상·장애·복구 설명을 읽거나 <a href="../lab-plans/ip-subnetting.md">Lab Plan</a>을 확인하세요.</p></div>
+      <div class="subnet-callout pending" data-learning-section="7"><b>07 · 패킷 흐름과 실제 관측 구분</b><p>위 화면은 가정된 조건을 보여 주는 <b>교육용 모델</b>입니다. 현재 이 과정의 실제 Packet Capture는 없습니다. PNETLab 내부 링크에서 수집한 근거가 생기면 별도 관측 결과로 연결합니다.</p></div>
+      <noscript><p class="subnet-callout pending">JavaScript가 꺼져 있어 계산·시뮬레이션·선택형 퀴즈를 실행할 수 없습니다. 아래 설명과 Lab Plan은 그대로 읽을 수 있습니다.</p></noscript>
+    </section>
+
+    <section id="troubleshooting" aria-labelledby="troubleshooting-title">
+      <div class="subnet-number">08–12 · 정상 → 장애 → 원인 → 복구</div><h2 id="troubleshooting-title">같은 “실패”라도 ARP 대상이 다릅니다</h2>
+      <div class="subnet-grid three">
+        <article class="subnet-card" data-learning-section="8"><h3>08 · 정상 상태</h3><p>PC1 /25 → PC3 .20: PC3에 직접 ARP.<br>PC1 /25 → PC2 .140: Gateway .1에 ARP.</p><p class="subnet-muted">실제 검증에서는 양쪽 목적지로 각각 ping 3회 응답과 ARP/ICMP 근거를 함께 확인합니다. 현재는 예상 동작입니다.</p></article>
+        <article class="subnet-card" data-learning-section="9"><h3>09 · 대표 장애 두 가지</h3><p><b>Mask 오류:</b> PC1만 /24로 바꾸면 원격 PC2를 같은 망으로 오판합니다.</p><p><b>Gateway 오류:</b> /25는 유지하고 Gateway를 미사용 .126으로 바꾸면 존재하지 않는 다음 홉을 찾습니다.</p></article>
+        <article class="subnet-card" data-learning-section="10"><h3>10 · 장애 원인 찾기</h3><p>ARP 대상이 <b>.140</b>이면 Mask/선택 경로를, <b>.126</b>이면 Gateway 설정을 확인하세요.</p><p class="subnet-muted">PC3 통신을 대조 테스트로 남깁니다. ARP 무응답만으로 대상 Down을 단정하지 않습니다.</p></article>
+      </div>
+      <div class="subnet-grid" style="margin-top:16px">
+        <article class="subnet-card" data-learning-section="11"><h3>11 · 복구 후 다시 증명하기</h3><p>PC1을 <code>/25</code>, Gateway를 <code>192.0.2.1</code>로 각각 복원합니다. 모델에서는 올바른 Gateway MAC으로 다시 전달합니다.</p><p>실제 Lab에서는 설정 복원만으로 끝내지 않고, Gateway ARP 응답·PC2 왕복 ping·라우터 양쪽 링크를 다시 수집해야 복구로 기록합니다.</p></article>
+        <article class="subnet-card" data-learning-section="12"><h3>12 · Troubleshooting 순서</h3><ol><li>PC1 IP / Mask를 확인한다.</li><li>PC2를 on-link로 판단하는지 계산한다.</li><li>Routing Table과 선택된 다음 홉을 확인한다.</li><li>Gateway의 위치와 ARP 대상·응답을 확인한다.</li><li>라우터 입력/출력과 반환 경로를 비교한다.</li></ol></article>
+      </div>
+    </section>
+
+    <section id="operator" aria-labelledby="operator-title">
+      <div class="subnet-number">OPERATOR DRILL · 장애에서 다음 증거 고르기</div>
+      <h2 id="operator-title">“Ping 실패”보다 먼저 Subnet 판단이 맞는지 확인합니다.</h2>
+      <div class="subnet-grid three">
+        <article class="subnet-card operator-case">
+          <h3>Case 1 · 원격 Host를 직접 ARP</h3>
+          <div class="case-data">PC1 192.168.10.10/16
+Target 192.168.20.10
+ARP 192.168.20.10 = incomplete</div>
+          <p>가장 먼저 확인할 항목은?</p>
+          <div class="answer-grid"><button type="button" data-drill="mask" data-case="1">IP / Mask</button><button type="button" data-drill="gateway" data-case="1">Gateway MAC</button><button type="button" data-drill="dns" data-case="1">DNS</button></div>
+          <p id="drill-feedback-1" class="subnet-muted">선택 후 이유를 확인하세요.</p>
+        </article>
+        <article class="subnet-card operator-case">
+          <h3>Case 2 · 엉뚱한 다음 홉 ARP</h3>
+          <div class="case-data">PC1 192.0.2.10/25
+Target 192.0.2.140
+ARP 192.0.2.126 = incomplete</div>
+          <p>가장 먼저 확인할 항목은?</p>
+          <div class="answer-grid"><button type="button" data-drill="mask" data-case="2">Subnet Mask</button><button type="button" data-drill="gateway" data-case="2">Default Gateway</button><button type="button" data-drill="target" data-case="2">PC2 전원</button></div>
+          <p id="drill-feedback-2" class="subnet-muted">선택 후 이유를 확인하세요.</p>
+        </article>
+        <article class="subnet-card operator-case">
+          <h3>Case 3 · ARP는 성공, Ping은 실패</h3>
+          <div class="case-data">PC1 192.0.2.10/25
+Target 192.0.2.20
+ARP 192.0.2.20 = REACHABLE
+ICMP Reply = 없음</div>
+          <p>다음 단계로 가장 적절한 것은?</p>
+          <div class="answer-grid"><button type="button" data-drill="mask" data-case="3">Mask부터 변경</button><button type="button" data-drill="gateway" data-case="3">Gateway부터 변경</button><button type="button" data-drill="host" data-case="3">상대 Host / 정책 확인</button></div>
+          <p id="drill-feedback-3" class="subnet-muted">선택 후 이유를 확인하세요.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="workflow" aria-labelledby="workflow-title">
+      <div class="subnet-card">
+        <div class="subnet-number">CLI WORKFLOW · 근거를 좁히는 순서</div>
+        <h2 id="workflow-title">명령어보다 “무엇을 먼저 증명할지”가 중요합니다.</h2>
+        <div class="workflow" aria-label="Subnet troubleshooting workflow">
+          <div><b>1</b><br>IP / Mask</div><div><b>2</b><br>Network 계산</div><div><b>3</b><br>Route Table</div><div><b>4</b><br>Next-hop</div><div><b>5</b><br>ARP / Neighbor</div><div><b>6</b><br>Packet / Return</div>
+        </div>
+        <div class="cli-tabs">
+          <div><b>Windows</b><pre><code>ipconfig /all
+route print
+arp -a
+ping &lt;target&gt;</code></pre></div>
+          <div><b>Linux</b><pre><code>ip addr
+ip route
+ip neigh
+ping &lt;target&gt;</code></pre></div>
+          <div><b>VPCS / PNETLab</b><pre><code>show ip
+show arp
+ping &lt;target&gt;</code></pre></div>
+        </div>
+        <p class="subnet-muted">ARP가 성공했다고 End-to-End 통신 성공이 증명되는 것은 아닙니다. 반대로 ARP 실패만으로 원격 Host Down을 단정하지 않습니다.</p>
+      </div>
+    </section>
+
+    <section id="advanced" class="advanced-only" aria-labelledby="advanced-title">
+      <div class="subnet-number">필요할 때 펼치는 고급 내용</div><h2 id="advanced-title">주소 계산에서 실제 패킷으로</h2>
+      <details data-learning-section="13"><summary>13 · Packet 자세히 보기: IP와 Ethernet은 역할이 다릅니다</summary><p>시뮬레이터의 Packet 상세는 합성 필드입니다. 예를 들어 PC1→PC2 첫 ICMP 요청은 Source IP .10, Destination IP .140, Ethernet Destination MAC은 R1 왼쪽입니다. R1은 오른쪽 링크에서 Source/Destination MAC을 새로 만들고 TTL을 줄입니다. NAT는 없습니다.</p><p>ARP는 IPv4 패킷이 아니므로 ARP의 “찾는 IP”와 IPv4 Header의 “Destination IP”를 같은 필드로 읽으면 안 됩니다. 실제 캡처는 <code>arp || icmp</code>로 구간을 좁히고 목적지·ICMP 식별자·순번을 함께 비교합니다.</p><p>그림과 MAC은 합성 예시이고 실제 PNETLab 결과가 아닙니다. <a class="subnet-anchor" href="arp-default-gateway.html">기존 ARP 과정의 실제 관측</a>은 별도 실험임을 확인하고 비교하세요.</p></details>
+      <details data-learning-section="14"><summary>14 · 심화: /31, /32, Proxy ARP와 조건의 한계</summary><p><b>/31</b>은 RFC 3021의 Point-to-Point 링크 문맥에서 두 주소를 쓰는 특례입니다. 일반 LAN Network/Broadcast 공식을 그대로 적용하지 않습니다. <b>/32</b>는 단일 Host Route를 나타냅니다. /0 계산에는 예약·특수 IPv4 범위도 들어 있으므로 계산된 주소 수 전체를 실제 Host에 할당할 수 있다는 뜻은 아닙니다.</p><p>이 파일럿은 추가 Host/Static Route 없음, Proxy ARP 꺼짐, NAT 없음, 정상 링크를 가정합니다. Proxy ARP가 켜져 있거나 더 구체적인 경로가 있으면 잘못된 Mask에서도 관측이 달라질 수 있습니다. 서로 다른 Mask 설정과 반환 경로도 따로 확인해야 합니다.</p><p>CLI·주소 대응·캡처 위치는 <a class="subnet-anchor" href="../lab-plans/ip-subnetting.md">IP/Subnetting Lab Plan</a>에 있습니다. 문서 주소는 TEST-NET, 실제 계획은 격리된 사설 주소이며 두 집합을 같은 캡처로 취급하지 않습니다.</p><div class="subnet-links"><a class="subnet-anchor" href="https://www.rfc-editor.org/rfc/rfc5737">RFC 5737 · 문서 주소</a><a class="subnet-anchor" href="https://www.rfc-editor.org/rfc/rfc3021">RFC 3021 · /31 P2P</a><a class="subnet-anchor" href="https://www.rfc-editor.org/rfc/rfc1918">RFC 1918 · 사설 주소</a></div></details>
+    </section>
+
+    <section id="quiz" data-learning-section="15" aria-labelledby="quiz-title">
+      <div class="subnet-card"><div class="subnet-number">15 · 결과 예측</div><h2 id="quiz-title">다른 망으로 가는 첫 프레임은?</h2><p>PC1 .10/25가 PC2 .140으로 보냅니다. PC1의 Gateway는 .1이고 ARP가 정상 완료되었습니다. 맞는 조합을 선택하세요.</p><div class="subnet-quiz" role="group" aria-label="IP와 Ethernet 목적지 선택"><button type="button" data-quiz-answer="correct" aria-pressed="false">IP 목적지: PC2 .140 · Ethernet 목적지: R1 왼쪽 MAC</button><button type="button" data-quiz-answer="rewrite" aria-pressed="false">IP 목적지: Gateway .1 · Ethernet 목적지: PC2 MAC</button><button type="button" data-quiz-answer="direct" aria-pressed="false">IP 목적지: PC2 .140 · Ethernet 목적지: PC2 MAC</button></div><p id="quiz-feedback" role="status" aria-live="polite">답을 선택하면 이유를 보여 줍니다. 정답 선택은 개인 연습이며 공개 Lab 완료 기록을 바꾸지 않습니다.</p></div>
+    </section>
+
+    <section id="evidence" data-learning-section="16" aria-labelledby="evidence-title">
+      <div class="subnet-number">16 · EVIDENCE</div><h2 id="evidence-title">검증 상태를 확인하는 중입니다.</h2>
+      <p id="evidence-summary">실제 Lab 상태는 <code>results/ip-subnetting.json</code>을 기준으로 표시합니다. 브라우저 시뮬레이션과 실제 PNETLab/PCAP Evidence는 서로 분리합니다.</p>
+      <div class="quick-summary" id="evidence-meta" aria-label="실제 Lab 메타데이터">
+        <div><b>실행 환경</b><br><span id="evidence-environment">PNETLab 예정</span></div>
+        <div><b>Run / Evidence</b><br><span id="evidence-run">미실행 · artifact 0</span></div>
+      </div>
+      <div class="subnet-table-wrap" tabindex="0" role="region" aria-label="실제 Lab 수행 상태 표"><table><thead><tr><th scope="col">단계</th><th scope="col">실제 검증할 내용</th><th scope="col">현재</th></tr></thead><tbody id="evidence-table-body"><tr><td colspan="3">결과 manifest를 불러오는 중입니다.</td></tr></tbody></table></div>
+      <div class="subnet-links"><a class="btn" href="../lab-plans/ip-subnetting.md">실제 Lab Plan</a><a class="btn" href="../results/ip-subnetting.json">결과 manifest</a><a class="btn" href="../evidence/ip-subnetting/README.md">Evidence 수집 규칙</a><a class="btn" href="../topologies/ip-subnetting/README.md">노드 / 링크 정의</a><a class="btn" href="../configs/ip-subnetting/README.md">설정 작성 기준</a><a class="btn" href="../docs/PNETLAB-LAB-STANDARD.md">PNETLab 실습 표준</a></div>
+    </section>
+
+    <section id="explain" aria-labelledby="explain-title">
+      <div class="subnet-number">EXPLAIN IN MY OWN WORDS · 마지막 점검</div>
+      <h2 id="explain-title">정답을 외우지 말고 자신의 말로 설명해 보세요.</h2>
+      <div class="explain-prompts">
+        <details><summary>1. /25에서 192.0.2.10과 192.0.2.140이 왜 다른 Subnet인가?</summary><p><code>/25</code>는 마지막 Octet을 0~127과 128~255로 나눕니다. .10의 Network는 192.0.2.0/25, .140의 Network는 192.0.2.128/25이므로 서로 다릅니다.</p></details>
+        <details><summary>2. 다른 Subnet으로 보낼 때 왜 IP 목적지는 Gateway IP로 바뀌지 않는가?</summary><p>IP 목적지는 최종 도착지입니다. Gateway는 현재 링크에서 사용할 다음 홉이므로 첫 Ethernet 프레임의 목적지 MAC이 Gateway MAC이 됩니다. NAT 같은 별도 기능이 없다면 목적지 IP는 최종 Host를 유지합니다.</p></details>
+        <details><summary>3. Mask가 너무 넓으면 왜 원격 Host에게 직접 ARP할 수 있는가?</summary><p>송신자가 잘못된 Mask로 원격 주소를 같은 Network라고 계산하기 때문입니다. Host의 on-link 판단이 잘못되면 Routing Table의 Gateway보다 목적지 직접 ARP를 선택할 수 있습니다.</p></details>
+        <details><summary>4. ARP 실패만 보고 상대 PC Down이라고 단정하면 안 되는 이유는?</summary><p>ARP 대상 자체가 잘못됐을 수 있습니다. 잘못된 Mask라면 원격 목적지를 직접 ARP하고, 잘못된 Gateway라면 존재하지 않는 다음 홉을 ARP할 수 있으므로 먼저 IP/Mask/Route/Next-hop을 확인해야 합니다.</p></details>
+      </div>
+    </section>
+
+    <section id="completion" data-learning-section="17" aria-labelledby="completion-title">
+      <div class="subnet-card"><div class="subnet-number">17 · 학습 완료 기준</div><h2 id="completion-title">이유를 설명하고, 근거로 확인하기</h2><p><b>학습자 확인:</b> IP/Mask에서 Network·Broadcast·Host 범위를 찾고, 직접 전달과 Gateway 전달을 구분하며, 잘못된 Mask와 Gateway의 ARP 대상을 설명할 수 있어야 합니다.</p><p><b>과정 완료 판정:</b> 실제 정상 2종·대표 장애 2종·각 복구, 공개 가능한 근거와 최종 설명 검토가 필요합니다. 개념·Plan·환경·정상·장애·근거·복구·교육 HTML·모바일/PC UI·판단 요소·설명 검토의 11개 조건을 모두 확인한 뒤 완료 상태를 부여합니다.</p><p class="subnet-callout pending">현재는 교육 파일럿 단계입니다. 다음 과정 ICMP는 이 과정의 실제 검증과 완료 검토 뒤에 진행합니다.</p><div class="subnet-links"><a class="subnet-anchor" href="../NETWORK-LEARNING-MASTER-PLAN.md">전체 순차 계획</a><a class="subnet-anchor" href="../docs/WINDOWS-LAB-CHECKLIST.md">Windows 실제 수행 체크리스트</a><a class="subnet-anchor" href="../roadmap.html">로드맵으로 돌아가기</a></div></div>
+    </section>
+  </main>
+  <footer class="footer"><div class="shell">Network Learning Journey · 교육용 시뮬레이션과 실제 Evidence를 구분합니다.</div></footer>
+  <script type="module" src="../assets/lab/ip-subnetting-page.js"></script>
+</body>
+</html>
