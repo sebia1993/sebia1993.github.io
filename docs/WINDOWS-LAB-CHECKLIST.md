@@ -190,32 +190,34 @@ Smoke Test가 실패하면 3-switch STP 같은 다음 Lab으로 넘어가지 않
 
 ## 7. 첫 정식 PNETLab Lab
 
-현재 로드맵 기준 첫 장비 기반 목표는 `icmp-troubleshooting`이다.
+현재 로드맵 기준 첫 장비 기반 목표는 `ip-subnetting`이다. 교육 페이지와 [IP/Subnetting Lab Plan](../lab-plans/ip-subnetting.md)의 예상 동작을 실제 PNETLab + PCAP으로 검증한다.
 
 최소 topology:
 
 ```text
-PC1 ─ R1 ─ PC2
+PC1 ─ Left LAN ─ R1 ─ Right LAN ─ PC2
+               │
+              PC3
 ```
 
 시나리오:
-1. 정상 Ping
-2. 목적지 Down 또는 Interface Down
-3. Route/return path 오류
-4. 각 장애 복구
+1. Same Subnet 정상: PC1 → PC3
+2. Different Subnet 정상: PC1 → PC2
+3. Wrong Mask 단독 적용 → 원인 확인 → Mask Recovery
+4. Wrong Gateway 단독 적용 → 원인 확인 → Gateway Recovery
 
 필수 Evidence:
-- 정상 CLI
-- 장애 CLI
-- 복구 CLI
-- ICMP PCAP
-- TTL/Unreachable 관측 가능 시 해당 Packet
-- topology 설명
-- expected vs actual
-- SHA-256
-- 최종 원인 설명
+- PC1/PC2/PC3 및 R1의 정상 CLI
+- 정상·장애·복구 CLI
+- PNETLab Link Capture 기반 ARP/ICMP PCAP
+- Wrong Mask와 Wrong Gateway의 서로 다른 ARP Target
+- Router 전/후 Ethernet Header와 TTL 비교
+- 같은 LAN 대조 테스트
+- topology 설명과 expected vs actual
+- 원본/공개본 SHA-256 및 공개 검토
+- 최종 원인·복구 설명
 
-첫 Lab이 끝까지 완료되면 `vlan-trunk`로 이동한다.
+IP/Subnetting이 완료되면 `icmp-troubleshooting`으로 이동하고, 이후 `vlan-trunk` 순서로 진행한다.
 
 ## 8. 자원 보호 기준
 
