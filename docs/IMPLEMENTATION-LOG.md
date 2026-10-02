@@ -1,3 +1,23 @@
+## 2026-10-02 — IP/Subnetting 교육 구현 완료 및 PNETLab 검증 준비
+
+### 변경
+
+- IP/Subnetting 교육 페이지를 Beginner First 구조로 확장했다: 30초 요약, Mental Model, Subnet Boundary, 계산 과정/고급 Binary AND, 반복 Trainer, 기존 패킷 시뮬레이션, Operator Drill, CLI Workflow, Explain In My Own Words를 연결했다.
+- 기본/고급 모드를 분리하고 모바일에서 Subnet Boundary와 계산 결과를 읽을 수 있도록 반응형 구성을 보완했다.
+- 실제 검증 환경의 기준을 미수행 GNS3 계획에서 **PNETLab + Wireshark/PCAP**으로 전환했다. 과거 ARP/Ethernet의 GNS3 Evidence는 역사적 기록이므로 변경하지 않는다.
+- `results/ip-subnetting.json`을 실제 Lab 상태의 단일 Source of Truth로 두고 교육 페이지 Evidence 영역이 manifest를 읽어 NOT_RUN/진행/완료 상태를 표시하도록 준비했다.
+- `tests/check_site.py`를 NOT_RUN 하드코딩에서 상태별 검증으로 변경했다. 미실행 상태는 actual/artifact/runId가 없어야 하고, 향후 실제 실행 상태는 real-lab provenance, runId, actual, artifact, 검토 상태를 요구한다.
+- PNETLab 표준의 첫 Evidence 파이프라인을 `ip-subnetting`으로 정렬했다.
+
+### 현재 상태
+
+실제 PNETLab Lab은 아직 수행하지 않았다. `results/ip-subnetting.json`은 `NOT_RUN`, actual은 null, artifact는 빈 배열을 유지한다. 정상/장애/복구 PASS와 로드맵 Evidence 수치는 실제 PNETLab/PCAP 검증 후에만 반영한다.
+
+### 실제 검증 시 이어갈 순서
+
+PNETLab 준비 확인 → 격리 Lab/Router 플랫폼·버전 확정 → Baseline → Same/Different Subnet → Wrong Mask → Recovery → Wrong Gateway → Recovery → PNETLab Link Capture/Wireshark PCAP + CLI 수집 → SHA-256/공개 검토 → result manifest actual 반영 → Evidence UI readback → 로드맵 완료 gate 검토.
+
+
 # 구현·검증 기록
 
 ## 2026-09-21 — 첫 단계
