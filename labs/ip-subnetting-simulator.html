@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261003-answer-flow-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
+<meta name="lab-ui-version" content="20261003-answer-flow-v1">
+<meta name="summary-ui-version" content="20261003-summary-status-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
 <meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
 /* Shared learning flow at every viewport; only layout changes by screen size. */
@@ -75,11 +76,34 @@
 #ipLab #nextBtn{margin-left:auto;min-width:210px;order:2}
 #ipLab #resetBtn{order:1}
 #ipLab .complete{margin-top:18px;border:1px solid var(--blue);border-radius:16px;padding:22px;background:var(--panel2)}
-#ipLab .complete h2{font-size:1.6rem;margin:0 0 10px}
+#ipLab .complete h2{font-size:1.6rem;margin:0 0 10px;word-break:keep-all;overflow-wrap:break-word}
 #ipLab .complete p{margin:6px 0 14px;color:var(--muted)}
-#ipLab .summary-list{display:grid;gap:8px;margin:14px 0}
-#ipLab .summary-item{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel3)}
-#ipLab .summary-item small{display:block;color:var(--muted)}
+/* Summary states use text + distinct icons + a color bar at every viewport. */
+#ipLab #completionScore{display:block;margin:10px 0 8px;font-size:.94rem;line-height:2.8}
+#ipLab .summary-chip{display:inline-block;vertical-align:middle;padding:6px 12px;border:1px solid #486179;border-radius:999px;background:#172e44;color:#eef6ff;font-size:.9rem;font-weight:850;line-height:1.5;white-space:nowrap}
+#ipLab .summary-chip[data-grade=correct]{background:#174738;border-color:#5fcaa2;color:#a5f3cf}
+#ipLab .summary-chip[data-grade=incorrect]{background:#573816;border-color:#e0aa62;color:#ffdb9c}
+#ipLab .summary-list{display:grid;gap:12px;margin:18px 0}
+#ipLab .summary-item{--summary-accent:#9fb2c9;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 18px;align-items:center;padding:16px 18px;border:1px solid #40566c;border-inline-start:5px solid var(--summary-accent);border-radius:12px;background:#0a1726;min-width:0}
+#ipLab .summary-item[data-grade=correct]{--summary-accent:#7ee0c2;background:#0d2427;border-color:#355950;border-inline-start-color:var(--summary-accent)}
+#ipLab .summary-item[data-grade=incorrect]{--summary-accent:#ffbf69;background:#2a2220;border-color:#735937;border-inline-start-color:var(--summary-accent)}
+#ipLab .summary-meta{min-width:0}
+#ipLab .summary-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#ipLab .summary-title{margin:0;color:#eef6ff;font-size:1.04rem;font-weight:850;line-height:1.5}
+#ipLab .summary-status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #6d8399;border-radius:999px;background:#1b3046;color:#e6eff9;font-size:.86rem;font-weight:850;line-height:1.5;white-space:nowrap;flex-shrink:0}
+#ipLab [data-grade=correct] > .summary-meta .summary-status{background:#174738;border-color:#5fcaa2;color:#a5f3cf}
+#ipLab [data-grade=incorrect] > .summary-meta .summary-status{background:#573816;border-color:#e0aa62;color:#ffdb9c}
+#ipLab .summary-status-icon{font-size:1.1em;font-weight:900;line-height:1}
+#ipLab .summary-answer{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:9px}
+#ipLab .summary-answer-label{padding:2px 8px;border:1px solid #516274;border-radius:6px;background:#1a2938;color:#dce7f3;font-size:.76rem;font-weight:750;line-height:1.6;white-space:nowrap}
+#ipLab .summary-answer-value{min-width:0;color:#e1ebf7;font-size:.94rem;line-height:1.65}
+#ipLab .summary-review{min-height:46px;white-space:nowrap;justify-self:end;font-size:.86rem}
+#ipLab .summary-item[data-grade=incorrect] .summary-review{color:#ffdb9c;border-color:#b6884b;background:#2a2220}
+#ipLab .summary-review:hover{border-color:var(--summary-accent)}
+@media(forced-colors:active){
+ #ipLab .summary-status,#ipLab .summary-chip,#ipLab .summary-answer-label{border-color:CanvasText}
+ #ipLab .summary-item{border-color:CanvasText}
+}
 #ipLab .scope{margin-top:18px;color:var(--muted);font-size:.82rem}
 #ipLab .scope summary{cursor:pointer;min-height:44px;padding:10px 0}
 #ipLab .storage{font-size:.76rem;color:var(--muted);margin:18px 0 0}
@@ -101,7 +125,10 @@
  #ipLab #nextBtn{order:0;min-width:0;width:100%;margin:0}
  #ipLab #resetBtn{order:1}
  #ipLab #submitRow{display:grid}#ipLab #runBtn{width:100%}
- #ipLab .summary-item{flex-wrap:wrap}#ipLab .summary-item button{margin-left:auto}
+ #ipLab .summary-item{grid-template-columns:minmax(0,1fr);padding:14px;gap:12px}
+ #ipLab .summary-review{max-width:100%;white-space:normal}
+ #ipLab .summary-title{font-size:1rem}
+ #ipLab .summary-answer-value{font-size:.92rem}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style></head><body>
@@ -131,7 +158,7 @@
  <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
 </section>
 </main>
-<section class="complete" id="complete" hidden aria-labelledby="completionTitle"><h2 id="completionTitle" tabindex="-1">네 문제의 결과를 확인했습니다.</h2><strong id="completionScore"></strong><p>아래 판정은 각 문제의 가장 최근 제출 답안 기준입니다. 결과 확인 횟수와 정답 수는 다릅니다.</p><div class="summary-list" id="summaryList"></div><div class="lesson-actions"><button class="primary" id="reviewWrongBtn" type="button">오답 다시 보기</button><a class="secondary" href="ip-subnetting.html">개념서 다시 보기</a><a class="secondary" href="../roadmap.html">로드맵</a></div></section>
+<section class="complete" id="complete" hidden aria-labelledby="completionTitle"><h2 id="completionTitle" tabindex="-1">네 문제의 결과를 확인했습니다.</h2><strong id="completionScore"></strong><p>아래 판정은 각 문제의 가장 최근 제출 답안 기준입니다. 결과 확인 횟수와 정답 수는 다릅니다.</p><div class="summary-list" id="summaryList" role="list" aria-label="문제별 답안 판정"></div><div class="lesson-actions"><button class="primary" id="reviewWrongBtn" type="button">오답 다시 보기</button><a class="secondary" href="ip-subnetting.html">개념서 다시 보기</a><a class="secondary" href="../roadmap.html">로드맵</a></div></section>
 <div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙으로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
 <p class="storage" id="storageNote">답안은 이 브라우저에 저장됩니다. 다른 기기와 동기화되지 않습니다.</p>
 <noscript>문제를 풀려면 브라우저에서 JavaScript를 활성화해야 합니다.</noscript>
@@ -222,9 +249,29 @@ function renderResult(){
 }
 function renderSummary(){
  $('complete').hidden=!summaryOpen;if(!summaryOpen)return;
- var n=counts();$('completionScore').textContent='결과 확인 '+n.answered+' / 4 · 정답 '+n.correct+' · 오답 '+n.wrong;
+ var n=counts(),score=$('completionScore');score.replaceChildren();
+ // Preserve the same score text and derive both chips and cards from saved answers.
+ [['answered','결과 확인 '+n.answered+' / 4'],['correct','정답 '+n.correct],['incorrect','오답 '+n.wrong]].forEach(function(item,i){
+  if(i)score.append(document.createTextNode(' · '));
+  var chip=document.createElement('span');chip.className='summary-chip';chip.dataset.grade=item[0];chip.textContent=item[1];score.append(chip);
+ });
  $('reviewWrongBtn').hidden=n.wrong===0;$('summaryList').replaceChildren();
- lessons.forEach(function(l,i){var row=document.createElement('div');row.className='summary-item';var text=document.createElement('div');var b=document.createElement('b');b.textContent=l.label+' · '+(grade(i)==='correct'?'정답':'오답');var s=document.createElement('small');s.textContent='내 답: '+label(l,answers[i].choice);text.append(b,s);var btn=document.createElement('button');btn.type='button';btn.className='secondary';btn.textContent='답안 보기';btn.setAttribute('aria-label','문제 '+(i+1)+' 답안 보기');btn.addEventListener('click',function(){goTo(i,true);});row.append(text,btn);$('summaryList').append(row);});
+ lessons.forEach(function(l,i){
+  var g=grade(i),state=g==='correct'?'정답':g==='incorrect'?'오답':'미응답';
+  var row=document.createElement('div');row.className='summary-item';row.dataset.grade=g;row.setAttribute('role','listitem');
+  var text=document.createElement('div');text.className='summary-meta';
+  var head=document.createElement('div');head.className='summary-head';
+  var title=document.createElement('h3');title.className='summary-title';title.textContent=l.label;
+  var badge=document.createElement('span');badge.className='summary-status';
+  var icon=document.createElement('span');icon.className='summary-status-icon';icon.setAttribute('aria-hidden','true');icon.textContent=g==='correct'?'✓':g==='incorrect'?'✕':'—';
+  var stateText=document.createElement('span');stateText.className='summary-status-text';stateText.textContent=state;badge.append(icon,stateText);head.append(title,badge);
+  var answer=document.createElement('div');answer.className='summary-answer';
+  var answerLabel=document.createElement('span');answerLabel.className='summary-answer-label';answerLabel.textContent='내 답 · '+state;
+  var answerValue=document.createElement('span');answerValue.className='summary-answer-value';answerValue.textContent=label(l,answers[i].choice)||'아직 제출하지 않았습니다.';
+  answer.append(answerLabel,answerValue);text.append(head,answer);
+  var btn=document.createElement('button');btn.type='button';btn.className='secondary summary-review';btn.textContent=g==='incorrect'?'오답 해설 보기':'답안 보기';btn.setAttribute('aria-label','문제 '+(i+1)+' '+btn.textContent);btn.addEventListener('click',function(){goTo(i,true);});
+  row.append(text,btn);$('summaryList').append(row);
+ });
 }
 function render(){
  var l=lessons[idx];$('lessonNo').textContent='문제 '+(idx+1)+' / 4';$('question').textContent=l.title;
