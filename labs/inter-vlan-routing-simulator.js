@@ -1,0 +1,326 @@
+(() => {
+  const $ = id => document.getElementById(id);
+
+  const scenarios = [
+    {
+      id:'same-vlan',
+      claim:'IVR-01',
+      tab:'1 · 같은 VLAN이면 누구의 MAC?',
+      title:'같은 VLAN은 Default Gateway 없이 Peer에게 직접 보냅니다.',
+      text:'PC10A와 PC10B는 모두 VLAN 10 / 10.10.10.0/24에 있습니다.',
+      start:['PC10A 10.10.10.10/24','PC10B 10.10.10.20/24','Gateway 10.10.10.1'],
+      question:'PC10A가 PC10B로 Ping할 때 Ethernet Destination은 누구의 MAC일까요?',
+      options:[
+        ['peer','PC10B MAC · 같은 VLAN Peer'],
+        ['gateway','Vlan10 Gateway MAC'],
+        ['broadcast','항상 ff:ff:ff:ff:ff:ff']
+      ],
+      correct:'peer',
+      reason:'PC10A는 10.10.10.20을 on-link로 판단해 PC10B를 직접 ARP합니다. 실제 Echo Request의 Ethernet Destination은 PC10B MAC이었고, CP1/CP3에서 TTL도 64로 동일했습니다.',
+      metric1:['ARP 대상','10.10.10.20 · PC10B'],
+      metric2:['TTL','64 → 64 · Routing 없음'],
+      conclusion:'Same-VLAN 통신은 최종 Host를 Next-Hop으로 사용합니다.',
+      steps:[
+        {kind:'ON-LINK',title:'PC10A · 같은 Subnet 판단',detail:'10.10.10.20은 /24 기준 on-link입니다.',zone10:'active',hosts:['pc10a'],packet:{ip:'10.10.10.10 → 10.10.10.20',mac:'ARP 대상 = PC10B',ttl:'—',decision:'Peer를 직접 Next-Hop으로 선택'}},
+        {kind:'ARP PEER',title:'PC10A → VLAN10 · PC10B ARP',detail:'Gateway가 아니라 10.10.10.20의 MAC을 확인합니다.',zone10:'active',hosts:['pc10a','pc10b'],link10:'active',arrow10:'ARP',packet:{ip:'ARP target 10.10.10.20',mac:'Broadcast Request → PC10B Reply',ttl:'—',decision:'Peer MAC 확인'}},
+        {kind:'L2 FORWARD',title:'PC10A → PC10B · 직접 L2 전달',detail:'Echo Request Ethernet Destination은 PC10B MAC입니다. SVI Routing은 개입하지 않습니다.',zone10:'active',hosts:['pc10a','pc10b'],switch:'active',link10:'active',arrow10:'L2',packet:{ip:'10.10.10.10 → 10.10.10.20',mac:'PC10A → PC10B',ttl:'64 → 64',decision:'VLAN10 내부 Switching'}}
+      ]
+    },
+    {
+      id:'remote-forward',
+      claim:'IVR-02 / IVR-03',
+      tab:'2 · 다른 VLAN이면 무엇이 바뀔까?',
+      title:'Remote IP는 그대로, 현재 L2 목적지만 Gateway로 바뀝니다.',
+      text:'PC10A는 VLAN10, PC20A는 VLAN20입니다. SW1의 Vlan10/Vlan20 SVI가 두 VLAN의 Gateway입니다.',
+      start:['PC10A GW 10.10.10.1','PC20A 10.10.20.10/24','Vlan10/20 Up · ip routing'],
+      question:'PC10A가 PC20A로 보낼 첫 IPv4 Echo Frame의 올바른 조합은 무엇일까요?',
+      options:[
+        ['gw','Ethernet dst = Gateway MAC · IP dst = PC20A'],
+        ['remote','Ethernet dst = PC20A MAC · IP dst = PC20A'],
+        ['gatewayip','Ethernet dst = Gateway MAC · IP dst = Gateway IP']
+      ],
+      correct:'gw',
+      reason:'다른 Subnet이므로 PC10A는 Gateway 10.10.10.1을 ARP합니다. IP Destination은 최종 PC20A 10.10.20.10 그대로이고, SW1이 Routing하면서 TTL 64→63 및 VLAN20용 새 Ethernet Header를 만듭니다.',
+      metric1:['Ingress Frame','MAC PC10A → SVI · IP dst PC20A'],
+      metric2:['Egress Frame','MAC SVI → PC20A · TTL 64 → 63'],
+      conclusion:'Inter-VLAN Routing은 IP 목적지를 유지하면서 Hop마다 L2 Header를 다시 구성합니다.',
+      steps:[
+        {kind:'OFF-LINK',title:'PC10A · 다른 Subnet 판단',detail:'10.10.20.10은 /24 기준 off-link이므로 Default Gateway를 Next-Hop으로 선택합니다.',zone10:'active',hosts:['pc10a'],svis:['svi10'],packet:{ip:'Destination = 10.10.20.10',mac:'Next-Hop = 10.10.10.1',ttl:'—',decision:'Default Gateway 선택'}},
+        {kind:'ARP GATEWAY',title:'PC10A · 10.10.10.1 ARP',detail:'Remote PC20A를 직접 ARP하지 않고 Vlan10 Gateway MAC을 확인합니다.',zone10:'active',hosts:['pc10a'],switch:'active',svis:['svi10'],link10:'active',arrow10:'ARP GW',packet:{ip:'ARP target 10.10.10.1',mac:'Gateway MAC aa:bb:cc:80:01:00',ttl:'—',decision:'Gateway Neighbor Resolution'}},
+        {kind:'INGRESS',title:'VLAN10 → SW1 SVI',detail:'Ingress Ethernet Destination은 Gateway MAC, IPv4 Destination은 PC20A입니다.',zone10:'active',hosts:['pc10a'],switch:'active',svis:['svi10'],link10:'active',arrow10:'→ GW',packet:{ip:'10.10.10.10 → 10.10.20.10',mac:'PC10A → Gateway',ttl:'64',decision:'Vlan10 L3 Ingress'}},
+        {kind:'ROUTE',title:'SW1 · Route Lookup + TTL 감소',detail:'Connected 10.10.20.0/24를 선택하고 TTL을 64에서 63으로 줄입니다.',switch:'active',svis:['svi10','svi20'],packet:{ip:'10.10.10.10 → 10.10.20.10',mac:'Ingress L2 Header 종료',ttl:'64 → 63',decision:'Vlan20으로 Routing'}},
+        {kind:'EGRESS',title:'SW1 → PC20A · 새 Ethernet Frame',detail:'Egress Destination MAC은 PC20A, Source MAC은 실제 Vlan20 L3 Interface MAC입니다.',zone20:'active',hosts:['pc20a'],switch:'active',svis:['svi20'],link20:'active',arrow20:'→ PC20A',packet:{ip:'10.10.10.10 → 10.10.20.10',mac:'Vlan20 L3 MAC → PC20A',ttl:'63',decision:'새 L2 Encapsulation'}}
+      ]
+    },
+    {
+      id:'reply',
+      claim:'IVR-04',
+      tab:'3 · Reply도 Gateway를 쓸까?',
+      title:'반대편 Host도 Return Path를 독립적으로 판단합니다.',
+      text:'PC20A가 PC10A로 Echo Reply를 보낼 차례입니다. PC10A는 VLAN20 기준 off-link입니다.',
+      start:['PC20A 10.10.20.10/24','PC20A GW 10.10.20.1','PC10A 10.10.10.10/24'],
+      question:'PC20A가 PC10A로 Reply할 때 첫 Ethernet Destination은 무엇일까요?',
+      options:[
+        ['gateway','Vlan20 Gateway MAC'],
+        ['pc10a','PC10A MAC을 직접 사용'],
+        ['pc20b','같은 VLAN의 PC20B MAC']
+      ],
+      correct:'gateway',
+      reason:'Return Path도 별도 판단입니다. PC20A는 PC10A를 off-link로 보고 Vlan20 Gateway MAC으로 Reply를 보냅니다. SW1은 VLAN10으로 Routing하면서 TTL 64→63, Egress Destination을 PC10A MAC으로 구성했습니다.',
+      metric1:['VLAN20 Reply ingress','PC20A → Vlan20 Gateway MAC'],
+      metric2:['VLAN10 Reply egress','SW1 → PC10A MAC · TTL 63'],
+      conclusion:'왕복 경로에서 각 Host는 자신의 Subnet/Gateway 기준으로 독립적으로 Next-Hop을 정합니다.',
+      steps:[
+        {kind:'RETURN DECISION',title:'PC20A · PC10A는 off-link',detail:'PC20A는 10.10.10.10으로 직접 L2 전달하지 않습니다.',zone20:'active',hosts:['pc20a'],svis:['svi20'],packet:{ip:'10.10.20.10 → 10.10.10.10',mac:'Next-Hop = 10.10.20.1',ttl:'—',decision:'Vlan20 Gateway 선택'}},
+        {kind:'REPLY INGRESS',title:'PC20A → Vlan20 Gateway',detail:'Reply Ethernet Destination은 Vlan20 SVI MAC입니다.',zone20:'active',hosts:['pc20a'],switch:'active',svis:['svi20'],link20:'reply',arrow20:'← GW',packet:{ip:'10.10.20.10 → 10.10.10.10',mac:'PC20A → Gateway',ttl:'64',decision:'Vlan20 L3 Ingress'}},
+        {kind:'ROUTE BACK',title:'SW1 · VLAN10으로 Routing',detail:'TTL은 64→63으로 줄고 VLAN10 connected route를 사용합니다.',switch:'active',svis:['svi10','svi20'],packet:{ip:'10.10.20.10 → 10.10.10.10',mac:'L2 Header 재구성 중',ttl:'64 → 63',decision:'Vlan10 Egress 선택'}},
+        {kind:'REPLY EGRESS',title:'SW1 → PC10A',detail:'VLAN10 Egress Ethernet Destination은 PC10A MAC입니다.',zone10:'active',hosts:['pc10a'],switch:'active',svis:['svi10'],link10:'reply',arrow10:'← PC10A',packet:{ip:'10.10.20.10 → 10.10.10.10',mac:'Vlan10 L3 MAC → PC10A',ttl:'63',decision:'Reply 도착'}}
+      ]
+    },
+    {
+      id:'svi-down',
+      claim:'IVR-05',
+      tab:'4 · Vlan20 SVI가 Down이면?',
+      title:'VLAN20 L2는 살아 있어도 Inter-VLAN Routing은 끊길 수 있습니다.',
+      text:'VLAN20 Access Port와 VLAN 자체는 그대로 두고 interface Vlan20만 shutdown한 실제 장애입니다.',
+      start:['Vlan10 Up/Up','Vlan20 shutdown','VLAN20 Access Ports Up'],
+      question:'이 상태에서 어떤 결과가 맞을까요?',
+      options:[
+        ['l2only','PC20A↔PC20B는 정상 · PC10A↔PC20A는 실패'],
+        ['allfail','VLAN20의 Same-VLAN과 Inter-VLAN 모두 실패'],
+        ['allworks','SVI가 Down이어도 모두 정상']
+      ],
+      correct:'l2only',
+      reason:'Vlan20 SVI shutdown으로 10.10.20.0/24 connected route가 사라져 Inter-VLAN은 실패했지만 VLAN20 내부 L2 Switching은 계속 3/3 성공했습니다. 실제 장비는 PC10A에 Type 3 Code 1을 반환했습니다.',
+      metric1:['L3 상태','Vlan20 Down · 10.10.20.0/24 route 없음'],
+      metric2:['L2 Positive Control','PC20A ↔ PC20B · 3/3 성공'],
+      conclusion:'SVI는 VLAN의 L3 Gateway 경계이며, SVI Down이 VLAN 자체의 L2 Switching Down과 같은 뜻은 아닙니다.',
+      steps:[
+        {kind:'FAILURE',title:'Vlan20 SVI shutdown',detail:'Vlan20이 administratively down/down이 되고 connected route가 제거됩니다.',switch:'stop',sviDown:['svi20'],svis:['svi10'],packet:{ip:'Route 10.10.20.0/24 없음',mac:'VLAN20 L2 Port는 유지',ttl:'—',decision:'L3 경로 상실'}},
+        {kind:'REMOTE TRY',title:'PC10A → PC20A · Inter-VLAN 실패',detail:'PC10A의 요청은 VLAN10 Gateway까지 도달하지만 VLAN20으로 Routed Echo는 나오지 않습니다.',zone10:'active',hosts:['pc10a'],switch:'stop',svis:['svi10'],sviDown:['svi20'],link10:'active',arrow10:'→ GW',link20:'blocked',arrow20:'×',packet:{ip:'10.10.10.10 → 10.10.20.10',mac:'Gateway까지 도달',ttl:'64',decision:'No connected route to VLAN20'}},
+        {kind:'ACTUAL ERROR',title:'SW1 → PC10A · Destination Unreachable',detail:'이번 IOL Run에서는 실제로 ICMP Type 3 Code 1이 반환됐습니다. 이 Code를 모든 플랫폼의 고정 규칙으로 일반화하지 않습니다.',zone10:'active',hosts:['pc10a'],switch:'stop',svis:['svi10'],sviDown:['svi20'],link10:'reply',arrow10:'← ICMP',packet:{ip:'10.10.10.1 → 10.10.10.10',mac:'SW1 → PC10A',ttl:'장비 생성 ICMP',decision:'실제 오류 응답'}},
+        {kind:'L2 CONTROL',title:'PC20A ↔ PC20B · Same-VLAN 정상',detail:'VLAN20의 L2 Switching은 계속 동작해 Local Ping은 3/3 성공했습니다.',zone20:'active',hosts:['pc20a','pc20b'],switch:'active',sviDown:['svi20'],link20:'active',arrow20:'L2',packet:{ip:'10.10.20.10 ↔ 10.10.20.20',mac:'Peer MAC 직접 사용',ttl:'64 → 64',decision:'VLAN20 내부 Switching'}},
+        {kind:'RECOVERY',title:'Vlan20 no shutdown → 안정화 후 복구',detail:'Connected route가 돌아왔고 첫 확인은 2/3, 이후 별도 안정화 Run에서 3/3 성공했습니다.',switch:'active',svis:['svi10','svi20'],zone10:'active',zone20:'active',link10:'active',link20:'active',arrow10:'→',arrow20:'→',packet:{ip:'Inter-VLAN 정상 복귀',mac:'Gateway → PC20A 재캡슐화',ttl:'64 → 63',decision:'Baseline 복구 확인'}}
+      ]
+    },
+    {
+      id:'wrong-gateway',
+      claim:'IVR-06',
+      tab:'5 · Gateway가 틀리면 어디서 멈출까?',
+      title:'Same-VLAN은 되지만 Remote는 잘못된 Gateway ARP에서 멈춥니다.',
+      text:'PC10A의 Gateway만 10.10.10.254로 바꿨고 그 주소에는 실제 Host/Router가 없습니다.',
+      start:['PC10A GW = 10.10.10.254','10.10.10.254 ARP responder 없음','SW1 SVI / Routing 정상'],
+      question:'PC10A의 통신 결과로 맞는 것은 무엇일까요?',
+      options:[
+        ['arpstop','PC10B는 정상 · PC20A는 .254 ARP 실패에서 중단'],
+        ['allfail','잘못된 Gateway 때문에 PC10B도 실패'],
+        ['remoteecho','PC20A Echo Request는 전송되지만 Reply만 실패']
+      ],
+      correct:'arpstop',
+      reason:'Same-VLAN은 Gateway를 쓰지 않으므로 PC10B 통신은 3/3 유지됐습니다. Remote 통신은 10.10.10.254의 MAC을 구하려는 ARP에 Reply가 없어 실제 PC20A 대상 Echo Frame 자체가 생성되지 않았습니다.',
+      metric1:['Same-VLAN','PC10A → PC10B · 3/3 성공'],
+      metric2:['Remote-VLAN','ARP 10.10.10.254 무응답 · Echo 0개'],
+      conclusion:'잘못된 Default Gateway는 Local L2 통신이 아니라 off-link Next-Hop Resolution에서 문제를 만듭니다.',
+      steps:[
+        {kind:'LOCAL CONTROL',title:'PC10A → PC10B · Same-VLAN 정상',detail:'PC10B는 on-link이므로 잘못된 Gateway 설정과 무관하게 Peer MAC으로 직접 통신합니다.',zone10:'active',hosts:['pc10a','pc10b'],switch:'active',link10:'active',arrow10:'L2',packet:{ip:'10.10.10.10 → 10.10.10.20',mac:'PC10A → PC10B',ttl:'64 → 64',decision:'Gateway 미사용'}},
+        {kind:'REMOTE DECISION',title:'PC10A → PC20A · off-link',detail:'Remote Destination이라 설정된 Default Gateway 10.10.10.254를 Next-Hop으로 선택합니다.',zone10:'active',hosts:['pc10a'],packet:{ip:'Destination 10.10.20.10',mac:'Next-Hop 10.10.10.254',ttl:'—',decision:'잘못된 Gateway 선택'}},
+        {kind:'ARP FAIL',title:'10.10.10.254 ARP · Reply 없음',detail:'PC10A는 존재하지 않는 Gateway MAC을 얻지 못합니다.',zone10:'stop',hosts:['pc10a'],link10:'blocked',arrow10:'ARP ×',packet:{ip:'ARP target 10.10.10.254',mac:'Reply 없음',ttl:'—',decision:'Neighbor Resolution 실패'}},
+        {kind:'NO ECHO',title:'Remote Echo Frame은 생성되지 않음',detail:'L2 Next-Hop을 해결하지 못했기 때문에 PC20A를 Destination IP로 한 Echo Request Frame은 실제 Link에 나오지 않았습니다.',zone10:'stop',hosts:['pc10a'],link10:'blocked',link20:'blocked',arrow10:'×',arrow20:'×',packet:{ip:'10.10.20.10 대상 Echo 0개',mac:'Ethernet Frame 미생성',ttl:'—',decision:'ARP 단계에서 중단'}},
+        {kind:'RECOVERY',title:'Gateway 10.10.10.1 복구',detail:'정상 Gateway ARP 후 PC20A Remote Ping이 다시 3/3 성공했습니다.',zone10:'active',zone20:'active',hosts:['pc10a','pc20a'],switch:'active',svis:['svi10','svi20'],link10:'active',link20:'active',arrow10:'→ GW',arrow20:'→ PC20A',packet:{ip:'10.10.10.10 → 10.10.20.10',mac:'Gateway → PC20A',ttl:'64 → 63',decision:'Inter-VLAN 정상 복귀'}}
+      ]
+    }
+  ];
+
+  const answers=scenarios.map(()=>({selected:null,submitted:false,correct:false}));
+  let lesson=0,stepIndex=0,reviewReturn=false,busy=false;
+
+  function optionLabel(s,id){return s.options.find(x=>x[0]===id)?.[1]||'—';}
+  function counts(){
+    const submitted=answers.filter(a=>a.submitted).length;
+    const correct=answers.filter(a=>a.submitted&&a.correct).length;
+    return {submitted,correct,wrong:submitted-correct,pending:answers.length-submitted};
+  }
+
+  function renderTabs(){
+    $('lessonTabs').innerHTML=scenarios.map((s,i)=>{
+      const cls=['lesson-tab',i===lesson?'active':'',answers[i].submitted?'done':''].filter(Boolean).join(' ');
+      return '<button class="'+cls+'" data-lesson="'+i+'">'+s.tab+'</button>';
+    }).join('');
+    $('lessonTabs').querySelectorAll('[data-lesson]').forEach(btn=>btn.addEventListener('click',()=>{
+      if(busy)return;reviewReturn=false;loadLesson(Number(btn.dataset.lesson));
+    }));
+  }
+
+  function renderProgress(){
+    const c=counts();
+    $('courseBar').style.width=(c.submitted/scenarios.length*100)+'%';
+    $('courseCount').textContent='결과 확인 '+c.submitted+' / '+scenarios.length+' · 정답 '+c.correct;
+    renderTabs();
+  }
+
+  function renderChoices(){
+    const s=scenarios[lesson],a=answers[lesson];
+    $('choices').innerHTML=s.options.map(([id,label])=>{
+      const cls=['choice',a.selected===id?'selected':''];
+      if(a.submitted&&id===s.correct)cls.push('correct-answer');
+      if(a.submitted&&a.selected===id&&id!==s.correct)cls.push('wrong-answer');
+      return '<button class="'+cls.filter(Boolean).join(' ')+'" data-choice="'+id+'"'+(a.submitted?' disabled':'')+'>'+label+'</button>';
+    }).join('');
+    $('choices').querySelectorAll('[data-choice]').forEach(btn=>btn.addEventListener('click',()=>{
+      if(busy||answers[lesson].submitted)return;
+      answers[lesson].selected=btn.dataset.choice;
+      renderChoices();updateControls();
+    }));
+  }
+
+  function clearTopology(){
+    ['zone10','zone20'].forEach(id=>$(id).className='zone');
+    ['pc10a','pc10b','pc20a','pc20b'].forEach(id=>$(id).className='host');
+    $('sw1').className='switch-box';
+    ['svi10','svi20'].forEach(id=>$(id).className='svi');
+    ['link10','link20'].forEach(id=>$(id).className='path-link');
+    $('link10Arrow').textContent='·';$('link20Arrow').textContent='·';
+  }
+
+  function applyStep(){
+    const s=scenarios[lesson],step=s.steps[stepIndex];
+    clearTopology();
+    if(step.zone10)$('zone10').classList.add(step.zone10);
+    if(step.zone20)$('zone20').classList.add(step.zone20);
+    (step.hosts||[]).forEach(id=>$(id).classList.add(step.kind.includes('REPLY')?'reply':step.kind.includes('FAIL')?'stop':'active'));
+    if(step.switch)$('sw1').classList.add(step.switch);
+    (step.svis||[]).forEach(id=>$(id).classList.add('active'));
+    (step.sviDown||[]).forEach(id=>$(id).classList.add('down'));
+    if(step.link10)$('link10').classList.add(step.link10);
+    if(step.link20)$('link20').classList.add(step.link20);
+    if(step.arrow10)$('link10Arrow').textContent=step.arrow10;
+    if(step.arrow20)$('link20Arrow').textContent=step.arrow20;
+    $('packetIp').textContent=step.packet?.ip||'—';
+    $('packetMac').textContent=step.packet?.mac||'—';
+    $('packetTtl').textContent=step.packet?.ttl||'—';
+    $('packetDecision').textContent=step.packet?.decision||'—';
+    $('eventKind').textContent=step.kind;
+    $('eventTitle').textContent=step.title;
+    $('eventDetail').textContent=step.detail;
+    $('stepCount').textContent=(stepIndex+1)+' / '+s.steps.length;
+    $('prevStepBtn').disabled=stepIndex===0;
+    $('nextStepBtn').disabled=stepIndex===s.steps.length-1;
+  }
+
+  function renderObservation(){
+    const s=scenarios[lesson];
+    $('metric1Label').textContent=s.metric1[0];$('metric1Value').textContent=s.metric1[1];
+    $('metric2Label').textContent=s.metric2[0];$('metric2Value').textContent=s.metric2[1];
+    $('observationConclusion').textContent=s.conclusion;
+    applyStep();
+  }
+
+  function renderFeedback(){
+    const s=scenarios[lesson],a=answers[lesson];
+    if(!a.submitted){$('feedback').hidden=true;$('observation').hidden=true;return;}
+    $('feedback').hidden=false;$('observation').hidden=false;
+    $('feedback').className='feedback '+(a.correct?'correct':'incorrect');
+    $('feedbackBadge').textContent=a.correct?'✓ 정답입니다':'✕ 오답입니다';
+    $('myAnswer').textContent=optionLabel(s,a.selected);
+    $('correctAnswer').textContent=optionLabel(s,s.correct);
+    $('feedbackReason').textContent=s.reason;
+    renderObservation();
+  }
+
+  function updateControls(){
+    const a=answers[lesson];
+    $('runBtn').disabled=busy||!a.selected||a.submitted;
+    $('resetBtn').disabled=busy||a.submitted||!a.selected;
+    $('retryBtn').hidden=!a.submitted;
+    $('nextLessonBtn').disabled=!a.submitted;
+    $('summaryBackBtn').hidden=!reviewReturn;
+    if(reviewReturn)$('nextLessonBtn').textContent='전체 결과로 돌아가기 →';
+    else if(lesson===scenarios.length-1)$('nextLessonBtn').textContent='학습 결과 보기 →';
+    else $('nextLessonBtn').textContent='다음 문제 →';
+  }
+
+  function loadLesson(i){
+    lesson=i;stepIndex=0;
+    const s=scenarios[i],a=answers[i];
+    $('summaryPanel').hidden=true;$('labMain').hidden=false;
+    $('coachIcon').textContent=String(i+1);
+    $('coachTitle').textContent=s.title;
+    $('coachText').textContent=s.text;
+    $('startState').innerHTML=s.start.map(x=>'<span>'+x+'</span>').join('');
+    $('question').textContent=s.question;
+    renderChoices();renderFeedback();renderProgress();updateControls();
+    if(a.submitted)renderObservation();
+  }
+
+  function submitCurrent(){
+    const a=answers[lesson];if(busy||a.submitted||!a.selected)return;
+    busy=true;a.submitted=true;a.correct=a.selected===scenarios[lesson].correct;
+    stepIndex=scenarios[lesson].steps.length-1;
+    renderChoices();renderFeedback();renderProgress();busy=false;updateControls();
+    requestAnimationFrame(()=>$('feedback').focus({preventScroll:true}));
+    $('feedback').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function resetSelection(){
+    const a=answers[lesson];if(busy||a.submitted)return;
+    a.selected=null;renderChoices();updateControls();
+  }
+
+  function retryCurrent(){
+    if(busy)return;
+    answers[lesson]={selected:null,submitted:false,correct:false};
+    stepIndex=0;loadLesson(lesson);
+  }
+
+  function goNext(){
+    if(!answers[lesson].submitted)return;
+    if(reviewReturn){showSummary();return;}
+    if(lesson<scenarios.length-1){
+      loadLesson(lesson+1);window.scrollTo({top:$('labMain').offsetTop-20,behavior:'smooth'});
+    }else showSummary();
+  }
+
+  function renderSummary(){
+    const c=counts();
+    $('submittedCount').textContent=c.submitted;$('correctCount').textContent=c.correct;
+    $('wrongCount').textContent=c.wrong;$('pendingCount').textContent=c.pending;
+    $('summaryList').innerHTML=scenarios.map((s,i)=>{
+      const a=answers[i],status=!a.submitted?'pending':a.correct?'correct':'incorrect';
+      const label=!a.submitted?'미응답':a.correct?'✓ 정답':'✕ 오답';
+      const detail=!a.submitted?'아직 답을 제출하지 않았습니다.':'내 답 · '+optionLabel(s,a.selected);
+      const button=!a.submitted?'문제 풀기':a.correct?'정답 복습':'오답 해설 보기';
+      return '<article class="summary-card '+status+'"><div><strong>'+(i+1)+'. '+s.title+'</strong><span class="status-badge">'+label+'</span><p>'+detail+'</p></div><button class="btn" data-review="'+i+'">'+button+'</button></article>';
+    }).join('');
+    $('summaryList').querySelectorAll('[data-review]').forEach(btn=>btn.addEventListener('click',()=>{
+      reviewReturn=true;loadLesson(Number(btn.dataset.review));window.scrollTo({top:$('labMain').offsetTop-20,behavior:'smooth'});
+    }));
+    const target=answers.findIndex(a=>!a.submitted||!a.correct);
+    $('continueBtn').hidden=target<0;
+    if(target>=0){
+      $('continueBtn').textContent=answers[target].submitted?'오답 문제 다시 보기 →':'미응답 문제로 이동 →';
+      $('continueBtn').dataset.target=String(target);
+    }
+  }
+
+  function showSummary(){
+    reviewReturn=false;renderSummary();
+    $('labMain').hidden=true;$('summaryPanel').hidden=false;
+    requestAnimationFrame(()=>$('summaryPanel').focus({preventScroll:true}));
+    $('summaryPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  $('runBtn').addEventListener('click',submitCurrent);
+  $('resetBtn').addEventListener('click',resetSelection);
+  $('retryBtn').addEventListener('click',retryCurrent);
+  $('nextLessonBtn').addEventListener('click',goNext);
+  $('summaryBackBtn').addEventListener('click',showSummary);
+  $('prevStepBtn').addEventListener('click',()=>{if(stepIndex>0){stepIndex--;applyStep();}});
+  $('nextStepBtn').addEventListener('click',()=>{if(stepIndex<scenarios[lesson].steps.length-1){stepIndex++;applyStep();}});
+  $('continueBtn').addEventListener('click',()=>{
+    const target=Number($('continueBtn').dataset.target);
+    reviewReturn=true;loadLesson(Number.isFinite(target)?target:0);
+    window.scrollTo({top:$('labMain').offsetTop-20,behavior:'smooth'});
+  });
+
+  loadLesson(0);
+})();
