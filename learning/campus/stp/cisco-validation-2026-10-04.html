@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STP / RSTP — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.22rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:760px}.role-pass{color:var(--mint)}.role-alt{color:var(--amber)}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/stp.html">← STP / RSTP</a><a class="btn" href="../../../labs/stp-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-04</div>
+  <h1>STP / RSTP<br><em>Cisco 검증 요약</em></h1>
+  <p>PNETLab의 Cisco IOL L2 3대와 VPCS 2대로 Rapid-PVST+ VLAN10 Triangle을 실제 실행했습니다. Root 선출, Port Role, Alternate/BPDU, Path Cost 변경, Root-Port Link 장애 재수렴, Root Priority 변경을 CLI와 4개 Internal Link PCAP으로 대조했고 <b>STP-01~06은 모두 PASS</b>했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-04-stp-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Claim Result</small><strong class="pass">6 PASS / 0 FAIL</strong></article>
+    <article class="summary-card"><small>Final State</small><strong class="pass">Root / Cost / Link / Ping 복구</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 토폴로지</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>실제 검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Switch</td><td>Cisco IOL L2 3대 · IOS 15.2(CML_NIGHTLY_20190423)FLO_DSGS7</td></tr>
+        <tr><td>Endpoints</td><td>PC1 192.0.2.10/24 — SW1 · SW3 — PC3 192.0.2.30/24 · Gateway 없음</td></tr>
+        <tr><td>Topology</td><td>SW1—SW2=L12 · SW2—SW3=L23 · SW3—SW1=L31 · 모든 Link Access VLAN10 · Trunk 없음</td></tr>
+        <tr><td>STP</td><td>Rapid-PVST+ VLAN10 · Baseline SW1/SW2/SW3 Base Priority 24576/28672/32768 · Inter-switch Cost 4</td></tr>
+        <tr><td>Capture</td><td>CP1 L12 · CP2 L23 · CP3 L31 · CP4 SW3—PC3 Edge</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="stp-01">
+    <h2>STP-01 · BPDU / Root Bridge Election <span class="pass">PASS</span></h2>
+    <p>Equal Priority 32768에서 STP 출력 전에 Base MAC을 확인해 SW1을 Root로 예측했습니다. 실제 MAC은 SW1 <code>aabb.cc00.0100</code>, SW2 <code>.0200</code>, SW3 <code>.0300</code> 순이었고 실제 Root는 SW1이었습니다. 이후 Base Priority를 24576/28672/32768로 바꾼 Deterministic Baseline에서도 SW1이 Root였습니다.</p>
+    <p class="evidence">Equal operational priority 32778 · Baseline root priority 24586 · BPDU Root ID matched SW1 on L12/L23/L31</p>
+  </article>
+
+  <article class="claim" id="stp-02">
+    <h2>STP-02 · Loop-Free Port Role Map <span class="pass">PASS</span></h2>
+    <p>Baseline은 요청서와 정확히 일치했습니다. SW1은 Root라 Root Port가 없고 L12/L31 모두 Designated/FWD, SW2-L12는 Root/FWD, SW2-L23은 Designated/FWD, SW3-L31은 Root/FWD, SW3-L23은 Alternate/BLK였습니다. Warmed PC1→PC3 Flow는 L31 Direct Path만 사용했습니다.</p>
+    <p class="evidence">Actual path: PC1 → SW1 → L31 → SW3 → PC3 · Ping 3/3</p>
+  </article>
+
+  <article class="claim" id="stp-03">
+    <h2>STP-03 · Alternate / Discarding <span class="pass">PASS</span></h2>
+    <p>SW3 Ethernet0/1(L23)은 <code>Altn BLK</code>였지만 CP2에서는 RSTP version 2 BPDU가 실제 관찰됐습니다. User Data Active Path는 L31이었고 PC3 Edge에는 요청당 하나의 Echo Request만 도착했습니다.</p>
+    <p><b>해석:</b> Alternate/Discarding은 Cable Down이 아닙니다. User Data Forwarding에서는 제외되지만 STP Control Plane에는 참여합니다.</p>
+  </article>
+
+  <article class="claim" id="stp-04">
+    <h2>STP-04 · Path Cost Change <span class="pass">PASS</span></h2>
+    <p>SW3-L31 Cost만 4→20으로 변경하자 Direct Root Path는 20, SW2 경유 Path는 4+4=8이 됐습니다. SW3 Root Port는 L23으로 바뀌고 L31은 Alternate/BLK가 됐으며 실제 Data Path도 SW1→L12→SW2→L23→SW3로 이동했습니다.</p>
+    <p class="evidence">Cost phase: CP1 + CP2 + CP4 request/reply · CP3 absent from active unicast path · Cost 4 recovery restored L31</p>
+  </article>
+
+  <article class="claim" id="stp-05">
+    <h2>STP-05 · Root-Port Link Failure Reconvergence <span class="pass">PASS</span></h2>
+    <p>SW3의 기존 Root Port L31을 shutdown하자 L23가 Root/FWD로 승격됐고 Data Path는 SW1→SW2→SW3로 자동 전환됐습니다. 연속 100개 Probe는 요청 100 / 응답 100 / 중복 Endpoint Request 0 / Missing Sequence 0이었습니다.</p>
+    <p>동일 PNET 게스트 Capture Clock 기준 마지막 Direct Delivery와 첫 Alternate Delivery의 간격은 <b>0.201710초</b>였습니다. 다만 Probe 간격이 200ms이므로 이는 <b>관찰된 Data-Path Transition Delivery Gap</b>이지 정확한 내부 Protocol Convergence Time이나 모든 RSTP 장비의 보편적 “0.2초 수렴”이 아닙니다.</p>
+    <p class="evidence">last direct seq35 → first alternate seq36 · first failed Echo = NOT_OBSERVED · link recovery restored original direct L31 path</p>
+  </article>
+
+  <article class="claim" id="stp-06">
+    <h2>STP-06 · Root Priority Change <span class="pass">PASS</span></h2>
+    <p>SW3 Base Priority만 32768→16384로 낮추자 Root가 SW3(Operational 16394)로 변경됐습니다. SW1-L31과 SW2-L23가 Root Port가 되고, 차단 위치는 Baseline SW3-L23에서 <b>SW2-L12 Alternate/BLK</b>로 이동했습니다. SW3 Priority를 원복하자 Root SW1과 원래 Role Map이 복구됐습니다.</p>
+  </article>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">ROLE MAP</div><h2>핵심 상태 비교</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Phase</th><th>Root</th><th>SW3-L31</th><th>SW3-L23</th><th>SW2-L12</th><th>PC1→PC3 Data Path</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline</td><td>SW1</td><td class="role-pass">Root/FWD c4</td><td class="role-alt">Altn/BLK c4</td><td>Root/FWD c4</td><td>SW1 → L31 → SW3</td></tr>
+        <tr><td>Cost 20</td><td>SW1</td><td class="role-alt">Altn/BLK c20</td><td class="role-pass">Root/FWD c4</td><td>Root/FWD c4</td><td>SW1 → L12 → SW2 → L23 → SW3</td></tr>
+        <tr><td>L31 Down</td><td>SW1</td><td>DOWN</td><td class="role-pass">Root/FWD c4</td><td>Root/FWD c4</td><td>SW1 → L12 → SW2 → L23 → SW3</td></tr>
+        <tr><td>Root SW3</td><td>SW3</td><td>Desg/FWD c4</td><td>Desg/FWD c4</td><td class="role-alt">Altn/BLK c4</td><td>SW1 → L31 → SW3</td></tr>
+        <tr><td>Final</td><td>SW1</td><td class="role-pass">Root/FWD c4</td><td class="role-alt">Altn/BLK c4</td><td>Root/FWD c4</td><td>Original L31 Direct Path</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="warning">
+    <div class="eyebrow">검증 한계</div>
+    <h2>Rapid-PVST+ IOL 한 Run의 Actual입니다.</h2>
+    <p>Classic PVST+/802.1D, MSTP, 물리 Catalyst Hardware의 성능을 비교하지 않았습니다. <code>Altn BLK</code>는 이번 Cisco Rapid-PVST+ CLI의 Alternate/Discarding 표현입니다.</p>
+    <p>Link Failure 때 IOL 한쪽 Interface shutdown이 반대편의 물리 Carrier-Down과 완전히 같다고 가정하지 않았습니다. Wire에 Frame 복사본이 보였다는 사실만으로 shutdown/Alternate Port가 User Data를 Forward했다고 판정하지 않고, Port Role/State + Endpoint Delivery + PCAP 상관관계를 함께 사용했습니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Integrity</div><h2>원본 Capture SHA-256</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Capture</th><th>Bytes</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1 · L12</td><td>122498</td><td class="evidence">5184753c6ffabf7e9c718f8821eee28f0ac46c850acff40bd417a5bba1abac97</td></tr>
+        <tr><td>CP2 · L23</td><td>122574</td><td class="evidence">f17a4692f54faa1a1e0271f611cb105bc1a2bfc02c49048092b8190a925a5cb1</td></tr>
+        <tr><td>CP3 · L31</td><td>129116</td><td class="evidence">97fcb0dcbc93bb25b27d252945b8037b0a993d35e056abdd915ea1055e4931f3</td></tr>
+        <tr><td>CP4 · PC3 Edge</td><td>195930</td><td class="evidence">ec16d66158162bfa1992b55edacfbf92deb1124fd0b56f9cc7920b6e26ba3755</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Cisco 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://standards.ieee.org/ieee/802.1Q/10323/">IEEE 802.1Q-2022</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/stp/stp-configuration-guide/m-stp.html">Cisco IOS XE 17 · Spanning Tree Protocol Configuration Guide</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html">Cisco · Understand Rapid Spanning Tree Protocol (802.1w)</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">STP / RSTP · Cisco Rapid-PVST+ Validation Summary</div></footer>
+</body>
+</html>
