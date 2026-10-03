@@ -196,7 +196,11 @@
 #ipLab .sim-readout small,#ipLab .sim-readout strong{display:block}
 #ipLab .sim-readout small{font-size:.7rem;color:#9fbad0}
 #ipLab .sim-readout strong{font-size:.88rem;color:#e9f5ff;margin-top:2px}
-#ipLab .sim-primary-actions{margin-top:10px;padding-top:10px;border-top:1px solid #36546d}
+#ipLab .sim-primary-actions{margin-top:8px;padding-top:8px;border-top:1px solid #36546d}
+#ipLab .sim-flow-details{margin-top:9px}
+#ipLab .sim-flow-details summary{min-height:42px;padding:8px 10px}
+#ipLab .sim-flow-details .optional-body{padding:0 10px 10px}
+#ipLab .sim-caption{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 #ipLab .sim-playback{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:10px}
 #ipLab .sim-playback button{min-height:42px;font-size:.8rem}
 #ipLab #simStepLabel{text-align:center;color:#dceaf6;font-size:.78rem}
@@ -269,16 +273,18 @@
    </section>
    <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
   </div>
-  <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
   <p id="modelEvent"></p>
   <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
-  <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
-   <button class="secondary" id="simPrev" type="button">← 이전 흐름</button>
-   <strong id="simStepLabel" aria-live="polite"></strong>
-   <button class="secondary" id="simNext" type="button">다음 흐름 →</button>
-  </div>
-  <p class="sim-step-text" id="simStepText" role="status" aria-live="polite" aria-atomic="true"></p>
-  <figcaption id="modelCaption"></figcaption>
+  <details class="optional sim-flow-details" id="simFlowDetails"><summary>ARP / IPv4 흐름을 단계별로 보기</summary><div class="optional-body">
+   <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
+   <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
+    <button class="secondary" id="simPrev" type="button">← 이전 흐름</button>
+    <strong id="simStepLabel" aria-live="polite"></strong>
+    <button class="secondary" id="simNext" type="button">다음 흐름 →</button>
+   </div>
+   <p class="sim-step-text" id="simStepText" role="status" aria-live="polite" aria-atomic="true"></p>
+  </div></details>
+  <figcaption class="sim-caption" id="modelCaption"></figcaption>
  </figure>
  <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div>
  <details class="optional" id="traceDetails"><summary>모델의 판단 순서 다시 보기 · 채점은 유지</summary><div class="optional-body">
@@ -435,7 +441,7 @@ function render(){
  $('questionHelp').textContent='PC1 '+l.src+'/'+l.prefix+' → '+l.dstNode+' '+l.dst+'/'+l.dstPrefix;
  $('questionContext').textContent=idx===2?'PC1의 Mask만 /24로 변경했습니다. 다른 장비와 L2 연결은 그대로이며 Proxy ARP는 꺼져 있습니다.':'PC1은 목적지를 어떻게 판단할까요? 주소를 보고 내 예상을 고르세요.';
  $('initialConditions').textContent='각 문제는 지정된 시작 설정으로 독립 실행합니다. PC1 기본 Gateway: '+l.gateway+'; ARP Cache는 비운 상태를 가정합니다. PC3은 LAN A, PC2는 별도 LAN B에 있고 R1으로 연결됩니다. Proxy ARP와 별도 Host Route는 사용하지 않습니다. 스위치 내부 처리와 ICMP 왕복은 이 모델에서 생략합니다.';
- $('calculationDetails').open=false;$('evidenceDetails').open=false;$('traceDetails').open=false;$('startConditions').open=false;traceStep=0;
+ $('calculationDetails').open=false;$('evidenceDetails').open=false;$('traceDetails').open=false;$('startConditions').open=false;$('simFlowDetails').open=false;traceStep=0;
  renderTabs();renderProgress();renderChoices();renderResult();renderSummary();
 }
 function goTo(i,align){
@@ -487,7 +493,7 @@ function renderObservation(){
  $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 검증된 조건의 학습 모델';
  $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
  $('modelTargetLabel').textContent='ARP 대상 · '+o.targetRole;$('simDecision').textContent=o.decision;
- $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 LAN에서 직접 전달 경로':'✓ Gateway를 통한 원격 전달 경로'):'! LAN A의 ARP가 해결되지 않아 원격 전달 전 중단';
+ $('modelEvent').textContent=o.resolved?(o.onLink?'✓ ARP 대상 '+o.arpTarget+' · 같은 LAN에서 직접 전달':'✓ ARP 대상 Gateway '+o.arpTarget+' · 원격 전달 경로'):'! ARP 대상 '+o.arpTarget+' · 응답 없음 · 원격 전달 전 중단';
  $('modelCaption').textContent='화살표와 강조는 ARP 대상 선택과 이후 검증된 전달 경로를 보여줍니다. LAN A/LAN B는 L2 영역을 단순화한 표시이며 SW1/SW2 내부 동작은 생략합니다. 움직이는 표시는 현재 단계의 ARP/IPv4 대상이며 실제 장비 실행 화면이 아닙니다.';
  renderTrace();
 }
