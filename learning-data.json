@@ -1,10 +1,10 @@
 {
   "updated": "2026-10-03",
   "summary": {
-    "completedTopics": 2,
+    "completedTopics": 3,
     "labs": 3,
     "faultScenarios": 6,
-    "packetCaptures": 18,
+    "packetCaptures": 16,
     "recoveryValidations": 6,
     "explainNotes": 1,
     "automations": 2
@@ -90,18 +90,20 @@
       "id": "ethernet-mac-table",
       "category": "0단계 · 네트워크 기초",
       "title": "Ethernet / MAC Table",
-      "status": "ready",
-      "statusLabel": "실습 완료 · 설명 복습 중",
-      "summary": "MAC Learning, Forwarding, Flooding, Broadcast, Aging을 실습과 캡처로 확인했습니다.",
+      "status": "completed",
+      "statusLabel": "검증·2단계 학습 완료",
+      "summary": "Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging/Re-learning, ARP/FDB 독립성을 Cisco IOL L2/PNETLab에서 검증했습니다.",
       "why": "스위치가 프레임을 어느 포트로 보내는지 이해해야 이후 VLAN과 STP를 정확히 볼 수 있습니다.",
       "completeWhen": "Unknown Unicast Flooding과 Broadcast를 구분하고, Aging 이후 재학습 과정을 설명할 수 있습니다.",
       "labs": 1,
       "faultScenarios": 0,
-      "packetCaptures": 5,
+      "packetCaptures": 3,
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 1,
-      "detailUrl": "./labs/ethernet-mac-table.html"
+      "detailUrl": "./labs/ethernet-mac-table.html",
+      "contentStatus": "completed",
+      "labStatus": "completed"
     },
     {
       "id": "arp-default-gateway",
