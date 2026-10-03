@@ -1,129 +1,142 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IP 주소 / Subnetting — 개념서</title>
-<meta name="description" content="IPv4 Prefix와 Subnet Mask로 네트워크 경계를 계산하고 목적지가 on-link인지 gateway 경유인지 판단하는 1단계 개념서입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
+<html id="ipConceptRoot" lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="concept-visual-version" content="20261003-concept-visual-v1">
+<title>IP 주소 / Subnetting — 개념서</title><meta name="description" content="IPv4 Prefix와 Subnet Mask로 네트워크 경계를 계산하고 목적지가 on-link인지 gateway 경유인지 판단하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css">
 <style>
 .concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
 .concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
 .stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
 .core-line{margin:18px 0 0;padding:20px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.035em}.core-line p{margin:7px 0 0;color:#b9c9d8}
-.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.step>b{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:10px}.step h3{margin:0 0 7px}.step p{margin:0;color:var(--muted);font-size:.9rem}
-.boundary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.block{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.block strong{display:block;font-size:1.05rem}.block span{display:block;color:var(--muted);margin-top:7px}.block.current{border-color:#3e6a91;background:rgba(88,184,255,.07)}
-.case-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.case{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.case small{display:block;color:var(--blue);font-weight:850;margin-bottom:7px}.case h3{margin:0 0 8px}.case p{margin:.45rem 0;color:var(--muted)}.case .decision{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--panel2);color:var(--text);font-weight:800}
 .compare{overflow:auto}.compare table{width:100%;border-collapse:collapse}.compare th,.compare td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.compare th{background:var(--panel2)}
 .memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3{margin-top:0}.memory-card li{margin:.55rem 0}.explain{padding:20px;border:1px solid #8f6a38;border-radius:16px;background:rgba(255,191,105,.07)}.explain h3{margin:0 0 6px}
-.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:760px}.verified{display:flex;gap:10px;align-items:flex-start;padding:15px 17px;border:1px solid #347968;border-radius:14px;background:rgba(126,224,194,.06)}.verified b{color:var(--mint)}.verified p{margin:0;color:var(--muted)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:760px}
 .refs{display:grid;gap:8px}.refs a{color:var(--blue)}
-@media(max-width:850px){.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}.flow,.case-grid,.memory-grid{grid-template-columns:1fr}.next-stage .actions{justify-self:start}}
-@media(max-width:600px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.boundary{grid-template-columns:1fr}.compare table,.compare thead,.compare tbody,.compare tr,.compare th,.compare td{display:block;width:100%}.compare thead{display:none}.compare tbody{display:grid;gap:10px}.compare tr{padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.compare th,.compare td{padding:4px 0;border:0}.compare td{display:grid;grid-template-columns:110px 1fr;gap:10px}.compare td::before{content:attr(data-label);color:var(--muted);font-size:.76rem;font-weight:800}}
-</style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a><a href="#prefix">Prefix</a><a href="#decision">판단</a><a href="#examples">예시</a><a href="#mistake">Mask 오류</a><a href="#review">복습</a>
-    </nav>
-  </div>
-</header>
+@media(max-width:850px){.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}.memory-grid{grid-template-columns:1fr}.next-stage .actions{justify-self:start}}
+@media(max-width:600px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.compare table,.compare thead,.compare tbody,.compare tr,.compare th,.compare td{display:block;width:100%}.compare thead{display:none}.compare tbody{display:grid;gap:10px}.compare tr{padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.compare th,.compare td{padding:4px 0;border:0}.compare td{display:grid;grid-template-columns:110px 1fr;gap:10px}.compare td::before{content:attr(data-label);color:var(--muted);font-size:.76rem;font-weight:800}}
+html#ipConceptRoot{scroll-behavior:auto}
+/* Diagram labels remain real, reflowable text; SVGs are decorative only. */
+#ipConcept{--a:#7ee0c2;--b:#82caff;--warn:#ffce86;overflow-wrap:anywhere}
+#ipConcept .shell{max-width:1080px}
+#ipConcept>header{position:static;top:auto;backdrop-filter:none;z-index:auto}
+#ipConcept .topbar{flex-wrap:wrap;min-height:60px;padding:10px 0}
+#ipConcept .nav{justify-content:flex-start}
+#ipConcept h2,#ipConcept h3{word-break:keep-all;overflow-wrap:anywhere}
+#ipConcept section{scroll-margin-top:16px;padding:28px 0}
+#ipConcept .preview-hero{padding-top:34px}
+#ipConcept .preview-hero h1{font-size:clamp(2rem,5vw,3.6rem)}
+#ipConcept .concept-stage{grid-template-columns:minmax(0,1fr) auto}
+#ipConcept .core-line{padding:22px;text-align:left}
+#ipConcept .core-line>strong{font-size:clamp(1.2rem,2.5vw,1.75rem)}
+#ipConcept .visual{margin:0;border:1px solid #3d5872;border-radius:16px;padding:22px;background:#0d1b2a;min-width:0}
+#ipConcept .visual figcaption{margin-top:14px;font-size:.86rem;line-height:1.6;color:#b8ccdf}
+#ipConcept .v-label{display:block;margin-bottom:12px;color:#c0d2e4;font-size:.8rem;font-weight:750;letter-spacing:.03em}
+#ipConcept .v-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #55758f;border-radius:7px;color:#dbedfd;font-size:.8rem;font-weight:800}
+#ipConcept .v-a{color:var(--a)}#ipConcept .v-b{color:var(--b)}#ipConcept .v-warning{color:var(--warn)}
+#ipConcept .v-arrow{display:grid;place-items:center;inline-size:26px;block-size:26px;flex-shrink:0;color:#b5d8f4;font-size:1.3rem;line-height:1;pointer-events:none;align-self:center;justify-self:center}
+#ipConcept .v-kernel{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr) 26px minmax(0,1fr);gap:8px;margin:16px 0 0}
+#ipConcept .v-kernel span:not(.v-arrow){display:grid;place-items:center;text-align:center;padding:10px;background:#142f46;border:1px solid #476b88;border-radius:10px;font-size:.92rem;font-weight:800}
+#ipConcept .v-parent{border:1px solid #6686a0;border-radius:12px;padding:12px;text-align:center;background:#152b3f;color:#e4f2ff}
+#ipConcept .v-parent strong{display:block;font-size:1.05rem}
+#ipConcept .v-parent span{font-size:.82rem;color:#bed2e5}
+#ipConcept .v-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;position:relative}
+#ipConcept .v-split:before{content:"";position:absolute;top:-14px;left:25%;right:25%;height:12px;border:solid #6a8ca8;border-width:2px 2px 0;pointer-events:none}
+#ipConcept .v-split:after{content:"";position:absolute;top:-24px;left:50%;height:10px;border-left:2px solid #6a8ca8;pointer-events:none}
+#ipConcept .v-block{min-width:0;border:1px solid #3d8171;border-top:5px solid var(--a);border-radius:12px;background:#102c2c;padding:16px}
+#ipConcept .v-block[data-lan=B]{border-color:#3e759e;border-top-color:var(--b);background:#122b42}
+#ipConcept .v-block h3{margin:8px 0;font-size:1.08rem;color:var(--a)}
+#ipConcept .v-block[data-lan=B] h3{color:var(--b)}
+#ipConcept .v-scale{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 14px;border-top:3px solid currentColor;padding-top:7px;color:#e7f2fd;font-size:1rem;font-weight:750}
+#ipConcept .v-hosts{display:flex;gap:6px;flex-wrap:wrap}
+#ipConcept .v-host{font-size:.84rem;padding:4px 7px;border:1px solid #7995a6;border-radius:6px;color:#edf6ff}
+#ipConcept .v-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#ipConcept .v-calc{text-align:center;border:1px solid #47647f;border-radius:12px;padding:14px;background:#102236;min-width:0}
+#ipConcept .v-calc h3{font-size:1rem;margin:0 0 8px}
+#ipConcept .v-equation{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;font-size:.96rem;color:#e1edf8}
+#ipConcept .v-mask{border:1px solid #4f84ae;border-radius:7px;background:#153954;color:#b9e5ff;padding:5px 9px;font-weight:850}
+#ipConcept .v-output{display:block;border-top:1px solid #47647f;margin-top:10px;padding-top:8px;font-weight:800;color:#d9ecff}
+#ipConcept .v-merge{height:24px;border:solid #6a8ca8;border-width:0 2px 2px;margin:0 25%;position:relative;pointer-events:none}
+#ipConcept .v-merge:after{content:"";height:12px;position:absolute;top:22px;left:50%;border-left:2px solid #6a8ca8}
+#ipConcept .v-compare{display:table;margin:12px auto 0;padding:10px 20px;border:2px solid #90bbda;border-radius:999px;text-align:center;background:#19364f;font-weight:850}
+#ipConcept .v-branches{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+#ipConcept .v-branch{text-align:center;border:1px solid #497766;border-radius:12px;padding:12px;background:#102c2c;min-width:0}
+#ipConcept .v-branch[data-path=off]{background:#122b42;border-color:#426f91}
+#ipConcept .v-branch b{display:block;color:var(--a);font-size:1rem}
+#ipConcept .v-branch[data-path=off] b{color:var(--b)}
+#ipConcept .v-branch span{display:block;color:#e1edf7;font-size:.9rem}
+#ipConcept .v-route-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#ipConcept .v-route{border:1px solid #487c6d;border-radius:14px;padding:18px;background:#102629;min-width:0}
+#ipConcept .v-route[data-path=off]{background:#122638;border-color:#496f90}
+#ipConcept .v-route h3{font-size:1.05rem;margin:9px 0}
+#ipConcept .v-route-diagram{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:6px;align-items:center;margin:20px 0}
+#ipConcept .v-route-diagram.three{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr) 22px minmax(0,1fr)}
+#ipConcept .v-device{display:grid;justify-items:center;gap:4px;text-align:center;min-width:0}
+#ipConcept .v-device svg{width:52px;height:46px;color:var(--a)}
+#ipConcept [data-path=off] .v-device svg{color:var(--b)}
+#ipConcept .v-device strong{font-size:.94rem;color:#eef6ff}
+#ipConcept .v-device span{font-size:.82rem;color:#bed2e5}
+#ipConcept .v-route .v-conclusion{border-top:1px solid #426779;padding-top:12px;font-size:.93rem;color:#e5f2fd;margin:0}
+#ipConcept .v-route .v-detail{font-size:.86rem;color:#c0d2e3;margin:7px 0 0}
+#ipConcept .v-config{display:flex;gap:8px 18px;justify-content:center;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1px solid #57748d;border-radius:10px;background:#14293b;font-size:.9rem;color:#e9f2ff;margin-bottom:16px}
+#ipConcept .v-mask-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#ipConcept .v-mask-panel{padding:18px;border:1px solid #497d9c;border-radius:14px;min-width:0;background:#112739}
+#ipConcept .v-mask-panel[data-state=wrong]{background:#2a2420;border-color:#b08a54}
+#ipConcept .v-mask-panel h3{font-size:1.08rem;margin:8px 0 6px}
+#ipConcept .v-mask-setting{font-size:.88rem;color:#cad8e5;margin:0 0 12px}
+#ipConcept .v-small-blocks{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:6px;align-items:center}
+#ipConcept .v-small-block{padding:10px 6px;border:1px solid #679aaa;border-radius:9px;text-align:center;background:#12363a;min-width:0}
+#ipConcept .v-small-block:last-child{background:#183854}
+#ipConcept .v-small-block strong,#ipConcept .v-one-block strong{display:block;font-size:.86rem;color:#f0f7ff}
+#ipConcept .v-small-block span,#ipConcept .v-one-block span{display:block;font-size:.8rem;color:#c8dfef;margin-top:5px}
+#ipConcept .v-one-block{border:2px dashed #d7a961;border-radius:9px;background:#46351f;padding:10px;text-align:center}
+#ipConcept .v-one-block .v-member-pair{display:flex;gap:8px;justify-content:space-around;flex-wrap:wrap}
+#ipConcept .v-mask-result{border-top:1px solid #537086;margin:14px 0 0;padding-top:10px;font-weight:850;font-size:.96rem;color:var(--b)}
+#ipConcept [data-state=wrong] .v-mask-result{color:var(--warn);border-color:#927247}
+#ipConcept .v-mask-panel .v-detail{font-size:.86rem;line-height:1.6;color:#d0ddeb;margin:7px 0 0}
+#ipConcept .compare table{min-width:0}#ipConcept .compare td{min-width:0}
+#ipConcept .note{margin-top:12px}
+#ipConcept .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#ipConcept .next-stage .actions{flex-shrink:0}
+#ipConcept .btn{min-height:48px}
+#ipConcept :focus-visible{outline:3px solid #96d3ff;outline-offset:4px}
+#ipConcept details.evidence-note{margin-top:14px;padding:12px 14px;border:1px solid #386479;border-radius:12px;color:#bcd0e4;font-size:.86rem}
+#ipConcept details.evidence-note summary{cursor:pointer;font-weight:750;color:#d9eaf9;min-height:28px}
+@media(max-width:850px){#ipConcept .v-route-pair,#ipConcept .v-mask-panels{grid-template-columns:minmax(0,1fr)}#ipConcept .concept-stage,#ipConcept .memory-grid{grid-template-columns:minmax(0,1fr)}#ipConcept .section-head{align-items:start;flex-direction:column;gap:8px}}
+@media(max-width:600px){#ipConcept .shell{width:calc(100% - 28px)}#ipConcept .visual{padding:14px}#ipConcept .v-block{padding:12px}#ipConcept .v-split{gap:8px}#ipConcept .v-block h3{font-size:.96rem}#ipConcept .v-block .v-tag{font-size:.74rem;padding:3px 6px}#ipConcept .v-host{font-size:.78rem}#ipConcept .v-kernel{grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr);gap:4px}#ipConcept .v-kernel .v-arrow{inline-size:16px}#ipConcept .v-kernel span:not(.v-arrow){padding:8px 4px;font-size:.88rem}#ipConcept .v-two{gap:8px}#ipConcept .v-calc{padding:10px 7px}#ipConcept .v-calc h3{font-size:.88rem}#ipConcept .v-equation{font-size:.86rem;gap:5px}#ipConcept .v-output{font-size:.86rem}#ipConcept .v-branches{gap:8px}#ipConcept .v-branch{padding:10px 6px}#ipConcept .v-route,#ipConcept .v-mask-panel{padding:14px}#ipConcept .compare td{grid-template-columns:minmax(0,90px) minmax(0,1fr)}#ipConcept .next-stage{padding:18px}#ipConcept .core-line{padding:16px}#ipConcept .topbar .brand{white-space:normal}}
+@media(max-width:360px){#ipConcept .v-small-blocks{grid-template-columns:1fr}#ipConcept .v-small-blocks .v-arrow{transform:none}}
+@media(forced-colors:active){#ipConcept .v-block,#ipConcept .v-route,#ipConcept .v-mask-panel,#ipConcept .v-one-block,#ipConcept .v-small-block,#ipConcept .visual{border-color:CanvasText}}
+@media print{#ipConcept .visual{break-inside:avoid}}
+</style></head>
+<body id="ipConcept">
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 요약</a><a href="#prefix">Prefix</a><a href="#decision">판단</a><a href="#examples">예시</a><a href="#mistake">Mask 오류</a><a href="#review">복습</a></nav></div></header>
 <main>
-<section class="preview-hero">
-  <div class="shell">
-    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>IP 주소 / <em>Subnetting</em></h1>
-    <p>목표는 하나입니다. <b>내 IP와 Prefix/Mask를 이용해 목적지가 같은 Subnet인지 판단하는 원리</b>를 설명할 수 있으면 됩니다.</p>
-    <div class="concept-stage">
-      <div><strong>이 페이지에서는 판단 원리만 이해합니다.</strong><span>CLI, PCAP, 장비 설정은 숨겨두고 검증된 핵심 Mental Model만 학습합니다.</span></div>
-      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
-    </div>
-    <div class="core-line">
-      <strong>Mask를 적용한 Network Prefix가 같으면 on-link, 다르면 gateway 경유입니다.</strong>
-      <p>IP + Prefix/Mask → Network Prefix 계산 → 비교 → 전달 방식 결정</p>
-    </div>
-  </div>
-</section>
-
-<section id="summary"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>딱 세 문장만 먼저 기억하세요.</h2></div></div>
-  <div class="test-guide">
-    <p><b>① /25는 IPv4 32비트 중 앞 25비트가 Network Prefix라는 뜻입니다.</b></p>
-    <p><b>② 송신자는 자신의 Mask를 내 IP와 목적지 IP에 적용해 Network Prefix를 비교합니다.</b></p>
-    <p><b>③ 같으면 목적지를 직접 전달 대상으로 보고, 다르면 Routing 결과의 gateway/next-hop을 사용합니다.</b></p>
-  </div>
+<section class="preview-hero"><div class="shell"><div class="eyebrow">1단계 · CONCEPT GUIDE</div><h1>IP 주소 / <em>Subnetting</em></h1><p>목표는 하나입니다. <b>내 IP와 Prefix/Mask를 이용해 목적지가 같은 Subnet인지 판단하는 원리</b>를 설명할 수 있으면 됩니다.</p>
+<div class="concept-stage"><div><strong>이 페이지에서는 판단 원리만 이해합니다.</strong><span>CLI, PCAP, 장비 설정은 숨겨두고 검증된 핵심 Mental Model만 학습합니다.</span></div><div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div></div>
+<div class="core-line"><strong>Mask를 적용한 Network Prefix가 같으면 on-link, 다르면 gateway 경유입니다.</strong><figure id="coreModel" class="v-kernel" data-visual="core" aria-label="내 IP와 목적지 IP에 내 Mask를 적용하고 Network Prefix를 비교하는 순서"><span>내 IP · 목적지 IP</span><span class="v-arrow" aria-hidden="true">→</span><span>내 Mask 적용</span><span class="v-arrow" aria-hidden="true">→</span><span>Network Prefix 비교</span></figure></div>
 </div></section>
-
-<section id="prefix"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">01 · PREFIX / MASK</div><h2>/25는 주소 공간을 어디서 나눌까요?</h2></div><p>/25 = 255.255.255.128</p></div>
-  <div class="boundary" aria-label="10.77.10.0/24를 두 개의 /25로 나눈 예시">
-    <article class="block current"><strong>10.77.10.0/25</strong><span>주소 범위 .0 ~ .127</span><span>일반 Host 예: .10, .20</span></article>
-    <article class="block"><strong>10.77.10.128/25</strong><span>주소 범위 .128 ~ .255</span><span>일반 Host 예: .140</span></article>
-  </div>
-  <div class="note"><b>검증된 예:</b> 10.77.10.10/25의 Network는 10.77.10.0/25, 10.77.10.140/25의 Network는 10.77.10.128/25였습니다.</div>
-</div></section>
-
-<section id="decision"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">02 · 판단 순서</div><h2>보내기 전에 먼저 “같은 Network인가?”를 판단합니다.</h2></div></div>
-  <div class="flow">
-    <article class="step"><b>1</b><h3>내 Network 계산</h3><p>내 IPv4 주소에 <b>내 인터페이스의 Mask</b>를 적용합니다.</p></article>
-    <article class="step"><b>2</b><h3>목적지 Network 계산</h3><p>목적지 IPv4에도 <b>같은 Mask</b>를 적용합니다.</p></article>
-    <article class="step"><b>3</b><h3>두 결과 비교</h3><p>같으면 <b>on-link</b>, 다르면 <b>gateway/next-hop 경유</b>로 판단합니다.</p></article>
-  </div>
-  <div class="note"><b>순서가 중요합니다.</b> ARP가 먼저 목적지를 정하는 것이 아닙니다. 먼저 IP/Mask와 Routing으로 전달 대상을 판단한 뒤 필요한 이웃 MAC을 확인합니다.</div>
-</div></section>
-
-<section id="examples"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">03 · 두 가지 예시</div><h2>같은 /25에서도 목적지에 따라 판단이 달라집니다.</h2></div></div>
-  <div class="case-grid">
-    <article class="case"><small>ON-LINK</small><h3>PC1 .10/25 → PC3 .20/25</h3><p>둘 다 10.77.10.0/25에 속합니다.</p><p>실제 검증에서도 PC1은 <b>.20을 직접 ARP</b>했고 ping 3/3이 성공했습니다.</p><div class="decision">결론 · 목적지를 직접 전달 대상으로 판단</div></article>
-    <article class="case"><small>VIA GATEWAY</small><h3>PC1 .10/25 → PC2 .140/25</h3><p>PC1은 10.77.10.0/25, PC2는 10.77.10.128/25입니다.</p><p>실제 검증에서는 PC1이 <b>gateway .1을 ARP</b>했고 IPv4 Destination은 계속 .140을 유지했습니다.</p><div class="decision">결론 · gateway/next-hop을 통해 전달</div></article>
-  </div>
-</div></section>
-
-<section id="mistake"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">04 · 대표 오설정</div><h2>Mask를 너무 넓게 잡으면 판단 자체가 바뀝니다.</h2></div></div>
-  <div class="case-grid">
-    <article class="case"><small>NORMAL · /25</small><h3>.10과 .140은 다른 Subnet</h3><p>PC1은 .140을 off-link로 판단하고 gateway .1을 next-hop으로 사용합니다.</p><div class="decision">10.77.10.0/25 ≠ 10.77.10.128/25</div></article>
-    <article class="case"><small>WRONG MASK · /24</small><h3>.140을 같은 Subnet으로 오판</h3><p>PC1만 /24로 바꾸면 .10과 .140이 모두 10.77.10.0/24로 계산됩니다.</p><p>검증 Lab에서는 Proxy ARP를 끈 상태에서 PC1이 <b>.140에 직접 ARP</b>했고 Reply가 없어 원격 ICMP를 보내기 전에 실패했습니다.</p><div class="decision">잘못된 Mask → 잘못된 on-link 판단</div></article>
-  </div>
-  <div class="verified"><div>✓</div><p><b>실제 검증 완료:</b> Cisco 3725 IOS 12.4(15)T14 + VPCS/PNETLab에서 /25 → /24 → /25 변화와 ARP/ICMP 흐름을 CLI와 PCAP으로 교차 확인했습니다. 이 구현 환경에서 확인한 장애 현상을 모든 OS의 세부 동작으로 일반화하지 않습니다.</p></div>
-</div></section>
-
-<section id="compare"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">05 · 헷갈리기 쉬운 비교</div><h2>세 개념을 섞지 마세요.</h2></div></div>
-  <div class="compare"><table><thead><tr><th>개념</th><th>무엇을 뜻하나?</th><th>이번 학습에서의 역할</th></tr></thead><tbody>
-    <tr><th>Prefix / Mask</th><td data-label="뜻">Network Prefix의 길이/비트 범위</td><td data-label="역할">같은 Subnet인지 계산</td></tr>
-    <tr><th>Network Address</th><td data-label="뜻">해당 Prefix 블록을 나타내는 주소</td><td data-label="역할">두 주소가 어느 블록에 속하는지 비교</td></tr>
-    <tr><th>Default Gateway</th><td data-label="뜻">off-link 목적지로 갈 때 선택될 수 있는 next-hop</td><td data-label="역할">Network 판단이 끝난 뒤의 다음 단계</td></tr>
-  </tbody></table></div>
-</div></section>
-
-<section id="review"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">06 · REVIEW</div><h2>여기까지 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
-  <div class="memory-grid">
-    <article class="memory-card"><h3>⭐ 꼭 기억하세요</h3><ul>
-      <li>IPv4 Prefix는 <b>0~32비트</b> 길이로 Network Prefix를 표현합니다.</li>
-      <li>같은 Subnet 판단은 <b>송신자의 Mask</b> 기준입니다.</li>
-      <li>Network Prefix가 같으면 <b>on-link</b>, 다르면 <b>gateway/next-hop 경유</b>입니다.</li>
-      <li>off-link여도 <b>IPv4 Destination이 gateway IP로 바뀌는 것은 아닙니다.</b></li>
-      <li>잘못된 Mask는 ARP 이전의 <b>전달 판단 자체</b>를 틀리게 만들 수 있습니다.</li>
-    </ul></article>
-    <article class="explain"><div class="eyebrow">내 말로 설명하기</div><h3>“10.77.10.10/25에서 10.77.10.140은 왜 다른 Subnet인가?”</h3><p>/25가 만드는 Network Prefix를 두 주소에서 각각 계산해 설명해 보세요.</p></article>
-  </div>
-</div></section>
-
-<section><div class="shell"><div class="next-stage">
-  <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>이제 Prefix를 직접 바꿔 판단이 어떻게 달라지는지 확인하세요.</h2><p>정답을 먼저 보지 않고 /25 정상 판단, /24 오설정, /25 복구를 직접 비교합니다.</p></div>
-  <div class="actions"><a class="btn primary" href="ip-subnetting-simulator.html">Interactive Lab 시작 →</a></div>
-</div></div></section>
-
+<section id="summary"><div class="shell"><div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>딱 세 문장만 먼저 기억하세요.</h2></div></div><div class="test-guide"><p><b>① /25는 IPv4 32비트 중 앞 25비트가 Network Prefix라는 뜻입니다.</b></p><p><b>② 송신자는 자신의 Mask를 내 IP와 목적지 IP에 적용해 Network Prefix를 비교합니다.</b></p><p><b>③ 같으면 목적지를 직접 전달 대상으로 보고, 다르면 Routing 결과의 gateway/next-hop을 사용합니다.</b></p></div></div></section>
+<section id="prefix"><div class="shell"><div class="section-head"><div><div class="eyebrow">01 · PREFIX / MASK</div><h2>/25는 주소 공간을 어디서 나눌까요?</h2></div><p>/25 = 255.255.255.128</p></div>
+<figure id="rangeVisual" class="visual" data-visual="range" data-claim="IPSUB-01" aria-labelledby="rangeCaption"><span class="v-label">주소 공간 보기 · 공통 앞부분은 10.77.10</span><div class="v-parent"><strong>10.77.10.0/24</strong><span>마지막 숫자 .0 ~ .255</span></div><div class="v-split">
+<div class="v-block" data-lan="A" data-network="10.77.10.0/25"><span class="v-tag">A · 첫 번째 /25</span><h3>10.77.10.0/25</h3><div class="v-scale"><span>.0</span><span>.127</span></div><div class="v-hosts"><span class="v-host">PC1 · .10</span><span class="v-host">PC3 · .20</span></div></div>
+<div class="v-block" data-lan="B" data-network="10.77.10.128/25"><span class="v-tag">B · 두 번째 /25</span><h3>10.77.10.128/25</h3><div class="v-scale"><span>.128</span><span>.255</span></div><div class="v-hosts"><span class="v-host">PC2 · .140</span></div></div></div>
+<figcaption id="rangeCaption">이 /24 범위를 두 /25로 나누면 경계는 <b>.127과 .128 사이</b>입니다. .10과 .20은 A, .140은 B에 있습니다. 막대는 전체 주소 범위이며, 아래 칩은 그 안의 Host 예시입니다.</figcaption></figure>
+<div class="note"><b>검증된 예:</b> 10.77.10.10/25의 Network는 10.77.10.0/25, 10.77.10.140/25의 Network는 10.77.10.128/25였습니다.</div></div></section>
+<section id="decision"><div class="shell"><div class="section-head"><div><div class="eyebrow">02 · 판단 순서</div><h2>보내기 전에 먼저 “같은 Network인가?”를 판단합니다.</h2></div></div>
+<figure id="decisionVisual" class="visual" data-visual="decision" data-claim="IPSUB-02" aria-labelledby="decisionCaption"><div class="v-two"><div class="v-calc"><h3>① 내 Network 계산</h3><div class="v-equation"><span>내 IPv4</span><span aria-hidden="true">→</span><span class="v-mask">내 Mask 적용</span></div><span class="v-output">↓ 내 Network Prefix</span></div><div class="v-calc"><h3>② 목적지 Network 계산</h3><div class="v-equation"><span>목적지 IPv4</span><span aria-hidden="true">→</span><span class="v-mask">같은 내 Mask 적용</span></div><span class="v-output">↓ 목적지 Network Prefix</span></div></div><div class="v-merge" aria-hidden="true"></div><div class="v-compare">③ 두 Network Prefix 비교</div><div class="v-branches"><div class="v-branch" data-path="on"><b>＝ 같음 ↓</b><span><strong>on-link</strong><br>목적지를 직접 전달 대상으로</span></div><div class="v-branch" data-path="off"><b>≠ 다름 ↓</b><span><strong>gateway / next-hop</strong><br>Routing 결과에 따라 전달</span></div></div><figcaption id="decisionCaption">두 계산 모두 <b>송신자의 Mask</b>를 사용합니다. 전달 대상을 정한 다음, 필요한 이웃 MAC을 확인합니다.</figcaption></figure>
+<div class="note"><b>순서가 중요합니다.</b> ARP가 먼저 목적지를 정하는 것이 아닙니다. 먼저 IP/Mask와 Routing으로 전달 대상을 판단한 뒤 필요한 이웃 MAC을 확인합니다.</div></div></section>
+<section id="examples"><div class="shell"><div class="section-head"><div><div class="eyebrow">03 · 두 가지 예시</div><h2>같은 /25에서도 목적지에 따라 판단이 달라집니다.</h2></div></div>
+<figure id="routeVisual" class="visual" data-visual="routes" data-claim="IPSUB-02" aria-labelledby="routeCaption"><span class="v-label">전달 대상 비교 · 아래 IP의 공통 앞부분은 10.77.10</span><div class="v-route-pair">
+<div class="v-route" data-path="on"><span class="v-tag v-a">A 안에서 · ON-LINK</span><h3>PC1 .10/25 → PC3 .20/25</h3><div class="v-route-diagram"><div class="v-device"><svg viewBox="0 0 64 54" width="52" height="46" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="54" height="34" rx="4"/><path d="M24 39v9h16v-9M18 49h28"/><path d="M12 12h40v20H12z" fill="currentColor" opacity=".12" stroke="none"/></svg><strong>PC1</strong><span>.10/25</span></div><span class="v-arrow" aria-hidden="true">→</span><div class="v-device"><svg viewBox="0 0 64 54" width="52" height="46" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="54" height="34" rx="4"/><path d="M24 39v9h16v-9M18 49h28"/><path d="M12 12h40v20H12z" fill="currentColor" opacity=".12" stroke="none"/></svg><strong>PC3</strong><span>.20/25</span></div></div><p class="v-conclusion"><b>목적지 .20을 직접 ARP</b></p><p class="v-detail">둘 다 10.77.10.0/25에 속합니다. 실제 검증에서도 ping 3/3이 성공했습니다.</p></div>
+<div class="v-route" data-path="off"><span class="v-tag v-b">A → B · VIA GATEWAY</span><h3>PC1 .10/25 → PC2 .140/25</h3><div class="v-route-diagram three"><div class="v-device"><svg viewBox="0 0 64 54" width="52" height="46" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="54" height="34" rx="4"/><path d="M24 39v9h16v-9M18 49h28"/><path d="M12 12h40v20H12z" fill="currentColor" opacity=".12" stroke="none"/></svg><strong>PC1</strong><span>.10/25</span></div><span class="v-arrow" aria-hidden="true">→</span><div class="v-device"><svg viewBox="0 0 64 54" width="52" height="46" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="56" height="34" rx="7"/><path d="M13 22h17m-5-4l5 4-5 4M51 35H34m5-4l-5 4 5 4"/><circle cx="13" cy="38" r="2" fill="currentColor" stroke="none"/></svg><strong>R1</strong><span>.1 · Gateway</span></div><span class="v-arrow" aria-hidden="true">→</span><div class="v-device"><svg viewBox="0 0 64 54" width="52" height="46" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="54" height="34" rx="4"/><path d="M24 39v9h16v-9M18 49h28"/><path d="M12 12h40v20H12z" fill="currentColor" opacity=".12" stroke="none"/></svg><strong>PC2</strong><span>.140/25</span></div></div><p class="v-conclusion"><b>먼저 gateway .1을 ARP</b></p><p class="v-detail">서로 다른 /25입니다. IPv4 Destination은 계속 .140을 유지합니다.</p></div>
+</div><figcaption id="routeCaption">화살표는 <b>전달 대상과 gateway 경유 여부</b>를 보여줍니다. 스위치와 실제 배선은 생략한 개념도이며, “직접 전달”이 PC 간 케이블 직결을 뜻하지는 않습니다.</figcaption></figure></div></section>
+<section id="mistake"><div class="shell"><div class="section-head"><div><div class="eyebrow">04 · 대표 오설정</div><h2>Mask를 너무 넓게 잡으면 판단 자체가 바뀝니다.</h2></div></div>
+<figure id="maskVisual" class="visual" data-visual="mask" data-claim="IPSUB-03 IPSUB-04" aria-labelledby="maskCaption"><div class="v-config"><span><b>변경:</b> PC1의 /25 → /24</span><span><b>유지:</b> PC2 10.77.10.140/25 · 실제 L2 연결</span></div><div class="v-mask-panels">
+<div class="v-mask-panel" data-state="normal"><span class="v-tag v-b">BEFORE · 정상 /25</span><h3>PC1의 눈에는 두 Network</h3><p class="v-mask-setting">PC1 실제 설정: <b>10.77.10.10/25</b></p><div class="v-small-blocks"><div class="v-small-block"><strong>10.77.10.0/25</strong><span>내 IP .10</span></div><span class="v-arrow" aria-hidden="true">≠</span><div class="v-small-block"><strong>10.77.10.128/25</strong><span>목적지 .140</span></div></div><p class="v-mask-result">↓ 다른 Subnet → gateway .1</p><p class="v-detail">.140을 off-link로 판단합니다.</p></div>
+<div class="v-mask-panel" data-state="wrong"><span class="v-tag v-warning">AFTER · 잘못된 /24</span><h3>PC1의 눈에는 같은 Network</h3><p class="v-mask-setting">PC1 실제 설정: <b>10.77.10.10/24</b></p><div class="v-one-block"><strong>PC1이 계산한 10.77.10.0/24</strong><div class="v-member-pair"><span>내 IP .10</span><span>목적지 .140</span></div></div><p class="v-mask-result">↓ on-link로 오판 → .140 직접 ARP</p><p class="v-detail">검증 Lab에서는 Proxy ARP가 꺼져 있어 Reply가 없었고, 원격 ICMP를 보내기 전에 실패했습니다.</p></div>
+</div><figcaption id="maskCaption"><b>PC2의 설정은 계속 /25입니다.</b> 바뀐 것은 PC1의 계산 기준이지, 목적지의 실제 Mask나 물리적 연결이 아닙니다. PC1을 /25로 복구하면 다시 gateway를 선택합니다.</figcaption></figure>
+<details class="evidence-note"><summary>검증 환경과 적용 범위</summary><p>Cisco 3725 IOS 12.4(15)T14 + VPCS/PNETLab에서 /25 → /24 → /25 변화와 ARP/ICMP 흐름을 CLI와 PCAP으로 교차 확인했습니다. 이 구현 환경에서 확인한 장애 현상을 모든 OS의 세부 동작으로 일반화하지 않습니다.</p></details></div></section>
+<section id="compare"><div class="shell"><div class="section-head"><div><div class="eyebrow">05 · 헷갈리기 쉬운 비교</div><h2>세 개념을 섞지 마세요.</h2></div></div><div class="compare"><table><thead><tr><th>개념</th><th>무엇을 뜻하나?</th><th>이번 학습에서의 역할</th></tr></thead><tbody><tr><th>Prefix / Mask</th><td data-label="뜻">Network Prefix의 길이/비트 범위</td><td data-label="역할">같은 Subnet인지 계산</td></tr><tr><th>Network Address</th><td data-label="뜻">해당 Prefix 블록을 나타내는 주소</td><td data-label="역할">두 주소가 어느 블록에 속하는지 비교</td></tr><tr><th>Default Gateway</th><td data-label="뜻">off-link 목적지로 갈 때 선택될 수 있는 next-hop</td><td data-label="역할">Network 판단이 끝난 뒤의 다음 단계</td></tr></tbody></table></div></div></section>
+<section id="review"><div class="shell"><div class="section-head"><div><div class="eyebrow">06 · REVIEW</div><h2>여기까지 설명할 수 있으면 1단계 완료입니다.</h2></div></div><div class="memory-grid"><article class="memory-card"><h3>⭐ 꼭 기억하세요</h3><ul><li>IPv4 Prefix는 <b>0~32비트</b> 길이로 Network Prefix를 표현합니다.</li><li>같은 Subnet 판단은 <b>송신자의 Mask</b> 기준입니다.</li><li>Network Prefix가 같으면 <b>on-link</b>, 다르면 <b>gateway/next-hop 경유</b>입니다.</li><li>off-link여도 <b>IPv4 Destination이 gateway IP로 바뀌는 것은 아닙니다.</b></li><li>잘못된 Mask는 ARP 이전의 <b>전달 판단 자체</b>를 틀리게 만들 수 있습니다.</li></ul></article><article class="explain"><div class="eyebrow">내 말로 설명하기</div><h3>“10.77.10.10/25에서 10.77.10.140은 왜 다른 Subnet인가?”</h3><p>/25가 만드는 Network Prefix를 두 주소에서 각각 계산해 설명해 보세요.</p></article></div></div></section>
+<section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>이제 Prefix를 직접 바꿔 판단이 어떻게 달라지는지 확인하세요.</h2><p>정답을 먼저 보지 않고 /25 정상 판단, /24 오설정, /25 복구를 직접 비교합니다.</p></div><div class="actions"><a class="btn primary" href="ip-subnetting-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
 <section><div class="shell"><div class="note refs"><b>Reference</b><span><a href="https://www.rfc-editor.org/rfc/rfc1122.html">RFC 1122 §3.3.1.1</a> · Local/Remote Decision</span><span><a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632 §3.1</a> · CIDR Prefix Notation</span><span><a href="https://www.cisco.com/c/en/us/support/docs/ip/dynamic-address-allocation-resolution/13718-5.html">Cisco · Understand Proxy ARP</a> · 잘못된 Mask/Proxy ARP 구현 조건</span></div></div></section>
-</main>
-<footer class="footer"><div class="shell">IP 주소 / Subnetting · Concept → Interactive Lab</div></footer>
-</body>
-</html>
+</main><footer class="footer"><div class="shell">IP 주소 / Subnetting · Concept → Interactive Lab</div></footer></body></html>
