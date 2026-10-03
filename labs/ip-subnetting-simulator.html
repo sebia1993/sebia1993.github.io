@@ -202,19 +202,26 @@
 #ipLab .sim-step-text{margin:8px 0 0;padding:9px 10px;border-left:3px solid #65aee0;background:#0d2030;color:#dbe9f5;font-size:.84rem;line-height:1.55}
 #ipLab .network-simulator[data-outcome=unresolved] .sim-step-text{border-left-color:#ffbf69}
 @media(max-width:700px){
- #ipLab .network-simulator{padding:10px 12px}
- #ipLab .sim-topology{grid-template-columns:minmax(0,1fr);gap:7px;padding:10px}
- #ipLab .sim-connector{width:4px;height:26px;justify-self:center}
+ #ipLab .network-simulator{padding:9px 10px}
+ #ipLab .sim-topology{grid-template-columns:minmax(0,1fr);gap:5px;padding:8px}
+ #ipLab .sim-zone{padding:7px}
+ #ipLab .sim-zone-heading{margin-bottom:5px}
+ #ipLab .sim-host-stack{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ #ipLab .sim-node,#ipLab .sim-router{padding:6px}
+ #ipLab .sim-device-type{margin-bottom:3px;padding:1px 5px}
+ #ipLab .sim-node strong,#ipLab .sim-router strong{font-size:.84rem}
+ #ipLab .sim-node small,#ipLab .sim-router small{font-size:.66rem}
+ #ipLab .sim-connector{width:4px;height:18px;justify-self:center}
  #ipLab .sim-connector span{transform:translate(-50%,-50%) rotate(90deg)}
- #ipLab .sim-router{width:min(100%,220px);justify-self:center}
- #ipLab .sim-zone-b .sim-node{width:min(100%,220px);margin:auto}
- #ipLab .sim-readout{grid-template-columns:minmax(0,1fr)}
- #ipLab .sim-playback{grid-template-columns:1fr 1fr}
- #ipLab #simStepLabel{grid-column:1/-1;grid-row:1}
- #ipLab #simPrev{grid-column:1;grid-row:2}
- #ipLab #simNext{grid-column:2;grid-row:2}
+ #ipLab .sim-router{width:min(100%,190px);justify-self:center}
+ #ipLab .sim-zone-b .sim-node{width:min(100%,190px);margin:auto}
+ #ipLab .sim-readout{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ #ipLab .sim-readout>span{padding:7px 8px}
+ #ipLab .sim-playback{grid-template-columns:auto minmax(0,1fr) auto;gap:5px}
+ #ipLab #simStepLabel{grid-column:auto;grid-row:auto}
+ #ipLab #simPrev,#ipLab #simNext{grid-column:auto;grid-row:auto;padding:8px 9px}
+ #ipLab .sim-step-text{font-size:.8rem;padding:8px}
 }
-@media(max-width:360px){#ipLab .sim-host-stack{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){#ipLab .sim-packet,#ipLab .sim-zone,#ipLab .sim-router,#ipLab .sim-node,#ipLab .sim-connector{transition:none}}
 @media(forced-colors:active){#ipLab .sim-topology,#ipLab .sim-zone,#ipLab .sim-node,#ipLab .sim-router,#ipLab .sim-readout>span,#ipLab .sim-packet{border-color:CanvasText}}
 </style></head><body>
