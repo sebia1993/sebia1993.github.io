@@ -122,7 +122,7 @@ async function surface(url,name){
    await page.addStyleTag({content:'html{font-size:200%}'});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
-   assert.ok((await page.locator('#modelEvent').innerText()).includes('이웃 MAC'));
+   assert.ok((await page.locator('#modelEvent').innerText()).includes('ARP 대상'));
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    assert.deepEqual(errors,[]);
    checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','same-run-details','replay-keeps-grade','sequential-next','summary-return','summary-reload','actual-prefix','source-links','200%-text','forced-colors']});
