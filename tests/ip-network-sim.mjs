@@ -25,6 +25,9 @@ async function submit(page,tab,choice){
  if(await page.locator('#resetBtn').isVisible())await page.locator('#resetBtn').click();
  await page.locator('#choices [data-value="'+choice+'"]').click();await page.locator('#runBtn').click();
 }
+async function openFlow(page){
+ if((await page.locator('#simFlowDetails').getAttribute('open'))===null)await page.locator('#simFlowDetails summary').click();
+}
 async function verify(url,surface){
  for(const [width,height,touch] of matrix){
   const context=await browser.newContext({viewport:{width,height},isMobile:touch,hasTouch:touch}),page=await context.newPage(),errors=[];
@@ -44,6 +47,8 @@ async function verify(url,surface){
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.20');
    assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK');
+   assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
+   await openFlow(page);
    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4');
    await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'arp-request');
@@ -56,6 +61,7 @@ async function verify(url,surface){
    await submit(page,1,'gw');
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.1');
    assert.equal(await page.locator('#simDecision').innerText(),'VIA GATEWAY');
+   await openFlow(page);
    for(let i=0;i<3;i++)await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
    assert.equal(await page.locator('#simTopology [data-sim-id=pc2]').evaluate(e=>e.classList.contains('is-current')),true);
@@ -65,6 +71,7 @@ async function verify(url,surface){
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.140');
    assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK로 오판');
+   await openFlow(page);
    await page.locator('#simNext').click();await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'unresolved-arp');
    assert.equal(await page.locator('#simPacket').innerText(),'응답 없음');
@@ -78,7 +85,7 @@ async function verify(url,surface){
    assert.equal(await page.locator('#scoreText').innerText(),score);
    assert.equal(await page.evaluate(()=>localStorage.getItem('network-learning:ip-subnetting:answers:v1')),saved,'sim playback changed learner state');
 
-   await submit(page,3,'gw');for(let i=0;i<3;i++)await page.locator('#simNext').click();
+   await submit(page,3,'gw');await openFlow(page);for(let i=0;i<3;i++)await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
    assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
 
