@@ -478,7 +478,7 @@ function renderObservation(){
  $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
  $('modelTargetLabel').textContent='ARP 대상 · '+o.targetRole;$('simDecision').textContent=o.decision;
  $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 LAN에서 직접 전달 경로':'✓ Gateway를 통한 원격 전달 경로'):'! LAN A의 ARP가 해결되지 않아 원격 전달 전 중단';
- $('modelCaption').textContent='LAN A/LAN B는 L2 영역을 단순화한 표시입니다. SW1/SW2 내부 동작은 생략합니다. 움직이는 표시는 현재 단계의 ARP/IPv4 대상이며 실제 장비 실행 화면이 아닙니다.';
+ $('modelCaption').textContent='화살표와 강조는 ARP 대상 선택과 이후 검증된 전달 경로를 보여줍니다. LAN A/LAN B는 L2 영역을 단순화한 표시이며 SW1/SW2 내부 동작은 생략합니다. 움직이는 표시는 현재 단계의 ARP/IPv4 대상이며 실제 장비 실행 화면이 아닙니다.';
  renderTrace();
 }
 function simElement(id){return $('simTopology').querySelector('[data-sim-id="'+id+'"]');}
