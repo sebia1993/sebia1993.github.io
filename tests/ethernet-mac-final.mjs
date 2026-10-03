@@ -75,7 +75,9 @@ try{
             for(let i=1;i<=6;i++) assert.equal(await page.locator(`#ethmac-0${i}`).count(),1);
           }
           if(name==='roadmap'){
-            assert.ok((await page.locator('#current').innerText()).includes('Ethernet / MAC Table'));
+            const body=await page.locator('body').innerText();
+            assert.ok(body.includes('Ethernet / MAC Table'),'Ethernet topic must remain in the roadmap');
+            assert.ok(await page.locator('a[href="./labs/ethernet-mac-table.html"]').count()>=1,'Ethernet concept link must remain available');
           }
           assert.deepEqual(errors,[]);
         }finally{await page.close();}
