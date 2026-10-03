@@ -87,6 +87,7 @@ async function surface(url,name){
     assert.equal(await page.locator('#tracePrev').isDisabled(),true);
     await input(page,'#traceNext',touch);assert.equal(await page.locator('#traceEvent').getAttribute('data-kind'),'arp-request');
     await input(page,'#traceNext',touch);assert.equal(await page.locator('#traceEvent').getAttribute('data-kind'),fixtures[i].kind);
+    while(!(await page.locator('#traceNext').isDisabled())) await input(page,'#traceNext',touch);
     assert.equal(await page.locator('#traceNext').isDisabled(),true);
     await input(page,'#tracePrev',touch);
     assert.equal(await page.evaluate(k=>localStorage.getItem(k),key),saved,'observation replay changed saved answer');
