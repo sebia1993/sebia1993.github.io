@@ -52,7 +52,7 @@
   <section class="lab-scope-strip advanced-only" aria-label="시뮬레이터 범위와 가정">
     <b>이 실습의 기본 가정</b>
     <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 전달 상태 · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
-    <span><b>Aging 기준 = 300초</b>는 이 시뮬레이터와 검증 GNS3 Linux Bridge의 학습 조건이며 모든 스위치의 고정값이 아닙니다. 경과 시간은 실제 시간에 자동 증가하지 않고 실습의 시간 경과 버튼으로만 진행됩니다.</span>
+    <span><b>시뮬레이터 Aging 기준 = 300초</b>는 교육용 모델의 값입니다. 실제 Cisco IOL L2 검증에서는 기존 300초를 확인한 뒤 30초로 단축해 Aging/Re-learning을 검증하고 300초로 원복했습니다. 300초를 모든 스위치의 고정값으로 일반화하지 않습니다. 시뮬레이터의 경과 시간은 버튼으로만 진행됩니다.</span>
   </section>
 
   <section class="card lab-card">
@@ -288,8 +288,8 @@
     </div>
     <div class="explain" id="explainBox">먼저 <b>첫 PING 실행</b>을 눌러보세요.</div>
     <div class="evidence-link-row advanced-only">
-      <a id="evidenceLink" href="../ethernet-viewer.html?mode=console&amp;scenario=01-arp-first-contact">실제 GNS3 FDB·패킷 근거 보기 →</a>
-      <span>시뮬레이터의 학습 모델과 실제 GNS3/PCAP 관찰 증거를 분리해서 확인합니다.</span>
+      <a id="evidenceLink" href="../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-01">실제 Cisco Source MAC 검증 근거 보기 →</a>
+      <span>시뮬레이터의 학습 모델과 2026-10-03 Cisco IOL L2/PCAP 검증 근거를 분리해서 확인합니다.</span>
     </div>
 
     <div class="lesson-status">
@@ -370,8 +370,8 @@
           <button type="button" id="manualBroadcastBtn">PC1 Broadcast</button>
         </div>
         <div class="scope-note">
-          <b>시뮬레이터 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 300초 기준의 단순 Aging, Same-port Filtering과 Re-learning을 모델링합니다.
-          Aging 경과 시간은 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 범위 밖입니다.
+          <b>시뮬레이터 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 교육용 300초 Aging과 Re-learning을 모델링합니다.
+          Aging 경과 시간은 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, Same-port Filtering, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 이번 6개 검증 Claim과 기본 학습 범위 밖입니다.
         </div>
       </div>
     </details>
@@ -389,6 +389,6 @@
     이 페이지에서는 개념 설명을 반복하지 않고 예상 → 실행 → 비교를 통해 핵심 동작을 확인합니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20261002-1"></script>
+<script src="ethernet-mac-simulator.js?v=20261003-1"></script>
 </body>
 </html>
