@@ -1,116 +1,249 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261003-header-flow-fix">
-<title>IP 주소 / Subnetting — 인터랙티브 실습</title>
-<meta name="description" content="IPv4 Prefix와 Subnet Mask를 바꾸며 같은 Subnet 판단을 예상하고 계산 결과와 비교하는 Interactive Lab입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
-<style>
-:root{--ok:#7ee0c2;--warn:#ffbf69}
-/* This is the lesson introduction, not the shared sticky site navigation.
-   Keep it in normal flow so it cannot cover questions or intercept touches. */
-.lab-wrap > header.hero{position:static;top:auto;z-index:auto;backdrop-filter:none}
-/* Rotate a small arrow box, not a full-width grid item over the addresses. */
-.lab-wrap .calc > .arrow{width:2rem;height:2rem;justify-self:center;align-self:center}
-
-body{min-height:100vh}.lab-wrap{width:min(1120px,calc(100% - 32px));margin:auto;padding:36px 0 64px}.hero{padding:26px 0 18px}.hero small,.eyebrow2{color:var(--blue);font-weight:900;letter-spacing:.08em}.hero h1{margin:8px 0;font-size:clamp(2rem,5vw,3.5rem)}.hero p{color:var(--muted);max-width:820px}.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-right:8px}.guide strong{display:block;margin:8px 0 4px}.guide span{color:var(--muted);font-size:.86rem}
-.back{display:inline-flex;margin-bottom:16px;color:var(--blue);text-decoration:none;font-weight:800}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:18px 0}.tab{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);cursor:pointer;text-align:left}.tab.active{border-color:#3e6a91;background:rgba(88,184,255,.09)}.tab small{display:block;color:var(--muted);margin-top:4px}
-.card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.question small{color:var(--blue);font-weight:900}.question h2{margin:7px 0}.question p{color:var(--muted)}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.choice{min-height:72px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);cursor:pointer;text-align:left}.choice.selected{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset}.choice.correct{border-color:#347968;background:rgba(126,224,194,.08)}.choice.wrong{border-color:#8f6a38;background:rgba(255,191,105,.07)}
-.run-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.run{padding:12px 16px;border:0;border-radius:11px;background:var(--blue);color:#07131f;font-weight:900;cursor:pointer}.run:disabled{opacity:.45;cursor:not-allowed}.reset{padding:12px 16px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);cursor:pointer}.feedback{color:var(--muted);font-size:.88rem}
-.calc{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin-top:20px}.endpoint{padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.endpoint small{display:block;color:var(--muted)}.endpoint strong{display:block;margin:6px 0;font-size:1.12rem}.endpoint code{font-size:.92rem}.arrow{display:grid;place-items:center;color:var(--blue);font-size:1.8rem;font-weight:900}.network-strip{display:flex;min-height:88px;margin:18px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel3)}.segment{display:grid;place-items:center;align-content:center;text-align:center;min-width:0}.segment.a{flex:1;border-right:1px solid var(--line)}.segment.b{flex:1}.segment.active{background:rgba(88,184,255,.08)}.segment strong{font-size:.9rem}.segment span{color:var(--muted);font-size:.75rem;margin-top:4px}.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.result{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.result small{display:block;color:var(--muted);font-size:.76rem}.result strong{display:block;margin-top:6px}.result.good strong{color:var(--ok)}.result.alert strong{color:var(--warn)}
-.explain{margin-top:16px;padding:16px;border-left:3px solid var(--blue);border-radius:10px;background:var(--panel3)}.explain b{display:block;margin-bottom:5px}.explain p{margin:0;color:var(--muted)}.lab-evidence{margin-top:14px;padding:14px;border:1px solid #347968;border-radius:12px;background:rgba(126,224,194,.05)}.lab-evidence b{color:var(--mint)}.lab-evidence p{margin:5px 0 0;color:var(--muted)}
-.progress{display:flex;gap:8px;align-items:center;margin:16px 0}.dots{display:flex;gap:6px}.dot{width:11px;height:11px;border-radius:50%;border:1px solid var(--line)}.dot.done{background:var(--mint);border-color:var(--mint)}.complete{display:none;margin-top:18px;padding:22px;border:1px solid #347968;border-radius:16px;background:rgba(126,224,194,.07)}.complete.show{display:block}.complete h2{margin:5px 0}.complete p{color:var(--muted)}.scope{margin-top:18px;color:var(--muted);font-size:.82rem}.scope details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel3)}.scope summary{cursor:pointer;font-weight:800;color:var(--text)}
-@media(max-width:860px){.start-guide,.choices,.result-grid{grid-template-columns:1fr 1fr}.calc{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
-@media(max-width:600px){
-  .lab-wrap{width:min(100% - 22px,1120px);padding:12px 0 calc(128px + env(safe-area-inset-bottom))}
-  .back{margin-bottom:8px;font-size:.86rem}
-  .hero{padding:8px 0 10px}
-  .hero h1{margin:5px 0;font-size:clamp(1.8rem,9vw,2.35rem);line-height:1.08}
-  .hero p{margin:8px 0 0;font-size:.92rem;line-height:1.55}
-  .start-guide{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
-  .guide{min-width:0;padding:8px 7px;border-radius:11px;text-align:center}
-  .guide b{width:22px;height:22px;margin:0 auto 5px;font-size:.75rem}
-  .guide strong{margin:0;font-size:.76rem;line-height:1.25}
-  .guide span{display:none}
-  .tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;margin:10px -11px 6px;padding:0 11px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .tabs::-webkit-scrollbar{display:none}
-  .tab{flex:0 0 min(58vw,205px);min-height:54px;padding:9px 10px;scroll-snap-align:center}
-  .tab b{font-size:.82rem}.tab small{font-size:.72rem;margin-top:2px}
-  .progress{margin:6px 0 10px;font-size:.86rem}
-  .card{padding:16px;border-radius:15px;scroll-margin-top:12px;scroll-margin-bottom:120px}
-  .question h2{margin:4px 0;font-size:1.45rem}
-  .question p{margin:5px 0 10px;font-size:.88rem;line-height:1.5}
-  .choices,.result-grid{grid-template-columns:1fr}
-  .choices{gap:8px;margin:10px 0}
-  .choice{min-height:54px;padding:10px 12px}
-  .run-row{display:grid;gap:8px}
-  .run,.reset{width:100%;min-height:48px}
-  .feedback{line-height:1.45}
-  .network-strip{height:auto;display:grid}
-  .segment{min-height:72px}
-  .segment.a{border-right:0;border-bottom:1px solid var(--line)}
-  .complete,.scope{scroll-margin-bottom:120px}
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="lab-ui-version" content="20261003-answer-flow-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
+<meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
+<link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
+/* Shared learning flow at every viewport; only layout changes by screen size. */
+#ipLab{width:min(100% - 32px,1040px);margin:auto;padding:22px 0 calc(48px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
+#ipLab [hidden]{display:none!important}
+#ipLab button,#ipLab summary{font:inherit;touch-action:manipulation}
+#ipLab button{cursor:pointer;min-height:46px}
+#ipLab button:disabled{cursor:default}
+#ipLab :focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+#ipLab .hero{position:static;top:auto;z-index:auto;backdrop-filter:none;background:none;border:0;padding:18px 0}
+#ipLab .hero small{font-size:.78rem;color:var(--blue);font-weight:800}
+#ipLab .hero h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;margin:8px 0}
+#ipLab .hero p{margin:0;color:var(--muted);font-size:.98rem}
+#ipLab .back{font-size:.88rem;color:var(--blue);text-decoration:none}
+#ipLab .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 14px}
+#ipLab .tab{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);text-align:left;min-width:0}
+#ipLab .tab b,#ipLab .tab small{display:block}
+#ipLab .tab b{font-size:.86rem}#ipLab .tab small{font-size:.76rem;color:var(--muted);margin-top:4px}
+#ipLab .tab.active{border-color:var(--blue);background:var(--panel2)}
+#ipLab .tab[data-grade=correct] small{color:var(--mint)}#ipLab .tab[data-grade=incorrect] small{color:var(--amber)}
+#ipLab .progress{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;font-size:.86rem;margin:12px 0;color:var(--muted)}
+#ipLab #progressText{color:var(--text)}
+#ipLab main.card{padding:24px;border-radius:18px;min-width:0}
+#ipLab section{padding:0}
+#ipLab .question small{color:var(--blue);font-weight:800}
+#ipLab .question h2{font-size:clamp(1.3rem,3vw,1.8rem);line-height:1.35;margin:6px 0 10px;scroll-margin-top:16px}
+#ipLab .question p{margin:0 0 8px;color:var(--text)}
+#ipLab .question .context-note{font-size:.86rem;color:var(--muted)}
+#ipLab .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 12px}
+#ipLab .choice{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:7px;padding:14px;min-height:104px;border:2px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);min-width:0}
+#ipLab .choice .choice-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.74rem;min-height:22px;color:var(--muted)}
+#ipLab .choice .choice-tag{font-weight:800;color:var(--text)}
+#ipLab .choice.selected{border-color:var(--blue)}
+#ipLab .choice.correct{border-color:var(--mint);background:#102f2c}
+#ipLab .choice.wrong{border-color:var(--amber);background:#35291b}
+#ipLab .choice:disabled{opacity:1}
+#ipLab .choice-text{font-size:.93rem;line-height:1.55}
+#ipLab #submitRow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 0}
+#ipLab .primary{background:var(--blue);color:#07111f;border:2px solid transparent;border-radius:11px;padding:11px 18px;font-weight:850;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:48px}
+#ipLab .primary:disabled{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+#ipLab .secondary{border:1px solid var(--line);background:var(--panel3);color:var(--text);border-radius:10px;padding:10px 14px;text-decoration:none}
+#ipLab #feedback{font-size:.86rem;color:var(--muted)}
+#ipLab #resultArea{margin-top:16px;scroll-margin-top:16px}
+#ipLab .verdict{padding:20px;border:2px solid var(--mint);border-radius:14px;background:#102f2c}
+#ipLab .verdict[data-grade=incorrect]{border-color:var(--amber);background:#35291b}
+#ipLab .verdict h2{font-size:clamp(1.5rem,4vw,1.85rem);line-height:1.3;margin:0 0 14px;color:var(--mint)}
+#ipLab .verdict[data-grade=incorrect] h2{color:var(--amber)}
+#ipLab .answer-compare{display:grid;grid-template-columns:100px minmax(0,1fr);gap:7px 12px;margin:0 0 14px;line-height:1.5}
+#ipLab .answer-compare dt{font-size:.82rem;color:#c7d6e8}#ipLab .answer-compare dd{margin:0;font-weight:750}
+#ipLab .verdict p{color:var(--text);line-height:1.6;font-size:.94rem;margin:0}
+#ipLab .explain-label{font-weight:850;margin-right:7px}
+#ipLab .optional{border:1px solid var(--line);border-radius:12px;background:var(--panel3);margin-top:10px}
+#ipLab .optional summary{padding:12px 14px;cursor:pointer;font-size:.88rem;font-weight:750;min-height:46px}
+#ipLab .optional-body{padding:0 14px 16px}
+#ipLab .basis{font-size:.9rem;color:var(--blue);margin:5px 0 12px}
+#ipLab .calc{display:grid;grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr);gap:10px;align-items:center}
+#ipLab .endpoint{border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+#ipLab .endpoint small,#ipLab .endpoint strong,#ipLab .endpoint code{display:block}
+#ipLab .endpoint small{color:var(--muted);font-size:.76rem}
+#ipLab .endpoint strong{margin:5px 0;font-size:1rem}
+#ipLab .endpoint code{white-space:normal;font-size:.82rem;color:var(--muted)}
+#ipLab .calc>.arrow{width:32px;height:32px;justify-self:center;align-self:center;display:grid;place-items:center;color:var(--blue);font-size:1.5rem}
+#ipLab .network-strip{display:flex;margin:12px 0;gap:8px}
+#ipLab .segment{flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:.86rem;background:var(--panel2)}
+#ipLab .segment strong,#ipLab .segment span{display:block}#ipLab .segment span{font-size:.78rem;color:var(--muted);margin-top:3px}
+#ipLab .result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#ipLab .result{min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px}
+#ipLab .result small{display:block;color:var(--muted);font-size:.76rem}#ipLab .result strong{display:block;font-size:.87rem;margin-top:3px}
+#ipLab #evidenceText,#ipLab #evidenceMeaning{font-size:.86rem;line-height:1.65;margin:8px 0}
+#ipLab #validatedOut{font-weight:800;color:var(--mint);font-size:.88rem}
+#ipLab .lesson-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+#ipLab #nextBtn{margin-left:auto;min-width:210px;order:2}
+#ipLab #resetBtn{order:1}
+#ipLab .complete{margin-top:18px;border:1px solid var(--blue);border-radius:16px;padding:22px;background:var(--panel2)}
+#ipLab .complete h2{font-size:1.6rem;margin:0 0 10px}
+#ipLab .complete p{margin:6px 0 14px;color:var(--muted)}
+#ipLab .summary-list{display:grid;gap:8px;margin:14px 0}
+#ipLab .summary-item{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel3)}
+#ipLab .summary-item small{display:block;color:var(--muted)}
+#ipLab .scope{margin-top:18px;color:var(--muted);font-size:.82rem}
+#ipLab .scope summary{cursor:pointer;min-height:44px;padding:10px 0}
+#ipLab .storage{font-size:.76rem;color:var(--muted);margin:18px 0 0}
+@media(max-width:700px){
+ #ipLab{width:calc(100% - 24px);padding-top:12px}
+ #ipLab .hero{padding:12px 0}#ipLab .hero p{font-size:.87rem}
+ #ipLab .tabs{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;gap:6px;padding:2px 0 6px;scrollbar-width:thin}
+ #ipLab .tab{flex:0 0 160px;padding:8px 10px}
+ #ipLab main.card{padding:16px}
+ #ipLab .choices{grid-template-columns:1fr;gap:8px;margin:12px 0}
+ #ipLab .choice{min-height:68px;padding:10px 12px;gap:2px}
+ #ipLab .verdict{padding:16px}
+ #ipLab .answer-compare{grid-template-columns:74px minmax(0,1fr);gap:7px 8px}
+ #ipLab .answer-compare dd{font-size:.9rem}
+ #ipLab .calc{grid-template-columns:1fr}#ipLab .calc>.arrow{transform:rotate(90deg)}
+ #ipLab .result-grid{grid-template-columns:1fr}
+ #ipLab .network-strip{flex-direction:column}
+ #ipLab .lesson-actions{display:grid;grid-template-columns:1fr}
+ #ipLab #nextBtn{order:0;min-width:0;width:100%;margin:0}
+ #ipLab #resetBtn{order:1}
+ #ipLab #submitRow{display:grid}#ipLab #runBtn{width:100%}
+ #ipLab .summary-item{flex-wrap:wrap}#ipLab .summary-item button{margin-left:auto}
 }
-</style>
-</head>
-<body>
-<div class="lab-wrap">
-  <a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
-  <header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>정답을 먼저 보지 말고 <b>같은 Subnet인지 먼저 예상</b>하세요. 그 다음 Prefix를 적용한 실제 계산 결과와 검증 Lab의 관측을 비교합니다.</p>
-    <div class="start-guide"><div class="guide"><b>1</b><strong>질문 읽기</strong><span>Source, Destination, Prefix를 확인합니다.</span></div><div class="guide"><b>2</b><strong>먼저 예상</strong><span>on-link인지 gateway 경유인지 고릅니다.</span></div><div class="guide"><b>3</b><strong>실행 후 비교</strong><span>Network Prefix 계산과 실제 관측을 확인합니다.</span></div></div>
-  </header>
-
-  <nav class="tabs" id="tabs" aria-label="Subnetting 실습 선택"></nav>
-  <div class="progress"><strong id="progressText">0 / 4 완료</strong><div class="dots" id="dots"></div></div>
-
-  <main class="card">
-    <section class="question"><small id="lessonNo">실습 1</small><h2 id="question">질문</h2><p id="questionHelp"></p></section>
-    <div class="choices" id="choices" role="group" aria-label="결과 예상"></div>
-    <div class="run-row"><button class="run" id="runBtn" disabled>② 실행해서 확인하기</button><button class="reset" id="resetBtn">현재 실습 다시 시작</button><span class="feedback" id="feedback">먼저 예상 답을 선택하세요.</span></div>
-
-    <section id="resultArea" hidden>
-      <div class="calc">
-        <div class="endpoint"><small>송신자</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow">→</div><div class="endpoint"><small>목적지</small><strong id="dstIp"></strong><code id="dstNet"></code></div>
-      </div>
-      <div class="network-strip" id="networkStrip"></div>
-      <div class="result-grid">
-        <div class="result"><small>Prefix</small><strong id="prefixOut"></strong></div>
-        <div class="result"><small>판단</small><strong id="decisionOut"></strong></div>
-        <div class="result"><small>첫 전달 대상</small><strong id="nextHopOut"></strong></div>
-        <div class="result"><small>검증 결과</small><strong id="validatedOut"></strong></div>
-      </div>
-      <div class="explain"><b id="explainTitle"></b><p id="explainText"></p></div>
-      <div class="lab-evidence"><b>실제 PNETLab 관측</b><p id="evidenceText"></p></div>
-    </section>
-  </main>
-
-  <section class="complete" id="complete"><div class="eyebrow2">2단계 완료</div><h2>Subnet 판단의 핵심 흐름을 모두 확인했습니다.</h2><p>/25 정상 → on-link/off-link 구분 → /24 오설정 → /25 복구를 직접 비교했습니다. 이제 Prefix/Mask가 ARP보다 먼저 전달 판단을 바꾼다는 점을 설명할 수 있으면 됩니다.</p><div class="run-row"><a class="btn primary" href="ip-subnetting.html">개념서 다시 보기</a><a class="btn" href="../roadmap.html">로드맵으로 돌아가기</a></div></section>
-
-  <div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙으로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body>
+<div class="lab-wrap" id="ipLab">
+<a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
+<header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>예상하기 → 정오답과 이유 확인 → 다음 문제. 틀려도 해설을 보고 계속 진행할 수 있습니다.</p></header>
+<nav class="tabs" id="tabs" aria-label="문제 선택 및 이전 답안 보기"></nav>
+<div class="progress"><strong id="progressText">결과 확인 0 / 4</strong><span id="scoreText">정답 0 · 오답 0 · 미응답 4</span></div>
+<main class="card" id="lessonCard">
+<section class="question" aria-labelledby="question"><small id="lessonNo"></small><h2 id="question" tabindex="-1"></h2><p id="questionHelp"></p><p id="questionContext" class="context-note"></p></section>
+<div class="choices" id="choices" role="group" aria-label="내 예상 답 선택"></div>
+<div id="submitRow"><button class="primary" id="runBtn" type="button" disabled>답안 제출 · 결과 확인</button><span id="feedback" role="status" aria-live="polite">먼저 예상 답을 선택하세요.</span></div>
+<section id="resultArea" hidden aria-label="답안 판정과 해설">
+ <div class="verdict" id="verdict" data-grade="correct">
+  <h2 id="verdictTitle" tabindex="-1"></h2>
+  <dl class="answer-compare"><dt>내 답</dt><dd id="chosenAnswer"></dd><dt>올바른 답</dt><dd id="correctAnswer"></dd></dl>
+  <p><span class="explain-label">이유</span><span id="explainText"></span></p>
+ </div>
+ <details class="optional" id="calculationDetails"><summary>계산 과정과 PC1의 판단 펼쳐보기</summary><div class="optional-body">
+  <p class="basis" id="calculationBasis"></p>
+  <div class="calc"><div class="endpoint"><small>송신자 · PC1 실제 설정</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow" aria-hidden="true">→</div><div class="endpoint"><small id="destinationLabel">목적지 실제 설정</small><strong id="dstIp"></strong><code id="dstNet"></code></div></div>
+  <div class="network-strip" id="networkStrip"></div>
+  <p id="explainTitle"></p>
+  <div class="result-grid"><div class="result"><small>PC1의 계산 기준</small><strong id="prefixOut"></strong></div><div class="result"><small>PC1이 내린 판단</small><strong id="decisionOut"></strong></div><div class="result"><small>PC1의 전달 대상</small><strong id="nextHopOut"></strong></div></div>
+ </div></details>
+ <details class="optional" id="evidenceDetails"><summary>사전 장비 검증 근거 · 내 답안 채점과 별개</summary><div class="optional-body"><strong id="validatedOut"></strong><p id="evidenceMeaning">PASS는 제작자가 해당 동작을 검증했다는 뜻입니다. 내 답이 정답이거나 통신이 성공했다는 뜻은 아닙니다.</p><p id="evidenceText"></p></div></details>
+ <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
+</section>
+</main>
+<section class="complete" id="complete" hidden aria-labelledby="completionTitle"><h2 id="completionTitle" tabindex="-1">네 문제의 결과를 확인했습니다.</h2><strong id="completionScore"></strong><p>아래 판정은 각 문제의 가장 최근 제출 답안 기준입니다. 결과 확인 횟수와 정답 수는 다릅니다.</p><div class="summary-list" id="summaryList"></div><div class="lesson-actions"><button class="primary" id="reviewWrongBtn" type="button">오답 다시 보기</button><a class="secondary" href="ip-subnetting.html">개념서 다시 보기</a><a class="secondary" href="../roadmap.html">로드맵</a></div></section>
+<div class="scope"><details><summary>검증 범위와 시뮬레이터 한계</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙으로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
+<p class="storage" id="storageNote">답안은 이 브라우저에 저장됩니다. 다른 기기와 동기화되지 않습니다.</p>
+<noscript>문제를 풀려면 브라우저에서 JavaScript를 활성화해야 합니다.</noscript>
 </div>
 <script>
 (function(){
+'use strict';
   var lessons=[
     {title:'같은 /25라면?',label:'1 · 같은 Subnet',src:'10.77.10.10',dst:'10.77.10.20',prefix:25,answer:'on',choices:[['on','같은 Subnet · 직접 전달'],['gw','다른 Subnet · gateway 경유'],['drop','주소가 달라서 전달 불가']],next:'목적지 .20',decision:'ON-LINK',validated:'PASS',explain:'두 주소 모두 10.77.10.0/25에 속합니다.',evidence:'CP1에서 PC1이 10.77.10.20에 직접 ARP했고 ICMP 3/3이 성공했습니다.'},
     {title:'다른 /25라면?',label:'2 · 다른 Subnet',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','같은 Subnet · .140 직접 전달'],['gw','다른 Subnet · gateway .1 경유'],['rewrite','목적지 IP를 gateway .1로 변경']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'.10은 10.77.10.0/25, .140은 10.77.10.128/25입니다. IP 목적지는 .140을 유지하고 L2 next-hop만 gateway가 됩니다.',evidence:'CP1에서 gateway .1 ARP/Reply가 관측됐고, 원격 ICMP의 IPv4 Destination은 .140으로 유지되었습니다. 같은 설정의 추가 정상 시험은 3/3 성공했습니다.'},
     {title:'PC1 Mask만 /24면?',label:'3 · 잘못된 Mask',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','기존 gateway .1을 계속 사용'],['on','같은 Subnet으로 오판 · .140 직접 ARP'],['drop','Mask가 다르면 즉시 패킷 폐기']],next:'목적지 .140 직접',decision:'ON-LINK로 오판',validated:'PASS',explain:'/24에서는 .10과 .140이 모두 10.77.10.0/24로 계산됩니다. 그래서 gateway를 선택하기 전에 목적지를 on-link로 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
     {title:'다시 /25로 복구하면?',label:'4 · 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 .140 직접 ARP'],['gw','다시 gateway .1 경유'],['none','ARP 없이 바로 ICMP 전송']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'Mask를 /25로 되돌리면 .140은 다시 다른 Prefix가 되어 정상 next-hop 판단으로 복구됩니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
   ];
-  var idx=0,selected=null,done={};
-  var tabs=document.getElementById('tabs'),choices=document.getElementById('choices'),runBtn=document.getElementById('runBtn'),resetBtn=document.getElementById('resetBtn');
-  function ipToInt(ip){return ip.split('.').reduce(function(a,v){return ((a<<8)>>>0)+Number(v)},0)>>>0}
-  function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.')}
-  function mask(prefix){return prefix===0?0:(0xffffffff << (32-prefix))>>>0}
-  function net(ip,prefix){return intToIp(ipToInt(ip)&mask(prefix))+'/'+prefix}
-  function renderTabs(){tabs.innerHTML='';lessons.forEach(function(l,i){var b=document.createElement('button');b.className='tab'+(i===idx?' active':'');b.type='button';b.innerHTML='<b>'+l.label+'</b><small>'+l.title+'</small>';b.onclick=function(){idx=i;selected=null;render()};tabs.appendChild(b)})}
-  function renderDots(){var d=document.getElementById('dots');d.innerHTML='';lessons.forEach(function(_,i){var x=document.createElement('span');x.className='dot'+(done[i]?' done':'');d.appendChild(x)});document.getElementById('progressText').textContent=Object.keys(done).length+' / 4 완료'}
-  function render(){var l=lessons[idx];renderTabs();renderDots();document.getElementById('lessonNo').textContent='실습 '+(idx+1);document.getElementById('question').textContent=l.title;document.getElementById('questionHelp').textContent=l.src+'/'+l.prefix+'에서 '+l.dst+'로 보낼 때 송신자는 목적지를 어떻게 판단할까요?';choices.innerHTML='';l.choices.forEach(function(c){var b=document.createElement('button');b.className='choice';b.type='button';b.dataset.value=c[0];b.textContent=c[1];b.onclick=function(){selected=c[0];Array.prototype.forEach.call(choices.children,function(x){x.classList.toggle('selected',x===b);x.classList.remove('correct','wrong')});runBtn.disabled=false;document.getElementById('feedback').textContent='예상을 선택했습니다. 이제 실행해서 비교하세요.'};choices.appendChild(b)});runBtn.disabled=true;document.getElementById('resultArea').hidden=true;document.getElementById('feedback').textContent='먼저 예상 답을 선택하세요.'}
-  function run(){if(selected===null)return;var l=lessons[idx];Array.prototype.forEach.call(choices.children,function(b){if(b.dataset.value===l.answer)b.classList.add('correct');else if(b.dataset.value===selected)b.classList.add('wrong')});document.getElementById('feedback').textContent=selected===l.answer?'예상이 맞았습니다. 계산 근거를 확인하세요.':'예상과 달랐습니다. Network Prefix 계산을 기준으로 다시 보세요.';document.getElementById('srcIp').textContent=l.src+'/'+l.prefix;document.getElementById('dstIp').textContent=l.dst+'/'+l.prefix;var sn=net(l.src,l.prefix),dn=net(l.dst,l.prefix);document.getElementById('srcNet').textContent='Network · '+sn;document.getElementById('dstNet').textContent='Network · '+dn;document.getElementById('prefixOut').textContent='/'+l.prefix;document.getElementById('decisionOut').textContent=l.decision;document.getElementById('nextHopOut').textContent=l.next;document.getElementById('validatedOut').textContent=l.validated;document.getElementById('explainTitle').textContent=sn===dn?'Network Prefix가 같습니다.':'Network Prefix가 다릅니다.';document.getElementById('explainText').textContent=l.explain;document.getElementById('evidenceText').textContent=l.evidence;var strip=document.getElementById('networkStrip');if(l.prefix===25){strip.innerHTML='<div class="segment a '+((sn.indexOf('.0/25')>-1)?'active':'')+'"><strong>10.77.10.0/25</strong><span>.0 ~ .127</span></div><div class="segment b '+((dn.indexOf('.128/25')>-1)?'active':'')+'"><strong>10.77.10.128/25</strong><span>.128 ~ .255</span></div>'}else{strip.innerHTML='<div class="segment a active"><strong>10.77.10.0/24</strong><span>.0 ~ .255 · 두 주소가 같은 블록</span></div>'}document.getElementById('resultArea').hidden=false;done[idx]=true;renderDots();if(Object.keys(done).length===4)document.getElementById('complete').classList.add('show')}
-  runBtn.addEventListener('click',run);resetBtn.addEventListener('click',function(){selected=null;render()});render();
+// Actual destination configuration is distinct from the sender's calculation mask.
+lessons.forEach(function(l,i){l.dstPrefix=25;l.dstNode=i===0?'PC3':'PC2';});
+var KEY='network-learning:ip-subnetting:answers:v1';
+var $=function(id){return document.getElementById(id);};
+var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, canStore=true;
+try {
+ var saved=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(saved && saved.schema===1 && Array.isArray(saved.answers) && saved.answers.length===lessons.length){
+  var valid=saved.answers.every(function(a,i){return a && typeof a.submitted==='boolean' && (a.choice===null || lessons[i].choices.some(function(c){return c[0]===a.choice;})) && (!a.submitted || a.choice!==null);});
+  if(valid){answers=saved.answers.map(function(a){return {choice:a.choice,submitted:a.submitted};});idx=Number.isInteger(saved.index)&&saved.index>=0&&saved.index<lessons.length?saved.index:0;}
+ }
+} catch(e){canStore=false;}
+function persist(){
+ try{localStorage.setItem(KEY,JSON.stringify({schema:1,index:idx,answers:answers}));canStore=true;}
+ catch(e){canStore=false;}
+ $('storageNote').textContent=canStore?'답안은 이 브라우저에 저장됩니다. 다른 기기와 동기화되지 않습니다.':'브라우저 저장을 사용할 수 없어 답안은 현재 화면에서만 유지됩니다.';
+}
+function ipToInt(ip){return ip.split('.').reduce(function(a,v){return ((a<<8)>>>0)+Number(v);},0)>>>0;}
+function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
+function net(ip,p){return intToIp(ipToInt(ip)&(p===0?0:(0xffffffff<<(32-p))>>>0))+'/'+p;}
+function grade(i){return !answers[i].submitted?'pending':answers[i].choice===lessons[i].answer?'correct':'incorrect';}
+function label(l,id){var c=l.choices.find(function(c){return c[0]===id;});return c?c[1]:'';}
+function counts(){var a=answers.filter(function(a){return a.submitted;}).length;var c=lessons.filter(function(_,i){return grade(i)==='correct';}).length;return {answered:a,correct:c,wrong:a-c,pending:lessons.length-a};}
+function focusSection(id,align){
+ var el=$(id);el.focus({preventScroll:true});
+ var r=el.getBoundingClientRect();
+ if(align || r.top<16 || r.bottom>innerHeight-16){window.scrollTo({top:Math.max(0,scrollY+r.top-20),behavior:'instant'});}
+}
+function renderTabs(){
+ var pos=$('tabs').scrollLeft;
+ $('tabs').replaceChildren();
+ lessons.forEach(function(l,i){
+  var b=document.createElement('button');b.type='button';b.className='tab'+(i===idx?' active':'');b.dataset.grade=grade(i);b.setAttribute('aria-current',i===idx?'step':'false');
+  var t=document.createElement('b');t.textContent=l.label;var s=document.createElement('small');s.textContent=grade(i)==='correct'?'✓ 정답':grade(i)==='incorrect'?'✕ 오답 · 다시 보기':answers[i].choice?'선택 중 · 미제출':'미응답';b.append(t,s);
+  b.addEventListener('click',function(){goTo(i,false);});$('tabs').append(b);
+ });$('tabs').scrollLeft=pos;
+}
+function renderProgress(){var n=counts();$('progressText').textContent='결과 확인 '+n.answered+' / 4';$('scoreText').textContent='정답 '+n.correct+' · 오답 '+n.wrong+' · 미응답 '+n.pending;}
+function renderChoices(){
+ var l=lessons[idx],a=answers[idx];$('choices').replaceChildren();
+ l.choices.forEach(function(c,i){
+  var b=document.createElement('button');b.type='button';b.className='choice';b.dataset.value=c[0];b.disabled=a.submitted;b.setAttribute('aria-pressed',String(a.choice===c[0]));
+  if(a.choice===c[0])b.classList.add('selected');
+  var tag='';
+  if(a.submitted && c[0]===l.answer){b.classList.add('correct');tag=a.choice===c[0]?'내 답 · 정답':'올바른 답';}
+  else if(a.submitted && c[0]===a.choice){b.classList.add('wrong');tag='내 답 · 오답';}
+  else if(a.choice===c[0])tag='내 선택';
+  var top=document.createElement('span');top.className='choice-top';var letter=document.createElement('span');letter.textContent=String.fromCharCode(65+i);var badge=document.createElement('span');badge.className='choice-tag';badge.textContent=tag;top.append(letter,badge);
+  var text=document.createElement('span');text.className='choice-text';text.textContent=c[1];b.append(top,text);
+  b.addEventListener('click',function(){
+   if(answers[idx].submitted)return;
+   answers[idx].choice=c[0];persist();renderChoices();$('runBtn').hidden=false;$('runBtn').disabled=false;$('feedback').textContent='선택했습니다. 제출하면 정오답과 이유를 확인합니다.';
+   // Re-rendering choices must not lose keyboard focus.
+   $('choices').querySelector('[data-value="'+c[0]+'"]').focus({preventScroll:true});
+  });$('choices').append(b);
+ });
+}
+function nextIndex(){if(idx<lessons.length-1)return idx+1;return answers.findIndex(function(a){return !a.submitted;});}
+function renderResult(){
+ var l=lessons[idx],a=answers[idx];$('resultArea').hidden=!a.submitted;$('submitRow').hidden=a.submitted;$('runBtn').hidden=a.submitted||a.choice===null;$('runBtn').disabled=a.submitted||a.choice===null;
+ $('feedback').textContent=a.choice?'선택했습니다. 제출하면 정오답과 이유를 확인합니다.':'먼저 예상 답을 선택하세요.';
+ if(!a.submitted)return;
+ var g=grade(idx);$('verdict').dataset.grade=g;$('verdictTitle').textContent=g==='correct'?'✓ 정답입니다':'✕ 오답입니다';
+ $('chosenAnswer').textContent=label(l,a.choice);$('correctAnswer').textContent=label(l,l.answer);$('explainText').textContent=l.explain;
+ $('srcIp').textContent=l.src+'/'+l.prefix;$('dstIp').textContent=l.dst+'/'+l.dstPrefix;$('destinationLabel').textContent='목적지 · '+l.dstNode+' 실제 설정';
+ $('calculationBasis').textContent='PC1은 자신의 /'+l.prefix+'를 두 IP에 적용해 비교합니다. '+l.dstNode+'의 실제 설정은 /25로 유지됩니다.';
+ var sn=net(l.src,l.prefix),dn=net(l.dst,l.prefix);
+ $('srcNet').textContent='PC1 기준 계산: '+sn;$('dstNet').textContent='PC1 기준 계산: '+dn;
+ $('prefixOut').textContent='/'+l.prefix;$('decisionOut').textContent=l.decision;$('nextHopOut').textContent=l.next;
+ $('explainTitle').textContent=sn===dn?'PC1의 계산에서 두 Network Prefix가 같습니다.':'PC1의 계산에서 두 Network Prefix가 다릅니다.';
+ $('networkStrip').replaceChildren();
+ (l.prefix===25?[['10.77.10.0/25','.0 ~ .127'],['10.77.10.128/25','.128 ~ .255']]:[['10.77.10.0/24','.0 ~ .255 · PC1이 같은 블록으로 계산']]).forEach(function(item){var d=document.createElement('div');d.className='segment';var b=document.createElement('strong');b.textContent=item[0];var s=document.createElement('span');s.textContent=item[1];d.append(b,s);$('networkStrip').append(d);});
+ $('validatedOut').textContent='PASS · 제작자 사전 장비 검증';$('evidenceText').textContent=l.evidence;
+ var ni=nextIndex();$('nextBtn').textContent=ni<0?'학습 결과 보기 →':idx===3?'미응답 문제 '+(ni+1)+'로 →':'다음 문제 · '+(ni+1)+' / 4 →';
+}
+function renderSummary(){
+ $('complete').hidden=!summaryOpen;if(!summaryOpen)return;
+ var n=counts();$('completionScore').textContent='결과 확인 '+n.answered+' / 4 · 정답 '+n.correct+' · 오답 '+n.wrong;
+ $('reviewWrongBtn').hidden=n.wrong===0;$('summaryList').replaceChildren();
+ lessons.forEach(function(l,i){var row=document.createElement('div');row.className='summary-item';var text=document.createElement('div');var b=document.createElement('b');b.textContent=l.label+' · '+(grade(i)==='correct'?'정답':'오답');var s=document.createElement('small');s.textContent='내 답: '+label(l,answers[i].choice);text.append(b,s);var btn=document.createElement('button');btn.type='button';btn.className='secondary';btn.textContent='답안 보기';btn.setAttribute('aria-label','문제 '+(i+1)+' 답안 보기');btn.addEventListener('click',function(){goTo(i,true);});row.append(text,btn);$('summaryList').append(row);});
+}
+function render(){
+ var l=lessons[idx];$('lessonNo').textContent='문제 '+(idx+1)+' / 4';$('question').textContent=l.title;
+ $('questionHelp').textContent='PC1 '+l.src+'/'+l.prefix+' → '+l.dstNode+' '+l.dst+'/'+l.dstPrefix;
+ $('questionContext').textContent=idx===2?'PC1의 Mask만 /24로 변경했습니다. 다른 장비와 L2 연결은 그대로이며 Proxy ARP는 꺼져 있습니다.':'PC1은 목적지를 어떻게 판단할까요? 주소를 보고 내 예상을 고르세요.';
+ $('calculationDetails').open=false;$('evidenceDetails').open=false;
+ renderTabs();renderProgress();renderChoices();renderResult();renderSummary();
+}
+function goTo(i,align){
+ if(!Number.isInteger(i)||i<0||i>=lessons.length)return;
+ idx=i;summaryOpen=false;persist();render();
+ if(align)focusSection(answers[idx].submitted?'verdictTitle':'question',true);
+ // A top tab is a review shortcut. Do not unexpectedly move the page if its
+ // question is already visible; only the explicit Next/Retry actions align it.
+}
+$('runBtn').addEventListener('click',function(){var a=answers[idx];if(a.choice===null||a.submitted)return;a.submitted=true;persist();renderProgress();renderTabs();renderChoices();renderResult();focusSection('verdictTitle',true);});
+$('nextBtn').addEventListener('click',function(){if(!answers[idx].submitted)return;var ni=nextIndex();if(ni>=0){goTo(ni,true);}else{summaryOpen=true;renderSummary();focusSection('completionTitle',true);}});
+$('resetBtn').addEventListener('click',function(){answers[idx]={choice:null,submitted:false};summaryOpen=false;persist();render();focusSection('question',true);});
+$('reviewWrongBtn').addEventListener('click',function(){var i=lessons.findIndex(function(_,i){return grade(i)==='incorrect';});if(i>=0)goTo(i,true);});
+render();persist();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
