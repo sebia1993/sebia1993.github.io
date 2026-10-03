@@ -169,29 +169,98 @@
     }));
   }
 
-  const laneIds=['lane10','lane20','lane99'];
-  const nodeIds=['v10a','v10trunk','v10b','v20a','v20trunk','v20b','v99a','v99trunk','v99b'];
-  const linkIds=['v10left','v10right','v20left','v20right','v99left','v99right'];
-  const arrowIds=['v10leftArrow','v10rightArrow','v20leftArrow','v20rightArrow','v99leftArrow','v99rightArrow'];
+  const nodeBase={
+    pc10a:'device-node host vlan10 pc10a',pc20a:'device-node host vlan20 pc20a',pc99a:'device-node host vlan99 pc99a',
+    sw1:'device-node switch sw1',sw2:'device-node switch sw2',
+    pc10b:'device-node host vlan10 pc10b',pc20b:'device-node host vlan20 pc20b',pc99b:'device-node host vlan99 pc99b'
+  };
+  const linkBase={
+    link10L:'topo-link access-left link10l',link20L:'topo-link access-left link20l',link99L:'topo-link access-left link99l',
+    trunkLink:'topo-link trunk',
+    link10R:'topo-link access-right link10r',link20R:'topo-link access-right link20r',link99R:'topo-link access-right link99r'
+  };
+  const stateIds={link10L:'state10L',link20L:'state20L',link99L:'state99L',trunkLink:'stateTrunk',link10R:'state10R',link20R:'state20R',link99R:'state99R'};
 
   function clearTopology(){
-    laneIds.forEach(id=>$(id).className='lane');
-    nodeIds.forEach(id=>$(id).className='lane-node');
-    linkIds.forEach(id=>$(id).className='lane-link');
-    arrowIds.forEach(id=>$(id).textContent='·');
-    $('pc20bVlan').textContent='Access 20';
+    Object.entries(nodeBase).forEach(([id,cls])=>$(id).className=cls);
+    Object.entries(linkBase).forEach(([id,cls])=>{
+      $(id).className=cls;
+      $(stateIds[id]).textContent='';
+    });
+    $('pc20bVlan').textContent='Access VLAN 20';
+  }
+
+  function markNodes(ids,cls='active'){
+    (ids||[]).forEach(id=>$(id)?.classList.add(cls));
+  }
+
+  function markLink(id,cls,label){
+    const el=$(id); if(!el)return;
+    cls.split(/\s+/).filter(Boolean).forEach(c=>el.classList.add(c));
+    if(/active|tagged|native|control/.test(cls))el.classList.add('has-flow');
+    $(stateIds[id]).textContent=label||'';
+  }
+
+  function visualStateFor(scenarioId,index,step){
+    const S={nodes:[],control:[],stop:[],excluded:[],links:[],pc20b:step.pc20b||null};
+    const L=(id,cls,label)=>S.links.push([id,cls,label]);
+    if(scenarioId==='path20'){
+      if(index===0){S.nodes=['pc20a','sw1'];L('link20L','active','UNTAGGED');}
+      if(index===1){S.nodes=['sw1','sw2'];L('trunkLink','tagged','802.1Q · VLAN 20');}
+      if(index===2){S.nodes=['sw2','pc20b'];L('link20R','active','UNTAGGED');}
+    }else if(scenarioId==='separation'){
+      if(index===0){S.nodes=['pc20a','sw1'];L('link20L','active','ARP BROADCAST');}
+      if(index===1){S.nodes=['sw1','sw2'];L('trunkLink','tagged','BROADCAST · TAG 20');}
+      if(index===2){
+        S.nodes=['sw2','pc20b'];S.excluded=['pc10b'];
+        L('link20R','active','VLAN 20');L('link10R','isolated','VLAN 20 아님');
+      }
+      if(index===3){
+        S.control=['pc10a','sw1','sw2','pc10b'];
+        L('link10L','control','VLAN 10');L('trunkLink','tagged','POSITIVE CONTROL · TAG 10');L('link10R','control','VLAN 10');
+      }
+    }else if(scenarioId==='native'){
+      if(index===0){S.nodes=['pc99a','sw1'];L('link99L','active','UNTAGGED');}
+      if(index===1){S.nodes=['sw1','sw2'];L('trunkLink','native','UNTAGGED · NATIVE 99');}
+      if(index===2){S.nodes=['sw1','sw2'];L('trunkLink','tagged','COMPARE · TAG 20');}
+    }else if(scenarioId==='allowed'){
+      if(index===0){S.nodes=['pc20a','sw1'];L('link20L','active','ARP BROADCAST');}
+      if(index===1){S.nodes=['sw1'];L('trunkLink','blocked','VLAN 20 · NOT ALLOWED');}
+      if(index===2){
+        S.control=['sw1','sw2'];L('trunkLink','control','VLAN 10 ✓ · VLAN 99 ✓');
+      }
+      if(index===3){
+        S.nodes=['pc20a','sw1','sw2','pc20b'];
+        L('link20L','active','UNTAGGED');L('trunkLink','tagged','RECOVERY · TAG 20');L('link20R','active','UNTAGGED');
+      }
+    }else if(scenarioId==='mismatch'){
+      if(index===0){
+        S.nodes=['pc20a','sw1','sw2'];S.pc20b='Access VLAN 10';
+        L('link20L','active','VLAN 20');L('trunkLink','tagged','TAG 20');
+      }
+      if(index===1){
+        S.nodes=['sw2'];S.stop=['pc20b'];S.pc20b='Access VLAN 10';
+        L('trunkLink','tagged','VLAN 20 정상 도착');L('link20R','blocked','PORT = ACCESS VLAN 10');
+      }
+      if(index===2){
+        S.control=['pc10a','sw1','sw2','pc20b'];S.pc20b='Access VLAN 10';
+        L('link10L','control','VLAN 10');L('trunkLink','tagged','POSITIVE CONTROL · TAG 10');L('link20R','control','ACCESS VLAN 10');
+      }
+      if(index===3){
+        S.nodes=['pc20a','sw1','sw2','pc20b'];S.pc20b='Access VLAN 20';
+        L('link20L','active','UNTAGGED');L('trunkLink','tagged','RECOVERY · TAG 20');L('link20R','active','UNTAGGED');
+      }
+    }
+    return S;
   }
 
   function applyStep(){
     const s=scenarios[lesson],step=s.steps[stepIndex];
     clearTopology();
-    if(step.lane10)$('lane10').classList.add(step.lane10);
-    if(step.lane20)$('lane20').classList.add(step.lane20);
-    if(step.lane99)$('lane99').classList.add(step.lane99);
-    (step.nodes||[]).forEach(id=>$(id).classList.add(id.includes('trunk')?'active':(step.kind==='MISMATCH'&&id==='v20b'?'stop':'active')));
-    Object.entries(step.links||{}).forEach(([id,cls])=>$(id).classList.add(cls));
-    Object.entries(step.arrows||{}).forEach(([id,val])=>$(id+'Arrow').textContent=val);
-    if(step.pc20b)$('pc20bVlan').textContent=step.pc20b;
+    const v=visualStateFor(s.id,stepIndex,step);
+    markNodes(v.nodes,'active');markNodes(v.control,'control');markNodes(v.stop,'stop');markNodes(v.excluded,'excluded');
+    v.links.forEach(([id,cls,label])=>markLink(id,cls,label));
+    if(v.pc20b)$('pc20bVlan').textContent=v.pc20b;
     $('eventKind').textContent=step.kind;
     $('eventTitle').textContent=step.title;
     $('eventDetail').textContent=step.detail;
