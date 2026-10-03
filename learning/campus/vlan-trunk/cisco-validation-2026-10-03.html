@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VLAN / Access / Trunk — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.23rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:720px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/vlan-trunk.html">← VLAN / Access / Trunk</a><a class="btn" href="../../../labs/vlan-trunk-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-03</div>
+  <h1>VLAN / Access / Trunk<br><em>Cisco 검증 요약</em></h1>
+  <p>PNETLab의 Cisco IOL L2 2대와 VPCS 6대로 Access / 802.1Q Trunk / Native VLAN / Allowed VLAN / Access VLAN mismatch를 실제 실행했습니다. CLI와 4개 내부 링크 Capture를 대조했고 <b>VLAN-01~06은 모두 PASS</b>했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-03-vlan-trunk-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Claim Result</small><strong class="pass">6 PASS / 0 FAIL</strong></article>
+    <article class="summary-card"><small>Final Recovery</small><strong class="pass">Config / 3 VLAN 통신 정상</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>검증 토폴로지와 Capture</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>실제 검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Switch</td><td>Cisco IOL L2 I86BI_LINUXL2-ADVENTERPRISEK9-M · IOS 15.2(CML_NIGHTLY_20190423)FLO_DSGS7 · 2대</td></tr>
+        <tr><td>Fallback</td><td>Nexus 9000v는 PNETLab 8GB 환경에서 자원 기준을 충족하지 않아 요청서에 허용된 Cisco IOL L2 대체 경로 사용</td></tr>
+        <tr><td>VLAN</td><td>VLAN 10 / 20 / 99 · Static dot1q Trunk · Native 99 · Allowed 10,20,99 · DTP off</td></tr>
+        <tr><td>Hosts</td><td>VPCS 6대 · VLAN별 A/B Host 한 쌍 · Default Gateway 없음</td></tr>
+        <tr><td>Capture</td><td>CP1 PC20A—SW1 · CP2 SW1—SW2 Trunk · CP3 SW2—PC20B · CP4 SW2—PC10B</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="vlan-01">
+    <h2>VLAN-01 · Access Port / Access VLAN <span class="pass">PASS</span></h2>
+    <p>PC20A/PC20B Port는 static Access VLAN 20이었고 두 MAC은 VLAN 20에 동적 학습됐습니다. Host-facing CP1/CP3의 정상 ICMP Request/Reply는 모두 802.1Q Header가 없는 Untagged Frame이었습니다.</p>
+    <p class="evidence">CP1 #27,28,29,30,32,33 · CP3 #26,27,28,29,31,32</p>
+  </article>
+
+  <article class="claim" id="vlan-02">
+    <h2>VLAN-02 · Non-native 802.1Q Tag <span class="pass">PASS</span></h2>
+    <p>동일 VLAN 20 Traffic이 CP1 Access에서는 Untagged, CP2 Trunk에서는 VLAN ID 20 Tagged, CP3 Access에서는 다시 Untagged로 관찰됐습니다. MAC/IP/ICMP ID·Sequence와 L3 bytes를 대조했습니다.</p>
+    <p class="evidence">CP2 #82,83,84,85,89,90 · VLAN ID 20</p>
+  </article>
+
+  <article class="claim" id="vlan-03">
+    <h2>VLAN-03 · VLAN Separation <span class="pass">PASS</span></h2>
+    <p>PC20A의 ARP Broadcast는 CP1 → CP2(VLAN20 Tag) → CP3에 나타났고 VLAN10 Access Link인 CP4에는 나타나지 않았습니다. CP4의 별도 VLAN10 ARP/Ping Positive Control은 정상 수집됐습니다.</p>
+    <p class="evidence">PC20A ARP: CP1 #25 → CP2 #80 → CP3 #24 · CP4 동일 Broadcast 0</p>
+  </article>
+
+  <article class="claim" id="vlan-04">
+    <h2>VLAN-04 · Native VLAN 99 Untagged <span class="pass">PASS</span></h2>
+    <p>양쪽 Trunk Native VLAN은 99였고 global native tagging은 disabled였습니다. VLAN 99 Ping은 성공했고 CP2에서 VLAN99 Frame은 Untagged, 같은 Trunk의 VLAN10/20 Traffic은 Tagged였습니다.</p>
+    <p class="evidence">CP2 VLAN99 #108,109,113,114,115,116 · Untagged</p>
+  </article>
+
+  <article class="claim" id="vlan-05">
+    <h2>VLAN-05 · Allowed VLAN Missing / Recover <span class="pass">PASS</span></h2>
+    <p>SW1 Trunk Allowed 목록에서 VLAN20만 제거하자 Port/Trunk는 Up 상태를 유지했지만 PC20A ARP는 CP1까지만 나타나고 CP2/CP3에는 없었습니다. VLAN10/99는 계속 성공했습니다. VLAN20 복구 후 STP Forwarding을 확인한 뒤 통신과 VLAN20 Tagged Frame이 다시 나타났습니다.</p>
+    <p class="evidence">Failure CP1 #91,92,94 · Recovery CP2 #542–547 / CP3 #172–177</p>
+  </article>
+
+  <article class="claim" id="vlan-06">
+    <h2>VLAN-06 · Access VLAN Mismatch / Recover <span class="pass">PASS</span></h2>
+    <p>SW2의 PC20B Port만 Access VLAN10으로 변경하자 VLAN20 ARP는 CP1과 CP2 Trunk까지 정상 도달했지만 CP3에는 나타나지 않았습니다. CP3에서 VLAN10 Positive Control이 수집돼 Capture 경로가 정상임을 확인했습니다. Port를 VLAN20으로 원복한 뒤 통신과 Traffic이 복구됐습니다.</p>
+    <p class="evidence">Failure CP1 #256,257,259 · CP2 #765,766,770 · CP3 VLAN20 0 · Recovery CP2 #881–889 / CP3 #279–285</p>
+  </article>
+
+  <section class="warning">
+    <div class="eyebrow">검증 한계</div>
+    <h2>Nexus 9000v 결과로 일반화하지 않습니다.</h2>
+    <p>이번 실제 플랫폼은 요청서가 허용한 Cisco IOL L2 fallback입니다. Nexus 9000v는 직접 실행하지 않았습니다. 또한 Native VLAN의 Wire 형식은 native VLAN tagging 기능에 따라 달라질 수 있어, 최종 학습자료는 “이번 Cisco 기본 설정 / 검증 환경에서 Untagged”라는 조건을 유지합니다.</p>
+    <p>Allowed VLAN 복원 직후 첫 재시도는 이번 Run에서 STP 전환 중 실패했습니다. Forwarding 확인 후 정상화됐으므로 “설정 한 줄 원복 = 즉시 통신 복구”라고 표현하지 않습니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Integrity</div><h2>원본 Capture 무결성</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Capture</th><th>Frames</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1</td><td>324</td><td class="evidence">c4e95a814de9ab8671404e094c62bf64e46f274315a211ed04f79efc157436f8</td></tr>
+        <tr><td>CP2</td><td>979</td><td class="evidence">bf0326183634033c522283fa7fccfaf4d86e6e383cea73fc584f158f126e32fa</td></tr>
+        <tr><td>CP3</td><td>310</td><td class="evidence">e0f23f68daac0d59ff961084f54cbe09ba189b71c472cf9501a5441ea696bc92</td></tr>
+        <tr><td>CP4</td><td>347</td><td class="evidence">acc05411ef9e66bcff5daee77ee6fbe90bf5459e413a0f71d630453b2d6a8b95</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Cisco 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://standards.ieee.org/ieee/802.1Q/10323/">IEEE 802.1Q-2022</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/93x/interfaces/configuration/guide/b-cisco-nexus-9000-nx-os-interfaces-configuration-guide-93x/b-cisco-nexus-9000-nx-os-interfaces-configuration-guide-93x_chapter_0100.html">Cisco Nexus 9000 NX-OS Interfaces 9.3(x)</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/vlan/vlan-configuration-guide/configure-vlan-trunks.html">Cisco IOS XE 17 · Configure VLAN Trunks</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">VLAN / Access / Trunk · Cisco IOL L2 Validation Summary</div></footer>
+</body>
+</html>
