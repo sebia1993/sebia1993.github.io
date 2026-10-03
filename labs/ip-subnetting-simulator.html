@@ -196,6 +196,7 @@
 #ipLab .sim-readout small,#ipLab .sim-readout strong{display:block}
 #ipLab .sim-readout small{font-size:.7rem;color:#9fbad0}
 #ipLab .sim-readout strong{font-size:.88rem;color:#e9f5ff;margin-top:2px}
+#ipLab .sim-primary-actions{margin-top:10px;padding-top:10px;border-top:1px solid #36546d}
 #ipLab .sim-playback{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:10px}
 #ipLab .sim-playback button{min-height:42px;font-size:.8rem}
 #ipLab #simStepLabel{text-align:center;color:#dceaf6;font-size:.78rem}
@@ -270,6 +271,7 @@
   </div>
   <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
   <p id="modelEvent"></p>
+  <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
   <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
    <button class="secondary" id="simPrev" type="button">← 이전 흐름</button>
    <strong id="simStepLabel" aria-live="polite"></strong>
@@ -278,7 +280,6 @@
   <p class="sim-step-text" id="simStepText" role="status" aria-live="polite" aria-atomic="true"></p>
   <figcaption id="modelCaption"></figcaption>
  </figure>
- <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
  <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div>
  <details class="optional" id="traceDetails"><summary>모델의 판단 순서 다시 보기 · 채점은 유지</summary><div class="optional-body">
   <strong id="tracePosition"></strong><p id="traceEvent" role="status" aria-live="polite" aria-atomic="true"></p>
