@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ICMP / Ping / Traceroute — 개념서</title>
+<meta name="description" content="Ping과 Traceroute를 ICMP Echo, IPv4 TTL, Time Exceeded, Destination Unreachable과 연결해 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.pair{display:grid;grid-template-columns:1fr 90px 1fr;gap:10px;align-items:center}.device{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3);text-align:center}.device b{display:block;font-size:1.1rem}.device span{display:block;color:var(--muted);font-size:.82rem;margin-top:4px}.pair-mid{display:grid;gap:8px}.arrow-label{padding:9px 8px;border:1px solid #355d82;border-radius:999px;text-align:center;font-size:.76rem;font-weight:850;color:var(--blue);background:#0d2034}.arrow-label.reply{color:var(--mint);border-color:#347968;background:rgba(126,224,194,.06)}
+.ttl-flow{display:grid;grid-template-columns:1fr 72px 1fr 72px 1fr;gap:8px;align-items:center}.ttl-node{padding:16px 10px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);text-align:center}.ttl-node strong{display:block}.ttl-node span{display:block;color:var(--muted);font-size:.78rem}.ttl-link{text-align:center;color:var(--blue);font-weight:900}.ttl-link small{display:block;font-weight:700;color:var(--muted);line-height:1.25}
+.flow-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.flow-card{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid #3e6a91;border-radius:9px;color:var(--blue);margin-bottom:9px}.flow-card h3{margin:0 0 6px;font-size:1rem}.flow-card p{margin:0;color:var(--muted);font-size:.87rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.compare-card h3{margin:4px 0 7px}.compare-card p{margin:0;color:var(--muted)}.compare-card.standard{border-color:#51658a}.compare-card.actual{border-color:#347968}
+.type-pill{display:inline-flex;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;font-weight:850}.type-pill.std{color:var(--violet);border-color:#70649c}.type-pill.impl{color:var(--mint);border-color:#347968}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+.impl-note{margin-top:14px;padding:15px 17px;border-left:3px solid var(--amber);background:rgba(255,191,105,.06);border-radius:10px;color:#d8e3ef}
+@media(max-width:850px){.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.flow-cards{grid-template-columns:1fr 1fr}.memory-grid,.compare-grid{grid-template-columns:1fr}.next-stage .actions{justify-self:start}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.pair{grid-template-columns:1fr}.pair-mid{grid-template-columns:1fr 1fr}.ttl-flow{grid-template-columns:1fr 28px 1fr 28px 1fr}.ttl-node{padding:12px 6px}.ttl-link small{display:none}.flow-cards{grid-template-columns:1fr}.core-line{padding:17px}.preview-hero{padding-top:38px}}
+@media(max-width:390px){.ttl-node strong{font-size:.88rem}.ttl-node span{font-size:.69rem}.ttl-link{font-size:.85rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#ping">Ping</a>
+      <a href="#ttl">TTL</a>
+      <a href="#traceroute">Traceroute</a>
+      <a href="#unreachable">Unreachable</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>ICMP / Ping / <em>Traceroute</em></h1>
+    <p>목표는 하나입니다. <b>Ping과 Traceroute 결과를 ICMP 메시지와 TTL 변화에 연결해, 어디까지 통신됐고 왜 멈췄는지 설명</b>할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>이 페이지에서는 원리만 이해합니다.</strong><span>명령 출력이나 PCAP 원문을 외우지 않습니다. 핵심 흐름을 만든 뒤 2단계에서 직접 움직여 확인합니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>Ping은 “응답이 돌아오는가”, Traceroute는 “어디까지 갔는가”를 봅니다.</strong>
+      <p>Echo Reply · TTL · Time Exceeded · Destination Unreachable</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>실패 문구보다 ICMP 메시지를 먼저 봅니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① Ping:</b> Echo Request를 보내고 대응하는 <strong>Echo Reply</strong>가 돌아오면 왕복 도달을 확인할 수 있습니다.</p>
+      <p><b>② Router:</b> IPv4 Packet을 전달할 때 <strong>TTL을 줄입니다.</strong></p>
+      <p><b>③ Traceroute:</b> TTL을 일부러 작게 보내 <strong>Time Exceeded</strong>를 발생시키며 중간 Hop을 드러냅니다.</p>
+      <p><b>④ 실패:</b> <strong>Destination Unreachable</strong>을 받았다면 누가 어떤 Code를 보냈는지와 Route 상태를 함께 봅니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ping">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · PING</div><h2>Ping의 핵심은 Request와 Reply 한 쌍입니다.</h2></div><p>화면의 성공 문구는 이 왕복 결과를 요약한 것입니다.</p></div>
+    <div class="pair" aria-label="R1과 R3 사이 ICMP Echo Request와 Echo Reply">
+      <article class="device"><b>R1 · Source</b><span>Echo Request 전송</span></article>
+      <div class="pair-mid"><div class="arrow-label">→ Type 8 · Echo Request</div><div class="arrow-label reply">← Type 0 · Echo Reply</div></div>
+      <article class="device"><b>R3 · Destination</b><span>Request를 받고 Reply 반환</span></article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>대응 관계:</b> Echo Reply의 Identifier와 Sequence는 요청과 대응합니다. 따라서 여러 Ping 중 어느 Reply가 어느 Request에 대한 것인지 연결할 수 있습니다.</div>
+  </div>
+</section>
+
+<section id="ttl">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · TTL</div><h2>Router를 지날 때 TTL은 줄어듭니다.</h2></div><p>숫자 자체보다 “홉마다 감소한다”는 관계가 중요합니다.</p></div>
+    <div class="ttl-flow" aria-label="R1에서 R3로 전달되는 IPv4 패킷의 TTL 감소">
+      <article class="ttl-node"><strong>R1</strong><span>TTL = N</span></article>
+      <div class="ttl-link">→<small>R2로 전달</small></div>
+      <article class="ttl-node"><strong>R2</strong><span>Forwarding</span></article>
+      <div class="ttl-link">→<small>TTL = N-1</small></div>
+      <article class="ttl-node"><strong>R3</strong><span>목적지</span></article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>TTL이 0이 되면?</b> Router는 그 Packet을 다음 Hop으로 보내지 않고 폐기한 뒤 Source에 <b>ICMP Time Exceeded · Type 11 Code 0</b>을 돌려보냅니다.</div>
+  </div>
+</section>
+
+<section id="traceroute">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · TRACEROUTE</div><h2>TTL 만료를 일부러 만들어 Hop을 찾습니다.</h2></div></div>
+    <div class="flow-cards">
+      <article class="flow-card"><b>1</b><h3>TTL = 1</h3><p>첫 Probe가 R2에서 만료됩니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>R2 → Time Exceeded</h3><p>R1은 “첫 번째 Hop은 R2”라고 알 수 있습니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>TTL = 2</h3><p>다음 Probe는 R3까지 도달합니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>Destination 응답</h3><p>Cisco IOS UDP traceroute에서는 R3의 Port Unreachable로 도달을 확인할 수 있습니다.</p></article>
+    </div>
+    <div class="impl-note"><b>구현 차이:</b> “Traceroute는 항상 UDP”는 아닙니다. 이번 Cisco IOS 검증은 UDP Probe를 사용했지만 Windows <code>tracert</code>는 ICMP Echo Probe를 사용합니다. 공통 핵심은 <b>TTL을 단계적으로 바꾸며 중간 응답으로 Hop을 확인</b>한다는 점입니다.</div>
+  </div>
+</section>
+
+<section id="unreachable">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · DESTINATION UNREACHABLE</div><h2>“도달 불가”도 이유를 나눠 봅니다.</h2></div><p>Type 3의 Code와 Route 상태를 함께 해석합니다.</p></div>
+    <div class="compare-grid">
+      <article class="compare-card standard">
+        <span class="type-pill std">RFC 표준</span>
+        <h3>Code 0 · Network Unreachable</h3>
+        <p>RFC 1812는 Router에 목적지로 가는 Route가 전혀 없을 때 Network Unreachable을 요구합니다.</p>
+      </article>
+      <article class="compare-card actual">
+        <span class="type-pill impl">Cisco 구현 관찰</span>
+        <h3>Code 1 · Host Unreachable</h3>
+        <p>이번 Cisco IOS Lab과 Cisco 공식 문서에서는 “목적지 Route를 모름” 상황에서도 Host Unreachable이 관찰·기술됩니다.</p>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>운영에서 중요한 결론:</b> Code 하나만 보고 원인을 확정하지 않습니다. <b>누가 ICMP를 보냈는지 + 그 Router의 Routing Table + 다음 링크에 Packet이 나갔는지</b>를 함께 봅니다.</div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li>Ping은 <b>Echo Request ↔ Echo Reply</b> 왕복을 확인합니다.</li>
+          <li>Router는 IPv4 Packet을 Forward할 때 <b>TTL을 감소</b>시킵니다.</li>
+          <li>TTL이 만료되면 <b>Time Exceeded</b>가 경로 단서를 줍니다.</li>
+          <li>Traceroute는 TTL을 바꾸며 <b>Hop을 단계적으로 확인</b>합니다.</li>
+          <li>Ping 실패는 원인이 아닙니다. <b>ICMP 응답과 Route 상태</b>를 함께 봅니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“Ping과 Traceroute는 무엇을 다르게 알려주는가?”</h3>
+        <p>Echo Reply, TTL, Time Exceeded라는 세 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>이제 결과를 먼저 예상하고 직접 확인하세요.</h2><p>Echo, TTL 감소, TTL 만료, Traceroute, No Route 상황을 한 문제씩 움직여 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="icmp-troubleshooting-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 2026-10-03 Cisco IOL L3 / PNETLab에서 ICMP-01~04는 PASS, ICMP-05는 RFC와 Cisco 구현 차이로 원래 FAIL을 보존하고 해결했습니다. <a href="../learning/foundations/icmp-troubleshooting/cisco-validation-2026-10-03.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">ICMP / Ping / Traceroute · Concept → Interactive Lab</div></footer>
+</body>
+</html>
