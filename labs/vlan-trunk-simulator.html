@@ -37,29 +37,48 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
   letter-spacing:.08em
 }
 .device-node{
-  position:relative;z-index:2;border:1px solid var(--line);border-radius:12px;background:#0a1726;
-  text-align:center;min-width:0;transition:border-color .18s,box-shadow .18s,opacity .18s,filter .18s
+  position:relative;z-index:2;min-width:0;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:transparent;border:0;border-radius:0;
+  transition:opacity .18s,filter .18s
 }
-.device-node.host{padding:10px 6px}.device-node.switch{padding:13px 7px;align-self:center}
-.device-node b{display:block;font-size:.82rem}.device-node span{display:block;color:var(--muted);font-size:.63rem;margin-top:2px}
+.device-icon-shell{
+  position:relative;display:grid;place-items:center;width:72px;height:54px;
+  transition:filter .18s,transform .18s
+}
+.device-node.host .device-icon-shell{width:62px;height:50px}
+.device-node.switch .device-icon-shell{width:80px;height:54px}
+.device-icon{display:block;width:100%;height:100%;overflow:visible}
+.device-icon .chassis{fill:#0d2133;stroke:#5f819c;stroke-width:2}
+.device-icon .screen{fill:#0b1a29;stroke:#75a1c3;stroke-width:2}
+.device-icon .screen-glow{fill:#15344d;opacity:.72}
+.device-icon .detail{fill:#7fa1b9}
+.device-icon .port{fill:#8fb1c7}
+.device-icon .port-dark{fill:#45657c}
+.device-icon .led{fill:#79d8be}
+.device-icon .stand{fill:#688aa2}
+.device-node b{display:block;font-size:.78rem;line-height:1.1;margin-top:2px}
+.device-node>span{display:block;color:var(--muted);font-size:.58rem;margin-top:2px;line-height:1.15}
 .device-node .vlan-chip{
-  display:inline-flex;margin-top:5px;padding:2px 6px;border-radius:999px;border:1px solid #36536d;
-  color:#c8d9e8;font-size:.56rem;font-weight:900
+  display:inline-flex;margin-top:4px;padding:2px 6px;border-radius:999px;border:1px solid #36536d;
+  color:#c8d9e8;background:#0a1726;font-size:.53rem;font-weight:900;white-space:nowrap
 }
-.switch-glyph{
-  width:44px;height:26px;margin:0 auto 6px;border:1px solid #3a607d;border-radius:7px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:3px;align-items:center;padding:0 6px;background:#0d2133
+.device-node.active .device-icon-shell{filter:drop-shadow(0 0 8px rgba(88,184,255,.35))}
+.device-node.active .device-icon-shell::after,
+.device-node.control .device-icon-shell::after,
+.device-node.stop .device-icon-shell::after{
+  content:"";position:absolute;inset:-7px;border-radius:16px;pointer-events:none
 }
-.switch-glyph i{display:block;width:5px;height:5px;border-radius:1px;background:#7194af}
-.device-node.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(88,184,255,.09)}
-.device-node.active::after{
-  content:"";position:absolute;inset:-7px;border:2px solid rgba(88,184,255,.72);border-radius:16px;
-  animation:nodePulse .75s ease-out 1;pointer-events:none
+.device-node.active .device-icon-shell::after{
+  border:2px solid rgba(88,184,255,.75);animation:nodePulse .75s ease-out 1
 }
-.device-node.control{border-color:var(--mint);box-shadow:0 0 0 2px rgba(121,216,190,.08)}
-.device-node.stop{border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,180,80,.08)}
-.device-node.excluded{opacity:.38;filter:saturate(.45)}
-@keyframes nodePulse{0%{opacity:0;transform:scale(.93)}35%{opacity:1}100%{opacity:0;transform:scale(1.08)}}
+.device-node.control .device-icon-shell{filter:drop-shadow(0 0 7px rgba(121,216,190,.28))}
+.device-node.control .device-icon-shell::after{border:2px solid rgba(121,216,190,.72)}
+.device-node.stop .device-icon-shell{filter:drop-shadow(0 0 7px rgba(245,180,80,.32))}
+.device-node.stop .device-icon-shell::after{border:2px solid rgba(245,180,80,.82)}
+.device-node.stop .device-icon .chassis,.device-node.stop .device-icon .screen{stroke:#d9a54d}
+.device-node.excluded{opacity:.34;filter:saturate(.35)}
+@keyframes nodePulse{0%{opacity:0;transform:scale(.9)}35%{opacity:1}100%{opacity:0;transform:scale(1.14)}}
 
 .pc10a{grid-column:1;grid-row:1}.pc20a{grid-column:1;grid-row:2}.pc99a{grid-column:1;grid-row:3}
 .sw1{grid-column:3;grid-row:1/4}.sw2{grid-column:5;grid-row:1/4}
@@ -128,7 +147,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 .scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
 .summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
 @media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
-@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.lane{grid-template-columns:1fr 24px 1fr 24px 1fr;padding:6px}.lane-label{display:none}.lane-node{padding:8px 2px}.lane-node b{font-size:.72rem}.lane-node span{font-size:.58rem}.lane-arrow{font-size:.62rem}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
+@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.network-topology{min-width:640px;grid-template-columns:98px 44px 86px minmax(138px,1fr) 86px 44px 98px}.device-node.host .device-icon-shell{width:54px;height:45px}.device-node.switch .device-icon-shell{width:70px;height:48px}.device-node b{font-size:.72rem}.device-node>span{font-size:.54rem}.device-node .vlan-chip{font-size:.49rem;padding:2px 5px}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
 </style>
 </head>
 <body>
@@ -194,16 +213,62 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
             <div class="side-zone left"><span class="zone-title">SW1 SIDE · ACCESS</span></div>
             <div class="side-zone right"><span class="zone-title">SW2 SIDE · ACCESS</span></div>
 
-            <div class="device-node host vlan10 pc10a" id="pc10a"><b>PC10A</b><span>Host A</span><small class="vlan-chip">Access VLAN 10</small></div>
-            <div class="device-node host vlan20 pc20a" id="pc20a"><b>PC20A</b><span>Host A</span><small class="vlan-chip">Access VLAN 20</small></div>
-            <div class="device-node host vlan99 pc99a" id="pc99a"><b>PC99A</b><span>Host A</span><small class="vlan-chip">Access VLAN 99</small></div>
+            <div class="device-node host vlan10 pc10a" id="pc10a"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC10A</b><span>Host A</span><small class="vlan-chip">Access VLAN 10</small></div>
+            <div class="device-node host vlan20 pc20a" id="pc20a"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC20A</b><span>Host A</span><small class="vlan-chip">Access VLAN 20</small></div>
+            <div class="device-node host vlan99 pc99a" id="pc99a"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC99A</b><span>Host A</span><small class="vlan-chip">Access VLAN 99</small></div>
 
             <div class="topo-link access-left link10l" id="link10L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state10L"></span></div>
             <div class="topo-link access-left link20l" id="link20L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state20L"></span></div>
             <div class="topo-link access-left link99l" id="link99L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state99L"></span></div>
 
-            <div class="device-node switch sw1" id="sw1">
-              <div class="switch-glyph" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="device-node switch sw1" id="sw1"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 84 52" focusable="false">
+                  <rect class="chassis" x="4" y="8" width="76" height="36" rx="7"/>
+                  <rect class="port-dark" x="10" y="16" width="46" height="18" rx="3"/>
+                  <rect class="port" x="14" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="24" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="34" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="44" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="14" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="24" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="34" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="44" y="27" width="7" height="4" rx="1"/>
+                  <circle class="led" cx="64" cy="21" r="2"/>
+                  <circle class="led" cx="71" cy="21" r="2"/>
+                  <rect class="detail" x="61" y="28" width="13" height="2" rx="1"/>
+                  <rect class="detail" x="61" y="33" width="9" height="2" rx="1"/>
+                </svg>
+              </div><b>SW1</b><span>Cisco IOL L2</span></div>
               <b>SW1</b><span>Cisco IOL L2</span>
             </div>
 
@@ -212,8 +277,24 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
               <span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="stateTrunk"></span>
             </div>
 
-            <div class="device-node switch sw2" id="sw2">
-              <div class="switch-glyph" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="device-node switch sw2" id="sw2"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 84 52" focusable="false">
+                  <rect class="chassis" x="4" y="8" width="76" height="36" rx="7"/>
+                  <rect class="port-dark" x="10" y="16" width="46" height="18" rx="3"/>
+                  <rect class="port" x="14" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="24" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="34" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="44" y="20" width="7" height="5" rx="1"/>
+                  <rect class="port" x="14" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="24" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="34" y="27" width="7" height="4" rx="1"/>
+                  <rect class="port" x="44" y="27" width="7" height="4" rx="1"/>
+                  <circle class="led" cx="64" cy="21" r="2"/>
+                  <circle class="led" cx="71" cy="21" r="2"/>
+                  <rect class="detail" x="61" y="28" width="13" height="2" rx="1"/>
+                  <rect class="detail" x="61" y="33" width="9" height="2" rx="1"/>
+                </svg>
+              </div><b>SW2</b><span>Cisco IOL L2</span></div>
               <b>SW2</b><span>Cisco IOL L2</span>
             </div>
 
@@ -221,9 +302,39 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
             <div class="topo-link access-right link20r" id="link20R"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state20R"></span></div>
             <div class="topo-link access-right link99r" id="link99R"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state99R"></span></div>
 
-            <div class="device-node host vlan10 pc10b" id="pc10b"><b>PC10B</b><span>Host B</span><small class="vlan-chip">Access VLAN 10</small></div>
-            <div class="device-node host vlan20 pc20b" id="pc20b"><b>PC20B</b><span>Host B</span><small class="vlan-chip" id="pc20bVlan">Access VLAN 20</small></div>
-            <div class="device-node host vlan99 pc99b" id="pc99b"><b>PC99B</b><span>Host B</span><small class="vlan-chip">Access VLAN 99</small></div>
+            <div class="device-node host vlan10 pc10b" id="pc10b"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC10B</b><span>Host B</span><small class="vlan-chip">Access VLAN 10</small></div>
+            <div class="device-node host vlan20 pc20b" id="pc20b"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC20B</b><span>Host B</span><small class="vlan-chip" id="pc20bVlan">Access VLAN 20</small></div>
+            <div class="device-node host vlan99 pc99b" id="pc99b"><div class="device-icon-shell" aria-hidden="true">
+                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
+                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
+                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
+                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
+                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
+                  <circle class="led" cx="49" cy="31" r="1.5"/>
+                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
+                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
+                </svg>
+              </div><b>PC99B</b><span>Host B</span><small class="vlan-chip">Access VLAN 99</small></div>
           </div>
         </div>
         <div class="topology-legend" aria-label="토폴로지 표현 범례">
