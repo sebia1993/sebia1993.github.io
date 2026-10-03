@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inter-VLAN Routing — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.23rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:720px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/inter-vlan-routing.html">← Inter-VLAN Routing</a><a class="btn" href="../../../labs/inter-vlan-routing-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-04</div>
+  <h1>Inter-VLAN Routing<br><em>Cisco 검증 요약</em></h1>
+  <p>PNETLab의 Cisco IOL SVI L3 Switch 1대와 VPCS 4대로 Same-VLAN / Inter-VLAN / SVI Down / Wrong Gateway를 실제 실행했습니다. CLI와 4개 Host 링크 PCAP을 대조했고 <b>IVR-01~06은 모두 PASS</b>했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-03-inter-vlan-routing-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Claim Result</small><strong class="pass">6 PASS / 0 FAIL</strong></article>
+    <article class="summary-card"><small>Final Recovery</small><strong class="pass">Config / Same & Inter-VLAN 정상</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>검증 토폴로지</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>실제 검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Switch</td><td>Cisco IOL SVI L3 · IOS 15.2(CML_NIGHTLY_20190423)FLO_DSGS7</td></tr>
+        <tr><td>VLAN10</td><td>PC10A 10.10.10.10 · PC10B 10.10.10.20 · SVI 10.10.10.1</td></tr>
+        <tr><td>VLAN20</td><td>PC20A 10.10.20.10 · PC20B 10.10.20.20 · SVI 10.10.20.1</td></tr>
+        <tr><td>Routing</td><td>ip routing 활성 · Connected 10.10.10.0/24 / 10.10.20.0/24 · NAT/Static/Default Route 없음</td></tr>
+        <tr><td>Capture</td><td>CP1 PC10A · CP2 PC20A · CP3 PC10B · CP4 PC20B Host Links</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="ivr-01">
+    <h2>IVR-01 · Same-VLAN Direct L2 <span class="pass">PASS</span></h2>
+    <p>PC10A는 PC10B 10.10.10.20을 직접 ARP했고 Echo Request Ethernet Destination도 PC10B MAC이었습니다. CP1/CP3에서 같은 Request의 TTL은 64로 동일해 SVI Routing이 개입하지 않았습니다.</p>
+    <p class="evidence">ARP target 10.10.10.20 · CP1/55 ↔ CP3/48 · TTL 64 → 64</p>
+  </article>
+
+  <article class="claim" id="ivr-02">
+    <h2>IVR-02 · Off-Link Uses Default Gateway <span class="pass">PASS</span></h2>
+    <p>PC10A→PC20A에서는 PC10A가 10.10.10.1을 ARP했습니다. Ingress Echo Ethernet Destination은 Vlan10 SVI MAC이지만 IPv4 Destination은 최종 PC20A 10.10.20.10 그대로였습니다.</p>
+    <p class="evidence">CP1 ARP frame 71 · Gateway MAC aa:bb:cc:80:01:00 · Remote Host 직접 ARP 없음</p>
+  </article>
+
+  <article class="claim" id="ivr-03">
+    <h2>IVR-03 · SVI Routing / TTL / Re-encapsulation <span class="pass">PASS</span></h2>
+    <p>동일 Echo Request가 CP1에서 TTL 64, CP2에서 TTL 63으로 확인됐습니다. IP Source/Destination은 그대로였고 Ethernet은 PC10A→SVI에서 SVI→PC20A로 바뀌었습니다.</p>
+    <p class="evidence">CP1/73: 10.10.10.10→10.10.20.10 TTL64, PC10A→SVI · CP2/63: same IP TTL63, SVI→PC20A</p>
+  </article>
+
+  <article class="claim" id="ivr-04">
+    <h2>IVR-04 · Independent Reply Path <span class="pass">PASS</span></h2>
+    <p>PC20A는 PC10A를 off-link로 판단해 Vlan20 Gateway MAC으로 Echo Reply를 보냈습니다. SW1은 VLAN10으로 Routing하면서 TTL 64→63으로 감소시키고 Ethernet Destination을 PC10A MAC으로 구성했습니다.</p>
+    <p class="evidence">PC20A ARP: 10.10.20.1 → aa:bb:cc:80:01:00 · Round-trip 3/3</p>
+  </article>
+
+  <article class="claim" id="ivr-05">
+    <h2>IVR-05 · Vlan20 SVI Down / Recover <span class="pass">PASS</span></h2>
+    <p>Vlan20 shutdown 후 SVI는 down/down, 10.10.20.0/24 Connected Route는 제거됐습니다. Inter-VLAN은 실패했지만 PC20A↔PC20B Same-VLAN L2는 3/3 유지됐습니다. 실제 IOL은 PC10A에 ICMP Type 3 Code 1을 반환했습니다.</p>
+    <p>no shutdown 직후 첫 Recovery는 2/3이었고, ARP 재형성 후 별도 확인 Run에서 3/3이 됐습니다. 이 transient를 숨기지 않습니다.</p>
+    <p class="evidence">Failure CP1 Echo + Type3/Code1 · CP2 Routed Echo 0 · CP2/CP4 VLAN20 L2 Positive Control</p>
+  </article>
+
+  <article class="claim" id="ivr-06">
+    <h2>IVR-06 · Wrong Default Gateway / Recover <span class="pass">PASS</span></h2>
+    <p>PC10A Gateway만 10.10.10.254로 변경하자 PC10B Same-VLAN은 3/3 유지됐고 Remote-VLAN은 .254 ARP Reply가 없어 중단됐습니다. PC20A를 Destination IP로 하는 실제 Echo Frame은 생성되지 않았습니다.</p>
+    <p class="evidence">CP1 wrong-gateway ARP frames 280/282/283 · Remote Echo frames 0 · Gateway .1 복구 후 3/3</p>
+  </article>
+
+  <section class="warning">
+    <div class="eyebrow">검증 한계</div>
+    <h2>이 Lab에는 Trunk가 없습니다.</h2>
+    <p>VLAN / Trunk 자체는 직전 학습에서 이미 검증했기 때문에 이번 Inter-VLAN Lab은 한 L3 Switch의 Access VLAN + SVI 경계만 사용했습니다. 따라서 이 페이지에서 802.1Q Tag가 검증됐다고 주장하지 않습니다.</p>
+    <p>또한 이번 IOL 이미지에서는 Vlan10과 Vlan20 SVI의 Numeric MAC이 모두 <code>aa:bb:cc:80:01:00</code>이었습니다. 핵심 증거는 SVI MAC 값이 서로 다르다는 것이 아니라, Routing 전후 Egress Destination MAC과 TTL이 올바르게 바뀌는 것입니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Packet Comparison</div><h2>Same-VLAN과 Inter-VLAN의 차이</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Flow</th><th>IP</th><th>TTL</th><th>Ethernet</th></tr></thead>
+      <tbody>
+        <tr><td>Same VLAN CP1</td><td>10.10.10.10 → 10.10.10.20</td><td>64</td><td>PC10A → PC10B</td></tr>
+        <tr><td>Same VLAN CP3</td><td>10.10.10.10 → 10.10.10.20</td><td>64</td><td>PC10A → PC10B</td></tr>
+        <tr><td>Inter-VLAN CP1</td><td>10.10.10.10 → 10.10.20.10</td><td>64</td><td>PC10A → Vlan10 SVI</td></tr>
+        <tr><td>Inter-VLAN CP2</td><td>10.10.10.10 → 10.10.20.10</td><td>63</td><td>Vlan20 L3 MAC → PC20A</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Integrity</div><h2>원본 Capture SHA-256</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Capture</th><th>Bytes</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1</td><td>60984</td><td class="evidence">004c08cf690256570eeb37c1fe5974a70205c5d4afc9d763c6104f8c77774090</td></tr>
+        <tr><td>CP2</td><td>59556</td><td class="evidence">c174ab0b87958e9122361c3e914624eecc0cbd816a2ef84094c06751e4cfba21</td></tr>
+        <tr><td>CP3</td><td>41949</td><td class="evidence">e9a41d95ddfecb47d0b3efeead8b3a401370bd296f1cdc69afb12a4164ff9e9a</td></tr>
+        <tr><td>CP4</td><td>42269</td><td class="evidence">30dfd4341ae499141fa398b9db4e807699c358c8e7899ce39ffa45ea60763528</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Cisco 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1122.html">RFC 1122 · Host next-hop selection</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc826.html">RFC 826 · ARP</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1812.html">RFC 1812 · IPv4 Router Forwarding</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/inter-vlan-routing/41260-189.html">Cisco · Configure Inter-VLAN Routing with Catalyst Switches</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">Inter-VLAN Routing · Cisco IOL Validation Summary</div></footer>
+</body>
+</html>
