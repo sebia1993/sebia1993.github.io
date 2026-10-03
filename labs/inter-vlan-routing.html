@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inter-VLAN Routing — 개념서</title>
+<meta name="description" content="같은 VLAN과 다른 VLAN 통신에서 Default Gateway, SVI, TTL, Ethernet 재캡슐화가 어떻게 달라지는지 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.compare-card h3{margin:5px 0 8px}.compare-card p{margin:0;color:var(--muted)}.compare-card.local{border-color:#347968}.compare-card.remote{border-color:#3e6a91}
+.flow{display:grid;grid-template-columns:1fr 65px 1fr 65px 1fr;gap:8px;align-items:center}.flow-node{padding:17px 8px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);text-align:center}.flow-node b{display:block}.flow-node span{display:block;color:var(--muted);font-size:.74rem;margin-top:3px}.flow-link{text-align:center}.flow-link strong{display:block;color:var(--blue);font-size:.8rem}.flow-link span{display:block;color:var(--muted);font-size:.72rem}
+.header-swap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.header-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.header-card h3{margin:0 0 7px}.header-card code{display:block;margin-top:5px;overflow-wrap:anywhere}.ip-stable{color:var(--mint)}.mac-change{color:var(--blue)}
+.flow-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.flow-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.95rem}.flow-card p{margin:0;color:var(--muted);font-size:.84rem}
+.failure-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.failure-card{padding:19px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:3px 0 7px}.failure-card p{margin:0;color:#d4e0ec}.failure-path{margin-top:11px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624;color:var(--muted);font-size:.8rem}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:900px){.flow-cards{grid-template-columns:1fr 1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.compare-grid,.failure-grid,.header-swap{grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.flow{grid-template-columns:1fr 28px 1fr 28px 1fr}.flow-node{padding:11px 3px}.flow-node b{font-size:.78rem}.flow-node span{font-size:.62rem}.flow-link strong{font-size:.65rem}.flow-link span{display:none}.flow-cards{grid-template-columns:1fr}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#same-remote">같은/다른 VLAN</a>
+      <a href="#routing">Routing</a>
+      <a href="#reply">Reply</a>
+      <a href="#failure">장애</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1><em>Inter-VLAN</em> Routing</h1>
+    <p>목표는 하나입니다. <b>같은 VLAN은 직접 L2로 보내고, 다른 VLAN은 Default Gateway를 거쳐 Routing된다는 차이</b>를 Ethernet과 IP Header까지 연결해 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>이 페이지에서는 경계만 정확히 봅니다.</strong><span>Routing Table이나 CLI를 외우기보다 “Host가 누구의 MAC을 쓰는가 → L3 Switch가 무엇을 바꾸는가”에 집중합니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>IP 목적지는 최종 Host, Ethernet 목적지는 현재 L2 구간의 Next-Hop입니다.</strong>
+      <p>Same VLAN → Peer MAC · Different VLAN → Gateway MAC → Routing → 새 L2 Frame</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>먼저 “같은 Subnet인가?”를 판단합니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① Same VLAN:</b> 목적지가 on-link라면 <strong>최종 Host를 ARP</strong>하고 그 Host MAC으로 직접 보냅니다.</p>
+      <p><b>② Different VLAN:</b> 목적지가 off-link라면 <strong>Default Gateway를 ARP</strong>하고 Gateway MAC으로 보냅니다.</p>
+      <p><b>③ L3 Switch:</b> IP Destination은 그대로 두고 <strong>TTL을 감소</strong>시킨 뒤 다른 VLAN에 맞는 새 Ethernet Header로 전송합니다.</p>
+      <p><b>④ Reply:</b> 반대편 Host도 똑같이 독립 판단합니다. Return Path 역시 자기 Gateway를 사용합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="same-remote">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · SAME VLAN vs DIFFERENT VLAN</div><h2>달라지는 것은 “현재 L2 목적지”입니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card local">
+        <div class="eyebrow">PC10A → PC10B</div>
+        <h3>같은 VLAN 10</h3>
+        <p>PC10A는 <b>10.10.10.20</b>을 직접 ARP하고, Ethernet Destination을 <b>PC10B MAC</b>으로 보냅니다. Gateway는 이 Flow의 Next-Hop이 아닙니다.</p>
+      </article>
+      <article class="compare-card remote">
+        <div class="eyebrow">PC10A → PC20A</div>
+        <h3>다른 VLAN 20</h3>
+        <p>PC10A는 Remote Host가 아니라 <b>Gateway 10.10.10.1</b>을 ARP합니다. Ethernet Destination은 <b>Gateway MAC</b>이지만 IP Destination은 여전히 <b>10.10.20.10</b>입니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="routing">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · SVI ROUTING</div><h2>L3 Switch를 지나면 Ethernet Header는 새로 만들어집니다.</h2></div><p>이번 실제 검증에서 동일 Echo Request를 VLAN10과 VLAN20 링크에서 대조했습니다.</p></div>
+    <div class="flow" aria-label="PC10A에서 SVI Routing을 거쳐 PC20A로 전달되는 흐름">
+      <article class="flow-node"><b>PC10A</b><span>VLAN10 · TTL 64</span></article>
+      <div class="flow-link"><strong>→ Gateway MAC</strong><span>IP dst = PC20A</span></div>
+      <article class="flow-node"><b>SW1 SVI</b><span>Route Lookup · TTL -1</span></article>
+      <div class="flow-link"><strong>→ PC20A MAC</strong><span>새 Ethernet Header</span></div>
+      <article class="flow-node"><b>PC20A</b><span>VLAN20 · TTL 63</span></article>
+    </div>
+    <div class="header-swap">
+      <article class="header-card">
+        <h3>VLAN10에서 들어올 때</h3>
+        <code class="ip-stable">IP 10.10.10.10 → 10.10.20.10</code>
+        <code class="mac-change">MAC PC10A → VLAN10 Gateway</code>
+        <code>TTL 64</code>
+      </article>
+      <article class="header-card">
+        <h3>VLAN20으로 나갈 때</h3>
+        <code class="ip-stable">IP 10.10.10.10 → 10.10.20.10</code>
+        <code class="mac-change">MAC VLAN20 L3 Interface → PC20A</code>
+        <code>TTL 63</code>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>이번 IOL 특징:</b> Vlan10과 Vlan20 SVI의 숫자 MAC은 둘 다 <code>aa:bb:cc:80:01:00</code>으로 같았습니다. 중요한 것은 “두 SVI MAC 값이 다르냐”가 아니라, <b>Ingress Frame을 그대로 전달하지 않고 Egress Next-Hop에 맞는 L2 Header를 새로 구성했다</b>는 점입니다.</div>
+  </div>
+</section>
+
+<section id="reply">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · REPLY PATH</div><h2>Reply도 독립적으로 Gateway를 선택합니다.</h2></div></div>
+    <div class="flow-cards">
+      <article class="flow-card"><b>1</b><h3>PC20A가 Reply 준비</h3><p>Destination은 PC10A 10.10.10.10입니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>Off-link 판단</h3><p>PC20A는 PC10A가 VLAN20 밖에 있다고 판단합니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>Gateway 사용</h3><p>VLAN20 Gateway 10.10.20.1의 MAC으로 Reply Frame을 보냅니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>SW1 Routing</h3><p>TTL 64 → 63으로 감소하고 VLAN10으로 전달합니다.</p></article>
+      <article class="flow-card"><b>5</b><h3>PC10A 도착</h3><p>VLAN10 Egress Ethernet Destination은 PC10A MAC입니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · 두 가지 대표 장애</div><h2>같은 VLAN과 다른 VLAN을 나눠 보면 원인이 빨리 보입니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">SVI DOWN</div>
+        <h3>Vlan20 L3 Interface만 shutdown</h3>
+        <p>10.10.20.0/24 Connected Route가 사라지고 Inter-VLAN Ping은 실패했습니다. 하지만 PC20A↔PC20B 같은 VLAN20 L2 통신은 3/3 정상으로 유지됐습니다.</p>
+        <div class="failure-path">VLAN20 내부 L2 ✓ · VLAN10 ↔ VLAN20 Routing ✕</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">WRONG GATEWAY</div>
+        <h3>PC10A Gateway만 10.10.10.254</h3>
+        <p>PC10A↔PC10B 같은 VLAN 통신은 계속 성공했지만 Remote VLAN은 존재하지 않는 Gateway에 ARP만 반복하고 실제 Remote Echo Frame을 만들지 못했습니다.</p>
+        <div class="failure-path">Same VLAN ✓ · Gateway ARP 10.10.10.254 응답 없음 → Remote ✕</div>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>복구 주의:</b> Vlan20을 다시 올린 직후 첫 Run은 2/3이었고, ARP가 다시 형성된 뒤 별도 확인 Run에서 3/3이 됐습니다. 그래서 “SVI no shutdown 즉시 완벽 복구”라고 일반화하지 않습니다.</div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li>Same VLAN이면 <b>Peer MAC</b>으로 직접 보냅니다.</li>
+          <li>Different VLAN이면 <b>Gateway MAC</b>으로 보내지만 IP Destination은 최종 Host입니다.</li>
+          <li>L3 Routing을 거치면 <b>TTL이 감소</b>하고 Ethernet Header는 Egress용으로 새로 구성됩니다.</li>
+          <li>Reply Path도 독립적으로 <b>자기 Default Gateway</b>를 사용합니다.</li>
+          <li>Same-VLAN이 된다고 해서 <b>Gateway / SVI가 정상</b>이라는 뜻은 아닙니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“PC10A가 PC20A로 보낼 때 왜 PC20A MAC을 직접 쓰지 않는가?”</h3>
+        <p>Subnet 판단, Gateway MAC, IP Destination, 새 Ethernet Frame을 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 VLAN과 다른 VLAN의 Frame을 직접 비교하세요.</h2><p>먼저 Next-Hop을 예상하고, Gateway MAC·TTL·새 L2 Header·SVI Down·Wrong Gateway 중단 지점을 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="inter-vlan-routing-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 2026-10-04 PNETLab의 Cisco IOL SVI L3 Switch + VPCS 4대로 IVR-01~06을 모두 PASS했습니다. <a href="../learning/campus/inter-vlan-routing/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">Inter-VLAN Routing · Concept → Interactive Lab</div></footer>
+</body>
+</html>
