@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>Inter-VLAN Routing</h2>
-      <p>Same-VLAN 직접 전달과 Different-VLAN의 Gateway 선택, SVI Routing, TTL 감소와 L2 재캡슐화를 실제 검증한 내용으로 정리했습니다.</p>
+      <h2>STP / RSTP</h2>
+      <p>Root Bridge, Port Role, Alternate/Discarding, Path Cost와 Rapid-PVST+ 재수렴을 실제 검증한 내용으로 정리했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/inter-vlan-routing.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/inter-vlan-routing-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/stp.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/stp-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -142,7 +142,8 @@ const interactiveUrls={
   'arp-default-gateway':'./labs/arp-default-gateway-simulator.html',
   'icmp-troubleshooting':'./labs/icmp-troubleshooting-simulator.html',
   'vlan-trunk':'./labs/vlan-trunk-simulator.html',
-  'inter-vlan-routing':'./labs/inter-vlan-routing-simulator.html'
+  'inter-vlan-routing':'./labs/inter-vlan-routing-simulator.html',
+  'stp':'./labs/stp-simulator.html'
 };
 
 const summaryOverrides={
@@ -151,7 +152,8 @@ const summaryOverrides={
   'arp-default-gateway':'같은 서브넷과 다른 서브넷에서 ARP와 Default Gateway가 어떤 MAC 주소를 선택하게 만드는지 이해합니다.',
   'icmp-troubleshooting':'Ping의 Echo 응답, TTL 감소, Time Exceeded와 Traceroute의 Hop 발견을 연결해 이해합니다.',
   'vlan-trunk':'Access Port의 VLAN 소속과 802.1Q Trunk Tag, Native/Allowed VLAN을 연결해 이해합니다.',
-  'inter-vlan-routing':'같은 VLAN 직접 전달과 다른 VLAN의 Default Gateway·SVI Routing 차이를 연결해 이해합니다.'
+  'inter-vlan-routing':'같은 VLAN 직접 전달과 다른 VLAN의 Default Gateway·SVI Routing 차이를 연결해 이해합니다.',
+  'stp':'Root Bridge와 Port Role, Alternate/Discarding, Path Cost와 재수렴을 연결해 이해합니다.'
 };
 
 fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
