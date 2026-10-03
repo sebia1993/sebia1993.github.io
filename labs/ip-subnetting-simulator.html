@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="lab-ui-version" content="20261003-answer-flow-v1">
+<meta name="skill-review-version" content="20261003-observation-review-v1">
 <meta name="summary-ui-version" content="20261003-summary-status-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
 <meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
@@ -131,14 +132,48 @@
  #ipLab .summary-answer-value{font-size:.92rem}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Skill review: a visible model observation, separate from answer grading. */
+#ipLab .model-notice{font-size:.8rem;color:#bad0e4;margin:7px 0 0}
+#ipLab .start-conditions{margin-top:8px;font-size:.83rem;color:#bfd2e5}
+#ipLab .start-conditions summary{cursor:pointer;min-height:44px;padding:8px 0;color:#dceafa}
+#ipLab .start-conditions p{line-height:1.65;margin:4px 0 10px}
+#ipLab .model-observation{margin:12px 0 0;padding:12px 14px;border:1px solid #52799a;border-radius:12px;background:#102b42;min-width:0}
+#ipLab .model-heading{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:#bedcf3}
+#ipLab .model-route{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;margin:9px 0}
+#ipLab .model-node{min-width:0;display:grid;gap:2px;font-size:.92rem;color:#edf6ff}
+#ipLab .model-node small{font-size:.74rem;color:#c2d8ea}
+#ipLab .model-direction{width:24px;height:24px;display:grid;place-items:center;color:#9ad6ff;font-size:1.25rem;pointer-events:none}
+#ipLab #modelEvent{color:#e7f2fd;font-size:.86rem;font-weight:750;margin:0;line-height:1.5}
+#ipLab #modelObservation[data-outcome=unresolved]{background:#30281e;border-color:#d2a76d}
+#ipLab #modelObservation[data-outcome=unresolved] #modelEvent{color:#ffdb9c}
+#ipLab #modelCaption{font-size:.74rem;color:#c1d2e3;margin-top:5px;line-height:1.5}
+#ipLab .trace-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#ipLab .trace-controls button{font-size:.83rem}
+#ipLab #traceEvent{font-size:.92rem;color:#e5f0fb;margin:8px 0}
+#ipLab #tracePosition,#ipLab .trace-note{font-size:.8rem;color:#bad0e4}
+#ipLab .source-links{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:.84rem;margin-top:10px}
+#ipLab .source-links a{color:#a5dbff;min-height:44px;display:inline-flex;align-items:center}
+#ipLab .summary-jump{margin-top:10px;display:flex;justify-content:flex-end}
+#ipLab #summaryReturnBtn{font-size:.84rem}
+#ipLab .question,#ipLab .verdict,#ipLab .model-observation{word-break:keep-all;overflow-wrap:anywhere}
+#ipLab .trace-controls button:disabled{color:#8ba4bc;opacity:.6}
+#ipLab .trace-note{margin:7px 0 0}
+@media(max-width:700px){
+ #ipLab .model-observation{padding:10px 12px}
+ #ipLab .model-route{gap:5px}
+ #ipLab .model-node{font-size:.84rem}
+ #ipLab #modelEvent{font-size:.83rem}
+}
+@media(forced-colors:active){#ipLab .model-observation{border-color:CanvasText}}
 </style></head><body>
 <div class="lab-wrap" id="ipLab">
 <a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
-<header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>예상하기 → 정오답과 이유 확인 → 다음 문제. 틀려도 해설을 보고 계속 진행할 수 있습니다.</p></header>
+<header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>예상하기 → 정오답과 이유 확인 → 다음 문제. 틀려도 해설을 보고 계속 진행할 수 있습니다.</p><p class="model-notice">학습용 시뮬레이션 · PC1의 판단과 ARP 대상을 재현합니다. 실제 장비 실행은 아닙니다.</p></header>
 <nav class="tabs" id="tabs" aria-label="문제 선택 및 이전 답안 보기"></nav>
 <div class="progress"><strong id="progressText">결과 확인 0 / 4</strong><span id="scoreText">정답 0 · 오답 0 · 미응답 4</span></div>
 <main class="card" id="lessonCard">
-<section class="question" aria-labelledby="question"><small id="lessonNo"></small><h2 id="question" tabindex="-1"></h2><p id="questionHelp"></p><p id="questionContext" class="context-note"></p></section>
+<section class="question" aria-labelledby="question"><small id="lessonNo"></small><h2 id="question" tabindex="-1"></h2><p id="questionHelp"></p><p id="questionContext" class="context-note"></p><details class="start-conditions" id="startConditions"><summary>시작 조건과 생략 범위</summary><p id="initialConditions"></p></details></section>
 <div class="choices" id="choices" role="group" aria-label="내 예상 답 선택"></div>
 <div id="submitRow"><button class="primary" id="runBtn" type="button" disabled>답안 제출 · 결과 확인</button><span id="feedback" role="status" aria-live="polite">먼저 예상 답을 선택하세요.</span></div>
 <section id="resultArea" hidden aria-label="답안 판정과 해설">
@@ -147,6 +182,18 @@
   <dl class="answer-compare"><dt>내 답</dt><dd id="chosenAnswer"></dd><dt>올바른 답</dt><dd id="correctAnswer"></dd></dl>
   <p><span class="explain-label">이유</span><span id="explainText"></span></p>
  </div>
+ <figure class="model-observation" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
+  <div class="model-heading"><strong id="modelTitle">모델 관찰 결과</strong><span id="modelRunLabel"></span></div>
+  <div class="model-route"><div class="model-node"><small>송신자 · PC1 실제 설정</small><strong id="modelSource"></strong></div><span class="model-direction" aria-hidden="true">→</span><div class="model-node"><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></div></div>
+  <p id="modelEvent"></p><figcaption id="modelCaption"></figcaption>
+ </figure>
+ <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
+ <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div>
+ <details class="optional" id="traceDetails"><summary>모델의 판단 순서 다시 보기 · 채점은 유지</summary><div class="optional-body">
+  <strong id="tracePosition"></strong><p id="traceEvent" role="status" aria-live="polite" aria-atomic="true"></p>
+  <div class="trace-controls"><button class="secondary" id="tracePrev" type="button">← 이전 판단</button><button class="secondary" id="traceNext" type="button">다음 판단 →</button></div>
+  <p class="trace-note">수동 재생입니다. 위 결과와 같은 실행의 단계를 보여주며, 답안·점수·진행 기록은 바뀌지 않습니다.</p>
+ </div></details>
  <details class="optional" id="calculationDetails"><summary>계산 과정과 PC1의 판단 펼쳐보기</summary><div class="optional-body">
   <p class="basis" id="calculationBasis"></p>
   <div class="calc"><div class="endpoint"><small>송신자 · PC1 실제 설정</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow" aria-hidden="true">→</div><div class="endpoint"><small id="destinationLabel">목적지 실제 설정</small><strong id="dstIp"></strong><code id="dstNet"></code></div></div>
@@ -154,8 +201,8 @@
   <p id="explainTitle"></p>
   <div class="result-grid"><div class="result"><small>PC1의 계산 기준</small><strong id="prefixOut"></strong></div><div class="result"><small>PC1이 내린 판단</small><strong id="decisionOut"></strong></div><div class="result"><small>PC1의 전달 대상</small><strong id="nextHopOut"></strong></div></div>
  </div></details>
- <details class="optional" id="evidenceDetails"><summary>사전 장비 검증 근거 · 내 답안 채점과 별개</summary><div class="optional-body"><strong id="validatedOut"></strong><p id="evidenceMeaning">PASS는 제작자가 해당 동작을 검증했다는 뜻입니다. 내 답이 정답이거나 통신이 성공했다는 뜻은 아닙니다.</p><p id="evidenceText"></p></div></details>
- <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
+ <details class="optional" id="evidenceDetails"><summary>사전 장비 검증 근거 · 내 답안 채점과 별개</summary><div class="optional-body"><strong id="validatedOut"></strong><p id="evidenceMeaning">PASS는 제작자가 해당 동작을 검증했다는 뜻입니다. 내 답이 정답이거나 통신이 성공했다는 뜻은 아닙니다.</p><p id="evidenceText"></p><p class="trace-note" id="evidenceScope"></p><div class="source-links"><a href="../results/ip-subnetting.json">기존 검증 요약 · 2026-10-03</a><a href="ip-subnetting.html#decision">개념서의 판단 원리</a></div></div></details>
+
 </section>
 </main>
 <section class="complete" id="complete" hidden aria-labelledby="completionTitle"><h2 id="completionTitle" tabindex="-1">네 문제의 결과를 확인했습니다.</h2><strong id="completionScore"></strong><p>아래 판정은 각 문제의 가장 최근 제출 답안 기준입니다. 결과 확인 횟수와 정답 수는 다릅니다.</p><div class="summary-list" id="summaryList" role="list" aria-label="문제별 답안 판정"></div><div class="lesson-actions"><button class="primary" id="reviewWrongBtn" type="button">오답 다시 보기</button><a class="secondary" href="ip-subnetting.html">개념서 다시 보기</a><a class="secondary" href="../roadmap.html">로드맵</a></div></section>
@@ -173,19 +220,25 @@
     {title:'다시 /25로 복구하면?',label:'4 · 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 .140 직접 ARP'],['gw','다시 gateway .1 경유'],['none','ARP 없이 바로 ICMP 전송']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'Mask를 /25로 되돌리면 .140은 다시 다른 Prefix가 되어 정상 next-hop 판단으로 복구됩니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
   ];
 // Actual destination configuration is distinct from the sender's calculation mask.
-lessons.forEach(function(l,i){l.dstPrefix=25;l.dstNode=i===0?'PC3':'PC2';});
+lessons.forEach(function(l,i){
+ l.dstPrefix=25;l.dstNode=i===0?'PC3':'PC2';l.destinationLan=i===0?'A':'B';l.gateway='10.77.10.1';
+ l.scenarioId=['same-subnet','different-subnet','wrong-mask','mask-recovery'][i];
+ l.claimIds=i<2?['IPSUB-01','IPSUB-02']:[i===2?'IPSUB-03':'IPSUB-04'];
+});
 var KEY='network-learning:ip-subnetting:answers:v1';
 var $=function(id){return document.getElementById(id);};
-var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, canStore=true;
+var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, canStore=true, observation=null, traceStep=0;
 try {
  var saved=JSON.parse(localStorage.getItem(KEY)||'null');
  if(saved && saved.schema===1 && Array.isArray(saved.answers) && saved.answers.length===lessons.length){
   var valid=saved.answers.every(function(a,i){return a && typeof a.submitted==='boolean' && (a.choice===null || lessons[i].choices.some(function(c){return c[0]===a.choice;})) && (!a.submitted || a.choice!==null);});
-  if(valid){answers=saved.answers.map(function(a){return {choice:a.choice,submitted:a.submitted};});idx=Number.isInteger(saved.index)&&saved.index>=0&&saved.index<lessons.length?saved.index:0;}
+  if(valid){answers=saved.answers.map(function(a){return {choice:a.choice,submitted:a.submitted};});idx=Number.isInteger(saved.index)&&saved.index>=0&&saved.index<lessons.length?saved.index:0;
+   summaryOpen=saved.view==='summary' && answers.every(function(a){return a.submitted;});
+  }
  }
 } catch(e){canStore=false;}
 function persist(){
- try{localStorage.setItem(KEY,JSON.stringify({schema:1,index:idx,answers:answers}));canStore=true;}
+ try{localStorage.setItem(KEY,JSON.stringify({schema:1,index:idx,answers:answers,view:summaryOpen?'summary':'lesson'}));canStore=true;}
  catch(e){canStore=false;}
  $('storageNote').textContent=canStore?'답안은 이 브라우저에 저장됩니다. 다른 기기와 동기화되지 않습니다.':'브라우저 저장을 사용할 수 없어 답안은 현재 화면에서만 유지됩니다.';
 }
@@ -201,13 +254,20 @@ function focusSection(id,align){
  if(align || r.top<16 || r.bottom>innerHeight-16){window.scrollTo({top:Math.max(0,scrollY+r.top-20),behavior:'instant'});}
 }
 function renderTabs(){
- var pos=$('tabs').scrollLeft;
- $('tabs').replaceChildren();
- lessons.forEach(function(l,i){
-  var b=document.createElement('button');b.type='button';b.className='tab'+(i===idx?' active':'');b.dataset.grade=grade(i);b.setAttribute('aria-current',i===idx?'step':'false');
-  var t=document.createElement('b');t.textContent=l.label;var s=document.createElement('small');s.textContent=grade(i)==='correct'?'✓ 정답':grade(i)==='incorrect'?'✕ 오답 · 다시 보기':answers[i].choice?'선택 중 · 미제출':'미응답';b.append(t,s);
-  b.addEventListener('click',function(){goTo(i,false);});$('tabs').append(b);
- });$('tabs').scrollLeft=pos;
+ if(!$('tabs').children.length){
+  lessons.forEach(function(l,i){
+   var b=document.createElement('button');b.type='button';b.className='tab';
+   var t=document.createElement('b');t.textContent=l.label;var label=document.createElement('small');b.append(t,label);
+   b.addEventListener('click',function(){goTo(i,false);});$('tabs').append(b);
+  });
+ }
+ lessons.forEach(function(_,i){
+  var b=$('tabs').children[i];b.classList.toggle('active',i===idx);b.dataset.grade=grade(i);b.setAttribute('aria-current',i===idx?'step':'false');
+  b.querySelector('small').textContent=grade(i)==='correct'?'✓ 정답':grade(i)==='incorrect'?'✕ 오답 · 다시 보기':answers[i].choice?'선택 중 · 미제출':'미응답';
+ });
+ var tabs=$('tabs'),active=tabs.children[idx],r=active.getBoundingClientRect(),box=tabs.getBoundingClientRect();
+ if(r.left<box.left)tabs.scrollLeft-=box.left-r.left;
+ else if(r.right>box.right)tabs.scrollLeft+=r.right-box.right;
 }
 function renderProgress(){var n=counts();$('progressText').textContent='결과 확인 '+n.answered+' / 4';$('scoreText').textContent='정답 '+n.correct+' · 오답 '+n.wrong+' · 미응답 '+n.pending;}
 function renderChoices(){
@@ -223,7 +283,7 @@ function renderChoices(){
   var text=document.createElement('span');text.className='choice-text';text.textContent=c[1];b.append(top,text);
   b.addEventListener('click',function(){
    if(answers[idx].submitted)return;
-   answers[idx].choice=c[0];persist();renderChoices();$('runBtn').hidden=false;$('runBtn').disabled=false;$('feedback').textContent='선택했습니다. 제출하면 정오답과 이유를 확인합니다.';
+   answers[idx].choice=c[0];persist();renderTabs();renderChoices();$('runBtn').hidden=false;$('runBtn').disabled=false;$('feedback').textContent='선택했습니다. 제출하면 정오답과 이유를 확인합니다.';
    // Re-rendering choices must not lose keyboard focus.
    $('choices').querySelector('[data-value="'+c[0]+'"]').focus({preventScroll:true});
   });$('choices').append(b);
@@ -231,24 +291,29 @@ function renderChoices(){
 }
 function nextIndex(){if(idx<lessons.length-1)return idx+1;return answers.findIndex(function(a){return !a.submitted;});}
 function renderResult(){
- var l=lessons[idx],a=answers[idx];$('resultArea').hidden=!a.submitted;$('submitRow').hidden=a.submitted;$('runBtn').hidden=a.submitted||a.choice===null;$('runBtn').disabled=a.submitted||a.choice===null;
+ var l=lessons[idx],a=answers[idx];$('resultArea').hidden=!a.submitted;$('submitRow').hidden=a.submitted;$('runBtn').hidden=a.submitted;$('runBtn').disabled=a.submitted||a.choice===null;
  $('feedback').textContent=a.choice?'선택했습니다. 제출하면 정오답과 이유를 확인합니다.':'먼저 예상 답을 선택하세요.';
- if(!a.submitted)return;
+ $('summaryReturnBtn').hidden=counts().pending!==0;
+ if(!a.submitted){observation=null;return;}
+ observation=buildObservation(l);renderObservation();
  var g=grade(idx);$('verdict').dataset.grade=g;$('verdictTitle').textContent=g==='correct'?'✓ 정답입니다':'✕ 오답입니다';
  $('chosenAnswer').textContent=label(l,a.choice);$('correctAnswer').textContent=label(l,l.answer);$('explainText').textContent=l.explain;
  $('srcIp').textContent=l.src+'/'+l.prefix;$('dstIp').textContent=l.dst+'/'+l.dstPrefix;$('destinationLabel').textContent='목적지 · '+l.dstNode+' 실제 설정';
  $('calculationBasis').textContent='PC1은 자신의 /'+l.prefix+'를 두 IP에 적용해 비교합니다. '+l.dstNode+'의 실제 설정은 /25로 유지됩니다.';
- var sn=net(l.src,l.prefix),dn=net(l.dst,l.prefix);
+ var sn=observation.sourceNetwork,dn=observation.destinationNetwork;
  $('srcNet').textContent='PC1 기준 계산: '+sn;$('dstNet').textContent='PC1 기준 계산: '+dn;
- $('prefixOut').textContent='/'+l.prefix;$('decisionOut').textContent=l.decision;$('nextHopOut').textContent=l.next;
+ $('prefixOut').textContent='/'+l.prefix;$('decisionOut').textContent=observation.decision;$('nextHopOut').textContent=observation.targetRole+' '+observation.arpTarget;
  $('explainTitle').textContent=sn===dn?'PC1의 계산에서 두 Network Prefix가 같습니다.':'PC1의 계산에서 두 Network Prefix가 다릅니다.';
  $('networkStrip').replaceChildren();
  (l.prefix===25?[['10.77.10.0/25','.0 ~ .127'],['10.77.10.128/25','.128 ~ .255']]:[['10.77.10.0/24','.0 ~ .255 · PC1이 같은 블록으로 계산']]).forEach(function(item){var d=document.createElement('div');d.className='segment';var b=document.createElement('strong');b.textContent=item[0];var s=document.createElement('span');s.textContent=item[1];d.append(b,s);$('networkStrip').append(d);});
  $('validatedOut').textContent='PASS · 제작자 사전 장비 검증';$('evidenceText').textContent=l.evidence;
+ $('evidenceScope').textContent='근거: '+l.claimIds.join(', ')+' / '+l.scenarioId+'. 기존 Cisco/VPCS 검증 기록이며, 위 화면은 그 조건의 학습용 모델입니다. 브라우저에서는 ICMP 왕복·시간 경과·재시도 횟수를 재현하지 않습니다.';
  var ni=nextIndex();$('nextBtn').textContent=ni<0?'학습 결과 보기 →':idx===3?'미응답 문제 '+(ni+1)+'로 →':'다음 문제 · '+(ni+1)+' / 4 →';
 }
 function renderSummary(){
- $('complete').hidden=!summaryOpen;if(!summaryOpen)return;
+ $('complete').hidden=!summaryOpen;
+ $('lessonCard').hidden=summaryOpen;
+ if(!summaryOpen)return;
  var n=counts(),score=$('completionScore');score.replaceChildren();
  // Preserve the same score text and derive both chips and cards from saved answers.
  [['answered','결과 확인 '+n.answered+' / 4'],['correct','정답 '+n.correct],['incorrect','오답 '+n.wrong]].forEach(function(item,i){
@@ -277,7 +342,8 @@ function render(){
  var l=lessons[idx];$('lessonNo').textContent='문제 '+(idx+1)+' / 4';$('question').textContent=l.title;
  $('questionHelp').textContent='PC1 '+l.src+'/'+l.prefix+' → '+l.dstNode+' '+l.dst+'/'+l.dstPrefix;
  $('questionContext').textContent=idx===2?'PC1의 Mask만 /24로 변경했습니다. 다른 장비와 L2 연결은 그대로이며 Proxy ARP는 꺼져 있습니다.':'PC1은 목적지를 어떻게 판단할까요? 주소를 보고 내 예상을 고르세요.';
- $('calculationDetails').open=false;$('evidenceDetails').open=false;
+ $('initialConditions').textContent='각 문제는 지정된 시작 설정으로 독립 실행합니다. PC1 기본 Gateway: '+l.gateway+'; ARP Cache는 비운 상태를 가정합니다. PC3은 LAN A, PC2는 별도 LAN B에 있고 R1으로 연결됩니다. Proxy ARP와 별도 Host Route는 사용하지 않습니다. 스위치 내부 처리와 ICMP 왕복은 이 모델에서 생략합니다.';
+ $('calculationDetails').open=false;$('evidenceDetails').open=false;$('traceDetails').open=false;$('startConditions').open=false;traceStep=0;
  renderTabs();renderProgress();renderChoices();renderResult();renderSummary();
 }
 function goTo(i,align){
@@ -287,10 +353,54 @@ function goTo(i,align){
  // A top tab is a review shortcut. Do not unexpectedly move the page if its
  // question is already visible; only the explicit Next/Retry actions align it.
 }
+
+// BEGIN OBSERVATION MODEL — bounded to the four validated teaching scenarios.
+function buildObservation(l){
+ var sourceNetwork=net(l.src,l.prefix),destinationNetwork=net(l.dst,l.prefix);
+ var onLink=sourceNetwork===destinationNetwork;
+ var target=onLink?l.dst:l.gateway;
+ // Physical/L2 location is fixed; changing PC1's mask cannot move PC2 into LAN A.
+ var resolved=!onLink||l.destinationLan==='A';
+ var targetRole=onLink?'목적지':'Gateway';
+ var decision=onLink?(resolved?'ON-LINK':'ON-LINK로 오판'):'VIA GATEWAY';
+ var events=[
+  {kind:'prefix-comparison',text:'PC1 /'+l.prefix+' 적용: '+sourceNetwork+' '+(onLink?'＝':'≠')+' '+destinationNetwork+'.'},
+  {kind:'arp-request',text:'PC1은 '+targetRole+' '+target+'의 MAC을 알아내기 위해 ARP를 요청합니다.'},
+  {kind:resolved?'arp-reply':'unresolved-arp',text:resolved?'ARP 응답으로 전달할 이웃을 확인합니다. ICMP 왕복은 이 모델에서 생략합니다.':'PC2는 다른 L2에 있고 Proxy ARP는 꺼져 있습니다. ARP 응답 없음 → 원격 ICMP 전송 전 중단.'}
+ ];
+ events.forEach(Object.freeze);
+ return Object.freeze({kind:'teaching-simulation',scenarioId:l.scenarioId,claimIds:Object.freeze(l.claimIds.slice()),sourceNetwork:sourceNetwork,destinationNetwork:destinationNetwork,arpTarget:target,targetRole:targetRole,onLink:onLink,decision:decision,resolved:resolved,destinationIp:l.dst,destinationPrefix:l.dstPrefix,events:Object.freeze(events)});
+}
+// END OBSERVATION MODEL
+function renderObservation(){
+ var l=lessons[idx],o=observation;
+ $('modelObservation').dataset.scenario=o.scenarioId;$('modelObservation').dataset.outcome=o.resolved?'resolved':'unresolved';
+ $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 고정 시작 조건';
+ $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
+ $('modelTargetLabel').textContent='ARP 대상 · '+o.targetRole;
+ $('modelEvent').textContent=o.resolved?'✓ 이웃 MAC 확인 · 전달 준비':'! ARP 응답 없음 · 원격 ICMP 전송 전 중단';
+ $('modelCaption').textContent='화살표는 ARP 대상 선택입니다. 최종 목적지 '+l.dstNode+' '+l.dst+'/'+l.dstPrefix+'는 유지됩니다.';
+ renderTrace();
+}
+function renderTrace(){
+ if(!observation)return;
+ var event=observation.events[traceStep];
+ $('tracePosition').textContent='판단 '+(traceStep+1)+' / '+observation.events.length;
+ $('traceEvent').textContent=event.text;$('traceEvent').dataset.kind=event.kind;
+ $('tracePrev').disabled=traceStep===0;$('traceNext').disabled=traceStep===observation.events.length-1;
+}
+function showSummary(){
+ if(counts().pending){goTo(answers.findIndex(function(a){return !a.submitted;}),true);return;}
+ summaryOpen=true;persist();renderSummary();focusSection('completionTitle',true);
+}
+
 $('runBtn').addEventListener('click',function(){var a=answers[idx];if(a.choice===null||a.submitted)return;a.submitted=true;persist();renderProgress();renderTabs();renderChoices();renderResult();focusSection('verdictTitle',true);});
-$('nextBtn').addEventListener('click',function(){if(!answers[idx].submitted)return;var ni=nextIndex();if(ni>=0){goTo(ni,true);}else{summaryOpen=true;renderSummary();focusSection('completionTitle',true);}});
+$('nextBtn').addEventListener('click',function(){if(!answers[idx].submitted)return;var ni=nextIndex();if(ni>=0){goTo(ni,true);}else{showSummary();}});
 $('resetBtn').addEventListener('click',function(){answers[idx]={choice:null,submitted:false};summaryOpen=false;persist();render();focusSection('question',true);});
 $('reviewWrongBtn').addEventListener('click',function(){var i=lessons.findIndex(function(_,i){return grade(i)==='incorrect';});if(i>=0)goTo(i,true);});
+$('summaryReturnBtn').addEventListener('click',showSummary);
+$('tracePrev').addEventListener('click',function(){if(traceStep>0){traceStep--;renderTrace();}});
+$('traceNext').addEventListener('click',function(){if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
 render();persist();
 })();
 </script></body></html>
