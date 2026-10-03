@@ -65,8 +65,9 @@ try{
           }
           if(name==='simulator'){
             assert.equal(await page.locator('#runBtn').isDisabled(),true,'run must be gated by prediction');
-            assert.ok((await page.locator('body').innerText()).includes('시뮬레이터 Aging 기준 = 300초'));
-            assert.ok((await page.locator('body').innerText()).includes('Same-port Filtering'));
+            const domText=await page.locator('body').textContent();
+            assert.ok(domText.includes('시뮬레이터 Aging 기준 = 300초'));
+            assert.ok(domText.includes('Same-port Filtering'));
           }
           if(name==='validation'){
             const body=await page.locator('body').innerText();
