@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VLAN / Access / Trunk — 인터랙티브 실습</title>
+<meta name="description" content="Access, 802.1Q Trunk, Native VLAN, Allowed VLAN과 Access VLAN mismatch를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:880px;color:var(--muted)}
+.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
+.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
+.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
+.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
+.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
+.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.9}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
+.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
+.observation{margin-top:18px;display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.topology,.observation-side{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
+.vlan-lanes{display:grid;gap:8px}.lane{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;gap:7px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;background:#081522}.lane.active{border-color:#3e6a91;background:#0a1d2d}.lane.blocked{border-color:#8f6a38}.lane-label{font-size:.7rem;font-weight:900;color:var(--muted)}.lane-node{padding:10px 5px;border:1px solid var(--line);border-radius:10px;text-align:center;background:#0a1726}.lane-node b{display:block;font-size:.8rem}.lane-node span{display:block;color:var(--muted);font-size:.66rem}.lane-node.active{border-color:var(--blue)}.lane-node.stop{border-color:var(--amber)}.lane-link{height:4px;background:#223a54;position:relative;border-radius:999px}.lane-link.active{background:var(--blue)}.lane-link.tagged{background:linear-gradient(90deg,var(--blue) 0 48%,var(--violet) 48% 100%)}.lane-link.native{background:var(--mint)}.lane-link.blocked{background:#895a36}.lane-arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-58%);font-size:.78rem;font-weight:900;color:#dceaf7;background:#081522;padding:0 3px;white-space:nowrap}
+.event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#0a1b2b}.event-strip small{display:block;color:var(--blue);font-weight:850}.event-strip strong{display:block;margin-top:3px}.event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+.step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}.step-controls button{border:1px solid var(--line);border-radius:9px;background:#0b1b2b;color:var(--text);padding:8px 10px;cursor:pointer}.step-controls button:disabled{opacity:.35;cursor:default}.step-count{margin-left:auto;color:var(--muted);font-size:.78rem}
+.obs-grid{display:grid;gap:9px}.obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}.obs-item small{display:block;color:var(--muted);font-weight:800}.obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}
+.lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}.lesson-actions button{font:inherit}
+.scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
+.summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
+@media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.lane{grid-template-columns:1fr 24px 1fr 24px 1fr;padding:6px}.lane-label{display:none}.lane-node{padding:8px 2px}.lane-node b{font-size:.72rem}.lane-node span{font-size:.58rem}.lane-arrow{font-size:.62rem}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <small>2단계 · INTERACTIVE LAB</small>
+    <h1>VLAN / Access / Trunk</h1>
+    <p>1단계에서 배운 흐름을 직접 확인합니다. <b>먼저 결과를 예상</b>하고, Access → Trunk → Access에서 Tagged/Untagged와 장애 중단 지점을 비교하세요.</p>
+    <div class="start-guide">
+      <div class="guide-step"><b>1</b><span><strong>문제 읽기</strong>이번 문제의 한 가지 판단만 봅니다.</span></div>
+      <div class="guide-step"><b>2</b><span><strong>먼저 예상</strong>Frame이 어느 VLAN·형태로 갈지 선택합니다.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>실행 후 관찰</strong>내 답과 검증 기반 모델 흐름을 비교합니다.</span></div>
+    </div>
+  </header>
+
+  <nav class="lesson-tabs" id="lessonTabs" aria-label="VLAN 실습 문제 선택"></nav>
+
+  <div class="course-progress">
+    <div><strong>VLAN / Trunk 실습 진행도</strong><small>제출한 문제와 정답 수는 별도로 계산합니다.</small></div>
+    <div class="course-bar"><div id="courseBar"></div></div>
+    <div class="course-count" id="courseCount">결과 확인 0 / 5</div>
+  </div>
+
+  <div class="stage-link">
+    <span><b>2단계 Interactive Lab</b> · 문제 → 예상 → 실행 → 정오답/이유 → 다음 문제 순서로 진행합니다.</span>
+    <a class="btn" href="vlan-trunk.html">← 1단계 개념서</a>
+  </div>
+
+  <main id="labMain" class="card lab-card">
+    <div class="coach">
+      <div class="coach-icon" id="coachIcon">1</div>
+      <div>
+        <div class="coach-title" id="coachTitle"></div>
+        <div class="coach-text" id="coachText"></div>
+        <div class="start-state" id="startState"></div>
+      </div>
+    </div>
+
+    <section class="prediction">
+      <h2 id="question"></h2>
+      <p>정답을 몰라도 괜찮습니다. 먼저 예상하고 실행 후 실제 검증과 연결된 흐름을 확인하세요.</p>
+      <div class="options" id="choices"></div>
+      <div class="controls">
+        <button class="btn primary" id="runBtn" disabled>② 실행해서 확인하기</button>
+        <button class="btn" id="resetBtn">선택 초기화</button>
+      </div>
+    </section>
+
+    <section class="feedback" id="feedback" hidden tabindex="-1">
+      <div class="feedback-head"><strong>③ 내 예상과 실제 비교</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
+      <div class="answer-grid">
+        <div class="answer-box"><small>내 답</small><strong id="myAnswer"></strong></div>
+        <div class="answer-box"><small>올바른 답</small><strong id="correctAnswer"></strong></div>
+      </div>
+      <p id="feedbackReason"></p>
+    </section>
+
+    <section class="observation" id="observation" hidden>
+      <div class="topology">
+        <h3>모델 관찰 · VLAN 10 / 20 / 99</h3>
+        <div class="vlan-lanes">
+          <div class="lane" id="lane10">
+            <span class="lane-label">VLAN 10</span>
+            <div class="lane-node" id="v10a"><b>PC10A</b><span>Access 10</span></div>
+            <div class="lane-link" id="v10left"><span class="lane-arrow" id="v10leftArrow">·</span></div>
+            <div class="lane-node" id="v10trunk"><b>TRUNK</b><span>10 / 20 / 99</span></div>
+            <div class="lane-link" id="v10right"><span class="lane-arrow" id="v10rightArrow">·</span></div>
+            <div class="lane-node" id="v10b"><b>PC10B</b><span>Access 10</span></div>
+          </div>
+          <div class="lane" id="lane20">
+            <span class="lane-label">VLAN 20</span>
+            <div class="lane-node" id="v20a"><b>PC20A</b><span>Access 20</span></div>
+            <div class="lane-link" id="v20left"><span class="lane-arrow" id="v20leftArrow">·</span></div>
+            <div class="lane-node" id="v20trunk"><b>TRUNK</b><span>VLAN 20</span></div>
+            <div class="lane-link" id="v20right"><span class="lane-arrow" id="v20rightArrow">·</span></div>
+            <div class="lane-node" id="v20b"><b>PC20B</b><span id="pc20bVlan">Access 20</span></div>
+          </div>
+          <div class="lane" id="lane99">
+            <span class="lane-label">VLAN 99</span>
+            <div class="lane-node" id="v99a"><b>PC99A</b><span>Access 99</span></div>
+            <div class="lane-link" id="v99left"><span class="lane-arrow" id="v99leftArrow">·</span></div>
+            <div class="lane-node" id="v99trunk"><b>TRUNK</b><span>Native 99</span></div>
+            <div class="lane-link" id="v99right"><span class="lane-arrow" id="v99rightArrow">·</span></div>
+            <div class="lane-node" id="v99b"><b>PC99B</b><span>Access 99</span></div>
+          </div>
+        </div>
+        <div class="event-strip" aria-live="polite">
+          <small id="eventKind"></small>
+          <strong id="eventTitle"></strong>
+          <span id="eventDetail"></span>
+        </div>
+        <div class="step-controls">
+          <button id="prevStepBtn" type="button">← 이전 흐름</button>
+          <button id="nextStepBtn" type="button">다음 흐름 →</button>
+          <span class="step-count" id="stepCount"></span>
+        </div>
+      </div>
+      <aside class="observation-side">
+        <h3>현재 관찰 값</h3>
+        <div class="obs-grid">
+          <div class="obs-item"><small id="metric1Label"></small><strong id="metric1Value"></strong></div>
+          <div class="obs-item"><small id="metric2Label"></small><strong id="metric2Value"></strong></div>
+          <div class="obs-item"><small>한 줄 결론</small><strong id="observationConclusion"></strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <details class="scope-details">
+      <summary>가정과 실제 검증 근거 보기</summary>
+      <div>
+        이 화면은 학습용 시뮬레이션입니다. 모델은 2026-10-03 PNETLab의 Cisco IOL L2 2대 + VPCS 6대 검증 결과를 기반으로 합니다.
+        Nexus 9000v는 자원 제약으로 직접 실행하지 않았고, VLAN-01~06은 IOL L2에서 6/6 PASS했습니다.
+        <a href="../learning/campus/vlan-trunk/cisco-validation-2026-10-03.html">실제 검증 요약 →</a>
+      </div>
+    </details>
+
+    <div class="lesson-actions">
+      <button class="btn" id="retryBtn" hidden>이 문제 다시 풀기</button>
+      <button class="btn" id="summaryBackBtn" hidden>전체 결과로 돌아가기</button>
+      <button class="btn primary" id="nextLessonBtn" disabled>다음 문제 →</button>
+    </div>
+  </main>
+
+  <section id="summaryPanel" class="summary-panel" hidden tabindex="-1">
+    <div class="eyebrow">학습 결과</div>
+    <h2>정오답과 복습할 문제를 구분해 확인하세요.</h2>
+    <div class="summary-metrics">
+      <div class="summary-metric"><strong id="submittedCount">0</strong><span>결과 확인</span></div>
+      <div class="summary-metric"><strong id="correctCount">0</strong><span>정답</span></div>
+      <div class="summary-metric"><strong id="wrongCount">0</strong><span>오답</span></div>
+      <div class="summary-metric"><strong id="pendingCount">5</strong><span>미응답</span></div>
+    </div>
+    <div class="summary-list" id="summaryList"></div>
+    <div class="controls" style="margin-top:16px"><button class="btn primary" id="continueBtn">미응답/오답 문제로 이동 →</button></div>
+  </section>
+</div>
+
+<script src="vlan-trunk-simulator.js?v=20261003-1"></script>
+</body>
+</html>
