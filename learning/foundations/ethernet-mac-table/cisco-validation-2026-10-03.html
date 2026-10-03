@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ethernet / MAC Table — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:6px}.summary-card strong{display:block}.claim{scroll-margin-top:84px;margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin-top:0}.pass{color:var(--mint);font-weight:900}.evidence{font-family:Consolas,monospace;font-size:.86rem;overflow-wrap:anywhere}.table-scroll table{min-width:720px}.source-list{display:grid;gap:8px}.source-list a{overflow-wrap:anywhere}@media(max-width:800px){.summary-grid{grid-template-columns:1fr}.table-scroll{overflow-x:auto}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/ethernet-mac-table.html">← Ethernet / MAC Table</a><a class="btn" href="../../../labs/ethernet-mac-table-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-03</div>
+  <h1>Ethernet / MAC Table<br><em>Cisco 검증 요약</em></h1>
+  <p>이 문서는 학습용 시뮬레이션이 아니라, Codex가 PNETLab의 Cisco IOL L2와 VPCS 3대로 실제 실행한 검증 결과를 학습 페이지와 연결하기 위한 공개 요약입니다. 핵심 Claim 6개는 모두 PASS했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-03-ethernet-mac-table-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Result</small><strong class="pass">ETHMAC-01 ~ 06 · 6/6 PASS</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 범위</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Switch</td><td>Cisco IOL L2 · I86BI_LINUXL2-ADVENTERPRISEK9-M · 15.2(CML_NIGHTLY_20190423)FLO_DSGS7</td></tr>
+        <tr><td>Hosts</td><td>VPCS 1.0 (0.8c) · PC1/PC2/PC3</td></tr>
+        <tr><td>L2 범위</td><td>Access VLAN 10 · 3개 Host Port · STP FWD · 미사용 Et0/3 shutdown</td></tr>
+        <tr><td>Capture</td><td>CP1 PC1—SW1 · CP2 SW1—PC2 · CP3 SW1—PC3 · 원본 PCAPNG 보존</td></tr>
+        <tr><td>검증 방식</td><td>Cisco CLI + PNETLab 내부 링크 PCAPNG + Expected/Actual 비교</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="ethmac-01">
+    <h2>ETHMAC-01 · Source MAC Learning <span class="pass">PASS</span></h2>
+    <p>PC1 Dynamic FDB Entry를 삭제한 뒤 PC1이 Broadcast ARP Request를 보내자, 실제 PC1 Source MAC <code>00:50:79:66:68:27</code>이 VLAN 10 / Et0/0에 DYNAMIC으로 학습됐습니다.</p>
+    <p class="evidence">CP1 frames 142 / 144 / 145 · SW1 FDB Before/After CLI</p>
+  </article>
+
+  <article class="claim" id="ethmac-02">
+    <h2>ETHMAC-02 · Known Unicast <span class="pass">PASS</span></h2>
+    <p>PC1과 PC2의 FDB 학습 후 PC1→PC2 Echo Request 3개가 CP1과 CP2에서 동일 Ethernet Frame으로 확인됐고 CP3에서는 관찰되지 않았습니다. Destination MAC은 실제 PC2 MAC이었습니다.</p>
+    <p class="evidence">CP1 195/198/200 · CP2 153/157/159 · CP3 0 · Destination 00:50:79:66:68:28</p>
+  </article>
+
+  <article class="claim" id="ethmac-03">
+    <h2>ETHMAC-03 · Unknown Unicast Flooding <span class="pass">PASS</span></h2>
+    <p>PC1 ARP Cache는 PC2 MAC을 유지한 채 SW1의 PC2 FDB Entry만 삭제했습니다. 첫 Echo Request는 PC2의 Unicast Destination MAC을 그대로 유지하면서 CP2와 CP3 양쪽에서 관찰됐고, PC2의 Reply 이후 재학습되어 후속 요청은 Known Unicast가 됐습니다.</p>
+    <p class="evidence">First request: CP1 230 · CP2 184 · CP3 162</p>
+  </article>
+
+  <article class="claim" id="ethmac-04">
+    <h2>ETHMAC-04 · Ethernet Broadcast <span class="pass">PASS</span></h2>
+    <p>미사용 주소 <code>192.0.2.201</code>에 대한 ARP Request의 Ethernet Destination이 <code>ff:ff:ff:ff:ff:ff</code>임을 확인했고, 동일 Frame이 CP2와 CP3로 전달됐습니다.</p>
+    <p class="evidence">CP1 142/144/145 · CP2 105/107/108 · CP3 84/86/87</p>
+  </article>
+
+  <article class="claim" id="ethmac-05">
+    <h2>ETHMAC-05 · Dynamic FDB Aging / Re-learning <span class="pass">PASS</span></h2>
+    <p>검증 장비의 기존 Aging 300초를 기록한 뒤 30초로 설정했습니다. PC2 Entry가 자연 Aging으로 제거된 뒤 첫 Unicast가 Flooding됐고, PC2 Reply의 Source MAC으로 Et0/1에 재학습됐습니다. 시험 종료 후 Aging을 300초로 복구하고 정상 통신까지 다시 확인했습니다.</p>
+    <p><b>중요:</b> 이 Run에서 300초였다는 사실을 모든 Switch의 보편적 고정값으로 일반화하지 않습니다.</p>
+  </article>
+
+  <article class="claim" id="ethmac-06">
+    <h2>ETHMAC-06 · ARP Cache와 FDB의 독립 상태 <span class="pass">PASS</span></h2>
+    <p>PC1은 <code>192.0.2.20 → 00:50:79:66:68:28</code> ARP Mapping을 유지했지만 SW1에는 PC2 FDB Entry가 없는 상태를 재현했습니다. 새 ARP Request 없이 생성된 Unicast Frame이 Switch에서 Unknown Unicast로 Flooding됐습니다.</p>
+  </article>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">무결성</div><h2>PCAP 원본 SHA-256</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>원본</th><th>Packets</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1.pcapng</td><td>421</td><td class="evidence">6e128d430c608b554bdaacc2e036c4535ff07f2496b9607517b2da4e05df4fb8</td></tr>
+        <tr><td>CP2.pcapng</td><td>370</td><td class="evidence">358a7a2c001f9d9b2c8c539d0bf7e1bffb06debe2d2eab8df63ef0a9939e0e0f</td></tr>
+        <tr><td>CP3.pcapng</td><td>332</td><td class="evidence">7d3c046bf8e483788b8e2157076bb141a100452f46e93673908c8451e874ab49</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">근거</div><h2>공식 Source와 검증 한계</h2></div></div>
+    <div class="card">
+      <div class="source-list">
+        <a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html">Cisco IOS XE 17 · Configure MAC</a>
+        <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/23563-143.html">Cisco · Unicast Flooding in Switched Campus Networks</a>
+        <a href="https://www.cisco.com/c/en/us/td/docs/ios/lanswitch/command/reference/lsw_book/lsw_m1.html">Cisco IOS LAN Switching Command Reference · mac-address-table aging-time</a>
+      </div>
+      <p>이번 검증은 Cisco IOL L2 에뮬레이션의 실제 실행 결과입니다. 물리 Switch, 다른 NOS, 모든 ASIC 구현으로 일반화하지 않습니다. PCAPNG에는 interface statistics block이 없어 drop count는 제공되지 않았으며, Known Unicast의 CP3 무관측은 positive control과 시험 자극을 함께 사용해 해당 시험 범위에서만 판정했습니다.</p>
+      <p>Same-port Filtering은 이번 ETHMAC-01~06 검증 Claim에 포함하지 않았으므로 현재 기본 학습 범위의 완료 근거로 사용하지 않습니다.</p>
+      <p><a href="report.html">이전 2026-09-13 GNS3/Linux Bridge 검증 보고서 보기 →</a> <span style="color:var(--muted)">이전 검증은 별도 환경의 과거 Evidence이며 이번 Cisco Run과 동일한 실행으로 취급하지 않습니다.</span></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">Ethernet / MAC Table · Cisco IOL L2 Validation Summary</div></footer>
+</body>
+</html>
