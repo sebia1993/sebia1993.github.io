@@ -28,7 +28,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .concept-stage{grid-template-columns:minmax(0,1fr) auto}
 #ipConcept .core-line{padding:22px;text-align:left}
 #ipConcept .core-line>strong{font-size:clamp(1.2rem,2.5vw,1.75rem)}
-#ipConcept .visual{margin:0;border:1px solid #3d5872;border-radius:16px;padding:22px;background:#0d1b2a;min-width:0}
+#ipConcept .visual{word-break:keep-all;margin:0;border:1px solid #3d5872;border-radius:16px;padding:22px;background:#0d1b2a;min-width:0}
 #ipConcept .visual figcaption{margin-top:14px;font-size:.86rem;line-height:1.6;color:#b8ccdf}
 #ipConcept .v-label{display:block;margin-bottom:12px;color:#c0d2e4;font-size:.8rem;font-weight:750;letter-spacing:.03em}
 #ipConcept .v-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #55758f;border-radius:7px;color:#dbedfd;font-size:.8rem;font-weight:800}
@@ -44,6 +44,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .v-split:after{content:"";position:absolute;top:-24px;left:50%;height:10px;border-left:2px solid #6a8ca8;pointer-events:none}
 #ipConcept .v-block{min-width:0;border:1px solid #3d8171;border-top:5px solid var(--a);border-radius:12px;background:#102c2c;padding:16px}
 #ipConcept .v-block[data-lan=B]{border-color:#3e759e;border-top-color:var(--b);background:#122b42}
+#ipConcept .v-prefix{white-space:nowrap}
 #ipConcept .v-block h3{margin:8px 0;font-size:1.08rem;color:var(--a)}
 #ipConcept .v-block[data-lan=B] h3{color:var(--b)}
 #ipConcept .v-scale{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 14px;border-top:3px solid currentColor;padding-top:7px;color:#e7f2fd;font-size:1rem;font-weight:750}
@@ -117,8 +118,8 @@ html#ipConceptRoot{scroll-behavior:auto}
 <section id="summary"><div class="shell"><div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>딱 세 문장만 먼저 기억하세요.</h2></div></div><div class="test-guide"><p><b>① /25는 IPv4 32비트 중 앞 25비트가 Network Prefix라는 뜻입니다.</b></p><p><b>② 송신자는 자신의 Mask를 내 IP와 목적지 IP에 적용해 Network Prefix를 비교합니다.</b></p><p><b>③ 같으면 목적지를 직접 전달 대상으로 보고, 다르면 Routing 결과의 gateway/next-hop을 사용합니다.</b></p></div></div></section>
 <section id="prefix"><div class="shell"><div class="section-head"><div><div class="eyebrow">01 · PREFIX / MASK</div><h2>/25는 주소 공간을 어디서 나눌까요?</h2></div><p>/25 = 255.255.255.128</p></div>
 <figure id="rangeVisual" class="visual" data-visual="range" data-claim="IPSUB-01" aria-labelledby="rangeCaption"><span class="v-label">주소 공간 보기 · 공통 앞부분은 10.77.10</span><div class="v-parent"><strong>10.77.10.0/24</strong><span>마지막 숫자 .0 ~ .255</span></div><div class="v-split">
-<div class="v-block" data-lan="A" data-network="10.77.10.0/25"><span class="v-tag">A · 첫 번째 /25</span><h3>10.77.10.0/25</h3><div class="v-scale"><span>.0</span><span>.127</span></div><div class="v-hosts"><span class="v-host">PC1 · .10</span><span class="v-host">PC3 · .20</span></div></div>
-<div class="v-block" data-lan="B" data-network="10.77.10.128/25"><span class="v-tag">B · 두 번째 /25</span><h3>10.77.10.128/25</h3><div class="v-scale"><span>.128</span><span>.255</span></div><div class="v-hosts"><span class="v-host">PC2 · .140</span></div></div></div>
+<div class="v-block" data-lan="A" data-network="10.77.10.0/25"><span class="v-tag">A · 첫 번째 /25</span><h3>10.77.10.0<wbr><span class="v-prefix">/25</span></h3><div class="v-scale"><span>.0</span><span>.127</span></div><div class="v-hosts"><span class="v-host">PC1 · .10</span><span class="v-host">PC3 · .20</span></div></div>
+<div class="v-block" data-lan="B" data-network="10.77.10.128/25"><span class="v-tag">B · 두 번째 /25</span><h3>10.77.10.128<wbr><span class="v-prefix">/25</span></h3><div class="v-scale"><span>.128</span><span>.255</span></div><div class="v-hosts"><span class="v-host">PC2 · .140</span></div></div></div>
 <figcaption id="rangeCaption">이 /24 범위를 두 /25로 나누면 경계는 <b>.127과 .128 사이</b>입니다. .10과 .20은 A, .140은 B에 있습니다. 막대는 전체 주소 범위이며, 아래 칩은 그 안의 Host 예시입니다.</figcaption></figure>
 <div class="note"><b>검증된 예:</b> 10.77.10.10/25의 Network는 10.77.10.0/25, 10.77.10.140/25의 Network는 10.77.10.128/25였습니다.</div></div></section>
 <section id="decision"><div class="shell"><div class="section-head"><div><div class="eyebrow">02 · 판단 순서</div><h2>보내기 전에 먼저 “같은 Network인가?”를 판단합니다.</h2></div></div>
