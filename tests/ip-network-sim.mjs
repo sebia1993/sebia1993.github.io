@@ -45,10 +45,11 @@ async function verify(url,surface){
 
    await submit(page,0,'gw'); // deliberately wrong; model must still show validated behavior.
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
-   assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.20');
-   assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK');
+   assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.20'));
    assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
    await openFlow(page);
+   assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.20');
+   assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK');
    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4');
    await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'arp-request');
@@ -59,9 +60,10 @@ async function verify(url,surface){
    assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
 
    await submit(page,1,'gw');
+   assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.1'));
+   await openFlow(page);
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.1');
    assert.equal(await page.locator('#simDecision').innerText(),'VIA GATEWAY');
-   await openFlow(page);
    for(let i=0;i<3;i++)await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
    assert.equal(await page.locator('#simTopology [data-sim-id=pc2]').evaluate(e=>e.classList.contains('is-current')),true);
@@ -69,9 +71,10 @@ async function verify(url,surface){
 
    await submit(page,2,'gw');
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
+   assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.140'));
+   await openFlow(page);
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.140');
    assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK로 오판');
-   await openFlow(page);
    await page.locator('#simNext').click();await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'unresolved-arp');
    assert.equal(await page.locator('#simPacket').innerText(),'응답 없음');
