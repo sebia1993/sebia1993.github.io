@@ -113,18 +113,17 @@ try {
             const card = document.querySelector('main.card').getBoundingClientRect();
             return card.top < innerHeight * 0.9;
           }), true, 'current learning question is pushed below the first mobile viewport');
-          const beforeLessonTop = await page.evaluate(() => document.querySelector('main.card').getBoundingClientRect().top);
+          const beforeLessonSwitch = await page.evaluate(() => ({ scrollY, questionTop: document.querySelector('#question').getBoundingClientRect().top }));
           await page.locator('.tab').nth(1).click();
-          await page.waitForTimeout(120);
-          const mobileLessonPosition = await page.evaluate(() => {
-            const card = document.querySelector('main.card').getBoundingClientRect();
+          await page.waitForTimeout(80);
+          const afterLessonSwitch = await page.evaluate(() => {
             const question = document.querySelector('#question').getBoundingClientRect();
-            return { cardTop: card.top, questionTop: question.top, viewport: innerHeight };
+            return { scrollY, questionTop: question.top, questionBottom: question.bottom, viewport: innerHeight };
           });
-          assert.ok(mobileLessonPosition.cardTop < beforeLessonTop - 40, 'mobile lesson selection did not move the current lesson toward the viewport');
-          assert.ok(mobileLessonPosition.questionTop >= 0 && mobileLessonPosition.questionTop < mobileLessonPosition.viewport * 0.75, 'mobile lesson selection should leave the current question visibly in the viewport');
+          assert.ok(Math.abs(afterLessonSwitch.scrollY - beforeLessonSwitch.scrollY) <= 2, 'mobile lesson selection should not jump the document vertically');
+          assert.ok(afterLessonSwitch.questionBottom > 0 && afterLessonSwitch.questionTop < afterLessonSwitch.viewport * 0.9, 'mobile lesson selection should keep the current question visible');
           await page.locator('.tab').nth(0).click();
-          await page.waitForTimeout(120);
+          await page.waitForTimeout(80);
         }
         const run = page.locator('#runBtn');
         const expectedDecisions = ['ON-LINK', 'VIA GATEWAY', 'ON-LINK로 오판', 'VIA GATEWAY'];
