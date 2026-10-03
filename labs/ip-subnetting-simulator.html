@@ -438,7 +438,7 @@ function buildObservation(l){
  var resolved=!onLink||l.destinationLan==='A';
  var targetRole=onLink?'목적지':'Gateway';
  var decision=onLink?(resolved?'ON-LINK':'ON-LINK로 오판'):'VIA GATEWAY';
- var destinationId=l.dstNode.toLowerCase();
+ var destinationId=(l.dstNode||(l.destinationLan==='A'?'PC3':'PC2')).toLowerCase();
  var finalRoute=onLink
   ? (resolved?['pc1','lana','pc3']:['pc1','lana','link-a-r1','r1'])
   : ['pc1','lana','link-a-r1','r1','link-r1-b','lanb','pc2'];
