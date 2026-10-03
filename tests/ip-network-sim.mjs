@@ -93,11 +93,12 @@ async function verify(url,surface){
    assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
 
    const layout=await page.evaluate(()=>{
-    const a=document.querySelector('[data-sim-id=lana]').getBoundingClientRect(),r=document.querySelector('[data-sim-id=r1]').getBoundingClientRect();
-    return {mobile:innerWidth<=700,vertical:r.top>a.bottom-2,horizontal:r.left>a.right-2,overflow:document.documentElement.scrollWidth>innerWidth+1};
+    const a=document.querySelector('[data-sim-id=lana]').getBoundingClientRect(),r=document.querySelector('[data-sim-id=r1]').getBoundingClientRect(),b=document.querySelector('[data-sim-id=lanb]').getBoundingClientRect();
+    return {ordered:r.left>a.right-2&&b.left>r.right-2,inside:a.left>=0&&b.right<=innerWidth,overflow:document.documentElement.scrollWidth>innerWidth+1};
    });
    assert.equal(layout.overflow,false);
-   if(width<=700)assert.equal(layout.vertical,true,'mobile topology must reflow vertically');else assert.equal(layout.horizontal,true,'desktop topology must remain left-to-right');
+   assert.equal(layout.inside,true,'topology must fit without horizontal pan');
+   assert.equal(layout.ordered,true,'LAN A → R1 → LAN B order must remain visible');
 
    await page.emulateMedia({reducedMotion:'reduce'});
    assert.equal(await page.locator('#simPacket').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
