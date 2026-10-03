@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>Ethernet / MAC Table</h2>
-      <p>Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging/Re-learning과 ARP/FDB 독립성을 실제 검증한 내용으로 정리했습니다.</p>
+      <h2>ICMP / Ping / Traceroute</h2>
+      <p>Echo Reply, TTL, Time Exceeded, Traceroute와 Destination Unreachable을 연결해 Ping 성공·실패와 경로 정보를 해석하도록 정리했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/ethernet-mac-table.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/ethernet-mac-table-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/icmp-troubleshooting.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/icmp-troubleshooting-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -139,13 +139,15 @@ function esc(v){return String(v??'').replace(/[&<>"]/g,function(c){return {'&':'
 const interactiveUrls={
   'ip-subnetting':'./labs/ip-subnetting-simulator.html',
   'ethernet-mac-table':'./labs/ethernet-mac-table-simulator.html',
-  'arp-default-gateway':'./labs/arp-default-gateway-simulator.html'
+  'arp-default-gateway':'./labs/arp-default-gateway-simulator.html',
+  'icmp-troubleshooting':'./labs/icmp-troubleshooting-simulator.html'
 };
 
 const summaryOverrides={
   'ip-subnetting':'IP 주소, Subnet Mask, Prefix와 같은 네트워크 여부 판단을 핵심 개념부터 정리합니다.',
   'ethernet-mac-table':'Source MAC Learning과 Destination MAC Forwarding, Known/Unknown Unicast와 Broadcast를 이해합니다.',
-  'arp-default-gateway':'같은 서브넷과 다른 서브넷에서 ARP와 Default Gateway가 어떤 MAC 주소를 선택하게 만드는지 이해합니다.'
+  'arp-default-gateway':'같은 서브넷과 다른 서브넷에서 ARP와 Default Gateway가 어떤 MAC 주소를 선택하게 만드는지 이해합니다.',
+  'icmp-troubleshooting':'Ping의 Echo 응답, TTL 감소, Time Exceeded와 Traceroute의 Hop 발견을 연결해 이해합니다.'
 };
 
 fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
