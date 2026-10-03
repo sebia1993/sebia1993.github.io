@@ -400,6 +400,7 @@
 
   function applyRoleMap(mode){
     const map=roleMaps[mode]||roleMaps.baseline;
+    ['pc1','pc3'].forEach(id=>$(id).className='stp-node');
     ['sw1','sw2','sw3'].forEach(id=>{
       $(id).className='stp-node';
       if(id===map.root)$(id).classList.add('root');
