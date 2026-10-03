@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ICMP / Ping / Traceroute — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.fail{color:#ff9c93;font-weight:900}.resolved{color:var(--amber);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.25rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.diff{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.diff h2{margin-top:0}.table-scroll table{min-width:720px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/icmp-troubleshooting.html">← ICMP / Ping / Traceroute</a><a class="btn" href="../../../labs/icmp-troubleshooting-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-03</div>
+  <h1>ICMP / Ping / Traceroute<br><em>Cisco 검증 요약</em></h1>
+  <p>PNETLab의 Cisco IOL L3 Router 3대로 실제 Ping/Traceroute/No-route 시나리오를 실행하고, 두 내부 링크의 PCAPNG와 Cisco CLI를 대조했습니다. 원래 Validation Request의 판정은 <b>4 PASS / 1 FAIL</b>이며 FAIL은 숨기지 않고 RFC와 Cisco 구현 차이로 해결했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-03-icmp-troubleshooting-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Original Results</small><strong>4 PASS / <span class="fail">1 FAIL</span></strong></article>
+    <article class="summary-card"><small>Publication Gate</small><strong class="resolved">FAIL 차이 해결 후 반영</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 범위</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Router</td><td>Cisco IOL L3 · IOS 15.4(2)T4 DEVELOPMENT TEST SOFTWARE · 3대</td></tr>
+        <tr><td>대체 이유</td><td>PNETLab 가용 RAM이 C8000V 3대 최소 요구량보다 작아 요청서의 Cisco 대체 플랫폼 규칙 적용</td></tr>
+        <tr><td>Topology</td><td>R1 10.10.12.1/30 — R2 10.10.12.2/30, 10.10.23.1/30 — R3 10.10.23.2/30 · R3 Lo0 198.51.100.3/32</td></tr>
+        <tr><td>Capture</td><td>CP1 R1—R2 154 packets · CP2 R2—R3 116 packets · 원본 PCAPNG 보존</td></tr>
+        <tr><td>검증 방식</td><td>Cisco CLI + PNETLab 내부 링크 PCAPNG + 독립 TShark/Byte 분석</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="icmp-01">
+    <h2>ICMP-01 · Echo Request / Echo Reply <span class="pass">PASS</span></h2>
+    <p>111-byte Echo 5회를 대조했습니다. Request는 Type 8 Code 0, Reply는 Type 0 Code 0이며 Identifier 1 / Sequence 0~4와 Payload가 대응했습니다. CLI도 5/5 성공했습니다.</p>
+    <p class="evidence">CP1 Request 47/49/51/53/55 · Reply 48/50/52/54/56 · CP2 Request 13/15/17/19/21 · Reply 14/16/18/20/22</p>
+  </article>
+
+  <article class="claim" id="icmp-02">
+    <h2>ICMP-02 · TTL Decrement <span class="pass">PASS</span></h2>
+    <p>동일한 5개 Echo Request의 TTL이 CP1에서 255, R2를 지난 CP2에서 254로 관찰됐습니다. Packet 대응은 IP ID, ICMP ID/Sequence와 정규화한 IP Datagram 해시로 확인했습니다.</p>
+    <p class="evidence">CP1 47/49/51/53/55 → CP2 13/15/17/19/21 · TTL 255 → 254</p>
+  </article>
+
+  <article class="claim" id="icmp-03">
+    <h2>ICMP-03 · TTL Expiry / Time Exceeded <span class="pass">PASS</span></h2>
+    <p>TTL=1 UDP Probe가 R2에서 만료됐고 R3 방향으로 Forward되지 않았습니다. R2는 Source로 ICMP Type 11 Code 0을 반환했으며 Error Payload의 quoted IP/UDP header로 원래 Probe를 식별했습니다.</p>
+    <p class="evidence">CP1 Probe 59 · R2 Time Exceeded 60 · CP2 동일 Probe 0개 + positive control 확인</p>
+  </article>
+
+  <article class="claim" id="icmp-04">
+    <h2>ICMP-04 · Cisco IOS Traceroute <span class="pass">PASS</span></h2>
+    <p>첫 UDP Probe는 TTL 1 / destination port 33434, 다음 Probe는 TTL 2 / 33435였습니다. R2는 Type 11 Code 0, R3는 Type 3 Code 3(Port Unreachable)을 반환했고 CLI는 2 Hop에서 종료했습니다.</p>
+    <p class="evidence">CP1 59/61 UDP Probes · 60/62 ICMP Errors · CLI: 1 10.10.12.2 → 2 10.10.23.2</p>
+  </article>
+
+  <article class="claim" id="icmp-05">
+    <h2>ICMP-05 · No Route / Destination Unreachable <span class="fail">ORIGINAL FAIL</span></h2>
+    <p>R2의 목적지 /32 Static Route만 제거하고 Default Route가 없는 것을 확인했습니다. Echo Request는 R2까지 도달했지만 CP2로 전달되지 않았고, 실제 Cisco 응답은 요청서의 Code 0이 아니라 <b>Type 3 Code 1 · Host Unreachable</b>이었습니다. Route 복구 뒤 Ping 5/5와 Traceroute가 정상화됐습니다.</p>
+    <p class="evidence">CP1 Echo 105/107/108 · Type 3 Code 1: 106/109 · CP2 downstream Echo 0개 + failure positive control</p>
+  </article>
+
+  <section class="diff" id="implementation-difference">
+    <div class="eyebrow">RESOLVED IMPLEMENTATION DIFFERENCE</div>
+    <h2>RFC 표준 기대와 Cisco IOS 구현을 구분합니다.</h2>
+    <p><b>RFC 1812:</b> Router에 목적지 Route와 Default Route가 전혀 없으면 Destination Unreachable Code 0(Network Unreachable)을 요구합니다.</p>
+    <p><b>Cisco IOS / IOS XE 문서와 이번 Run:</b> 목적지 Route를 모르는 경우 ICMP Host Unreachable(Code 1)을 Source로 보낼 수 있음을 문서화하고 실제로 관찰했습니다.</p>
+    <p><b>학습 반영:</b> 원래 ICMP-05 FAIL은 PASS로 바꾸지 않습니다. 대신 “Type 3 Code 하나만 보고 원인을 확정하지 말고 ICMP 생성 Router의 Routing Table과 실제 Forwarding 지점을 함께 확인한다”는 표준/구현 구분으로 해결합니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Vendor Source</h2></div></div>
+    <div class="card">
+      <p><a href="https://www.rfc-editor.org/rfc/rfc792.html">RFC 792 · Internet Control Message Protocol</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1812.html">RFC 1812 · Requirements for IP Version 4 Routers</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/support/docs/ip/ip-routed-protocols/22826-traceroute.html">Cisco · Use the Traceroute Command on Operating Systems</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-addressing/b-ip-addressing/m_iap-ipserv-xe.html">Cisco IOS XE · Configuring IP Services</a></p>
+      <p style="color:var(--muted)">이번 결과는 Cisco IOL L3 IOS 15.4(2)T4 실행 근거이며 C8000V, 모든 Cisco 릴리스, 다른 Vendor에 자동 일반화하지 않습니다.</p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">ICMP / Ping / Traceroute · Cisco IOL L3 Validation Summary</div></footer>
+</body>
+</html>
