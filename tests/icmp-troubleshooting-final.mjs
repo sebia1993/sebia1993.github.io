@@ -31,6 +31,23 @@ function errorsFor(page){
   page.on('response',r=>{try{const u=new URL(r.url()),b=new URL(base);if(u.origin===b.origin&&r.status()>=400)errors.push(`http ${r.status()} ${u.pathname}`);}catch{}});
   return errors;
 }
+const published='https://sebia1993.github.io';
+async function gotoPublished(page,path,marker){
+  let last='';
+  for(let i=0;i<12;i++){
+    try{
+      const response=await page.goto(published+path+'?qa=icmp-final',{waitUntil:'networkidle',timeout:30000});
+      last='status '+response.status();
+      if(response.status()===200){
+        const body=await page.locator('body').innerText();
+        if(body.includes(marker)) return response;
+        last='marker missing';
+      }
+    }catch(error){last=error.message;}
+    await page.waitForTimeout(5000);
+  }
+  throw new Error('published page not ready: '+path+' · '+last);
+}
 
 const viewports=[{width:360,height:800},{width:768,height:1024},{width:1366,height:768},{width:1920,height:1080}];
 const pages=[
@@ -133,6 +150,48 @@ try{
       assert.equal(await page.locator('.scope-details').evaluate(el=>el.open),true);
       assert.equal(await page.locator('.scope-details a').count(),1);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+      assert.deepEqual(errors,[]);
+    }finally{await page.close();}
+  });
+
+  for(const viewport of [{width:360,height:800},{width:1366,height:768}]){
+    await check(`published ICMP pages ${viewport.width}x${viewport.height}`,async()=>{
+      const page=await browser.newPage({viewport});
+      const errors=[];
+      page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+      page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('favicon'))errors.push('console: '+m.text());});
+      try{
+        await gotoPublished(page,'/labs/icmp-troubleshooting.html','Ping은 “응답이 돌아오는가”');
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+        await gotoPublished(page,'/labs/icmp-troubleshooting-simulator.html','ICMP 실습 진행도');
+        assert.equal(await page.locator('.lesson-tab').count(),5);
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+        await gotoPublished(page,'/learning/foundations/icmp-troubleshooting/cisco-validation-2026-10-03.html','4 PASS / 1 FAIL');
+        assert.ok((await page.locator('body').innerText()).includes('RESOLVED IMPLEMENTATION DIFFERENCE'));
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+        assert.deepEqual(errors,[]);
+      }finally{await page.close();}
+    });
+  }
+
+  await check('published five-question sequential learner flow',async()=>{
+    const page=await browser.newPage({viewport:{width:1366,height:768}});
+    const errors=[];
+    page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+    page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('favicon'))errors.push('console: '+m.text());});
+    try{
+      await gotoPublished(page,'/labs/icmp-troubleshooting-simulator.html','ICMP 실습 진행도');
+      const correct=['reply','254','time','time','host'];
+      for(let i=0;i<5;i++){
+        assert.equal(await page.locator('#runBtn').isDisabled(),true);
+        await page.locator(`#choices [data-choice="${correct[i]}"]`).click();
+        await page.locator('#runBtn').click();
+        assert.equal(await page.locator('#feedbackBadge').innerText(),'✓ 정답입니다');
+        await page.locator('#nextLessonBtn').click();
+      }
+      assert.equal(await page.locator('#summaryPanel').isVisible(),true);
+      assert.equal(await page.locator('#correctCount').innerText(),'5');
+      assert.equal(await page.locator('#wrongCount').innerText(),'0');
       assert.deepEqual(errors,[]);
     }finally{await page.close();}
   });
