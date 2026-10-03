@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="lab-ui-version" content="20261003-answer-flow-v1">
-<meta name="skill-review-version" content="20261003-observation-review-v1">
+<meta name="skill-review-version" content="20261003-observation-review-v1">\n<meta name="network-sim-version" content="20261003-topology-sim-v1">
 <meta name="summary-ui-version" content="20261003-summary-status-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
 <meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
@@ -166,6 +166,57 @@
  #ipLab #modelEvent{font-size:.83rem}
 }
 @media(forced-colors:active){#ipLab .model-observation{border-color:CanvasText}}
+
+/* Beginner network topology simulator: same state drives topology, packet marker and text. */
+#ipLab .network-simulator{padding:14px 16px}
+#ipLab .sim-topology{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(104px,.55fr) 44px minmax(0,1fr);gap:8px;align-items:center;margin:12px 0;padding:12px;border:1px solid #3f607c;border-radius:14px;background:#091827;overflow:hidden;isolation:isolate}
+#ipLab .sim-zone,#ipLab .sim-router,#ipLab .sim-node,#ipLab .sim-connector{position:relative;z-index:1;transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease,opacity .18s ease}
+#ipLab .sim-zone{min-width:0;padding:10px;border:1px solid #36556f;border-radius:12px;background:#0d2233}
+#ipLab .sim-zone-heading{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;color:#dcecf8;font-size:.78rem}
+#ipLab .sim-zone-heading span{color:#9fbad0;font-size:.72rem}
+#ipLab .sim-host-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#ipLab .sim-node,#ipLab .sim-router{min-width:0;padding:9px;border:1px solid #476881;border-radius:10px;background:#142b3e;color:#edf6ff;text-align:center}
+#ipLab .sim-node strong,#ipLab .sim-router strong,#ipLab .sim-node small,#ipLab .sim-router small{display:block}
+#ipLab .sim-node strong,#ipLab .sim-router strong{font-size:.92rem}
+#ipLab .sim-node small,#ipLab .sim-router small{font-size:.7rem;color:#b7ccdc;margin-top:2px}
+#ipLab .sim-device-type{display:inline-flex;margin-bottom:5px;padding:2px 6px;border:1px solid #527998;border-radius:999px;color:#a9dafe;font-size:.62rem;font-weight:850;letter-spacing:.05em}
+#ipLab .sim-router{padding:12px 8px;border-color:#5c7691;background:#16283b}
+#ipLab .sim-connector{height:4px;border-radius:999px;background:#41576a;align-self:center}
+#ipLab .sim-connector span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:0 4px;background:#091827;color:#7ea8c8;font-size:.8rem}
+#ipLab [data-sim-id].on-route{border-color:#5298c8;box-shadow:0 0 0 1px rgba(91,174,229,.25) inset}
+#ipLab .sim-connector.on-route{background:#58a9dc;box-shadow:none}
+#ipLab [data-sim-id].is-current{border-color:#7ee0c2;background:#123b3c;box-shadow:0 0 0 2px rgba(126,224,194,.22)}
+#ipLab .sim-connector.is-current{background:#7ee0c2}
+#ipLab [data-sim-id].is-stop{border-color:#ffbf69;background:#3a2b1b;box-shadow:0 0 0 2px rgba(255,191,105,.24)}
+#ipLab .sim-packet{position:absolute;left:0;top:0;z-index:6;display:inline-flex;align-items:center;justify-content:center;min-width:58px;max-width:96px;min-height:28px;padding:4px 8px;border:1px solid #95d8ff;border-radius:999px;background:#123e5b;color:#e8f7ff;font-size:.68rem;font-weight:900;white-space:nowrap;pointer-events:none;transform:translate(-200px,-200px);transition:transform .38s cubic-bezier(.2,.8,.2,1),background-color .18s ease,border-color .18s ease}
+#ipLab .sim-packet[data-tone=success]{border-color:#7ee0c2;background:#17483e;color:#c7ffe9}
+#ipLab .sim-packet[data-tone=warning]{border-color:#ffbf69;background:#5a3b17;color:#ffe1b1}
+#ipLab .sim-readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+#ipLab .sim-readout>span{min-width:0;padding:9px 10px;border:1px solid #42627d;border-radius:10px;background:#0d2030}
+#ipLab .sim-readout small,#ipLab .sim-readout strong{display:block}
+#ipLab .sim-readout small{font-size:.7rem;color:#9fbad0}
+#ipLab .sim-readout strong{font-size:.88rem;color:#e9f5ff;margin-top:2px}
+#ipLab .sim-playback{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:10px}
+#ipLab .sim-playback button{min-height:42px;font-size:.8rem}
+#ipLab #simStepLabel{text-align:center;color:#dceaf6;font-size:.78rem}
+#ipLab .sim-step-text{margin:8px 0 0;padding:9px 10px;border-left:3px solid #65aee0;background:#0d2030;color:#dbe9f5;font-size:.84rem;line-height:1.55}
+#ipLab .network-simulator[data-outcome=unresolved] .sim-step-text{border-left-color:#ffbf69}
+@media(max-width:700px){
+ #ipLab .network-simulator{padding:10px 12px}
+ #ipLab .sim-topology{grid-template-columns:minmax(0,1fr);gap:7px;padding:10px}
+ #ipLab .sim-connector{width:4px;height:26px;justify-self:center}
+ #ipLab .sim-connector span{transform:translate(-50%,-50%) rotate(90deg)}
+ #ipLab .sim-router{width:min(100%,220px);justify-self:center}
+ #ipLab .sim-zone-b .sim-node{width:min(100%,220px);margin:auto}
+ #ipLab .sim-readout{grid-template-columns:minmax(0,1fr)}
+ #ipLab .sim-playback{grid-template-columns:1fr 1fr}
+ #ipLab #simStepLabel{grid-column:1/-1;grid-row:1}
+ #ipLab #simPrev{grid-column:1;grid-row:2}
+ #ipLab #simNext{grid-column:2;grid-row:2}
+}
+@media(max-width:360px){#ipLab .sim-host-stack{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){#ipLab .sim-packet,#ipLab .sim-zone,#ipLab .sim-router,#ipLab .sim-node,#ipLab .sim-connector{transition:none}}
+@media(forced-colors:active){#ipLab .sim-topology,#ipLab .sim-zone,#ipLab .sim-node,#ipLab .sim-router,#ipLab .sim-readout>span,#ipLab .sim-packet{border-color:CanvasText}}
 </style></head><body>
 <div class="lab-wrap" id="ipLab">
 <a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
@@ -182,10 +233,34 @@
   <dl class="answer-compare"><dt>내 답</dt><dd id="chosenAnswer"></dd><dt>올바른 답</dt><dd id="correctAnswer"></dd></dl>
   <p><span class="explain-label">이유</span><span id="explainText"></span></p>
  </div>
- <figure class="model-observation" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
-  <div class="model-heading"><strong id="modelTitle">모델 관찰 결과</strong><span id="modelRunLabel"></span></div>
-  <div class="model-route"><div class="model-node"><small>송신자 · PC1 실제 설정</small><strong id="modelSource"></strong></div><span class="model-direction" aria-hidden="true">→</span><div class="model-node"><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></div></div>
-  <p id="modelEvent"></p><figcaption id="modelCaption"></figcaption>
+ <figure class="model-observation network-simulator" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
+  <div class="model-heading"><strong id="modelTitle">네트워크 흐름 시뮬레이션</strong><span id="modelRunLabel"></span></div>
+  <div class="sim-topology" id="simTopology" data-step="0">
+   <section class="sim-zone sim-zone-a" data-sim-id="lana" aria-label="LAN A 실제 구성 10.77.10.0/25">
+    <div class="sim-zone-heading"><strong>LAN A</strong><span>실제 구성 · 10.77.10.0/25</span></div>
+    <div class="sim-host-stack">
+     <div class="sim-node sim-source" data-sim-id="pc1"><span class="sim-device-type">PC</span><strong>PC1</strong><small id="modelSource"></small></div>
+     <div class="sim-node" data-sim-id="pc3"><span class="sim-device-type">PC</span><strong>PC3</strong><small>10.77.10.20/25</small></div>
+    </div>
+   </section>
+   <div class="sim-connector" data-sim-id="link-a-r1" aria-hidden="true"><span>↔</span></div>
+   <div class="sim-router" data-sim-id="r1"><span class="sim-device-type">ROUTER</span><strong>R1</strong><small>LAN A · .1/25</small><small>LAN B · .129/25</small></div>
+   <div class="sim-connector" data-sim-id="link-r1-b" aria-hidden="true"><span>↔</span></div>
+   <section class="sim-zone sim-zone-b" data-sim-id="lanb" aria-label="LAN B 실제 구성 10.77.10.128/25">
+    <div class="sim-zone-heading"><strong>LAN B</strong><span>실제 구성 · 10.77.10.128/25</span></div>
+    <div class="sim-node" data-sim-id="pc2"><span class="sim-device-type">PC</span><strong>PC2</strong><small>10.77.10.140/25</small></div>
+   </section>
+   <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
+  </div>
+  <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
+  <p id="modelEvent"></p>
+  <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
+   <button class="secondary" id="simPrev" type="button">← 이전 흐름</button>
+   <strong id="simStepLabel" aria-live="polite"></strong>
+   <button class="secondary" id="simNext" type="button">다음 흐름 →</button>
+  </div>
+  <p class="sim-step-text" id="simStepText" role="status" aria-live="polite" aria-atomic="true"></p>
+  <figcaption id="modelCaption"></figcaption>
  </figure>
  <div class="lesson-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
  <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div>
@@ -363,24 +438,68 @@ function buildObservation(l){
  var resolved=!onLink||l.destinationLan==='A';
  var targetRole=onLink?'목적지':'Gateway';
  var decision=onLink?(resolved?'ON-LINK':'ON-LINK로 오판'):'VIA GATEWAY';
+ var destinationId=l.dstNode.toLowerCase();
+ var finalRoute=onLink
+  ? (resolved?['pc1','lana','pc3']:['pc1','lana','link-a-r1','r1'])
+  : ['pc1','lana','link-a-r1','r1','link-r1-b','lanb','pc2'];
+ var arpPath=onLink
+  ? (resolved?['pc1','lana','pc3']:['pc1','lana','link-a-r1','r1'])
+  : ['pc1','lana','link-a-r1','r1'];
+ var replyPath=resolved
+  ? (onLink?['pc3','lana','pc1']:['r1','link-a-r1','lana','pc1'])
+  : [];
  var events=[
-  {kind:'prefix-comparison',text:'PC1 /'+l.prefix+' 적용: '+sourceNetwork+' '+(onLink?'＝':'≠')+' '+destinationNetwork+'.'},
-  {kind:'arp-request',text:'PC1은 '+targetRole+' '+target+'의 MAC을 알아내기 위해 ARP를 요청합니다.'},
-  {kind:resolved?'arp-reply':'unresolved-arp',text:resolved?'ARP 응답으로 전달할 이웃을 확인합니다. ICMP 왕복은 이 모델에서 생략합니다.':'PC2는 다른 L2에 있고 Proxy ARP는 꺼져 있습니다. ARP 응답 없음 → 원격 ICMP 전송 전 중단.'}
+  {kind:'prefix-comparison',text:'PC1 /'+l.prefix+' 적용: '+sourceNetwork+' '+(onLink?'＝':'≠')+' '+destinationNetwork+'.',focus:['pc1',destinationId],packetAt:null,packetLabel:'',tone:'normal'},
+  {kind:'arp-request',text:onLink?(resolved?'LAN A에 ARP Request Broadcast: “'+l.dst+'의 MAC은?”':'LAN A에 ARP Request Broadcast: “'+l.dst+'의 MAC은?”'):'LAN A에 ARP Request Broadcast: “Gateway '+l.gateway+'의 MAC은?”',focus:arpPath,packetAt:resolved?(onLink?'pc3':'r1'):'r1',packetLabel:'ARP Request',tone:resolved?'normal':'warning'},
+  resolved
+   ? {kind:'arp-reply',text:(onLink?'PC3 '+l.dst:'R1 '+l.gateway)+'이 ARP Reply를 보내 PC1이 이웃 MAC을 확인합니다.',focus:replyPath,packetAt:'pc1',packetLabel:'ARP Reply',tone:'success'}
+   : {kind:'unresolved-arp',text:'R1은 Proxy ARP가 꺼져 있어 '+l.dst+' 대신 응답하지 않습니다. PC2는 LAN B에 있으므로 ARP Reply가 오지 않습니다.',focus:arpPath,packetAt:'r1',packetLabel:'응답 없음',tone:'warning',stopAt:'r1'}
  ];
- events.forEach(Object.freeze);
- return Object.freeze({kind:'teaching-simulation',scenarioId:l.scenarioId,claimIds:Object.freeze(l.claimIds.slice()),sourceNetwork:sourceNetwork,destinationNetwork:destinationNetwork,arpTarget:target,targetRole:targetRole,onLink:onLink,decision:decision,resolved:resolved,destinationIp:l.dst,destinationPrefix:l.dstPrefix,events:Object.freeze(events)});
+ if(resolved){
+  events.push(onLink
+   ? {kind:'direct-path',text:'이웃 MAC을 확인한 뒤 같은 LAN A에서 PC3로 IPv4 Packet을 전달합니다.',focus:finalRoute,packetAt:'pc3',packetLabel:'IPv4',tone:'success'}
+   : {kind:'routed-path',text:'IPv4 Destination '+l.dst+'을 유지한 채 R1을 거쳐 LAN B의 PC2로 전달합니다.',focus:finalRoute,packetAt:'pc2',packetLabel:'IPv4',tone:'success'});
+ }
+ events.forEach(function(e){if(e.focus)Object.freeze(e.focus);Object.freeze(e);});
+ return Object.freeze({kind:'teaching-simulation',scenarioId:l.scenarioId,claimIds:Object.freeze(l.claimIds.slice()),sourceNetwork:sourceNetwork,destinationNetwork:destinationNetwork,arpTarget:target,targetRole:targetRole,onLink:onLink,decision:decision,resolved:resolved,destinationIp:l.dst,destinationPrefix:l.dstPrefix,route:Object.freeze(finalRoute.slice()),events:Object.freeze(events)});
 }
 // END OBSERVATION MODEL
 function renderObservation(){
  var l=lessons[idx],o=observation;
  $('modelObservation').dataset.scenario=o.scenarioId;$('modelObservation').dataset.outcome=o.resolved?'resolved':'unresolved';
- $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 고정 시작 조건';
+ $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 검증된 조건의 학습 모델';
  $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
- $('modelTargetLabel').textContent='ARP 대상 · '+o.targetRole;
- $('modelEvent').textContent=o.resolved?'✓ 이웃 MAC 확인 · 전달 준비':'! ARP 응답 없음 · 원격 ICMP 전송 전 중단';
- $('modelCaption').textContent='화살표는 ARP 대상 선택입니다. 최종 목적지 '+l.dstNode+' '+l.dst+'/'+l.dstPrefix+'는 유지됩니다.';
+ $('modelTargetLabel').textContent='ARP 대상 · '+o.targetRole;$('simDecision').textContent=o.decision;
+ $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 LAN에서 직접 전달 경로':'✓ Gateway를 통한 원격 전달 경로'):'! LAN A의 ARP가 해결되지 않아 원격 전달 전 중단';
+ $('modelCaption').textContent='LAN A/LAN B는 L2 영역을 단순화한 표시입니다. SW1/SW2 내부 동작은 생략합니다. 움직이는 표시는 현재 단계의 ARP/IPv4 대상이며 실제 장비 실행 화면이 아닙니다.';
  renderTrace();
+}
+function simElement(id){return $('simTopology').querySelector('[data-sim-id="'+id+'"]');}
+function placeSimPacket(event){
+ var packet=$('simPacket');
+ if(!event.packetAt){packet.hidden=true;return;}
+ var target=simElement(event.packetAt),canvas=$('simTopology');
+ if(!target)return;
+ packet.hidden=false;packet.textContent=event.packetLabel||'Packet';packet.dataset.tone=event.tone||'normal';
+ requestAnimationFrame(function(){
+  var cr=canvas.getBoundingClientRect(),tr=target.getBoundingClientRect();
+  var x=tr.left-cr.left+tr.width/2-packet.offsetWidth/2;
+  var y=tr.top-cr.top+tr.height/2-packet.offsetHeight/2;
+  packet.style.transform='translate('+Math.round(x)+'px,'+Math.round(y)+'px)';
+ });
+}
+function renderSimulationStep(){
+ if(!observation)return;
+ var topology=$('simTopology'),event=observation.events[traceStep];
+ topology.dataset.step=String(traceStep+1);topology.dataset.kind=event.kind;
+ topology.querySelectorAll('[data-sim-id]').forEach(function(el){el.classList.remove('on-route','is-current','is-stop');});
+ observation.route.forEach(function(id){var el=simElement(id);if(el)el.classList.add('on-route');});
+ (event.focus||[]).forEach(function(id){var el=simElement(id);if(el)el.classList.add('is-current');});
+ if(event.stopAt){var stop=simElement(event.stopAt);if(stop)stop.classList.add('is-stop');}
+ $('simStepLabel').textContent='흐름 '+(traceStep+1)+' / '+observation.events.length;
+ $('simStepText').textContent=event.text;$('simStepText').dataset.kind=event.kind;
+ $('simPrev').disabled=traceStep===0;$('simNext').disabled=traceStep===observation.events.length-1;
+ placeSimPacket(event);
 }
 function renderTrace(){
  if(!observation)return;
@@ -388,6 +507,7 @@ function renderTrace(){
  $('tracePosition').textContent='판단 '+(traceStep+1)+' / '+observation.events.length;
  $('traceEvent').textContent=event.text;$('traceEvent').dataset.kind=event.kind;
  $('tracePrev').disabled=traceStep===0;$('traceNext').disabled=traceStep===observation.events.length-1;
+ renderSimulationStep();
 }
 function showSummary(){
  if(counts().pending){goTo(answers.findIndex(function(a){return !a.submitted;}),true);return;}
@@ -401,6 +521,9 @@ $('reviewWrongBtn').addEventListener('click',function(){var i=lessons.findIndex(
 $('summaryReturnBtn').addEventListener('click',showSummary);
 $('tracePrev').addEventListener('click',function(){if(traceStep>0){traceStep--;renderTrace();}});
 $('traceNext').addEventListener('click',function(){if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
+$('simPrev').addEventListener('click',function(){if(traceStep>0){traceStep--;renderTrace();}});
+$('simNext').addEventListener('click',function(){if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
+window.addEventListener('resize',function(){if(observation)placeSimPacket(observation.events[traceStep]);});
 render();persist();
 })();
 </script></body></html>

@@ -5,8 +5,10 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:site": "python3 tests/check_site.py",
-    "test:browser": "node tests/ip-skill-review.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ip-scroll.mjs && node tests/ip-summary.mjs"
+    "test:browser": "node tests/ip-network-sim.mjs && node tests/ip-skill-review.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ip-scroll.mjs && node tests/ip-summary.mjs"
   },
-  "devDependencies": { "playwright": "1.62.1" },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  },
   "packageManager": "pnpm@11.19.0"
 }
