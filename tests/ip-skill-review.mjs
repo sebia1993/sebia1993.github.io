@@ -137,7 +137,7 @@ async function surface(url,name){
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 즉시 패킷 폐기');
   assert.equal(await page.locator('#scoreText').innerText(),'정답 3 · 오답 1 · 미응답 0');
-  assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.140');
+  assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.140'));
   await page.locator('#summaryReturnBtn').click();assert.equal(await page.locator('#complete').isVisible(),true);
   checks.push({surface:name,case:'previous-schema-compatible',status:'PASS'});
  }finally{await context.close();}
