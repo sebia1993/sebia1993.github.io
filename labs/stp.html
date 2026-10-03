@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STP / RSTP — 개념서</title>
+<meta name="description" content="Root Bridge, Port Role, Path Cost, Alternate Port와 RSTP 재수렴을 한 번에 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.baseline-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.baseline-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.baseline-card h3{margin:4px 0 8px}.baseline-card p{margin:0;color:var(--muted)}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.role-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.role-card h3{margin:6px 0 6px}.role-card p{margin:0;color:var(--muted);font-size:.88rem}.role-pill{display:inline-flex;padding:4px 8px;border:1px solid;border-radius:999px;font-size:.7rem;font-weight:900}.rootp{color:var(--mint);border-color:#347968}.desg{color:var(--blue);border-color:#356d93}.altn{color:var(--amber);border-color:#8f6a38}
+.flow-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.flow-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.95rem}.flow-card p{margin:0;color:var(--muted);font-size:.84rem}
+.change-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.change-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.change-card h3{margin:4px 0 8px}.change-card p{margin:0;color:var(--muted)}.change-card strong{color:var(--text)}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:900px){.flow-cards{grid-template-columns:1fr 1fr}.change-grid,.role-grid{grid-template-columns:1fr 1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.baseline-grid{grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.flow-cards,.role-grid,.change-grid{grid-template-columns:1fr}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#root">Root</a>
+      <a href="#roles">Port Role</a>
+      <a href="#changes">Topology Change</a>
+      <a href="#review">복습</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>STP / <em>RSTP</em></h1>
+    <p>목표는 하나입니다. <b>Redundant Triangle에서 Root와 Port Role이 어떻게 Loop-Free Tree를 만들고, 장애나 Cost/Root 변화 때 경로가 어떻게 다시 계산되는지</b> 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>물리 Link와 논리 Forwarding Path를 분리해서 봅니다.</strong><span>Cable이 Up이라고 해서 모든 Link가 User Data를 Forward하는 것은 아닙니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>Root를 정하고 → 가장 좋은 길을 남기고 → 나머지 길을 대기시키고 → 장애 때 다시 계산합니다.</strong>
+      <p>BPDU · Root Bridge · Root/Designated/Alternate · Cost · Rapid Convergence</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>STP는 Link를 없애는 것이 아니라 Forwarding Tree를 하나만 남깁니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① Root:</b> BPDU를 비교해 <strong>가장 우수한 Bridge ID</strong>를 가진 Switch가 Root가 됩니다.</p>
+      <p><b>② Root Port:</b> Non-root Switch는 Root까지 <strong>가장 낮은 누적 Cost</strong> 경로를 고릅니다.</p>
+      <p><b>③ Alternate:</b> Redundant Port는 Cable Up 상태로 남을 수 있지만 <strong>User Data Forwarding에서는 제외</strong>됩니다.</p>
+      <p><b>④ RSTP:</b> Link나 Root가 바뀌면 Role을 다시 계산해 <strong>Standby Path를 Forwarding</strong>으로 전환합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="root">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · ROOT BRIDGE</div><h2>Priority가 먼저, MAC은 Tie-break입니다.</h2></div></div>
+    <div class="baseline-grid">
+      <article class="baseline-card">
+        <div class="eyebrow">Equal Priority</div>
+        <h3>32768 / 32768 / 32768</h3>
+        <p>이번 Lab에서는 SW1 MAC이 가장 낮아서 <b>SW1이 Root</b>로 예측됐고 실제 BPDU/CLI도 일치했습니다.</p>
+      </article>
+      <article class="baseline-card">
+        <div class="eyebrow">Deterministic Baseline</div>
+        <h3>SW1 24576 · SW2 28672 · SW3 32768</h3>
+        <p>Priority 차이를 주면 MAC Tie-break보다 Priority가 먼저 적용되어 <b>SW1 Root</b>가 유지됐습니다.</p>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>표시 숫자 주의:</b> Cisco CLI의 VLAN10 Operational Priority는 Extended System ID 때문에 Base Priority에 VLAN10 값이 더해져 <code>24586</code>처럼 보였습니다. Configured Base Priority와 화면 숫자를 그대로 동일시하지 않습니다.</div>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · PORT ROLE</div><h2>Triangle을 하나의 Loop-Free Tree로 바꿉니다.</h2></div></div>
+    <div class="role-grid">
+      <article class="role-card"><span class="role-pill rootp">Root Port</span><h3>Root로 가는 최적 경로</h3><p>Non-root Switch마다 하나를 선택합니다. Root Bridge에는 Root Port가 없습니다.</p></article>
+      <article class="role-card"><span class="role-pill desg">Designated Port</span><h3>Segment의 Forwarding 대표</h3><p>각 Segment에서 가장 좋은 BPDU를 제공하는 쪽이 Designated 역할을 맡습니다.</p></article>
+      <article class="role-card"><span class="role-pill altn">Alternate / Discarding</span><h3>대기 경로</h3><p>User Data는 Forward하지 않지만 BPDU Control Plane에는 참여하는 Standby Path입니다.</p></article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>이번 Baseline:</b> SW1이 Root, SW3→SW1(L31)이 Root/FWD, SW3→SW2(L23)가 Alternate/BLK였습니다. PC1→PC3 실제 Data Path는 <b>PC1 → SW1 → L31 → SW3 → PC3</b>였습니다.</div>
+  </div>
+</section>
+
+<section id="changes">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · TOPOLOGY CHANGE</div><h2>물리 Triangle은 그대로, 역할과 실제 Path만 바뀝니다.</h2></div></div>
+    <div class="change-grid">
+      <article class="change-card">
+        <div class="eyebrow">PATH COST</div>
+        <h3>SW3→SW1 Cost 4 → 20</h3>
+        <p>Direct Path 20보다 SW3→SW2→SW1 누적 Cost <strong>8</strong>이 더 낮아져 SW3 Root Port가 L23으로 바뀌었습니다.</p>
+      </article>
+      <article class="change-card">
+        <div class="eyebrow">LINK FAILURE</div>
+        <h3>SW3→SW1 Root Port Link Down</h3>
+        <p>L23이 Root/FWD로 전환됐고 100개 연속 Probe는 <strong>100/100 Reply</strong>였습니다. 실제 Data Path 전환 Delivery Gap은 약 <strong>0.202초</strong>였지만, 이는 200ms Probe 기반 관찰값이지 보편적 RSTP 수렴 시간은 아닙니다.</p>
+      </article>
+      <article class="change-card">
+        <div class="eyebrow">ROOT CHANGE</div>
+        <h3>SW3 Priority → 16384</h3>
+        <p>Root가 SW3로 바뀌며 차단 위치도 이동했습니다. Baseline의 SW3-L23 Alternate 대신 <strong>SW2-L12</strong>가 Alternate/BLK가 됐습니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="normal-flow">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · RSTP FLOW</div><h2>장애 때도 “Loop-Free Tree” 원칙은 그대로입니다.</h2></div></div>
+    <div class="flow-cards">
+      <article class="flow-card"><b>1</b><h3>BPDU 비교</h3><p>Root와 각 Port의 Best Path 정보를 계속 교환합니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>Role 선택</h3><p>Root / Designated / Alternate 역할을 정합니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>Data Forwarding</h3><p>Forwarding Tree에 포함된 Link만 User Data Path가 됩니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>Topology Change</h3><p>Link/Cost/Root 변화가 생기면 Role을 다시 계산합니다.</p></article>
+      <article class="flow-card"><b>5</b><h3>Standby 활성화</h3><p>Alternate가 새 Root Path로 승격되어 연결성을 유지할 수 있습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li>Root 선출은 <b>Bridge ID</b> 비교이며 Priority가 먼저입니다.</li>
+          <li>Non-root Switch의 <b>Root Port</b>는 Root까지 가장 좋은 Path입니다.</li>
+          <li><b>Alternate/Discarding</b>은 Cable Down이 아니라 논리적 Standby입니다.</li>
+          <li><b>Path Cost</b>가 달라지면 Root Port와 실제 Data Path도 바뀔 수 있습니다.</li>
+          <li>RSTP는 장애 후에도 <b>Loop-Free Tree</b>를 다시 구성합니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“왜 Triangle의 세 Link가 모두 Up인데 User Data는 한 Tree로만 흐르는가?”</h3>
+        <p>Root Bridge, Root Port, Alternate/Discarding, Cost라는 네 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 물리 Triangle에서 역할과 Path만 바꿔 보세요.</h2><p>Root 선출, Alternate/BPDU, Cost 변경, Link 장애, Root 변경을 모두 같은 토폴로지에서 예상하고 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="stp-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 2026-10-04 PNETLab의 Cisco IOL Rapid-PVST+ Switch 3대 + VPCS 2대로 STP-01~06을 모두 PASS했습니다. <a href="../learning/campus/stp/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">STP / RSTP · Concept → Interactive Lab</div></footer>
+</body>
+</html>
