@@ -144,11 +144,11 @@
   ];
 
   const evidenceByLesson=[
-    ['../ethernet-viewer.html?mode=console&scenario=01-arp-first-contact','실제 GNS3 Source MAC 학습 근거 보기 →'],
-    ['../ethernet-viewer.html?mode=packets&scenario=02-known-unicast&point=pc3-sw1','실제 Known Unicast PC3 미전달 PCAP 보기 →'],
-    ['../ethernet-viewer.html?mode=packets&scenario=04-unknown-unicast&point=pc3-sw1','실제 PC3 링크의 Unknown Unicast PCAP 보기 →'],
-    ['../ethernet-viewer.html?mode=packets&scenario=03-broadcast&point=pc3-sw1','실제 Broadcast PC3 링크 PCAP 보기 →'],
-    ['../learning/foundations/ethernet-mac-table/report.html','실제 Aging · Re-learning 검증 보고서 보기 →']
+    ['../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-01','실제 Cisco Source MAC 학습 근거 보기 →'],
+    ['../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-02','실제 Cisco Known Unicast 근거 보기 →'],
+    ['../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-03','실제 Cisco Unknown Unicast · ARP/FDB 근거 보기 →'],
+    ['../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-04','실제 Cisco Broadcast 근거 보기 →'],
+    ['../learning/foundations/ethernet-mac-table/cisco-validation-2026-10-03.html#ethmac-05','실제 Cisco Aging · Re-learning 근거 보기 →']
   ];
 
   let lesson=0;
@@ -572,11 +572,11 @@
 
   function completionText(idx){
     return [
-      'PC1/PC2의 Neighbor 상태와 SW1 FDB가 서로 독립적으로 형성되고, Source MAC은 학습에 Destination MAC은 출력 포트 결정에 사용됨을 확인했습니다.',
+      'PC1에서 들어온 프레임의 Source MAC이 port 1과 함께 FDB에 학습되는 것을 확인했습니다. Destination MAC의 전달 판단은 다음 실습에서 이어서 확인합니다.',
       'FDB에 목적지 정보가 있으면 해당 출력 포트로만 Known Unicast가 전달되는 것을 확인했습니다.',
       'Unknown Unicast는 목적지 MAC을 바꾸지 않은 채 다른 전달 가능 포트로 Flooding됨을 확인했습니다.',
       'Broadcast는 Ethernet 목적지 MAC으로 ff:ff:ff:ff:ff:ff를 사용하고, ARP Target Hardware는 별도 필드임을 확인했습니다.',
-      '이 실습의 300초 Aging 기준에서 엔트리 소멸 뒤 첫 요청은 Flooding되고 Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
+      '이 시뮬레이터의 교육용 300초 Aging 기준에서 엔트리 소멸 뒤 첫 요청은 Flooding되고 Reply의 Source MAC으로 재학습한 뒤 Known Unicast로 회복됨을 확인했습니다.'
     ][idx];
   }
 
