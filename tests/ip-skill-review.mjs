@@ -75,9 +75,10 @@ async function surface(url,name){
     assert.equal(await page.locator('#verdictTitle').innerText(),i<2?'✓ 정답입니다':'✕ 오답입니다');
     assert.equal(await page.locator('#modelObservation').isVisible(),true);
     assert.equal(await page.locator('#modelObservation').getAttribute('data-scenario'),fixtures[i].scenarioId);
-    assert.equal(await page.locator('#modelTarget').innerText(),fixtures[i].target);
+    assert.ok((await page.locator('#modelEvent').innerText()).includes(fixtures[i].target));
+    assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
     assert.equal(await page.locator('#modelObservation').getAttribute('data-outcome'),i===2?'unresolved':'resolved');
-    assert.ok((await page.locator('#modelCaption').innerText()).includes('ARP 대상 선택'));
+    assert.ok((await page.locator('#modelCaption').textContent()).includes('ARP 대상 선택'));
     assert.equal((await page.locator('body').innerText()).includes('PASS'),false);
     const distance=await page.evaluate(()=>document.querySelector('#nextBtn').getBoundingClientRect().bottom-document.querySelector('#verdictTitle').getBoundingClientRect().top);
     assert.ok(distance<720,'visible model displaced primary Next too far');
