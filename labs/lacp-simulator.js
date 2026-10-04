@@ -48,7 +48,7 @@
       steps:[
         {kind:'CLEAN STATE',title:'기존 EtherChannel State 제거',detail:'기존 active/passive Session을 지우고 Channel Group이 없는 상태를 먼저 확인했습니다.',po:'wait',m1:'idle',m2:'idle',nodes:['sw1','sw2']},
         {kind:'PASSIVE / PASSIVE',title:'양쪽 모두 passive',detail:'안정 관찰 구간에서 정상 LACPDU 협상이 시작되지 않았습니다.',po:'wait',m1:'idle',m2:'idle',nodes:['sw1','sw2']},
-        {kind:'NO BUNDLE',title:'정상 Bundle 미형성',detail:'Po1은 정상 Forwarding Bundle이 아니었고 Remote Port-Channel 통신도 형성되지 않았습니다.',po:'down',m1:'down',m2:'down',nodes:['sw1','sw2']},
+        {kind:'NO BUNDLE',title:'정상 Bundle 미형성',detail:'Po1은 정상 Forwarding Bundle이 아니었고 Remote Port-Channel 통신도 형성되지 않았습니다. Physical Cable Down과는 다른 상태입니다.',po:'wait',m1:'wait',m2:'wait',nodes:['sw1','sw2']},
         {kind:'RECOVERY',title:'SW1만 active로 변경',detail:'LACPDU 협상이 다시 시작되고 M1/M2가 Bundled, Po1 Up, Remote Ping 3/3으로 복구됐습니다.',po:'up',m1:'control',m2:'control',nodes:['sw1','sw2'],marker:{text:'LACPDU',type:'control',left:355,top:170}}
       ]
     },
@@ -186,10 +186,11 @@
     line.setAttribute('class','agg-link '+state);
     lab.className='link-label';
     if(state==='control')lab.classList.add('control');
+    if(state==='wait')lab.classList.add('wait');
     if(state==='down')lab.classList.add('down');
     if(state==='active-data'||state==='reply')lab.classList.add('active');
     const name=which.toUpperCase();
-    const suffix=state==='control'?'LACPDU':state==='down'?'DOWN':state==='active-data'?'DATA':state==='reply'?'REPLY':state==='idle'?'Idle':'Bundled';
+    const suffix=state==='control'?'LACPDU':state==='wait'?'Not Bundled':state==='down'?'DOWN':state==='active-data'?'DATA':state==='reply'?'REPLY':state==='idle'?'Idle':'Bundled';
     lab.textContent=name+' · '+suffix;
   }
 
