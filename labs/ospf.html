@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OSPF — 개념서</title>
+<meta name="description" content="OSPF Neighbor, LSDB, Cost, Area mismatch, MTU mismatch와 Convergence를 실제 Cisco 검증 결과에 연결해 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.18rem,3vw,1.88rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.flow-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.flow-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.92rem}.flow-card p{margin:0;color:var(--muted);font-size:.82rem}
+.topology-card{padding:18px;border:1px solid var(--line);border-radius:17px;background:var(--panel3);overflow:hidden}.topology-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden}.topology-stage{position:relative;width:780px;height:430px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}.topology-svg{position:absolute;inset:0;width:100%;height:100%}.link{stroke:#29455f;stroke-width:8;stroke-linecap:round}.link.preferred{stroke:#3f8b77}.link.backup{stroke:#6a566c;stroke-dasharray:12 10}.cost-badge{position:absolute;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#091624;color:#cbd9e7;font-size:.72rem;font-weight:850}.cost12{left:39%;top:24%}.cost23{left:66%;top:44%}.cost13{left:39%;top:69%}
+.router{position:absolute;width:150px;transform:translate(-50%,-50%);text-align:center}.router-icon{display:grid;place-items:center;width:76px;height:60px;margin:auto;border:2px solid #365675;border-radius:15px;background:#0d2032}.router-icon svg{width:50px;height:42px;stroke:#9fb8cf;fill:none;stroke-width:2}.router b{display:block;margin-top:7px}.router small{display:block;color:var(--muted);font-size:.72rem;line-height:1.4}.r1{left:20%;top:50%}.r2{left:58%;top:22%}.r3{left:78%;top:74%}
+.area-label{position:absolute;left:17px;top:15px;padding:6px 10px;border:1px solid #3e6a91;border-radius:999px;color:var(--blue);font-size:.74rem;font-weight:850;background:#091624}
+.path-note{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.path-note div{padding:12px;border:1px solid var(--line);border-radius:12px;background:#091624}.path-note strong{display:block}.path-note span{color:var(--muted);font-size:.8rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.compare-card h3{margin:5px 0 8px}.compare-card p{margin:0;color:var(--muted)}.mini-path{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:#c8d6e5;font:700 .78rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.failure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.failure-card{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:5px 0 7px}.failure-card p{margin:0;color:#d5e1ed;font-size:.86rem}.failure-state{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:var(--muted);font-size:.77rem}
+.lesson-note{padding:16px;border:1px solid #355d82;border-radius:14px;background:rgba(88,184,255,.05)}.lesson-note strong{color:var(--blue)}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:1000px){.flow-grid{grid-template-columns:1fr 1fr}.failure-grid{grid-template-columns:1fr}.compare-grid,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid{grid-template-columns:1fr}.path-note{grid-template-columns:1fr}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}.topology-stage{width:700px;height:400px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#neighbor">Neighbor·LSDB</a>
+      <a href="#cost">Cost</a>
+      <a href="#failure">장애</a>
+      <a href="#review">정리</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>OSPF</h1>
+    <p>목표는 하나입니다. <b>OSPF가 이웃과 Link-State 정보를 맞춘 뒤 Cost가 가장 낮은 경로를 선택하고, 장애가 생기면 대체 경로로 다시 계산하는 흐름</b>을 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>OSPF는 “Neighbor가 FULL인가?”에서 끝나지 않습니다.</strong><span>Neighbor → LSDB → SPF/Cost → Routing Table → 실제 Packet Path를 연결해서 봅니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>Hello → Neighbor → LSA / LSDB → SPF → Lowest Cost Path → Routing Table</strong>
+      <p>장애가 생기면 Adjacency 또는 Topology가 바뀌고, LSDB·SPF·Next Hop이 다시 계산됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>OSPF는 같은 Area의 지도를 맞추고 가장 낮은 Cost 길을 고릅니다.</h2></div></div>
+    <div class="flow-grid">
+      <article class="flow-card"><b>1</b><h3>Hello</h3><p>직접 연결된 OSPF Router가 서로를 발견합니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>Neighbor</h3><p>조건이 맞으면 Adjacency가 진행되어 FULL에 도달합니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>LSA / LSDB</h3><p>같은 Area의 Link-State 정보를 공유해 같은 지도를 만듭니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>SPF / Cost</h3><p>누적 Cost가 가장 낮은 경로를 계산합니다.</p></article>
+      <article class="flow-card"><b>5</b><h3>Route</h3><p>계산 결과의 Next Hop이 Routing Table과 실제 경로에 반영됩니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="neighbor">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · NEIGHBOR / LSDB</div><h2>세 Router가 모두 FULL이고 Area 0의 Router-LSA를 동기화했습니다.</h2></div></div>
+    <div class="topology-card">
+      <div class="topology-scroll">
+        <div class="topology-stage" aria-label="R1 R2 R3 OSPF 삼각형 토폴로지">
+          <svg class="topology-svg" viewBox="0 0 780 430" aria-hidden="true">
+            <line class="link preferred" x1="195" y1="205" x2="410" y2="115"/>
+            <line class="link preferred" x1="470" y1="135" x2="590" y2="290"/>
+            <line class="link backup" x1="210" y1="240" x2="585" y2="325"/>
+          </svg>
+          <span class="area-label">AREA 0 · POINT-TO-POINT</span>
+          <span class="cost-badge cost12">Cost 10 · CP12</span>
+          <span class="cost-badge cost23">Cost 10 · CP23</span>
+          <span class="cost-badge cost13">Cost 50 · CP13</span>
+          <div class="router r1"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M46 24l-6 5"/></svg></div><b>R1</b><small>RID 1.1.1.1<br>Source</small></div>
+          <div class="router r2"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M46 24l-6 5"/></svg></div><b>R2</b><small>RID 2.2.2.2<br>Preferred Transit</small></div>
+          <div class="router r3"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M46 24l-6 5"/></svg></div><b>R3</b><small>RID 3.3.3.3<br>Destination</small></div>
+        </div>
+      </div>
+      <div class="path-note">
+        <div><strong>Neighbor</strong><span>CP12 · CP23 · CP13 모두 양쪽에서 FULL</span></div>
+        <div><strong>LSDB</strong><span>세 Router의 Area 0 Router-LSA identity / sequence / checksum / link count가 일치</span></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>이번 Lab Actual:</b> Hello는 10초, Dead는 40초였고 모든 Transit Link를 point-to-point OSPF Network Type으로 검증했습니다. 이 값은 이번 검증 환경의 Actual로 사용합니다.</div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · COST / SPF</div><h2>R1은 직접 R3보다 R2를 거치는 길을 선택했습니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card">
+        <div class="eyebrow">SELECTED PATH</div>
+        <h3>R1 → R2 → R3 = Cost 21</h3>
+        <p>R1-R2 10 + R2-R3 10 + R3 Loopback 1 = 21. R1의 3.3.3.3/32 Next Hop은 <code>10.0.12.2</code>였습니다.</p>
+        <div class="mini-path">R1 ━▶ R2 ━▶ R3 · CP12 → CP23</div>
+      </article>
+      <article class="compare-card">
+        <div class="eyebrow">BACKUP PATH</div>
+        <h3>R1 → R3 = Cost 51</h3>
+        <p>직접 링크 50 + R3 Loopback 1 = 51. Neighbor는 FULL이지만 Cost가 더 높아서 정상 상태의 데이터 경로로 선택되지 않았습니다.</p>
+        <div class="mini-path">R1 ┄▶ R3 · CP13 · 정상 선택 아님</div>
+      </article>
+    </div>
+    <div class="lesson-note" style="margin-top:14px"><strong>중요:</strong> “Neighbor가 FULL이다”와 “그 Neighbor를 현재 트래픽 경로로 사용한다”는 같은 뜻이 아닙니다. 이번 Baseline에서는 CP13 Neighbor도 FULL이지만 실제 3회 Ping 흐름은 CP12/CP23에만 있었습니다.</div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · FAILURE / RECOVERY</div><h2>장애 원인에 따라 Adjacency가 깨지는 지점은 다르지만 대체 경로는 살아 있었습니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">AREA MISMATCH</div>
+        <h3>Area 1 ↔ Area 0</h3>
+        <p>R1-R2 링크에서 R1만 Area 1로 바꾸자 안정화 후 양쪽 Neighbor Table에서 상대가 사라졌습니다. CP12 Hello에는 Area 1과 Area 0이 실제로 함께 관측됐습니다.</p>
+        <div class="failure-state">CP12 adjacency ✕ · CP13/CP23 FULL · 트래픽은 CP13 3/3</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">MTU MISMATCH</div>
+        <h3>IP MTU 1400 ↔ 1500</h3>
+        <p>R1-R2 재협상에서 양쪽 Neighbor가 실제로 <b>EXSTART</b>에 머물렀고, DBD Interface MTU 1400/1500과 반복 Sequence를 PCAP으로 확인했습니다.</p>
+        <div class="failure-state">DBD negotiation STOP · CP13 3/3 · 1500/1500 복구 후 FULL</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">LINK FAILURE</div>
+        <h3>선호 R1-R2 Link Down</h3>
+        <p>R1-R2를 내리자 R1 Router-LSA가 바뀌고 3.3.3.3/32 Route는 Next Hop 10.0.13.2, Cost 51로 변경됐습니다.</p>
+        <div class="failure-state">Cost 21 path ✕ → Cost 51 CP13 ✓ → 복구 후 Cost 21</div>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>주의:</b> Area mismatch나 Link Down 직후 Neighbor 상태는 양쪽에서 동시에 변하지 않을 수 있습니다. 또한 EXSTART는 여러 원인이 있을 수 있습니다. 이번 검증에서는 MTU 설정과 DBD 필드를 함께 확인했기 때문에 MTU 원인으로 판정했습니다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · CONVERGENCE</div><h2>장애가 끝나면 원래 더 낮은 Cost 경로로 다시 돌아왔습니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card"><div class="eyebrow">FAILURE</div><h3>Next Hop 10.0.13.2 · Cost 51</h3><p>선호 Link가 사라진 동안 R1은 남아 있는 직접 R3 경로로 재계산했습니다. CP13에서 Ping 3/3이 확인됐습니다.</p></article>
+      <article class="compare-card"><div class="eyebrow">RECOVERY</div><h3>Next Hop 10.0.12.2 · Cost 21</h3><p>R1-R2 Link와 FULL adjacency가 복구된 뒤 Routing Table과 Packet Path는 다시 R1→R2→R3로 돌아왔습니다.</p></article>
+    </div>
+    <div class="lesson-note" style="margin-top:14px"><strong>수렴 시간:</strong> 이번 학습에서는 “경로가 다시 계산되어 바뀐다”를 배웁니다. 정확한 ms 단위 수렴 시간은 이번 검증의 보편 Claim으로 사용하지 않습니다.</div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 연결해서 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li><b>Hello → Neighbor → LSDB → SPF → Route</b> 순서로 연결해서 봅니다.</li>
+          <li>같은 Area의 Router는 Link-State 정보를 공유해 LSDB를 맞춥니다.</li>
+          <li>OSPF는 <b>누적 Cost가 더 낮은 경로</b>를 선택합니다.</li>
+          <li>FULL Neighbor가 있어도 그 Link가 현재 데이터 경로로 선택됐다는 뜻은 아닙니다.</li>
+          <li>Area/MTU/Link 장애는 각각 Adjacency와 경로에 다른 방식으로 영향을 주며, 복구 후 다시 수렴합니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“R1-R3가 직접 연결돼 있는데 왜 정상 상태에서는 R2를 거칠까?”</h3>
+        <p>Neighbor, LSDB, Cost 21 vs 51, SPF, Next Hop이라는 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>Neighbor 상태와 Route 경로를 직접 예상해 보세요.</h2><p>Neighbor/Hello → LSDB → Cost → Area mismatch → MTU mismatch → Link Convergence 순서로 같은 토폴로지에서 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="ospf-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> Run 2026-10-04-ospf-02, Cisco IOL L3 3대 / IOS 15.4(2)T4 / OSPF Process 1. OSPF-01~06 모두 PASS했고, Area mismatch·MTU mismatch·선호 Link 장애와 각각의 복구를 CLI+PCAP으로 확인했습니다. 최종 Neighbor/LSDB/Route/Config도 Baseline으로 복원됐습니다.</div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">OSPF · Concept → Interactive Lab</div></footer>
+</body>
+</html>
