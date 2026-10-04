@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>Routing Table / Static / Default Route</h2>
-      <p>Connected·Static·Default Route, Longest Prefix Match와 Route 상실/복구를 실제 Cisco IOL 검증으로 정리했습니다. No Route의 RFC Code 0과 이번 Cisco Actual Code 1 차이도 분리했습니다.</p>
+      <h2>OSPF</h2>
+      <p>Neighbor·LSDB·Cost 기반 SPF와 Area mismatch, MTU EXSTART, 선호 Link 장애 후 재수렴을 실제 Cisco IOL 검증으로 정리했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/routing-table.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/routing-table-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/ospf.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/ospf-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -147,7 +147,8 @@ const interactiveUrls={
   'lacp':'./labs/lacp-simulator.html',
   'dhcp':'./labs/dhcp-simulator.html',
   'dns':'./labs/dns-simulator.html',
-  'routing-table':'./labs/routing-table-simulator.html'
+  'routing-table':'./labs/routing-table-simulator.html',
+  'ospf':'./labs/ospf-simulator.html'
 };
 
 const summaryOverrides={
