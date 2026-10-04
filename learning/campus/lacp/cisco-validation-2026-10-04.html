@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LACP / Link Aggregation — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.warn{color:var(--amber);font-weight:900}.fail{color:#ff9c93;font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.22rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.resolution{padding:18px;border:1px solid #347968;border-radius:15px;background:rgba(126,224,194,.06)}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:760px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/lacp.html">← LACP / Link Aggregation</a><a class="btn" href="../../../labs/lacp-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-04</div>
+  <h1>LACP / Link Aggregation<br><em>Cisco 검증 요약</em></h1>
+  <p>원본 Run과 재검증 Run을 모두 보존합니다. 원본에서 <b>LACP-01/02/03/06은 PASS, LACP-04는 INCONCLUSIVE, LACP-05는 FAIL</b>이었고, 별도 재검증에서 LACP-04/05를 PASS해 Authoring 차단을 해소했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Original Run</small><strong>2026-10-04-lacp-01</strong></article>
+    <article class="summary-card"><small>Revalidation Run</small><strong>2026-10-04-lacp-02</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Publication Gate</small><strong class="pass">RESOLVED</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 토폴로지</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>실제 검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Switch</td><td>Cisco IOL L2 2대 · SW1 active / SW2 passive</td></tr>
+        <tr><td>Endpoints</td><td>PC1A .11 · PC1B .12 · PC2A .21 · PC2B .22 /24 · Gateway 없음</td></tr>
+        <tr><td>Aggregation</td><td>M1 + M2 = Port-channel1 · VLAN10 Access · Trunk 없음</td></tr>
+        <tr><td>Capture</td><td>CP1 M1 · CP2 M2 · CP3 PC1A · CP4 PC2A · CP5 PC1B · CP6 PC2B</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="lacp-01">
+    <h2>LACP-01 · Active/Passive Bundle <span class="pass">PASS</span></h2>
+    <p>SW1 active / SW2 passive에서 두 Switch 모두 Po1(SU), M1(P), M2(P)였고 CP1/CP2에서 Actor/Partner System ID와 Key가 일치하는 LACPDU가 관찰됐습니다. End-to-End Host Pair는 정상 통신했습니다.</p>
+  </article>
+
+  <article class="claim" id="lacp-02">
+    <h2>LACP-02 · Passive/Passive <span class="pass">PASS</span></h2>
+    <p>Clean Rebuild 후 양쪽을 passive로 두자 정상 Bundle이 형성되지 않았고 안정 관찰 구간에서 정상 LACPDU 협상도 시작되지 않았습니다. SW1만 active로 바꾸자 M1/M2가 다시 Bundled되고 Po1 Up / Remote Ping이 복구됐습니다.</p>
+    <p class="evidence">Original trial1의 nonegotiate 불일치 구성 오류는 별도 보존하고 formal adjudication에서 제외</p>
+  </article>
+
+  <article class="claim" id="lacp-03">
+    <h2>LACP-03 · One Logical Link <span class="pass">PASS</span></h2>
+    <p>Bundle 복구 후 STP는 M1/M2를 두 독립 포트로 표시하지 않고 Po1 하나를 Forwarding Link로 표시했습니다. Remote Dynamic MAC도 Po1 기준으로 학습됐습니다.</p>
+  </article>
+
+  <article class="claim" id="lacp-04">
+    <h2>LACP-04 · Flow-Based Hash Selection <span class="pass">PASS after revalidation</span></h2>
+    <p><b>Original run01:</b> <code>src-dst-ip</code>에서 F1~F8 모든 Forward Flow가 M1을 사용했습니다. Same-Flow Consistency는 보였지만 다른 Member 분산을 입증하지 못해 <span class="warn">INCONCLUSIVE</span>였습니다.</p>
+    <p><b>Revalidation run02:</b> <code>src-mac</code>을 양쪽 Switch에 적용하고 실제 PCAP으로 확인했습니다. PC1A→PC2A 5/5 Request는 M2, PC1B→PC2A 5/5 Request는 M1에만 나타났고 Duplicate Request는 없었습니다.</p>
+    <p class="evidence">PC1A source MAC 00:50:79:66:68:41 → M2 · PC1B source MAC 00:50:79:66:68:42 → M1</p>
+  </article>
+
+  <article class="claim" id="lacp-05">
+    <h2>LACP-05 · One Member Failure / Recovery <span class="pass">PASS after revalidation</span></h2>
+    <p><b>Original run01:</b> SW1의 M1만 shutdown했을 때 Forward Request는 M2로 이동했지만 Return Path가 shutdown M1 Wire에 남아 43/100 Reply 후 추가 0/100이었습니다. 원래 Result는 <span class="fail">FAIL</span>로 보존합니다.</p>
+    <p><b>Revalidation run02:</b> 신뢰 가능한 PNET live carrier-down API를 확보하지 못해 요청서 fallback대로 M1 양쪽 Endpoint를 하나의 장애 사건으로 admin-down했습니다. M2는 Bundled, Po1은 Up을 유지했고 Core src-mac Run과 원래 src-dst-ip 비교 Run 모두 <b>100 Request / 100 Delivery / 100 Reply / Loss 0</b>을 확인했습니다.</p>
+    <p>Core의 마지막 M1 Request와 첫 M2 Request 사이 관찰 간격은 약 1.001초, 비교 Run은 약 0.702초였습니다. Probe 간격을 포함한 Packet Observation 값이며 보편적인 LACP Convergence Time으로 일반화하지 않습니다.</p>
+  </article>
+
+  <article class="claim" id="lacp-06">
+    <h2>LACP-06 · All Members Failure / Recovery <span class="pass">PASS</span></h2>
+    <p>원본 Run에서 M1/M2 모두 Down되자 Po1도 Down됐고 Remote Ping은 실패했습니다. Source Stimulus와 Destination 부재, Local Positive Control을 함께 사용해 판정했습니다. 두 Member를 복구하자 M1(P), M2(P), Po1(SU), Remote Ping 3/3과 Baseline Config가 모두 복구됐습니다.</p>
+  </article>
+
+  <section class="resolution">
+    <div class="eyebrow">VALIDATION RESOLUTION</div>
+    <h2>원본 실패를 지우지 않고 재검증으로 해결했습니다.</h2>
+    <p>최종 Teaching Claim은 다음으로 제한합니다. 호환 LACP Bundle은 하나의 Logical Link이며, 검증된 <code>src-mac</code> 입력의 서로 다른 Flow는 서로 다른 Member를 선택했습니다. 한 Member가 양단에서 unavailable이고 다른 Member가 Bundled라면 이 IOL Run에서는 남은 Member로 양방향 통신을 유지했습니다.</p>
+    <p><b>주장하지 않는 것:</b> 모든 Hash Method에서 같은 분산, 50:50, 단일 Flow 처리량 2배, Universal Zero-Loss, Universal Convergence Time, 실제 Cable Carrier Propagation의 내부 구현 원인.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">FLOW MAP</div><h2>검증된 src-mac Member Mapping</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Flow</th><th>Source MAC</th><th>Destination</th><th>Member</th><th>Requests</th></tr></thead>
+      <tbody>
+        <tr><td>PC1A → PC2A</td><td>00:50:79:66:68:41</td><td>192.0.2.21</td><td>M2</td><td>5 / 5</td></tr>
+        <tr><td>PC1B → PC2A</td><td>00:50:79:66:68:42</td><td>192.0.2.21</td><td>M1</td><td>5 / 5</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="warning">
+    <div class="eyebrow">검증 한계</div>
+    <h2>Cisco IOL 가상 환경의 Actual로 제한합니다.</h2>
+    <p>재검증의 M1 Failure는 양쪽 M1 Interface admin-down으로 “Member 전체 unavailable”을 재현한 것입니다. 실제 물리 Cable 단절의 Carrier Propagation을 직접 구현한 것은 아닙니다. 원래 one-sided admin-down FAIL은 별도의 실제 관찰 결과로 남깁니다.</p>
+    <p>또한 <code>src-dst-ip</code>에서 8개 Flow가 모두 M1을 사용한 원래 결과도 그대로 유지합니다. <code>src-mac</code>의 실제 분산을 다른 Hash Method나 모든 Cisco Platform에 확대하지 않습니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Cisco 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://standards.ieee.org/ieee/802.1AX/6768/">IEEE 802.1AX-2020 · Link Aggregation</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/etherchannel/etherchannel-configuration-guide/m_ethernetchannel.html">Cisco IOS XE 17 · EtherChannel Configuration Guide</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/etherchannel/12023-4.html">Cisco · EtherChannel Load Balance and Redundancy</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">LACP / Link Aggregation · Cisco Validation + Revalidation Summary</div></footer>
+</body>
+</html>
