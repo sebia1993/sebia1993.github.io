@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DHCP / DHCP Relay — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.22rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:760px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/dhcp.html">← DHCP / DHCP Relay</a><a class="btn" href="../../../labs/dhcp-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-04</div>
+  <h1>DHCP / DHCP Relay<br><em>Cisco 검증 요약</em></h1>
+  <p>PNETLab의 Cisco IOL L3 2대, IOL L2 1대, VPCS 1대로 DORA, DHCP Option, Relay giaddr, Server Down, Relay Missing, Wrong Router Option을 실제 실행했습니다. CLI와 CP1~CP3 Internal Link PCAP을 대조했고 <b>DHCP-01~06은 모두 PASS</b>했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Run ID</small><strong>2026-10-04-dhcp-01</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Claim Result</small><strong class="pass">6 PASS / 0 FAIL</strong></article>
+    <article class="summary-card"><small>Final State</small><strong class="pass">Service / Relay / Option / Ping 복구</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 토폴로지</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>항목</th><th>실제 검증 값</th></tr></thead>
+      <tbody>
+        <tr><td>Client</td><td>VPCS 1.0(0.8c) · MAC 00:50:79:66:68:48</td></tr>
+        <tr><td>Switch</td><td>Cisco IOL L2 IOS 15.2 · VLAN10 Access</td></tr>
+        <tr><td>R1</td><td>Cisco IOL L3 IOS 15.4(2)T4 · Relay/Gateway · 192.0.2.1/24 · 198.51.100.1/30</td></tr>
+        <tr><td>R2</td><td>Cisco IOL L3 IOS 15.4(2)T4 · DHCP Server · 198.51.100.2/30</td></tr>
+        <tr><td>Pool</td><td>192.0.2.0/24 · .100 deterministic · GW 192.0.2.1 · DNS 203.0.113.53 · Lease 3600s</td></tr>
+        <tr><td>Capture</td><td>CP1 PC1—SW1 · CP2 SW1—R1 · CP3 R1—R2</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="dhcp-01">
+    <h2>DHCP-01 · DORA Establishes a Lease <span class="pass">PASS</span></h2>
+    <p>Baseline Transaction <code>0x57370148</code>에서 Discover → Offer → Request → ACK를 같은 Client MAC과 xid로 상관시켰습니다. ACK 이후 PC1은 <code>192.0.2.100/24</code>를 사용했고 R2 DHCP Binding에도 Client가 나타났습니다.</p>
+    <p class="evidence">CP1 Discover frame17 · Offer22 · Request24 · ACK25</p>
+  </article>
+
+  <article class="claim" id="dhcp-02">
+    <h2>DHCP-02 · ACK Lease / Options <span class="pass">PASS</span></h2>
+    <p>Baseline ACK에서 Option 1 <code>255.255.255.0</code>, Option 3 <code>192.0.2.1</code>, Option 6 <code>203.0.113.53</code>, Option 51 <code>3600</code>을 확인했습니다. Client는 Address/Mask/Gateway를 적용했고 R1 및 R2까지 Ping이 정상 동작했습니다.</p>
+  </article>
+
+  <article class="claim" id="dhcp-03">
+    <h2>DHCP-03 · Relay / giaddr <span class="pass">PASS</span></h2>
+    <p>Client Discover는 giaddr <code>0.0.0.0</code>의 Local Broadcast였고, CP3의 Relayed Discover는 같은 xid/chaddr를 유지하면서 <code>giaddr=192.0.2.1</code>, <code>hops=1</code>이었습니다. R2는 192.0.2.0/24 Pool에서 .100을 제안했습니다.</p>
+    <p class="evidence">R1→R2 relayed DHCP: UDP 67→67 · giaddr 192.0.2.1</p>
+  </article>
+
+  <article class="claim" id="dhcp-04">
+    <h2>DHCP-04 · Server Service Down / Recover <span class="pass">PASS</span></h2>
+    <p>R2에 <code>no service dhcp</code>만 적용하자 Client Discover는 CP1/CP2뿐 아니라 CP3 Server Segment까지 도달했지만 Offer/ACK는 없었고 신규 Lease가 실패했습니다. R1↔R2 ICMP Positive Control은 정상입니다. Service 복구 후 신규 DORA와 Remote Ping 3/3이 복구됐습니다.</p>
+  </article>
+
+  <article class="claim" id="dhcp-05">
+    <h2>DHCP-05 · Relay Missing / Recover <span class="pass">PASS</span></h2>
+    <p>R1 Client Interface의 <code>ip helper-address</code>만 제거하자 Discover는 CP1/CP2에 계속 있었지만 CP3에는 해당 xid/chaddr의 Relayed DHCP가 없었습니다. CP3 ICMP Positive Control은 정상이라 Capture Failure가 아니었습니다. Helper 복구 후 신규 DORA와 Remote Ping이 정상화됐습니다.</p>
+  </article>
+
+  <article class="claim" id="dhcp-06">
+    <h2>DHCP-06 · Wrong Router Option / Recover <span class="pass">PASS</span></h2>
+    <p>Pool의 Default Router만 <code>192.0.2.254</code>로 바꾸자 DORA와 Lease 자체는 정상 완료됐습니다. Client는 .254를 Gateway로 적용했고 Remote R2 Ping 시 .254에 대한 ARP만 반복하며 Reply를 받지 못했습니다. Option 3을 .1로 복구하고 신규 DORA 후 Remote Ping 3/3이 복구됐습니다.</p>
+    <p><b>핵심:</b> DHCP Address Allocation 성공과 실제 Network Connectivity 성공은 별도 상태입니다.</p>
+  </article>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">PACKET MAP</div><h2>같은 “주소 미할당”을 Capture 위치로 구분</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Scenario</th><th>CP1 Client</th><th>CP2 Relay Ingress</th><th>CP3 Server Transit</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Normal</td><td>Discover / Offer / Request / ACK</td><td>DORA 관찰</td><td>Relayed DORA · giaddr .1</td><td>Lease 성공</td></tr>
+        <tr><td>Server Down</td><td>Discover ✓</td><td>Discover ✓</td><td>Relayed Discover ✓ · Offer ✕</td><td>No Lease</td></tr>
+        <tr><td>Relay Missing</td><td>Discover ✓</td><td>Discover ✓</td><td>DHCP ✕ · ICMP control ✓</td><td>No Lease</td></tr>
+        <tr><td>Wrong Router</td><td>DORA ✓ · ARP .254 unanswered</td><td>DORA ✓</td><td>DORA ✓ · Remote ICMP ✕</td><td>Lease 성공 / Remote 실패</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="warning">
+    <div class="eyebrow">구현 차이와 검증 한계</div>
+    <h2>Standard Claim과 이번 IOS/VPCS Actual을 구분합니다.</h2>
+    <p>VPCS 1.0(0.8c)는 이번 Run의 DHCPREQUEST에 <code>ciaddr=192.0.2.100</code>을 넣는 동작을 보였습니다. 이를 일반 DHCP Client의 보편 규칙으로 가르치지 않습니다.</p>
+    <p>Client-side Offer/ACK는 이번 Capture에서 R1 <code>192.0.2.1</code> → PC1 <code>192.0.2.100</code> unicast였습니다. Broadcast/Unicast 전달 방식을 모든 Client/Server 조합의 고정 규칙으로 일반화하지 않습니다.</p>
+    <p>DNS는 Option 전달만 확인했습니다. DNS Server 응답, Lease Expiry, T1/T2는 이번 검증 범위 밖입니다. 실제 Platform은 Cisco IOS 15.4 IOL이며 IOS XE Hardware 검증으로 표현하지 않습니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Integrity</div><h2>정식 Capture SHA-256</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Capture</th><th>Bytes</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1</td><td>109689</td><td class="evidence">4371051776a52df7c2d38d6cb3adf77aff7b8a1b8e1eb2868ef682630ebb3b0e</td></tr>
+        <tr><td>CP2</td><td>121983</td><td class="evidence">477e7f5fcc0ec58389b68324a4c330c327e1217f9015cf934d417f91ffefbe2e</td></tr>
+        <tr><td>CP3</td><td>109678</td><td class="evidence">50122487b88259762c0af3bf1ef6a8d39a99ce458c7f5588bae04d8abb601a24</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 Cisco 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://www.rfc-editor.org/rfc/rfc2131.html">RFC 2131 · Dynamic Host Configuration Protocol</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc2132.html">RFC 2132 · DHCP Options and BOOTP Vendor Extensions</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1542.html">RFC 1542 · BOOTP Relay Agent Behavior</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipaddr_dhcp/configuration/15-mt/dhcp-15-mt-book/config-dhcp-server.html">Cisco IOS 15M&T · DHCP Server / Relay</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">DHCP / DHCP Relay · Cisco IOL Validation Summary</div></footer>
+</body>
+</html>
