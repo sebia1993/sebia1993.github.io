@@ -66,7 +66,7 @@
 <section id="interference"><div class="shell">
 <div class="section-head"><div><div class="eyebrow">03 · CCI vs ACI</div><h2>같은 Channel과 겹치는 Channel은 다른 문제입니다.</h2></div></div>
 <div class="compare-grid">
-<article class="compare-card"><span class="example-badge">CONCEPT EXAMPLE · LOCAL PASS 아님</span><h3>Co-Channel Condition</h3><p>서로 다른 BSS가 같은 Channel을 쓰면 같은 RF Channel을 공유하고 contention risk가 생깁니다. 이번 bounded read-only Snapshot에서는 서로 다른 동일채널 BSSID 쌍을 확인하지 못했으므로 실측 PASS로 표시하지 않습니다.</p><div class="rf-lane"><div class="rf-spectrum"><div class="rf-band" style="left:15%;width:45%">AP-X · ch149</div><div class="rf-band warn" style="left:35%;width:45%">AP-Y · ch149</div></div></div></article>
+<article class="compare-card"><span class="example-badge">OBSERVED · 3차 보완 PASS</span><h3>Co-Channel Condition</h3><p>권한 허용 후 기존 CoreWLAN cache를 read-only로 확인한 보존 Snapshot <b>MAC-AUTH-01</b>에서 5 GHz <b>ch149</b>에 서로 다른 BSSID 4개가 기록됐습니다. 공유 자료에서는 <b>AP-A / AP-06 / AP-12 / AP-13</b>으로 익명화했습니다. 따라서 실제 same-channel condition은 확인됐지만, cache entry의 개별 나이·실제 동시 송신·처리량 저하는 측정하지 않았습니다.</p><div class="rf-lane"><div class="rf-spectrum"><div class="rf-band" style="left:8%;width:36%">AP-A · ch149</div><div class="rf-band warn" style="left:28%;width:36%">AP-06 · ch149</div><div class="rf-band" style="left:48%;width:36%">AP-12 · ch149</div><div class="rf-band warn" style="left:64%;width:28%">AP-13 · ch149</div></div></div></article>
 <article class="compare-card"><div class="eyebrow">OBSERVED CHANNEL ALLOCATION</div><h3>Adjacent / Overlapping Channel</h3><p>실제 Snapshot 레코드에서 2.4 GHz ch1/20 MHz와 ch3/20 MHz가 관측됐고, 중심 2412/2422 MHz 기준 명목 점유 구간이 약 10 MHz 겹치는 것으로 계산됐습니다. 이것은 ACI 피해량 측정이 아니라 Channel Allocation 분류입니다.</p><div class="rf-lane"><div class="rf-spectrum"><div class="rf-band" style="left:10%;width:40%">ch1 · 20 MHz</div><div class="rf-band warn" style="left:30%;width:40%">ch3 · 20 MHz</div></div></div></article>
 </div>
 </div></section>
@@ -89,7 +89,7 @@
 </div></section>
 
 <section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>실측값과 개념 예시를 구분하면서 RF 상태를 직접 판정해 보세요.</h2><p>Band → Width → SNR → Co-Channel Evidence Boundary → Overlap → DFS 순서로 진행합니다.</p></div><div class="actions"><a class="btn primary" href="wifi-rf-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
-<section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> 1차 4 PASS / 2 INCONCLUSIVE, 2차에서 WIFIRF-03 PASS. WIFIRF-04는 bounded read-only Snapshot 3회 모두 unique BSSID 1개로 local PASS를 확보하지 못해 source-backed 개념으로 범위를 제한했습니다. 최종 Authoring Scope는 5 PASS + 1 Scope-Resolved이며 6 PASS로 표기하지 않습니다.</div></div></section>
+<section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> 1차 4 PASS / 2 INCONCLUSIVE와 2차 WIFIRF-03 PASS / WIFIRF-04 INCONCLUSIVE 이력은 그대로 보존합니다. 3차 권한 보완 Run에서 기존 CoreWLAN cache의 BSSID 식별이 가능해졌고, MAC-AUTH-01 한 Snapshot의 5 GHz ch149에서 서로 다른 BSSID 4개를 확인해 WIFIRF-04도 PASS로 해소했습니다. 최신 증거 합산은 <b>6 PASS / 0 INCONCLUSIVE / 0 FAIL</b>입니다. 단, 동시 송신·처리량 감소·간섭 심각도는 측정하지 않았습니다.</div></div></section>
 </main>
 <footer class="footer"><div class="shell">Wi-Fi / RF 기초 · Concept → Interactive Lab</div></footer>
 </body>
