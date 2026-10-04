@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DHCP / DHCP Relay — 개념서</title>
+<meta name="description" content="DORA, Lease, DHCP Option과 Relay의 giaddr를 연결해 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.dora-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.dora-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.dora-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.dora-card h3{margin:0 0 5px;font-size:.95rem}.dora-card p{margin:0;color:var(--muted);font-size:.84rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:19px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.compare-card h3{margin:4px 0 7px}.compare-card p{margin:0;color:var(--muted)}
+.option-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.option-card{padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.option-card strong{display:block;color:var(--blue);font-size:.9rem}.option-card span{display:block;color:var(--muted);font-size:.8rem;margin-top:4px}
+.failure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.failure-card{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:4px 0 7px}.failure-card p{margin:0;color:#d4e0ec;font-size:.88rem}.failure-path{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:var(--muted);font-size:.77rem}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:900px){.dora-grid,.option-grid{grid-template-columns:1fr 1fr}.failure-grid{grid-template-columns:1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.compare-grid{grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.dora-grid,.option-grid{grid-template-columns:1fr}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#dora">DORA</a>
+      <a href="#relay">Relay</a>
+      <a href="#options">Option</a>
+      <a href="#failure">장애</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>DHCP / <em>DHCP Relay</em></h1>
+    <p>목표는 하나입니다. <b>Client가 DORA로 Lease와 Network Option을 받고, Remote DHCP Server를 사용할 때 Relay가 어디에서 무엇을 바꾸는지</b> 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>“IP를 받았는가?”와 “실제 통신이 되는가?”를 분리해서 봅니다.</strong><span>주소 할당 과정과 Gateway/DNS 같은 사용 조건은 같은 DHCP 안에서도 서로 다른 판단입니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>Discover로 찾고 → Offer를 받고 → Request로 선택하고 → ACK로 Lease를 확정합니다.</strong>
+      <p>Remote Server라면 Relay가 giaddr로 Client Subnet을 알려 줍니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>DHCP는 IP 하나가 아니라 “사용할 네트워크 설정”을 Lease로 합의합니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① Discover:</b> IP가 없는 Client가 DHCP Server를 찾기 위해 Local Broadcast를 보냅니다.</p>
+      <p><b>② Relay:</b> Server가 다른 Subnet이면 Router의 Relay가 Request를 Server까지 전달하고 <strong>giaddr</strong>로 Client Subnet을 알려 줍니다.</p>
+      <p><b>③ ACK:</b> Address뿐 아니라 Mask, Default Gateway, DNS, Lease Time 같은 <strong>Option</strong>도 함께 받을 수 있습니다.</p>
+      <p><b>④ 검증:</b> Lease 성공과 Remote Connectivity 성공은 같은 뜻이 아닙니다. Option이 틀리면 IP는 받아도 통신은 실패할 수 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="dora">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · DORA</div><h2>초기 Lease는 네 메시지로 이해하면 됩니다.</h2></div></div>
+    <div class="dora-grid">
+      <article class="dora-card"><b>D</b><h3>Discover</h3><p>“사용할 DHCP Server와 주소가 있나요?” Client가 먼저 찾습니다.</p></article>
+      <article class="dora-card"><b>O</b><h3>Offer</h3><p>Server가 사용할 수 있는 주소와 Parameter를 제시합니다.</p></article>
+      <article class="dora-card"><b>R</b><h3>Request</h3><p>Client가 사용할 Server/주소를 선택해 요청합니다.</p></article>
+      <article class="dora-card"><b>A</b><h3>ACK</h3><p>Server가 Lease와 Option을 확정하고 Client가 설정을 적용합니다.</p></article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>실제 검증:</b> 동일 Transaction을 <code>xid 0x57370148</code>과 Client MAC으로 추적했고 최종 Lease는 <code>192.0.2.100/24</code>였습니다.</div>
+  </div>
+</section>
+
+<section id="relay">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · DHCP RELAY</div><h2>Broadcast를 “그냥 Routing”하는 것이 아닙니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card">
+        <div class="eyebrow">CLIENT VLAN</div>
+        <h3>Discover는 Broadcast</h3>
+        <p>Client는 <code>0.0.0.0 → 255.255.255.255</code>, UDP 68→67로 시작했습니다. 이 단계의 <code>giaddr</code>는 0.0.0.0입니다.</p>
+      </article>
+      <article class="compare-card">
+        <div class="eyebrow">ROUTED TRANSIT</div>
+        <h3>Relay가 Server로 전달</h3>
+        <p>R1은 같은 Transaction을 R2로 전달하면서 <code>giaddr=192.0.2.1</code>, <code>hops=1</code>로 만들었습니다. Server는 이 값을 보고 192.0.2.0/24 Pool을 선택했습니다.</p>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>헷갈리지 마세요:</b> <code>giaddr</code>는 Relay/Server가 Client Subnet과 Reply 경로를 판단하는 DHCP Field이고, <b>Option 3 Default Router</b>는 Client가 이후 Remote Traffic에 사용할 Gateway입니다.</div>
+  </div>
+</section>
+
+<section id="options">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · ACK OPTIONS</div><h2>Address를 받는 것과 “올바른 설정”을 받는 것은 별개입니다.</h2></div></div>
+    <div class="option-grid">
+      <article class="option-card"><strong>Option 1 · Mask</strong><span>255.255.255.0</span></article>
+      <article class="option-card"><strong>Option 3 · Router</strong><span>192.0.2.1</span></article>
+      <article class="option-card"><strong>Option 6 · DNS</strong><span>203.0.113.53</span></article>
+      <article class="option-card"><strong>Option 51 · Lease</strong><span>3600 seconds</span></article>
+    </div>
+    <div class="note" style="margin-top:14px">이번 검증에서 ACK가 위 네 값을 전달했고 Client는 Address/Mask/Gateway를 적용했습니다. DNS는 <b>Option 전달값</b>만 검증했으며 실제 DNS Server 응답은 이번 학습 범위가 아닙니다.</div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · 세 가지 장애를 위치로 구분</div><h2>Client 화면이 비슷해도 Packet이 마지막으로 보이는 곳이 다릅니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">SERVER DOWN</div>
+        <h3>Discover는 Server Segment까지 도착</h3>
+        <p>Relay와 Route는 정상이라 CP3까지 Discover가 보였지만 Server가 Offer/ACK를 만들지 않아 신규 Lease가 실패했습니다.</p>
+        <div class="failure-path">Client Discover ✓ → Relay ✓ → Server Segment ✓ → Offer ✕</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">RELAY MISSING</div>
+        <h3>Discover가 Client VLAN에서 멈춤</h3>
+        <p><code>ip helper-address</code>를 제거하자 Client Broadcast는 CP1/CP2에 있었지만 CP3에는 해당 DHCP Transaction이 없었습니다.</p>
+        <div class="failure-path">Client Discover ✓ → Relay ✕ → Server Segment DHCP ✕</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">WRONG ROUTER OPTION</div>
+        <h3>DORA는 성공, Remote 통신은 실패</h3>
+        <p>Option 3만 192.0.2.254로 바꾸자 Lease는 정상 완료됐지만 Client는 존재하지 않는 Gateway를 ARP하다 Remote Ping에 실패했습니다.</p>
+        <div class="failure-path">DORA ✓ · Lease ✓ · Gateway Option ✕ · Remote Connectivity ✕</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li>초기 DHCP는 <b>Discover → Offer → Request → ACK</b>로 이해합니다.</li>
+          <li>Remote DHCP Server를 쓰려면 <b>Relay</b>가 Client Broadcast를 Server에 전달해야 합니다.</li>
+          <li><b>giaddr</b>와 <b>Option 3 Default Router</b>는 목적이 다른 값입니다.</li>
+          <li>ACK는 Address 외에 <b>Mask / Gateway / DNS / Lease</b>도 전달할 수 있습니다.</li>
+          <li><b>Lease 성공 ≠ 실제 Remote 통신 성공</b>입니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“Client가 DHCP Server와 다른 Subnet에 있을 때 Discover가 어떻게 Server까지 가는가?”</h3>
+        <p>Broadcast, Relay, giaddr, ACK라는 네 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>Packet이 어디까지 갔는지 직접 비교하세요.</h2><p>DORA → ACK Option → Relay → Server Down/Relay Missing → Wrong Gateway Option 순서로 같은 Topology에서 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="dhcp-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 2026-10-04 PNETLab의 Cisco IOL L3 2대 + IOL L2 1대 + VPCS 1대로 DHCP-01~06을 모두 PASS했습니다. <a href="../learning/services/dhcp/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">DHCP / DHCP Relay · Concept → Interactive Lab</div></footer>
+</body>
+</html>
