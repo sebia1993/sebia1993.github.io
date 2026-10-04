@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACL — 인터랙티브 실습</title>
+<meta name="description" content="Extended ACL의 Protocol/Port, Rule Order, Implicit Deny, Direction, One-way/Bidirectional 정책을 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:900px;color:var(--muted)}
+.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
+.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
+.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
+.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
+.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
+.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.94}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}.hidden{display:none!important}
+.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
+.observation{margin-top:18px;display:grid;grid-template-columns:1.35fr .65fr;gap:14px;min-width:0}.topology,.observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
+.topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 8px}.topology-stage{position:relative;width:900px;height:350px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}.topology-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.net-link{stroke:#29455f;stroke-width:8;stroke-linecap:round}.net-link.pass{stroke:var(--mint);stroke-width:10;stroke-dasharray:20 12;animation:pathFlow 1s linear infinite}.net-link.return{stroke:var(--blue);stroke-width:9;stroke-dasharray:9 11;animation:pathFlow 1.15s linear infinite}.net-link.stop{stroke:#9a534d;stroke-width:9;stroke-dasharray:10 10}.net-link.idle{stroke:#29455f}@keyframes pathFlow{to{stroke-dashoffset:-30}}
+.node{position:absolute;width:150px;transform:translate(-50%,-50%);text-align:center}.node-icon{display:grid;place-items:center;width:78px;height:62px;margin:auto;border:2px solid #365675;border-radius:15px;background:#0d2032}.node-icon svg{width:50px;height:42px;stroke:#9fb8cf;fill:none;stroke-width:2}.node.active .node-icon{border-color:var(--mint);box-shadow:0 0 0 6px rgba(126,224,194,.08)}.node.policy .node-icon{border-color:#d49b43;box-shadow:0 0 0 6px rgba(255,191,105,.08)}.node.stop .node-icon{border-color:#9a534d;box-shadow:0 0 0 6px rgba(255,120,110,.07)}.node b{display:block;margin-top:7px}.node small{display:block;color:var(--muted);font-size:.72rem;line-height:1.4}.r1{left:14%;top:55%}.r2{left:50%;top:55%}.r3{left:86%;top:55%}
+.cp{position:absolute;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#091624;color:#cbd9e7;font-size:.7rem;font-weight:850}.cp12{left:29%;top:45%}.cp23{left:67%;top:45%}.policy-badge{position:absolute;left:50%;top:18px;transform:translateX(-50%);padding:6px 10px;border:1px solid #8f6a38;border-radius:999px;color:var(--amber);background:#21170c;font-size:.72rem;font-weight:900}.stop-marker{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);display:none;padding:6px 9px;border:1px solid #9a534d;border-radius:999px;background:#26100e;color:#ff9c93;font-size:.72rem;font-weight:900}
+.event-strip{margin-top:11px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#091624}.event-strip b{color:var(--blue)}.event-strip p{margin:4px 0 0;color:var(--muted);font-size:.84rem}
+.panel-stack{display:grid;gap:10px}.panel-box{padding:12px;border:1px solid var(--line);border-radius:11px;background:#091624}.panel-box h4{margin:0 0 7px;font-size:.84rem}.policy-meta{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:.76rem}.policy-meta span{color:var(--muted)}.policy-meta strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.74rem;text-align:right}.ace-list{display:grid;gap:6px}.ace{display:grid;grid-template-columns:42px 1fr auto;gap:7px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px}.ace .seq{font:800 .7rem ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--blue)}.ace code{font-size:.7rem;color:#d6e3ef}.ace .hits{font-size:.68rem;color:var(--muted)}.ace.hit{border-color:#347968;background:rgba(126,224,194,.05)}.ace.denyhit{border-color:#9a534d;background:rgba(255,120,110,.05)}.implicit{padding:8px;border:1px dashed #8f6a38;border-radius:8px;color:var(--amber);font-size:.72rem}
+.result-box{padding:10px;border:1px solid var(--line);border-radius:10px;background:#0a1928;font-size:.78rem}.result-box strong{display:block;margin-bottom:4px;color:var(--mint)}.evidence{padding:12px;border:1px solid var(--line);border-radius:11px;background:#0a1928}.evidence b{display:block;margin-bottom:5px}.evidence ul{margin:0;padding-left:1rem;color:var(--muted);font-size:.78rem}.evidence li{margin:.35rem 0}.scope-note{padding:12px;border:1px solid #8f6a38;border-radius:11px;background:rgba(255,191,105,.05);font-size:.78rem;color:#d6e2ef}.scope-note b{color:var(--amber)}
+.lesson-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+@media(prefers-reduced-motion:reduce){.net-link.pass,.net-link.return{animation:none}}
+@media(max-width:900px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.answer-grid{grid-template-columns:1fr}.stage-link{display:grid}.topology-stage{width:760px;height:330px}}
+@media(max-width:680px){.hero{padding-top:34px}.course-progress{grid-template-columns:1fr}.course-count{text-align:left}.topology-stage{width:680px;height:320px}.node{width:130px}.node-icon{width:68px;height:56px}.lesson-nav{flex-wrap:wrap}.ace{grid-template-columns:36px 1fr}.ace .hits{grid-column:2}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><div class="nav"><a href="acl.html">1단계 개념서</a></div></div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <small>2단계 · INTERACTIVE LAB</small>
+    <h1>ACL</h1>
+    <p>R1—R2—R3의 Routing은 그대로 두고 <b>R2의 ACL만 변경</b>합니다. 먼저 결과를 예상한 뒤 Packet Stop 위치, ACE 순서, Direction과 hit를 확인하세요.</p>
+    <div class="start-guide">
+      <div class="guide-step"><b>1</b><span><strong>예상</strong>어떤 Packet이 통과/차단될지 선택합니다.</span></div>
+      <div class="guide-step"><b>2</b><span><strong>정책 변경</strong>Rule Order 또는 Direction을 직접 비교합니다.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>관찰</strong>CP12/CP23와 ACE hit로 이유를 연결합니다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="stage-link"><span><b>1단계에서 가져올 한 문장:</b> Interface/Direction을 지난 Packet을 위에서부터 검사하고 첫 Match에서 Permit/Deny가 결정됩니다.</span><a class="btn" href="acl.html">개념서 다시 보기</a></div>
+    <div class="lesson-tabs" id="lessonTabs"></div>
+    <div class="course-progress">
+      <div><b>진행률</b><small>비교/복구가 있는 문제는 끝까지 확인해야 완료됩니다.</small></div>
+      <div class="course-bar"><div id="progressBar"></div></div>
+      <div class="course-count" id="progressCount">0 / 6 완료</div>
+    </div>
+
+    <article class="card lab-card">
+      <div class="coach">
+        <div class="coach-icon" id="lessonNo">1</div>
+        <div><div class="coach-title" id="lessonTitle"></div><div class="coach-text" id="lessonText"></div><div class="start-state" id="startState"></div></div>
+      </div>
+
+      <div class="prediction">
+        <h2 id="question"></h2>
+        <p>실행 전에 하나를 선택하세요. 선택 후 검증된 Actual을 보여줍니다.</p>
+        <div class="options" id="options"></div>
+        <div class="controls">
+          <button class="btn primary" id="runBtn" disabled>선택한 예상으로 실행</button>
+          <button class="btn hidden" id="compareBtn"></button>
+          <button class="btn hidden" id="recoverBtn">ACL 제거 후 복구 확인</button>
+          <button class="btn" id="resetBtn">이 문제 다시 풀기</button>
+        </div>
+      </div>
+
+      <div class="feedback hidden" id="feedback">
+        <div class="feedback-head"><strong>예상 vs 실제</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
+        <div class="answer-grid"><div class="answer-box"><small>내 예상</small><strong id="myAnswer"></strong></div><div class="answer-box"><small>검증된 결과</small><strong id="actualAnswer"></strong></div></div>
+        <p id="reason"></p>
+      </div>
+
+      <div class="observation">
+        <div class="topology">
+          <h3>Packet Path / Stop Point</h3>
+          <div class="topology-scroll">
+            <div class="topology-stage">
+              <svg class="topology-svg" viewBox="0 0 900 350" aria-hidden="true">
+                <line id="link12" class="net-link idle" x1="180" y1="193" x2="385" y2="193"/>
+                <line id="link23" class="net-link idle" x1="515" y1="193" x2="720" y2="193"/>
+              </svg>
+              <span class="policy-badge" id="policyBadge">R2 · ACL POLICY</span>
+              <span class="cp cp12">CP12</span><span class="cp cp23">CP23</span><span class="stop-marker" id="stopMarker">POLICY STOP</span>
+              <div class="node r1" id="r1"><div class="node-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R1</b><small>10.0.12.1<br>Source</small></div>
+              <div class="node r2" id="r2"><div class="node-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R2</b><small>E0/0 ← R1<br>E0/1 → R3</small></div>
+              <div class="node r3" id="r3"><div class="node-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R3</b><small>10.0.23.2<br>Destination</small></div>
+            </div>
+          </div>
+          <div class="event-strip"><b id="eventKind">IDLE</b><p id="eventText">예상을 선택한 뒤 실행하면 현재 ACL 판단과 Packet Path를 보여줍니다.</p></div>
+        </div>
+
+        <aside class="observation-side">
+          <div class="panel-stack">
+            <div class="panel-box"><h4>ACL Application</h4><div class="policy-meta" id="policyMeta"></div></div>
+            <div class="panel-box"><h4>ACE Order / Hit</h4><div class="ace-list" id="aceList"></div></div>
+            <div class="result-box" id="resultBox"><strong>대기</strong>예상 후 실행하세요.</div>
+            <div class="evidence"><b>실제 근거</b><ul id="evidenceList"><li>아직 실행하지 않았습니다.</li></ul></div>
+            <div class="scope-note" id="scopeNote"><b>검증 범위:</b> Routing은 모든 장면에서 고정입니다.</div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="lesson-nav"><button class="btn" id="prevBtn">← 이전 문제</button><button class="btn primary" id="nextBtn">다음 문제 →</button></div>
+    </article>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="wrap">ACL · 예상 → 정책 비교 → 관찰 → 설명</div></footer>
+
+<script>
+const lessons=[
+ {claim:"ACL-01",title:"Protocol Match",text:"R2 E0/0 inbound에서 R1→R3 ICMP만 Deny하고 나머지 IP는 Permit합니다.",states:["Source 10.0.12.1","Destination 10.0.23.2","deny ICMP","permit other IP"],question:"R1→R3 ICMP와 TCP/23 결과는?",options:["ICMP 차단 · TCP/23 허용","둘 다 차단","둘 다 허용"],correct:0,mode:"protocol",actual:"ICMP 0/3 · TCP/23 handshake + VTY 도달",reason:"ICMP만 첫 Deny ACE에 Match했고 TCP/23은 catch-all Permit으로 통과했습니다.",compare:null,evidence:["ICMP CP12 request 3 · CP23 0","ICMP deny hit +3","TCP SYN/SYN-ACK/ACK CP12·CP23 대응","R3 VTY prompt 도달"]},
+ {claim:"ACL-02",title:"TCP Destination Port Match",text:"R2 E0/0 inbound에서 R1→R3 TCP destination port 23만 Deny합니다.",states:["deny TCP dst 23","permit other IP"],question:"Ping과 TCP/23 결과는?",options:["Ping 성공 · TCP/23 차단","Ping 차단 · TCP/23 성공","둘 다 차단"],correct:0,mode:"port",actual:"Ping 3/3 · TCP/23 SYN은 R2에서 Stop",reason:"ICMP는 Permit이고 TCP destination port 23만 Deny ACE에 Match했습니다.",compare:null,evidence:["ICMP CP12/CP23 request+reply 대응","TCP SYN CP12 1 · CP23 0","TCP deny hit +1","ICMP permit hit +3"]},
+ {claim:"ACL-03",title:"First Match / Rule Order",text:"먼저 Specific TCP/23 Permit을 Broad IP Deny보다 위에 둡니다.",states:["10 permit TCP/23","20 deny IP R1→R3","30 permit any"],question:"Scenario A에서 TCP/23은?",options:["Specific Permit에서 허용","Broad Deny에서 차단","Implicit Deny"],correct:0,mode:"orderA",actual:"TCP/23 Permit · ICMP Broad Deny",reason:"TCP/23은 위의 Specific Permit에서 첫 Match하여 이후 Broad Deny를 보지 않습니다.",compare:"Broad Deny를 위로 이동",evidence:["A: TCP Specific Permit hit 증가","A: ICMP Broad Deny hit +3","B 검증에서는 하위 TCP Permit hit +0"]},
+ {claim:"ACL-04",title:"Implicit Deny",text:"ACL에는 R1→R3 ICMP Permit 한 줄만 있고 catch-all Permit과 TCP Deny는 없습니다.",states:["10 permit ICMP","TCP deny 없음","permit any 없음"],question:"Unmatched TCP/23은?",options:["Implicit Deny로 차단","명시적 Deny가 없으니 허용","ICMP Permit에 같이 Match"],correct:0,mode:"implicit",actual:"TCP/23 차단 · ICMP 3/3",reason:"TCP/23은 어떤 ACE에도 Match하지 않아 ACL 끝의 Implicit Deny로 차단됐습니다.",compare:null,evidence:["전체 ACL에 ICMP permit 한 줄","TCP explicit deny 없음","TCP SYN CP12 1 · CP23 0","ICMP permit hit +3"]},
+ {claim:"ACL-05",title:"Interface / Direction",text:"R1→R3 ICMP Deny ACL을 처음에는 R2 E0/0 outbound에 적용합니다.",states:["같은 ACL 내용","R2 E0/0 OUT","R1→R3 Request는 E0/0 IN"],question:"Wrong Direction 상태에서 R1→R3 Ping은?",options:["성공","R2에서 차단","Route가 사라짐"],correct:0,mode:"directionOut",actual:"Ping 3/3 · Deny hit 0",reason:"R1→R3 Request는 E0/0으로 들어오므로 E0/0 outbound ACL을 통과하지 않았습니다.",compare:"같은 ACL을 E0/0 IN으로 이동",evidence:["OUT: CP12/CP23 request+reply","OUT: deny hit +0","IN 검증: deny hit +3 · CP23 request 0"]},
+ {claim:"ACL-06",title:"One-way vs Bidirectional",text:"원래 FAIL을 보정한 echo-only 정책입니다. E0/0 inbound에서 R1→R3 Echo Request만 Deny합니다.",states:["deny ICMP echo R1→R3","permit other IP","Stateless ACL"],question:"Corrected One-way 상태의 두 Ping 결과는?",options:["R1→R3 실패 · R3→R1 성공","양쪽 모두 실패","양쪽 모두 성공"],correct:0,mode:"oneway",actual:"Forward 0/3 · Reverse 3/3",reason:"Echo Request만 차단하므로 reverse Ping의 R1 Echo Reply(type 0)는 Permit됩니다.",compare:"반대쪽 Echo Request Deny 추가",evidence:["SUPP06A forward 0/3","SUPP06A reverse 3/3","Forward deny hit +3","원래 all-ICMP 정책은 reverse Reply까지 막아 FAIL"]},
+];
+let index=0,selected=null,executed=false,compared=false,recovered=false;const done=new Set();
+const $=id=>document.getElementById(id);
+function tabs(){ $("lessonTabs").innerHTML=lessons.map((l,i)=>`<button class="lesson-tab ${i===index?"active":""} ${done.has(i)?"done":""}" data-i="${i}">${i+1}. ${l.claim}</button>`).join("");$("lessonTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>go(+b.dataset.i));}
+function progress(){const n=done.size;$("progressBar").style.width=(n/6*100)+"%";$("progressCount").textContent=`${n} / 6 완료`;}
+function resetVisual(){
+ $("link12").setAttribute("class","net-link idle");$("link23").setAttribute("class","net-link idle");$("stopMarker").style.display="none";["r1","r2","r3"].forEach(id=>$(id).className="node "+id);$("policyBadge").textContent="R2 · ACL POLICY";$("eventKind").textContent="IDLE";$("eventText").textContent="예상을 선택한 뒤 실행하면 현재 ACL 판단과 Packet Path를 보여줍니다.";$("policyMeta").innerHTML="<span>Interface</span><strong>대기</strong><span>Direction</span><strong>대기</strong>";$("aceList").innerHTML="";$("resultBox").innerHTML="<strong>대기</strong>예상 후 실행하세요.";$("scopeNote").innerHTML="<b>검증 범위:</b> Routing은 모든 장면에서 고정입니다.";
+}
+function ace(seq,rule,hits,type=""){return `<div class="ace ${type}"><span class="seq">${seq}</span><code>${rule}</code><span class="hits">${hits}</span></div>`;}
+function setPolicy(iface,dir,aces){$("policyMeta").innerHTML=`<span>Interface</span><strong>${iface}</strong><span>Direction</span><strong>${dir}</strong>`;$("aceList").innerHTML=aces.join("");}
+function passPath(){ $("link12").setAttribute("class","net-link pass");$("link23").setAttribute("class","net-link pass");["r1","r2","r3"].forEach(id=>$(id).classList.add("active")); }
+function stopAtR2(){ $("link12").setAttribute("class","net-link stop");$("link23").setAttribute("class","net-link idle");$("r1").classList.add("active");$("r2").classList.add("stop");$("stopMarker").style.display="block"; }
+function render(){
+ const l=lessons[index];selected=null;executed=false;compared=false;recovered=false;$("lessonNo").textContent=index+1;$("lessonTitle").textContent=l.title;$("lessonText").textContent=l.text;$("startState").innerHTML=l.states.map(x=>`<span>${x}</span>`).join("");$("question").textContent=l.question;$("options").innerHTML=l.options.map((x,i)=>`<button class="choice" data-i="${i}">${x}</button>`).join("");$("options").querySelectorAll(".choice").forEach(b=>b.onclick=()=>choose(+b.dataset.i));$("runBtn").disabled=true;$("compareBtn").classList.add("hidden");$("recoverBtn").classList.add("hidden");$("feedback").classList.add("hidden");$("evidenceList").innerHTML="<li>아직 실행하지 않았습니다.</li>";resetVisual();tabs();progress();$("prevBtn").disabled=index===0;$("nextBtn").textContent=index===5?"로드맵으로 →":"다음 문제 →";
+}
+function choose(i){if(executed)return;selected=i;$("options").querySelectorAll(".choice").forEach((b,j)=>b.classList.toggle("selected",j===i));$("runBtn").disabled=false;}
+function apply(mode){
+ if(mode==="protocol"){setPolicy("R2 E0/0","IN",[ace("10","deny icmp R1 → R3","+3","denyhit"),ace("20","permit ip any any","TCP pass","hit")]);stopAtR2();$("eventKind").textContent="ICMP DENY";$("eventText").textContent="ICMP는 CP12에서 R2 ingress까지 도착하고 CP23으로 전달되지 않습니다. TCP/23은 같은 ACL의 permit으로 통과했습니다.";$("resultBox").innerHTML="<strong>ICMP STOP · TCP/23 PASS</strong>Protocol별 결과 분리";}
+ if(mode==="port"){setPolicy("R2 E0/0","IN",[ace("10","deny tcp R1 → R3 eq 23","+1","denyhit"),ace("20","permit ip any any","ICMP +3","hit")]);passPath();$("r2").classList.add("policy");$("eventKind").textContent="PORT MATCH";$("eventText").textContent="ICMP는 CP12/CP23을 통과하지만 TCP/23 SYN은 R2에서 멈춥니다.";$("resultBox").innerHTML="<strong>Ping 3/3 · TCP/23 STOP</strong>Destination Port 23만 차단";}
+ if(mode==="orderA"){setPolicy("R2 E0/0","IN",[ace("10","permit tcp R1 → R3 eq 23","TCP hit","hit"),ace("20","deny ip R1 → R3","ICMP +3","denyhit"),ace("30","permit ip any any","0")]);passPath();$("eventKind").textContent="FIRST MATCH A";$("eventText").textContent="TCP/23은 위의 Specific Permit에서 첫 Match하여 Broad Deny까지 내려가지 않습니다.";$("resultBox").innerHTML="<strong>TCP/23 PASS · ICMP STOP</strong>Specific Permit First";}
+ if(mode==="orderB"){setPolicy("R2 E0/0","IN",[ace("10","deny ip R1 → R3","TCP +1 / ICMP +3","denyhit"),ace("20","permit tcp R1 → R3 eq 23","+0"),ace("30","permit ip any any","0")]);stopAtR2();$("eventKind").textContent="FIRST MATCH B";$("eventText").textContent="Broad Deny가 먼저 Match하므로 아래 TCP Permit은 해당 Packet에 사용되지 않습니다.";$("resultBox").innerHTML="<strong>TCP/23 STOP · lower permit +0</strong>Broad Deny First";}
+ if(mode==="implicit"){setPolicy("R2 E0/0","IN",[ace("10","permit icmp R1 → R3","+3","hit"),'<div class="implicit">implicit deny ip any any</div>']);stopAtR2();$("eventKind").textContent="IMPLICIT DENY";$("eventText").textContent="ICMP는 명시적 Permit으로 통과하지만 unmatched TCP/23은 보이지 않는 마지막 Deny에서 멈춥니다.";$("resultBox").innerHTML="<strong>ICMP 3/3 · TCP/23 STOP</strong>Explicit TCP deny 없음";}
+ if(mode==="directionOut"){setPolicy("R2 E0/0","OUT",[ace("10","deny icmp R1 → R3","+0"),ace("20","permit ip any any","reply +3","hit")]);passPath();$("eventKind").textContent="WRONG DIRECTION";$("eventText").textContent="R1→R3 Request는 E0/0 IN으로 들어오므로 E0/0 OUT ACL의 deny를 만나지 않습니다.";$("resultBox").innerHTML="<strong>Ping 3/3 · deny hit 0</strong>Packet이 ACL 방향을 지나지 않음";}
+ if(mode==="directionIn"){setPolicy("R2 E0/0","IN",[ace("10","deny icmp R1 → R3","+3","denyhit"),ace("20","permit ip any any","0")]);stopAtR2();$("eventKind").textContent="CORRECT DIRECTION";$("eventText").textContent="같은 ACL을 IN으로 옮기자 R1→R3 Request가 첫 Deny ACE에 Match해 R2에서 멈춥니다.";$("resultBox").innerHTML="<strong>Ping 0/3 · deny hit +3</strong>Same ACL, Direction changed";}
+ if(mode==="oneway"){setPolicy("R2 E0/0","IN",[ace("10","deny icmp R1 → R3 echo","+3","denyhit"),ace("20","permit ip any any","reverse +3","hit")]);stopAtR2();$("eventKind").textContent="ONE-WAY ECHO REQUEST";$("eventText").textContent="R1이 시작한 Echo Request만 차단합니다. R3→R1 Ping의 R1 Echo Reply는 type 0이라 Permit됩니다.";$("resultBox").innerHTML="<strong>Forward 0/3 · Reverse 3/3</strong>SUPP06A PASS";$("scopeNote").innerHTML="<b>원래 FAIL 보존:</b> 모든 ICMP를 deny하면 reverse Echo Reply도 차단되어 Reverse Ping은 실패했습니다.";}
+ if(mode==="bidir"){setPolicy("R2 E0/0 + E0/1","IN / IN",[ace("E0/0","deny echo R1 → R3","+3","denyhit"),ace("E0/1","deny echo R3 → R1","+3","denyhit")]);$("link12").setAttribute("class","net-link stop");$("link23").setAttribute("class","net-link stop");$("r2").classList.add("stop");$("stopMarker").style.display="block";$("eventKind").textContent="BIDIRECTIONAL";$("eventText").textContent="양쪽 ingress에서 각 방향 Echo Request를 차단하므로 양방향 Ping이 모두 실패합니다.";$("resultBox").innerHTML="<strong>Forward 0/3 · Reverse 0/3</strong>SUPP06B PASS";}
+ if(mode==="recovery"){setPolicy("none","none",[]);passPath();$("eventKind").textContent="RECOVERY";$("eventText").textContent="두 ACL application을 제거한 뒤 양방향 Ping이 다시 3/3으로 복구됐습니다.";$("resultBox").innerHTML="<strong>Forward 3/3 · Reverse 3/3</strong>Final baseline restored";}
+}
+function run(){
+ if(selected===null||executed)return;executed=true;const l=lessons[index];$("options").querySelectorAll(".choice").forEach((b,i)=>{b.disabled=true;if(i===l.correct)b.classList.add("correct-answer");if(i===selected&&i!==l.correct)b.classList.add("wrong-answer");});const ok=selected===l.correct;$("feedback").classList.remove("hidden","correct","incorrect");$("feedback").classList.add(ok?"correct":"incorrect");$("feedbackBadge").textContent=ok?"예상 적중":"예상과 다름";$("myAnswer").textContent=l.options[selected];$("actualAnswer").textContent=l.actual;$("reason").textContent=l.reason;$("evidenceList").innerHTML=l.evidence.map(x=>`<li>${x}</li>`).join("");apply(l.mode);
+ if(l.compare){$("compareBtn").textContent=l.compare;$("compareBtn").classList.remove("hidden");}else done.add(index);
+ tabs();progress();
+}
+function compare(){
+ const l=lessons[index];compared=true;$("compareBtn").classList.add("hidden");
+ if(l.mode==="orderA"){apply("orderB");done.add(index);$("actualAnswer").textContent="A: TCP Permit / B: Broad Deny First → TCP Stop";$("reason").textContent+=" 순서를 바꾸자 Broad Deny가 먼저 Match했고 아래 TCP Permit hit는 증가하지 않았습니다.";}
+ if(l.mode==="directionOut"){apply("directionIn");done.add(index);$("actualAnswer").textContent="OUT: Ping 3/3 → IN: Ping 0/3";$("reason").textContent+=" 같은 ACL을 inbound로 옮기자 deny hit가 3 증가했습니다.";}
+ if(l.mode==="oneway"){apply("bidir");$("recoverBtn").classList.remove("hidden");$("actualAnswer").textContent="One-way: Forward 0/3 Reverse 3/3 → Bidirectional: 둘 다 0/3";$("reason").textContent+=" 반대쪽 ingress에도 Echo Request Deny를 추가하면 양방향 시작 Packet이 각각 차단됩니다.";}
+ tabs();progress();
+}
+function recover(){if(index!==5||!compared)return;recovered=true;$("recoverBtn").classList.add("hidden");apply("recovery");done.add(index);$("actualAnswer").textContent="One-way PASS → Bidirectional PASS → ACL 제거 후 양방향 3/3";$("reason").textContent+=" 최종 ACL application을 제거해 양방향 통신과 baseline config를 복구했습니다.";tabs();progress();}
+function go(i){index=Math.max(0,Math.min(5,i));render();window.scrollTo({top:document.querySelector(".lesson-tabs").offsetTop-80,behavior:"smooth"});}
+$("runBtn").onclick=run;$("compareBtn").onclick=compare;$("recoverBtn").onclick=recover;$("resetBtn").onclick=render;$("prevBtn").onclick=()=>go(index-1);$("nextBtn").onclick=()=>{if(index===5){location.href="../roadmap.html";return;}go(index+1);};render();
+</script>
+</body>
+</html>
