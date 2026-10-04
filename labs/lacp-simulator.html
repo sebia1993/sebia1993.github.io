@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LACP / Link Aggregation — 인터랙티브 실습</title>
+<meta name="description" content="LACP 협상, Logical Port-Channel, Flow Hash, Member 장애와 Bundle 장애를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:900px;color:var(--muted)}
+.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
+.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
+.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
+.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
+.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
+.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.9}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
+.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
+.observation{margin-top:18px;display:grid;grid-template-columns:1.35fr .65fr;gap:14px;min-width:0}.topology,.observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
+.topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 8px}.topology-stage{position:relative;width:760px;height:390px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}
+.topology-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.agg-link{stroke:#29455f;stroke-width:9;stroke-linecap:round}.agg-link.bundled{stroke:#356d93}.agg-link.control{stroke:var(--violet);stroke-dasharray:9 8;animation:pathFlow 1.5s linear infinite}.agg-link.active-data{stroke:var(--blue);stroke-width:12;stroke-dasharray:22 12;animation:pathFlow 1s linear infinite}.agg-link.reply{stroke:var(--mint);stroke-width:12;stroke-dasharray:22 12;animation:pathFlow 1s linear infinite}.agg-link.down{stroke:#9a534d;stroke-dasharray:6 10}.agg-link.idle{stroke:#29455f}
+@keyframes pathFlow{to{stroke-dashoffset:-34}}
+.device{position:absolute;z-index:3;text-align:center}.device-icon{width:112px;height:62px;border:1px solid var(--line);border-radius:12px;background:#0a1726;display:grid;place-items:center;position:relative}.device-icon.switch:before{content:"";width:78px;height:12px;border:1px solid #52708e;border-radius:3px;box-shadow:0 18px 0 -1px #0a1726,0 18px 0 0 #52708e}.device-icon.pc:before{content:"";width:52px;height:31px;border:2px solid #52708e;border-radius:4px;box-shadow:0 8px 0 -5px #52708e}.device b{display:block;margin-top:6px;font-size:.82rem}.device span{display:block;color:var(--muted);font-size:.64rem}.device.active .device-icon{border-color:var(--blue);box-shadow:0 0 0 5px rgba(88,184,255,.08)}.device.control .device-icon{border-color:var(--violet)}.device.stop .device-icon{border-color:#9a534d}.device.reply .device-icon{border-color:var(--mint)}
+#pc1a{left:18px;top:72px}#pc1b{left:18px;top:228px}#sw1{left:198px;top:150px}#sw2{left:450px;top:150px}#pc2a{left:625px;top:72px}#pc2b{left:625px;top:228px}
+.po-overlay{position:absolute;left:306px;top:115px;width:145px;height:145px;border:2px solid #347968;border-left:0;border-right:0;border-radius:18px;z-index:2;pointer-events:none}.po-badge{position:absolute;left:347px;top:171px;z-index:5;padding:6px 10px;border:1px solid #347968;border-radius:999px;background:#0a1e1b;color:var(--mint);font-size:.7rem;font-weight:900}.po-badge.down{border-color:#9a534d;color:#ff9c93;background:#251313}.po-badge.wait{border-color:#8f6a38;color:var(--amber);background:#241b10}
+.link-label{position:absolute;z-index:5;padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#c7d7e7;font-size:.63rem;font-weight:800;white-space:nowrap}.link-label.active{color:var(--blue);border-color:#356d93}.link-label.control{color:var(--violet);border-color:#70649c}.link-label.down{color:#ff9c93;border-color:#9a534d}.link-label.wait{color:var(--amber);border-color:#8f6a38}
+#labelM1{left:353px;top:126px}#labelM2{left:353px;top:242px}
+.packet-marker{position:absolute;z-index:6;display:none;padding:5px 8px;border-radius:999px;border:1px solid #356d93;background:#0b2134;color:var(--blue);font-size:.64rem;font-weight:900}.packet-marker.show{display:block}.packet-marker.control{color:var(--violet);border-color:#70649c}.packet-marker.reply{color:var(--mint);border-color:#347968}.packet-marker.stop{color:#ff9c93;border-color:#9a534d}
+.event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#0a1b2b}.event-strip small{display:block;color:var(--blue);font-weight:850}.event-strip strong{display:block;margin-top:3px}.event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}.step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}.step-controls button{border:1px solid var(--line);border-radius:9px;background:#0b1b2b;color:var(--text);padding:8px 10px;cursor:pointer}.step-controls button:disabled{opacity:.35}.step-count{margin-left:auto;color:var(--muted);font-size:.78rem}
+.obs-grid{display:grid;gap:9px}.obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}.obs-item small{display:block;color:var(--muted);font-weight:800}.obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.legend span{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:.7rem}.legend i{display:inline-block;width:22px;height:4px;border-radius:999px;background:#356d93}.legend .control i{background:repeating-linear-gradient(90deg,var(--violet) 0 6px,transparent 6px 10px)}.legend .down i{background:repeating-linear-gradient(90deg,#9a534d 0 4px,transparent 4px 8px)}
+.lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}.lesson-actions button{font:inherit}.scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
+.summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
+@media(prefers-reduced-motion:reduce){.agg-link.control,.agg-link.active-data,.agg-link.reply{animation:none}}
+@media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <small>2단계 · INTERACTIVE LAB</small>
+  <h1>LACP / Link Aggregation</h1>
+  <p>같은 Physical Topology에서 <b>LACP Control Plane, Po1 Logical State, 실제 Flow가 선택한 Member, Member/Bundle 장애</b>를 구분해 확인합니다.</p>
+  <div class="start-guide">
+    <div class="guide-step"><b>1</b><span><strong>상태 예상</strong>active/passive, Member, Po1 상태를 먼저 판단합니다.</span></div>
+    <div class="guide-step"><b>2</b><span><strong>실행</strong>실제 검증 기반 Member Path를 보여줍니다.</span></div>
+    <div class="guide-step"><b>3</b><span><strong>관찰</strong>LACPDU와 User Data를 구분합니다.</span></div>
+  </div>
+</header>
+
+<nav class="lesson-tabs" id="lessonTabs" aria-label="LACP 실습 문제 선택"></nav>
+
+<div class="course-progress">
+  <div><strong>LACP / Link Aggregation 진행도</strong><small>결과 확인 수와 정답 수를 별도로 표시합니다.</small></div>
+  <div class="course-bar"><div id="courseBar"></div></div>
+  <div class="course-count" id="courseCount">결과 확인 0 / 5</div>
+</div>
+
+<div class="stage-link">
+  <span><b>2단계 Interactive Lab</b> · 예상 → 실행 → 정오답 → Member/Po1 관찰 → 단계 재생 → 다음 문제.</span>
+  <a class="btn" href="lacp.html">← 1단계 개념서</a>
+</div>
+
+<main id="labMain" class="card lab-card">
+  <div class="coach">
+    <div class="coach-icon" id="coachIcon">1</div>
+    <div>
+      <div class="coach-title" id="coachTitle"></div>
+      <div class="coach-text" id="coachText"></div>
+      <div class="start-state" id="startState"></div>
+    </div>
+  </div>
+
+  <section class="prediction">
+    <h2 id="question"></h2>
+    <p>먼저 예상하세요. 답안은 점수만 바꾸며 실제 검증 기반 모델의 결과는 바꾸지 않습니다.</p>
+    <div class="options" id="choices"></div>
+    <div class="controls">
+      <button class="btn primary" id="runBtn" disabled>② 실행해서 확인하기</button>
+      <button class="btn" id="resetBtn">선택 초기화</button>
+    </div>
+  </section>
+
+  <section class="feedback" id="feedback" hidden tabindex="-1">
+    <div class="feedback-head"><strong>③ 내 예상과 실제 비교</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
+    <div class="answer-grid">
+      <div class="answer-box"><small>내 답</small><strong id="myAnswer"></strong></div>
+      <div class="answer-box"><small>올바른 답</small><strong id="correctAnswer"></strong></div>
+    </div>
+    <p id="feedbackReason"></p>
+  </section>
+
+  <section class="observation" id="observation" hidden>
+    <div class="topology">
+      <h3>검증 기반 Learning Topology · VLAN 10</h3>
+      <div class="topology-scroll">
+        <div class="topology-stage">
+          <svg class="topology-svg" viewBox="0 0 760 390" aria-hidden="true">
+            <line class="agg-link bundled" id="edge1a" x1="130" y1="108" x2="198" y2="172"/>
+            <line class="agg-link bundled" id="edge1b" x1="130" y1="263" x2="198" y2="218"/>
+            <line class="agg-link bundled" id="m1Svg" x1="310" y1="170" x2="450" y2="170"/>
+            <line class="agg-link bundled" id="m2Svg" x1="310" y1="225" x2="450" y2="225"/>
+            <line class="agg-link bundled" id="edge2a" x1="562" y1="172" x2="625" y2="108"/>
+            <line class="agg-link bundled" id="edge2b" x1="562" y1="218" x2="625" y2="263"/>
+          </svg>
+
+          <div class="device" id="pc1a"><div class="device-icon pc"></div><b>PC1A</b><span>192.0.2.11</span></div>
+          <div class="device" id="pc1b"><div class="device-icon pc"></div><b>PC1B</b><span>192.0.2.12</span></div>
+          <div class="device" id="sw1"><div class="device-icon switch"></div><b>SW1</b><span>LACP active</span></div>
+          <div class="device" id="sw2"><div class="device-icon switch"></div><b>SW2</b><span>LACP passive</span></div>
+          <div class="device" id="pc2a"><div class="device-icon pc"></div><b>PC2A</b><span>192.0.2.21</span></div>
+          <div class="device" id="pc2b"><div class="device-icon pc"></div><b>PC2B</b><span>192.0.2.22</span></div>
+
+          <div class="po-overlay"></div>
+          <span class="po-badge" id="poBadge">Po1 · UP · M1+M2</span>
+          <span class="link-label" id="labelM1">M1 · Bundled</span>
+          <span class="link-label" id="labelM2">M2 · Bundled</span>
+          <span class="packet-marker" id="packetMarker">IPv4</span>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i></i>Bundled / Data</span>
+        <span class="control"><i></i>LACPDU</span>
+        <span class="down"><i></i>Member Down</span>
+      </div>
+
+      <div class="event-strip">
+        <small id="eventKind"></small>
+        <strong id="eventTitle"></strong>
+        <span id="eventDetail"></span>
+      </div>
+
+      <div class="step-controls">
+        <button id="prevStepBtn" type="button">← 이전 흐름</button>
+        <button id="nextStepBtn" type="button">다음 흐름 →</button>
+        <span class="step-count" id="stepCount"></span>
+      </div>
+    </div>
+
+    <aside class="observation-side">
+      <h3>현재 관찰 값</h3>
+      <div class="obs-grid">
+        <div class="obs-item"><small id="metric1Label"></small><strong id="metric1Value"></strong></div>
+        <div class="obs-item"><small id="metric2Label"></small><strong id="metric2Value"></strong></div>
+        <div class="obs-item"><small>한 줄 결론</small><strong id="observationConclusion"></strong></div>
+      </div>
+    </aside>
+  </section>
+
+  <details class="scope-details">
+    <summary>가정과 실제 검증 근거 보기</summary>
+    <div>
+      이 화면은 2026-10-04 Cisco IOL L2 + VPCS 실제 검증과 재검증 결과를 학습용으로 단순화한 시뮬레이션입니다.
+      원래 run01의 LACP-04 INCONCLUSIVE / LACP-05 FAIL을 보존하며, run02에서 src-mac Flow Diversity와 양단 M1 unavailable 조건을 추가 검증해 차단을 해소했습니다.
+      <a href="../learning/campus/lacp/cisco-validation-2026-10-04.html">실제 검증 요약 →</a>
+    </div>
+  </details>
+
+  <div class="lesson-actions">
+    <button class="btn" id="retryBtn" hidden>이 문제 다시 풀기</button>
+    <button class="btn" id="summaryBackBtn" hidden>전체 결과로 돌아가기</button>
+    <button class="btn primary" id="nextLessonBtn" disabled>다음 문제 →</button>
+  </div>
+</main>
+
+<section id="summaryPanel" class="summary-panel" hidden tabindex="-1">
+  <div class="eyebrow">학습 결과</div>
+  <h2>정오답과 복습할 문제를 구분해 확인하세요.</h2>
+  <div class="summary-metrics">
+    <div class="summary-metric"><strong id="submittedCount">0</strong><span>결과 확인</span></div>
+    <div class="summary-metric"><strong id="correctCount">0</strong><span>정답</span></div>
+    <div class="summary-metric"><strong id="wrongCount">0</strong><span>오답</span></div>
+    <div class="summary-metric"><strong id="pendingCount">5</strong><span>미응답</span></div>
+  </div>
+  <div class="summary-list" id="summaryList"></div>
+  <div class="controls" style="margin-top:16px"><button class="btn primary" id="continueBtn">미응답/오답 문제로 이동 →</button></div>
+</section>
+</div>
+<script src="lacp-simulator.js?v=20261004-1"></script>
+</body>
+</html>
