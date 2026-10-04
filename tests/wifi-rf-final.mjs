@@ -34,7 +34,7 @@ try{
   await page.goto(base+'/labs/wifi-rf.html',{waitUntil:'networkidle'});
   const body=await page.locator('body').innerText();
   assert.ok(body.includes('5 GHz · Channel 149 · 80 MHz'));
-  assert.ok(body.includes('CONCEPT EXAMPLE · LOCAL PASS 아님'));
+  assert.ok(body.includes('OBSERVED · 3차 보완 PASS'));
   assert.ok(body.includes('Radar Event는 관측하지 않았고'));
 
   await page.goto(base+'/labs/wifi-rf-simulator.html',{waitUntil:'networkidle'});
@@ -60,8 +60,9 @@ try{
   await page.locator('#resetBtn').click();
   await page.locator('.choice').nth(0).click();
   await page.locator('#runBtn').click();
-  assert.ok((await page.locator('#resultBox').innerText()).includes('NOT OBSERVED'));
-  assert.ok((await page.locator('#scopeNote').innerText()).includes('개념 예시'));
+  assert.ok((await page.locator('#resultBox').innerText()).includes('AP-A / AP-06 / AP-12 / AP-13'));
+  assert.ok((await page.locator('#metaPanel').innerText()).includes('4 BSSIDs'));
+  assert.ok((await page.locator('#scopeNote').innerText()).includes('3차 보완 PASS'));
 
   await page.locator('.lesson-tab').nth(5).click();
   await page.locator('#resetBtn').click();
