@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wi-Fi / RF 기초 — 개념서</title>
+<meta name="description" content="Band, Channel Width, RSSI/SNR, CCI/ACI, DFS를 실제 수동 RF 관측과 명확한 증거 한계로 배우는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.1rem,3vw,1.75rem)}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.flow-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.92rem}.flow-card p{margin:0;color:var(--muted);font-size:.82rem}
+.snapshot{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.snapshot-card,.metrics-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:13px;border:1px solid var(--line);border-radius:12px;background:#091624}.metric small{display:block;color:var(--muted);font-weight:800}.metric strong{display:block;margin-top:4px;font-size:1.15rem}.metric span{display:block;margin-top:3px;color:var(--muted);font-size:.72rem}
+.lanes{display:grid;gap:12px}.lane{position:relative;padding:14px 14px 14px 100px;border:1px solid var(--line);border-radius:13px;background:var(--panel3);min-height:58px}.lane-label{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:900;color:var(--blue)}.blocks{display:flex;gap:5px}.block{flex:1;min-height:30px;border:1px solid #3e6a91;border-radius:8px;background:rgba(88,184,255,.07);display:grid;place-items:center;font-size:.72rem;font-weight:800}.block.join{border-color:#8f6a38;background:rgba(255,191,105,.06);color:var(--amber)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.compare-card h3{margin:5px 0 8px}.compare-card p{margin:0;color:var(--muted)}.rf-lane{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#091624}.rf-spectrum{height:46px;position:relative;border-radius:9px;background:linear-gradient(90deg,#10263a,#0d1f30)}.rf-band{position:absolute;top:8px;height:30px;border:1px solid #3e6a91;border-radius:8px;background:rgba(88,184,255,.13);display:grid;place-items:center;font-size:.68rem;font-weight:900}.rf-band.warn{border-color:#8f6a38;background:rgba(255,191,105,.1);color:var(--amber)}
+.example-badge{display:inline-flex;padding:5px 8px;border:1px solid #8f6a38;border-radius:999px;color:var(--amber);font-size:.7rem;font-weight:900}
+.warning-box{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.warning-box h3{margin:5px 0 7px}.warning-box p{margin:0;color:#d8e4ef}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:1000px){.flow-grid{grid-template-columns:1fr 1fr}.snapshot,.compare-grid,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid,.metric-grid{grid-template-columns:1fr}.lane{padding-left:14px;padding-top:48px}.lane-label{top:14px;transform:none}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 요약</a><a href="#snapshot">실측</a><a href="#width">Channel Width</a><a href="#interference">CCI/ACI</a><a href="#dfs">DFS</a></nav></div></header>
+<main>
+<section class="preview-hero"><div class="shell">
+<div class="eyebrow">1단계 · CONCEPT GUIDE</div><h1>Wi-Fi / RF 기초</h1>
+<p>목표는 하나입니다. <b>RSSI 하나만 보고 품질을 판단하지 않고 Band·Channel·Width·SNR·간섭·DFS 조건을 함께 설명</b>할 수 있으면 됩니다.</p>
+<div class="concept-stage"><div><strong>RF 품질은 “신호가 세다/약하다”보다 넓은 문제입니다.</strong><span>Band → Channel → Width → RSSI+Noise → SNR → Channel 관계 → DFS 순서로 봅니다.</span></div><div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div></div>
+<div class="core-line"><strong>Band → Channel → Width → RSSI + Noise → SNR → CCI / ACI → DFS</strong><p>실측값이 없는 부분은 계산·공식근거와 실제 관측을 섞지 않습니다.</p></div>
+</div></section>
+
+<section id="summary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>무선 품질은 신호 세기 하나가 아니라 “신호 대 잡음 + 채널 사용 방식”입니다.</h2></div></div>
+<div class="flow-grid">
+<article class="flow-card"><b>1</b><h3>Band / Channel</h3><p>먼저 2.4/5/6 GHz 중 어느 Band인지 확인해야 Channel 의미를 해석할 수 있습니다.</p></article>
+<article class="flow-card"><b>2</b><h3>Width</h3><p>20/40/80 MHz처럼 넓어질수록 더 많은 Spectrum을 묶어 사용합니다.</p></article>
+<article class="flow-card"><b>3</b><h3>RSSI / SNR</h3><p>RSSI는 Signal Power, SNR은 Signal과 Noise의 차이입니다.</p></article>
+<article class="flow-card"><b>4</b><h3>CCI / ACI / DFS</h3><p>같은 채널, 겹치는 채널, 규제 제약을 따로 구분합니다.</p></article>
+</div>
+</div></section>
+
+<section id="snapshot"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · ACTUAL RF SNAPSHOT</div><h2>이번 수동 관측에서 확인된 값입니다.</h2></div></div>
+<div class="snapshot">
+<article class="snapshot-card"><div class="eyebrow">ASSOCIATED AP · AP-A</div><h3>5 GHz · Channel 149 · 80 MHz</h3><p>국가 코드는 KR로 보고됐고, 같은 수집에서 2.4 GHz와 5 GHz 주변 Channel 레코드가 관측됐습니다. 6 GHz는 이번 Snapshot에서 관측하지 못했습니다.</p>
+<div class="metric-grid" style="margin-top:14px"><div class="metric"><small>RSSI</small><strong>-22 dBm</strong><span>실제 OS/driver telemetry</span></div><div class="metric"><small>Noise</small><strong>-97 dBm</strong><span>실제 OS/driver telemetry</span></div><div class="metric"><small>SNR</small><strong>75 dB</strong><span>-22 - (-97)</span></div></div></article>
+<article class="metrics-card"><div class="eyebrow">EVIDENCE BOUNDARY</div><h3>측정값과 미측정값을 구분합니다.</h3><p>별도 Tool-SNR/SNIR 필드는 노출되지 않았습니다. 그래서 75 dB는 실제 RSSI/Noise 입력에서 계산한 값이며 별도 Spectrum Analyzer 측정이라고 주장하지 않습니다.</p><div class="warning-box" style="margin-top:14px"><strong>Privacy:</strong> SSID/BSSID 원본은 공개하지 않고 AP-A 같은 익명 별칭만 사용합니다.</div></article>
+</div>
+</div></section>
+
+<section id="width"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · CHANNEL WIDTH</div><h2>Width가 넓어지면 더 많은 20 MHz Block을 묶습니다.</h2></div></div>
+<div class="lanes">
+<div class="lane"><span class="lane-label">20 MHz</span><div class="blocks"><div class="block">1 block</div><div class="block">reuse</div><div class="block">reuse</div><div class="block">reuse</div></div></div>
+<div class="lane"><span class="lane-label">40 MHz</span><div class="blocks"><div class="block join">2 blocks bonded</div><div class="block join">2 blocks bonded</div></div></div>
+<div class="lane"><span class="lane-label">80 MHz</span><div class="blocks"><div class="block join">4 blocks bonded</div></div></div>
+</div>
+<div class="note" style="margin-top:14px"><b>핵심:</b> 넓은 Channel이 항상 실제 환경에서 더 빠르다는 뜻은 아닙니다. 더 많은 Spectrum을 묶기 때문에 같은 전체 Spectrum에서 독립적인 Channel Reuse 선택지는 줄어듭니다.</div>
+</div></section>
+
+<section id="interference"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · CCI vs ACI</div><h2>같은 Channel과 겹치는 Channel은 다른 문제입니다.</h2></div></div>
+<div class="compare-grid">
+<article class="compare-card"><span class="example-badge">CONCEPT EXAMPLE · LOCAL PASS 아님</span><h3>Co-Channel Condition</h3><p>서로 다른 BSS가 같은 Channel을 쓰면 같은 RF Channel을 공유하고 contention risk가 생깁니다. 이번 bounded read-only Snapshot에서는 서로 다른 동일채널 BSSID 쌍을 확인하지 못했으므로 실측 PASS로 표시하지 않습니다.</p><div class="rf-lane"><div class="rf-spectrum"><div class="rf-band" style="left:15%;width:45%">AP-X · ch149</div><div class="rf-band warn" style="left:35%;width:45%">AP-Y · ch149</div></div></div></article>
+<article class="compare-card"><div class="eyebrow">OBSERVED CHANNEL ALLOCATION</div><h3>Adjacent / Overlapping Channel</h3><p>실제 Snapshot 레코드에서 2.4 GHz ch1/20 MHz와 ch3/20 MHz가 관측됐고, 중심 2412/2422 MHz 기준 명목 점유 구간이 약 10 MHz 겹치는 것으로 계산됐습니다. 이것은 ACI 피해량 측정이 아니라 Channel Allocation 분류입니다.</p><div class="rf-lane"><div class="rf-spectrum"><div class="rf-band" style="left:10%;width:40%">ch1 · 20 MHz</div><div class="rf-band warn" style="left:30%;width:40%">ch3 · 20 MHz</div></div></div></article>
+</div>
+</div></section>
+
+<section id="dfs"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · DFS</div><h2>DFS는 5 GHz에서 Radar 공존을 위한 규제 조건입니다.</h2></div></div>
+<div class="compare-grid">
+<article class="compare-card"><div class="eyebrow">OBSERVED · KR</div><h3>ch36/80 · ch149/80 → non-DFS 분류</h3><p>이번 관측에서 본 5 GHz Primary ch36과 ch149의 80 MHz 그룹은 KR domain의 근거와 대조해 non-DFS로 분류했습니다.</p></article>
+<article class="compare-card"><div class="eyebrow">NOT REPRODUCED</div><h3>Radar Event / Channel Vacate</h3><p>Radar Event는 관측하지 않았고, Channel Vacate도 재현하지 않았습니다. Radar를 생성하거나 Production AP Channel을 바꾸는 검증은 수행하지 않습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>주의:</b> 사용 가능한 Channel과 DFS 범위는 Regulatory Domain에 따라 달라집니다. 특정 국가의 Channel 개수를 다른 국가에 그대로 적용하면 안 됩니다.</div>
+</div></section>
+
+<section id="review"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>다음 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="memory-grid">
+<article class="memory-card"><h3>⭐ 꼭 기억하세요</h3><ul><li>RSSI가 강해도 Noise가 높으면 SNR은 나빠질 수 있습니다.</li><li>Channel Width가 넓어지면 더 많은 Spectrum을 사용해 Reuse 선택지가 줄어듭니다.</li><li>CCI는 같은 Channel 공유, ACI는 겹치거나 인접한 Channel Allocation 문제입니다.</li><li>관측되지 않은 RF 현상을 실측한 것처럼 쓰지 않습니다.</li><li>DFS는 Regulatory Domain과 함께 해석합니다.</li></ul></article>
+<article class="explain-yourself"><div class="eyebrow">내 말로 설명하기</div><h3>“RSSI가 -50 dBm이면 Wi-Fi 품질이 좋다고 단정해도 될까?”</h3><p>Noise, SNR, Channel Width, CCI/ACI, DFS라는 단어를 사용해 왜 단정할 수 없는지 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>실측값과 개념 예시를 구분하면서 RF 상태를 직접 판정해 보세요.</h2><p>Band → Width → SNR → Co-Channel Evidence Boundary → Overlap → DFS 순서로 진행합니다.</p></div><div class="actions"><a class="btn primary" href="wifi-rf-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
+<section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> 1차 4 PASS / 2 INCONCLUSIVE, 2차에서 WIFIRF-03 PASS. WIFIRF-04는 bounded read-only Snapshot 3회 모두 unique BSSID 1개로 local PASS를 확보하지 못해 source-backed 개념으로 범위를 제한했습니다. 최종 Authoring Scope는 5 PASS + 1 Scope-Resolved이며 6 PASS로 표기하지 않습니다.</div></div></section>
+</main>
+<footer class="footer"><div class="shell">Wi-Fi / RF 기초 · Concept → Interactive Lab</div></footer>
+</body>
+</html>
