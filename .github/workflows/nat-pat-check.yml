@@ -1,0 +1,43 @@
+name: NAT PAT page checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'labs/nat-pat.html'
+      - 'labs/nat-pat-simulator.html'
+      - 'tests/nat-pat-final.mjs'
+      - 'tests/nat-pat-responsive.mjs'
+      - 'package.json'
+      - '.github/workflows/nat-pat-check.yml'
+  pull_request:
+    paths:
+      - 'labs/nat-pat.html'
+      - 'labs/nat-pat-simulator.html'
+      - 'tests/nat-pat-final.mjs'
+      - 'tests/nat-pat-responsive.mjs'
+      - 'package.json'
+      - '.github/workflows/nat-pat-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node tests/nat-pat-final.mjs
+      - run: node tests/nat-pat-responsive.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nat-pat-browser-evidence
+          path: test-results/
+          retention-days: 7
