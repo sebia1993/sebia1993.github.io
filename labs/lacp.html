@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LACP / Link Aggregation — 개념서</title>
+<meta name="description" content="LACP 협상, Port-Channel, Flow Hash, Member 장애와 전체 Bundle 장애를 짧게 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.compare-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.compare-card h3{margin:5px 0 7px}.compare-card p{margin:0;color:var(--muted);font-size:.88rem}
+.flow-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.flow-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.95rem}.flow-card p{margin:0;color:var(--muted);font-size:.84rem}
+.failure-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.failure-card{padding:19px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:3px 0 7px}.failure-card p{margin:0;color:#d4e0ec}.failure-path{margin-top:11px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624;color:var(--muted);font-size:.8rem}
+.hash-map{display:grid;grid-template-columns:1fr 72px 1fr;gap:12px;align-items:center}.hash-side{display:grid;gap:10px}.hash-flow{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.hash-flow b{display:block}.hash-flow span{display:block;color:var(--muted);font-size:.78rem;margin-top:3px}.member-stack{display:grid;gap:8px}.member{padding:11px;border:1px solid #356d93;border-radius:10px;text-align:center;color:var(--blue);font-weight:900}.member:nth-child(2){border-color:#347968;color:var(--mint)}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:900px){.flow-cards{grid-template-columns:1fr 1fr}.compare-grid{grid-template-columns:1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.failure-grid{grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.flow-cards{grid-template-columns:1fr}.hash-map{grid-template-columns:1fr}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#bundle">Bundle</a>
+      <a href="#hash">Hash</a>
+      <a href="#failure">장애</a>
+      <a href="#review">복습</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>LACP / <em>Link Aggregation</em></h1>
+    <p>목표는 하나입니다. <b>여러 Physical Member가 하나의 Logical Port-Channel을 만들고, Flow별 Member 선택과 Member 장애가 어떻게 다르게 나타나는지</b> 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>“Cable 두 개 = 모든 Packet이 절반씩”이라고 생각하지 않습니다.</strong><span>협상, Logical Bundle, Flow Hash, Member Failure를 순서대로 연결합니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>LACP는 Member를 묶고, Hash는 Flow마다 Member 하나를 고릅니다.</strong>
+      <p>Negotiation → Port-Channel → Flow Hash → Member Failure → Bundle State</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>Physical Member와 Logical Port-Channel을 따로 봅니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① 협상:</b> <strong>active</strong>는 LACP 협상을 시작하고 <strong>passive</strong>는 수신 LACP에 응답합니다.</p>
+      <p><b>② Bundle:</b> 호환되는 M1/M2가 묶이면 상위 기능에는 <strong>Po1 하나의 Logical Link</strong>로 보입니다.</p>
+      <p><b>③ Hash:</b> 한 Flow는 Hash 결과에 따라 <strong>한 Member에 일관되게</strong> 매핑될 수 있고, 다른 Flow는 다른 Member를 사용할 수 있습니다.</p>
+      <p><b>④ 장애:</b> Member 하나가 unavailable이어도 남은 Member가 있으면 Po1은 유지될 수 있지만, <strong>모든 Member가 사라지면 Po1도 Down</strong>됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="bundle">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · LACP BUNDLE</div><h2>두 Physical Link가 하나의 Logical Link가 됩니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card"><div class="eyebrow">SW1</div><h3>active</h3><p>LACPDU를 먼저 보내 협상을 시작합니다. 이번 Baseline에서 M1/M2 두 Member가 모두 Bundled됐습니다.</p></article>
+      <article class="compare-card"><div class="eyebrow">SW2</div><h3>passive</h3><p>active 쪽의 LACPDU에 응답했고 Actor/Partner 정보가 양쪽에서 일치했습니다.</p></article>
+      <article class="compare-card"><div class="eyebrow">UPPER LAYER</div><h3>Port-channel1</h3><p>STP에서는 Physical M1/M2 두 개가 아니라 <b>Po1 하나의 Forwarding Port</b>로 확인됐습니다.</p></article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>반대로 passive/passive는?</b> Clean 상태에서 양쪽 모두 passive로 구성하자 정상 Bundle이 형성되지 않았습니다. SW1만 active로 바꾸자 다시 두 Member가 Bundled되고 Po1이 정상화됐습니다.</div>
+  </div>
+</section>
+
+<section id="hash">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · FLOW HASH</div><h2>한 Flow를 Packet마다 번갈아 보내는 방식으로 이해하지 않습니다.</h2></div></div>
+    <div class="hash-map">
+      <div class="hash-side">
+        <article class="hash-flow"><b>PC1A → PC2A</b><span>Source MAC 00:50:79:66:68:41 · 5/5 Request</span></article>
+        <article class="hash-flow"><b>PC1B → PC2A</b><span>Source MAC 00:50:79:66:68:42 · 5/5 Request</span></article>
+      </div>
+      <div class="member-stack"><div class="member">M2</div><div class="member">M1</div></div>
+      <div class="hash-side">
+        <article class="hash-flow"><b>src-mac Method</b><span>PC1A Flow는 M2에서만 관찰</span></article>
+        <article class="hash-flow"><b>src-mac Method</b><span>PC1B Flow는 M1에서만 관찰</span></article>
+      </div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>중요:</b> 원래 <code>src-dst-ip</code> 검증에서는 8개 Flow가 모두 M1을 사용해 분산을 입증하지 못했습니다. 이를 숨기지 않고, 재검증에서 <code>src-mac</code>을 사용해 두 Flow가 M2/M1으로 실제 분리되는 것을 확인했습니다. 50:50·단일 Flow 2배 처리량·내부 Hash 공식은 검증하지 않았습니다.</div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · MEMBER FAILURE</div><h2>한 Member 장애와 Bundle 전체 장애는 다릅니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">ONE MEMBER UNAVAILABLE</div>
+        <h3>M1 양단 unavailable · M2는 Bundled</h3>
+        <p>재검증에서 양쪽 M1을 하나의 장애 사건으로 Down시켰을 때 Po1은 Up을 유지했고, Core Flow는 M2로 이동해 <b>100 Request / 100 Reply</b>를 유지했습니다.</p>
+        <div class="failure-path">M1 ✕ · M2 ✓ · Po1 UP · End-to-End ✓</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">ALL MEMBERS UNAVAILABLE</div>
+        <h3>M1 + M2 모두 Down</h3>
+        <p>원래 검증에서 두 Member를 모두 Down시키자 Po1도 Down됐고 Remote 통신은 실패했습니다. 두 Member를 복구하자 Po1과 통신이 모두 정상화됐습니다.</p>
+        <div class="failure-path">M1 ✕ · M2 ✕ · Po1 DOWN · End-to-End ✕</div>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>원래 LACP-05 FAIL도 보존합니다.</b> SW1 한쪽 M1만 administratively shutdown한 첫 Run에서는 Forward는 M2로 이동했지만 Return Path가 정상 전환되지 않아 자동 복구에 실패했습니다. 재검증은 “Member 전체가 양단에서 unavailable”한 조건으로 바꿔 PASS했으며, 이를 실제 Cable Carrier 동작까지 완전히 규명했다고 확대 해석하지 않습니다.</div>
+  </div>
+</section>
+
+<section id="normal-flow">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · NORMAL FLOW</div><h2>Bundle을 볼 때는 네 단계를 순서대로 확인합니다.</h2></div></div>
+    <div class="flow-cards">
+      <article class="flow-card"><b>1</b><h3>LACP 협상</h3><p>Actor/Partner와 Key가 호환되는 Member인지 확인합니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>Member Bundled</h3><p>M1/M2가 Po1의 In-use Member로 들어옵니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>Logical Link</h3><p>STP 등 상위 기능은 Po1 하나의 Link로 봅니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>Flow Hash</h3><p>각 Flow의 Hash 결과가 실제 Member를 선택합니다.</p></article>
+      <article class="flow-card"><b>5</b><h3>Failure Check</h3><p>Po1과 각 Member 상태를 함께 봐야 장애 범위를 구분할 수 있습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li><b>active/passive</b>는 LACP Bundle을 형성할 수 있지만 passive/passive는 협상을 시작하지 않습니다.</li>
+          <li>M1/M2가 묶이면 상위 Layer에는 <b>Po1 하나</b>로 보입니다.</li>
+          <li>Hash는 <b>Flow별 Member 선택</b>이며 Packet-by-Packet Striping으로 일반화하지 않습니다.</li>
+          <li>Member 하나 Down과 <b>Po1 전체 Down</b>은 다른 장애입니다.</li>
+          <li>Po1이 Up이어도 <b>각 Member State</b>를 별도로 확인해야 합니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“M1이 죽었는데 Po1은 왜 아직 Up일 수 있을까?”</h3>
+        <p>Bundle, Member, Hash, Remaining Member라는 네 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>두 Member의 상태와 실제 Flow Path를 직접 비교하세요.</h2><p>협상 → Bundle → Hash → 한 Member 장애 → 전체 장애 순서로 같은 Physical Topology에서 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="lacp-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 원본 Run에서 LACP-01/02/03/06 PASS, LACP-04 INCONCLUSIVE, LACP-05 FAIL을 기록했고, 2026-10-04 Revalidation에서 LACP-04/05를 추가 PASS해 차단을 해소했습니다. <a href="../learning/campus/lacp/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">LACP / Link Aggregation · Concept → Interactive Lab</div></footer>
+</body>
+</html>
