@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Routing Table / Static / Default Route — 인터랙티브 실습</title>
+<meta name="description" content="Connected, Static, Default Route와 Longest Prefix Match, No Route/Recovery를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.7rem);margin:.14em 0}.hero p{max-width:900px;color:var(--muted)}
+.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
+.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
+.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
+.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
+.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
+.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.94}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
+.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
+.observation{margin-top:18px;display:grid;grid-template-columns:1.38fr .62fr;gap:14px;min-width:0}.topology,.observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
+.topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 8px}.topology-stage{position:relative;width:900px;height:430px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}
+.topology-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.net-link{stroke:#29455f;stroke-width:8;stroke-linecap:round}.net-link.selected{stroke:var(--mint);stroke-width:10;stroke-dasharray:18 12;animation:pathFlow 1s linear infinite}.net-link.reply{stroke:var(--blue);stroke-width:10;stroke-dasharray:8 10;animation:pathFlow 1.15s linear infinite}.net-link.excluded{stroke:#4a5662;stroke-width:7;stroke-dasharray:8 14}.net-link.down{stroke:#9a534d;stroke-width:8;stroke-dasharray:9 10}.net-link.ingress{stroke:var(--amber);stroke-width:10;stroke-dasharray:18 12;animation:pathFlow 1s linear infinite}
+@keyframes pathFlow{to{stroke-dashoffset:-30}}
+.node{position:absolute;width:150px;transform:translate(-50%,-50%);text-align:center}.node-icon{display:grid;place-items:center;width:78px;height:62px;margin:auto;border:2px solid #365675;border-radius:15px;background:#0d2032;transition:.2s}.node-icon svg{width:50px;height:42px;stroke:#9fb8cf;fill:none;stroke-width:2}.node.active .node-icon{border-color:var(--mint);box-shadow:0 0 0 6px rgba(126,224,194,.08)}.node.stop .node-icon{border-color:#d49b43;box-shadow:0 0 0 6px rgba(255,191,105,.08)}.node.down .node-icon{border-color:#9a534d}.node b{display:block;margin-top:7px}.node small{display:block;color:var(--muted);font-size:.72rem;line-height:1.4}
+.node.pc1{left:11%;top:52%}.node.r1{left:43%;top:52%}.node.r2{left:78%;top:25%}.node.r3{left:78%;top:77%}
+.route-overlay{position:absolute;left:51%;top:6%;width:240px;padding:11px 12px;border:1px solid #355d82;border-radius:12px;background:rgba(8,21,34,.95);font-size:.76rem}.route-overlay b{display:block;color:var(--blue);margin-bottom:5px}.route-overlay code{display:block;color:#d7e5f3;margin:3px 0}.stop-marker{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:none;padding:5px 8px;border-radius:999px;border:1px solid #d49b43;color:var(--amber);background:#091624;font-size:.72rem;font-weight:900}
+.event-strip{margin-top:11px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#091624}.event-strip b{color:var(--blue)}.event-strip p{margin:4px 0 0;color:var(--muted);font-size:.84rem}
+.route-table{display:grid;gap:8px}.route-row{padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624}.route-row strong{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem}.route-row span{font-size:.74rem;color:var(--muted)}.route-row.chosen{border-color:#347968;background:rgba(126,224,194,.05)}.route-row.removed{opacity:.45;text-decoration:line-through}
+.evidence{margin-top:13px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#0a1928}.evidence b{display:block;margin-bottom:5px}.evidence ul{margin:0;padding-left:1rem;color:var(--muted);font-size:.8rem}.evidence li{margin:.35rem 0}
+.standard-note{margin-top:13px;padding:12px;border:1px solid #8f6a38;border-radius:11px;background:rgba(255,191,105,.05)}.standard-note b{color:var(--amber)}.standard-note p{margin:5px 0 0;color:#d6e2ef;font-size:.8rem}
+.lesson-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}.hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){.net-link.selected,.net-link.reply,.net-link.ingress{animation:none}}
+@media(max-width:900px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.answer-grid{grid-template-columns:1fr}.stage-link{display:grid}.topology-stage{width:760px;height:400px}.node.pc1{left:12%}.node.r1{left:44%}.node.r2,.node.r3{left:80%}}
+@media(max-width:680px){.hero{padding-top:34px}.course-progress{grid-template-columns:1fr}.course-count{text-align:left}.topology-stage{width:680px;height:390px}.node{width:130px}.node-icon{width:68px;height:56px}.route-overlay{width:210px;left:49%}.lesson-nav{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <div class="nav"><a href="routing-table.html">1단계 개념서</a></div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <small>2단계 · INTERACTIVE LAB</small>
+    <h1>Routing Table</h1>
+    <p>목적지 IP를 보고 <b>어떤 Route가 선택될지 먼저 예상</b>한 뒤, 검증된 Cisco Lab의 Route 상태와 실제 Packet Path를 학습용 모델로 확인합니다.</p>
+    <div class="start-guide">
+      <div class="guide-step"><b>1</b><span><strong>예상</strong>어떤 Route/경로가 선택될지 고릅니다.</span></div>
+      <div class="guide-step"><b>2</b><span><strong>실행</strong>Routing Table과 실제 검증 Path를 확인합니다.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>설명</strong>Prefix Length와 Next Hop으로 이유를 연결합니다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="stage-link"><span><b>1단계에서 가져올 한 문장:</b> 여러 Route가 동시에 맞으면 가장 긴 Prefix가 선택되고, Default Route는 마지막 후보입니다.</span><a class="btn" href="routing-table.html">개념서 다시 보기</a></div>
+    <div class="lesson-tabs" id="lessonTabs" aria-label="실습 목록"></div>
+    <div class="course-progress">
+      <div><b>진행률</b><small>각 장면을 직접 확인하세요.</small></div>
+      <div class="course-bar"><div id="progressBar"></div></div>
+      <div class="course-count" id="progressCount">0 / 5 완료</div>
+    </div>
+
+    <article class="card lab-card">
+      <div class="coach">
+        <div class="coach-icon" id="lessonNo">1</div>
+        <div>
+          <div class="coach-title" id="lessonTitle"></div>
+          <div class="coach-text" id="lessonText"></div>
+          <div class="start-state" id="startState"></div>
+        </div>
+      </div>
+
+      <div class="prediction">
+        <h2 id="question"></h2>
+        <p>실행 전에 하나를 선택하세요. 선택 후에만 검증 결과가 열립니다.</p>
+        <div class="options" id="options"></div>
+        <div class="controls">
+          <button class="btn primary" id="runBtn" disabled>선택한 예상으로 실행</button>
+          <button class="btn hidden" id="recoverBtn">복구 확인</button>
+          <button class="btn" id="resetBtn">이 문제 다시 풀기</button>
+        </div>
+      </div>
+
+      <div class="feedback hidden" id="feedback">
+        <div class="feedback-head"><strong>예상 vs 실제</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
+        <div class="answer-grid">
+          <div class="answer-box"><small>내 예상</small><strong id="myAnswer"></strong></div>
+          <div class="answer-box"><small>검증된 결과</small><strong id="actualAnswer"></strong></div>
+        </div>
+        <p id="reason"></p>
+      </div>
+
+      <div class="observation">
+        <div class="topology">
+          <h3>검증된 경로를 학습용 토폴로지로 보기</h3>
+          <div class="topology-scroll">
+            <div class="topology-stage" id="topologyStage">
+              <svg class="topology-svg" viewBox="0 0 900 430" aria-hidden="true">
+                <line id="link-pc-r1" class="net-link" x1="160" y1="224" x2="330" y2="224"/>
+                <line id="link-r1-r2" class="net-link" x1="435" y1="210" x2="660" y2="125"/>
+                <line id="link-r1-r3" class="net-link" x1="435" y1="238" x2="660" y2="330"/>
+              </svg>
+
+              <div class="node pc1" id="node-pc1">
+                <div class="node-icon">
+                  <svg viewBox="0 0 64 48"><rect x="8" y="5" width="48" height="30" rx="3"/><path d="M24 42h16M32 35v7"/></svg>
+                </div><b>PC1</b><small>10.10.10.10/24<br>GW 10.10.10.1</small>
+              </div>
+              <div class="node r1" id="node-r1">
+                <div class="node-icon">
+                  <svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M18 24l6 5M46 24l-6-5M46 24l-6 5"/></svg>
+                </div><b>R1</b><small>Route Decision Point</small>
+              </div>
+              <div class="node r2" id="node-r2">
+                <div class="node-icon">
+                  <svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M46 24l-6 5"/></svg>
+                </div><b>R2</b><small>Specific Next Hop<br>203.0.113.10</small>
+              </div>
+              <div class="node r3" id="node-r3">
+                <div class="node-icon">
+                  <svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24M18 24l6-5M46 24l-6 5"/></svg>
+                </div><b>R3</b><small>Default Next Hop<br>198.51.100.10</small>
+              </div>
+
+              <div class="route-overlay" id="routeOverlay"><b>ROUTE LOOKUP</b><code id="lookupDest">대기</code><code id="lookupDecision">예상 후 실행하세요.</code></div>
+              <div class="stop-marker" id="stopMarker">STOP · NO ROUTE</div>
+            </div>
+          </div>
+          <div class="event-strip"><b id="eventKind">IDLE</b><p id="eventText">예상을 선택한 뒤 실행하면 현재 Route 판단과 Packet Path를 보여줍니다.</p></div>
+        </div>
+
+        <aside class="observation-side">
+          <h3>R1 Routing Table</h3>
+          <div class="route-table" id="routeTable"></div>
+          <div class="evidence" id="evidenceBox">
+            <b>관찰 근거</b>
+            <ul id="evidenceList"><li>아직 실행하지 않았습니다.</li></ul>
+          </div>
+          <div class="standard-note hidden" id="standardNote">
+            <b>표준 vs 이번 구현</b>
+            <p id="standardText"></p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn" id="prevBtn">← 이전 문제</button>
+        <button class="btn primary" id="nextBtn">다음 문제 →</button>
+      </div>
+    </article>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="wrap">Routing Table · 예상 → 실행 → 관찰 → 설명</div></footer>
+
+<script>
+const lessons=[
+  {
+    title:"Connected Route는 언제 보일까?",
+    text:"R1의 세 L3 Interface가 모두 up/up인 정상 Baseline입니다.",
+    states:["R1 E0/0 · 10.10.10.1/24","R1 E0/1 · 192.0.2.1/30","R1 E0/2 · 192.0.2.5/30"],
+    question:"R1의 Routing Table에는 무엇이 생길까요?",
+    options:["세 Interface에 대응하는 Connected Prefix가 보인다","Default Route만 보인다","Interface IP는 Routing Table과 관계없다"],
+    correct:0,
+    actual:"Connected 10.10.10.0/24 · 192.0.2.0/30 · 192.0.2.4/30",
+    reason:"Cisco IOL에서 세 Interface가 up/up일 때 대응 Connected Prefix가 실제 Routing Table에 설치됐습니다.",
+    dest:"Interface 상태",
+    decision:"Connected Prefix 설치",
+    routeMode:"connected",
+    eventKind:"RIB",
+    eventText:"R1의 활성 L3 Interface Prefix가 Connected Route로 확인됩니다.",
+    evidence:["ROUTE-01 PASS","show ip interface brief + show ip route connected 교차 확인","실제 Interface명은 IOL Ethernet0/x"],
+    completeOnRecover:false
+  },
+  {
+    title:"Specific Static Route는 어느 방향일까?",
+    text:"R1에는 203.0.113.0/24 → 192.0.2.2(R2) Static Route와 /0 Default Route가 함께 있습니다.",
+    states:["목적지 203.0.113.10","/24 → R2","/0 → R3"],
+    question:"203.0.113.10으로 가는 패킷은 어디로 전달될까요?",
+    options:["R2 방향 CP2","R3 방향 CP3","R1에서 즉시 Drop"],
+    correct:0,
+    actual:"R2 방향 CP2",
+    reason:"203.0.113.0/24 Static Route가 목적지에 일치했고, 실제 CP2에서 Echo Request/Reply 3쌍이 확인됐습니다.",
+    dest:"203.0.113.10",
+    decision:"203.0.113.0/24 → 192.0.2.2 · R2",
+    routeMode:"r2",
+    eventKind:"FORWARD",
+    eventText:"R1이 /24 Static Route를 선택해 R2 방향으로 Forward합니다.",
+    evidence:["ROUTE-02 PASS","CP2 Request/Reply 3쌍","R1 통과 시 Request TTL 64 → 63","비선택 CP3 대응 Echo 0"],
+    completeOnRecover:false
+  },
+  {
+    title:"Default Route는 언제 선택될까?",
+    text:"R1에는 198.51.100.10을 위한 Specific Route가 없고 /0 Default Route만 남아 있습니다.",
+    states:["목적지 198.51.100.10","Specific Route 없음","Default /0 → R3"],
+    question:"R1은 198.51.100.10을 어디로 보낼까요?",
+    options:["R2의 /24로 보낸다","R3의 Default Route로 보낸다","Route가 없으므로 항상 Drop한다"],
+    correct:1,
+    actual:"R3 방향 CP3",
+    reason:"더 구체적인 Route가 없으므로 0.0.0.0/0이 선택됐고, 실제 CP3에서 3/3 Echo Reply가 확인됐습니다.",
+    dest:"198.51.100.10",
+    decision:"0.0.0.0/0 → 192.0.2.6 · R3",
+    routeMode:"r3",
+    eventKind:"DEFAULT",
+    eventText:"Specific Route가 없어서 Default Route가 Route of Last Resort로 선택됩니다.",
+    evidence:["ROUTE-03 PASS","Default RIB/CEF Next Hop과 CP3 경로 일치","CP3 3/3 Reply","비선택 CP2 대응 Echo 0"],
+    completeOnRecover:false
+  },
+  {
+    title:"/24와 /0이 동시에 맞으면?",
+    text:"203.0.113.10은 203.0.113.0/24와 0.0.0.0/0 두 Route에 모두 일치합니다.",
+    states:["203.0.113.0/24 → R2","0.0.0.0/0 → R3","둘 다 Match"],
+    question:"Longest Prefix Match 결과는 무엇일까요?",
+    options:["/0 Default가 더 넓으므로 R3","/24가 더 구체적이므로 R2","두 경로를 매 패킷마다 번갈아 사용"],
+    correct:1,
+    actual:"/24 Static Route → R2",
+    reason:"같은 목적지에 여러 Prefix가 맞으면 Prefix Length가 가장 긴 Route가 우선입니다. 실제 Echo는 CP2에 3쌍, CP3에 0개였습니다.",
+    dest:"203.0.113.10",
+    decision:"/24 wins over /0 → R2",
+    routeMode:"lpm",
+    eventKind:"LPM",
+    eventText:"R1은 /24와 /0을 비교하고 더 긴 /24 Prefix를 선택합니다.",
+    evidence:["ROUTE-04 PASS","RFC 1812/4632 Longest Prefix Match","CP2 3쌍 · CP3 0","이 실험은 AD/Metric 비교가 아님"],
+    completeOnRecover:false
+  },
+  {
+    title:"Default Route가 사라지면 어디에서 멈출까?",
+    text:"R1의 R3-facing E0/2를 shutdown해 Connected Route와 Default Route가 제거된 장애 상태입니다.",
+    states:["R1 E0/2 DOWN","192.0.2.4/30 제거","0.0.0.0/0 제거"],
+    question:"PC1 → 198.51.100.10 패킷은 어떻게 될까요?",
+    options:["R2로 자동 우회한다","R1에서 Stop되고 다음 경로로 Forward되지 않는다","기존 Default Route가 계속 사용된다"],
+    correct:1,
+    actual:"R1에서 STOP · CP2/CP3 Forward 0",
+    reason:"사용 가능한 Matching Route가 없어 R1이 패킷을 다음 Hop으로 보내지 않았습니다. 이번 Cisco IOL은 ICMP Type 3 Code 1을 반환했습니다.",
+    dest:"198.51.100.10",
+    decision:"No usable route → STOP at R1",
+    routeMode:"failure",
+    eventKind:"NO ROUTE",
+    eventText:"R1에 Matching Route가 없어 패킷이 R1에서 멈춥니다. 아래의 표준/구현 차이를 함께 확인하세요.",
+    evidence:["ROUTE-05 원래 Result = FAIL(엄격 RFC Code 판정)","Fault probe CP1 ingress 3 · CP2 0 · CP3 0","Cisco Actual ICMP Type 3 Code 1 ×3","추가 재검증 2회에서도 동일 동작 재현"],
+    completeOnRecover:true,
+    standard:"RFC 1812의 No Route 기대는 Type 3 Code 0입니다. 이번 Cisco IOL IOS 15.4(2)T4는 Type 3 Code 1을 반환했습니다. 원래 FAIL은 보존하며, Code 1을 모든 Cisco의 공통 동작으로 일반화하지 않습니다."
+  }
+];
+
+let index=0;
+let selected=null;
+let executed=false;
+let recovered=false;
+const done=new Set();
+
+const $=id=>document.getElementById(id);
+const tabs=$("lessonTabs"),options=$("options"),runBtn=$("runBtn"),recoverBtn=$("recoverBtn"),resetBtn=$("resetBtn");
+
+function routeRows(mode){
+  const base=[
+    {p:"C 10.10.10.0/24",n:"direct · E0/0"},
+    {p:"C 192.0.2.0/30",n:"direct · E0/1"},
+    {p:"C 192.0.2.4/30",n:"direct · E0/2"},
+    {p:"S 203.0.113.0/24",n:"via 192.0.2.2 · R2"},
+    {p:"S* 0.0.0.0/0",n:"via 192.0.2.6 · R3"}
+  ];
+  if(mode==="failure"&&!recovered){
+    base[2].removed=true;base[4].removed=true;
+  }
+  if(mode==="connected"){base[0].chosen=base[1].chosen=base[2].chosen=true;}
+  if(mode==="r2"||mode==="lpm")base[3].chosen=true;
+  if(mode==="r3"||(mode==="failure"&&recovered))base[4].chosen=true;
+  return base;
+}
+
+function renderTabs(){
+  tabs.innerHTML=lessons.map((l,i)=>`<button class="lesson-tab ${i===index?"active":""} ${done.has(i)?"done":""}" data-i="${i}">${i+1}. ${l.title}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>go(Number(b.dataset.i))));
+}
+function resetTopology(){
+  ["link-pc-r1","link-r1-r2","link-r1-r3"].forEach(id=>$(id).setAttribute("class","net-link"));
+  ["node-pc1","node-r1","node-r2","node-r3"].forEach(id=>$(id).className="node "+id.replace("node-",""));
+  $("stopMarker").style.display="none";
+  $("eventKind").textContent="IDLE";
+  $("eventText").textContent="예상을 선택한 뒤 실행하면 현재 Route 판단과 Packet Path를 보여줍니다.";
+  $("lookupDest").textContent="대기";
+  $("lookupDecision").textContent="예상 후 실행하세요.";
+}
+function renderRouteTable(){
+  $("routeTable").innerHTML=routeRows(lessons[index].routeMode).map(r=>`<div class="route-row ${r.chosen?"chosen":""} ${r.removed?"removed":""}"><strong>${r.p}</strong><span>${r.n}</span></div>`).join("");
+}
+function renderLesson(){
+  const l=lessons[index];
+  $("lessonNo").textContent=index+1;
+  $("lessonTitle").textContent=l.title;
+  $("lessonText").textContent=l.text;
+  $("startState").innerHTML=l.states.map(x=>`<span>${x}</span>`).join("");
+  $("question").textContent=l.question;
+  options.innerHTML=l.options.map((x,i)=>`<button class="choice" data-i="${i}" aria-pressed="false">${x}</button>`).join("");
+  options.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>selectAnswer(Number(b.dataset.i))));
+  selected=null;executed=false;recovered=false;
+  runBtn.disabled=true;
+  recoverBtn.classList.add("hidden");
+  $("feedback").classList.add("hidden");
+  $("standardNote").classList.add("hidden");
+  $("evidenceList").innerHTML="<li>아직 실행하지 않았습니다.</li>";
+  resetTopology();renderRouteTable();renderTabs();renderProgress();
+  $("prevBtn").disabled=index===0;
+  $("nextBtn").textContent=index===lessons.length-1?"로드맵으로 →":"다음 문제 →";
+}
+function selectAnswer(i){
+  if(executed)return;
+  selected=i;
+  options.querySelectorAll(".choice").forEach((b,j)=>{b.classList.toggle("selected",j===i);b.setAttribute("aria-pressed",j===i?"true":"false");});
+  runBtn.disabled=false;
+}
+function applyTopology(l){
+  $("lookupDest").textContent="Destination: "+l.dest;
+  $("lookupDecision").textContent="Decision: "+l.decision;
+  $("eventKind").textContent=l.eventKind;
+  $("eventText").textContent=l.eventText;
+  $("node-r1").classList.add(l.routeMode==="failure"&&!recovered?"stop":"active");
+  if(l.routeMode!=="connected")$("link-pc-r1").setAttribute("class","net-link ingress");
+  if(l.routeMode==="r2"){
+    $("link-r1-r2").setAttribute("class","net-link selected");$("node-r2").classList.add("active");
+  }else if(l.routeMode==="r3"){
+    $("link-r1-r3").setAttribute("class","net-link selected");$("node-r3").classList.add("active");
+  }else if(l.routeMode==="lpm"){
+    $("link-r1-r2").setAttribute("class","net-link selected");$("link-r1-r3").setAttribute("class","net-link excluded");$("node-r2").classList.add("active");
+  }else if(l.routeMode==="failure"){
+    if(recovered){
+      $("link-r1-r3").setAttribute("class","net-link selected");$("node-r3").classList.add("active");$("node-r1").classList.remove("stop");$("node-r1").classList.add("active");
+      $("eventKind").textContent="RECOVERY";$("eventText").textContent="E0/2가 복구되면서 Connected/Default Route가 다시 설치되고 R3 방향 3/3 통신이 복구됩니다.";
+      $("lookupDecision").textContent="Default restored → R3";
+    }else{
+      $("link-r1-r3").setAttribute("class","net-link down");$("node-r3").classList.add("down");$("stopMarker").style.display="block";
+    }
+  }
+}
+function execute(){
+  if(selected===null||executed)return;
+  executed=true;
+  const l=lessons[index];
+  options.querySelectorAll(".choice").forEach((b,i)=>{
+    b.disabled=true;
+    if(i===l.correct)b.classList.add("correct-answer");
+    if(i===selected&&i!==l.correct)b.classList.add("wrong-answer");
+  });
+  const correct=selected===l.correct;
+  const fb=$("feedback");
+  fb.classList.remove("hidden","correct","incorrect");fb.classList.add(correct?"correct":"incorrect");
+  $("feedbackBadge").textContent=correct?"예상 적중":"예상과 다름";
+  $("myAnswer").textContent=l.options[selected];
+  $("actualAnswer").textContent=l.actual;
+  $("reason").textContent=l.reason;
+  $("evidenceList").innerHTML=l.evidence.map(x=>`<li>${x}</li>`).join("");
+  if(l.standard){$("standardNote").classList.remove("hidden");$("standardText").textContent=l.standard;}
+  if(l.completeOnRecover){recoverBtn.classList.remove("hidden");}
+  else{done.add(index);}
+  resetTopology();applyTopology(l);renderRouteTable();renderTabs();renderProgress();
+}
+function recover(){
+  const l=lessons[index];
+  if(!executed||!l.completeOnRecover)return;
+  recovered=true;done.add(index);
+  recoverBtn.classList.add("hidden");
+  resetTopology();applyTopology(l);renderRouteTable();renderTabs();renderProgress();
+  $("actualAnswer").textContent="R1에서 STOP → E0/2 복구 후 Default Route 재설치 → R3 3/3 복구";
+  $("reason").textContent="장애 중 Route 제거와 Packet Stop을 확인한 뒤, 같은 Interface를 복구해 Connected/Default Route 재설치와 통신 복귀까지 검증했습니다.";
+}
+function renderProgress(){
+  const n=done.size;$("progressBar").style.width=(n/lessons.length*100)+"%";$("progressCount").textContent=`${n} / ${lessons.length} 완료`;
+}
+function go(i){index=Math.max(0,Math.min(lessons.length-1,i));renderLesson();window.scrollTo({top:document.querySelector(".lesson-tabs").offsetTop-80,behavior:"smooth"});}
+runBtn.addEventListener("click",execute);
+recoverBtn.addEventListener("click",recover);
+resetBtn.addEventListener("click",renderLesson);
+$("prevBtn").addEventListener("click",()=>go(index-1));
+$("nextBtn").addEventListener("click",()=>{if(index===lessons.length-1){location.href="../roadmap.html";return;}go(index+1);});
+renderLesson();
+</script>
+</body>
+</html>
