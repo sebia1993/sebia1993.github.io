@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>STP / RSTP</h2>
-      <p>Root Bridge, Port Role, Alternate/Discarding, Path Cost와 Rapid-PVST+ 재수렴을 실제 검증한 내용으로 정리했습니다.</p>
+      <h2>LACP / Link Aggregation</h2>
+      <p>LACP 협상, Logical Port-Channel, Flow Hash와 Member/Bundle 장애를 실제 검증·재검증한 내용으로 정리했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/stp.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/stp-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/lacp.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/lacp-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -143,7 +143,8 @@ const interactiveUrls={
   'icmp-troubleshooting':'./labs/icmp-troubleshooting-simulator.html',
   'vlan-trunk':'./labs/vlan-trunk-simulator.html',
   'inter-vlan-routing':'./labs/inter-vlan-routing-simulator.html',
-  'stp':'./labs/stp-simulator.html'
+  'stp':'./labs/stp-simulator.html',
+  'lacp':'./labs/lacp-simulator.html'
 };
 
 const summaryOverrides={
@@ -153,7 +154,8 @@ const summaryOverrides={
   'icmp-troubleshooting':'Ping의 Echo 응답, TTL 감소, Time Exceeded와 Traceroute의 Hop 발견을 연결해 이해합니다.',
   'vlan-trunk':'Access Port의 VLAN 소속과 802.1Q Trunk Tag, Native/Allowed VLAN을 연결해 이해합니다.',
   'inter-vlan-routing':'같은 VLAN 직접 전달과 다른 VLAN의 Default Gateway·SVI Routing 차이를 연결해 이해합니다.',
-  'stp':'Root Bridge와 Port Role, Alternate/Discarding, Path Cost와 재수렴을 연결해 이해합니다.'
+  'stp':'Root Bridge와 Port Role, Alternate/Discarding, Path Cost와 재수렴을 연결해 이해합니다.',
+  'lacp':'LACP 협상, Logical Port-Channel, Flow Hash와 Member 장애 범위를 연결해 이해합니다.'
 };
 
 fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
