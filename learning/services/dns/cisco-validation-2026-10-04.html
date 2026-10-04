@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DNS — Cisco 검증 요약</title>
+<link rel="stylesheet" href="../../../styles.css">
+<link rel="stylesheet" href="../../../lab-ui.css">
+<style>
+main{padding:42px 0}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.summary-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.summary-card small{display:block;color:var(--muted);margin-bottom:5px}.summary-card strong{display:block}.pass{color:var(--mint);font-weight:900}.warn{color:var(--amber);font-weight:900}.claim{scroll-margin-top:84px;margin-top:16px;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.claim h2{margin:0 0 8px;font-size:1.22rem}.claim p{margin:7px 0;color:#d1deeb}.evidence{font-family:Consolas,monospace;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.resolution{padding:18px;border:1px solid #347968;border-radius:15px;background:rgba(126,224,194,.06)}.warning{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.06)}.table-scroll table{min-width:780px}@media(max-width:800px){.summary-grid{grid-template-columns:1fr 1fr}.table-scroll{overflow-x:auto}}@media(max-width:500px){.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../../../labs/dns.html">← DNS</a><a class="btn" href="../../../labs/dns-simulator.html">Interactive Lab →</a></div></header>
+<main class="shell">
+  <div class="eyebrow">ACTUAL VALIDATION · 2026-10-04</div>
+  <h1>DNS<br><em>Cisco 검증 + 재검증 요약</em></h1>
+  <p>원본 Run과 재검증 Run을 모두 보존합니다. 최종 Run <b>2026-10-04-dns-02</b>에서 DNS-01~06이 모두 PASS했고, 첫 Run의 DNS-04/05 INCONCLUSIVE는 삭제하지 않고 VPCS Client 결함/수정 범위와 함께 Resolution으로 연결했습니다.</p>
+
+  <div class="summary-grid">
+    <article class="summary-card"><small>Final Run</small><strong>2026-10-04-dns-02</strong></article>
+    <article class="summary-card"><small>Runtime Gate</small><strong class="pass">GPT-6 Astra · High · PASS</strong></article>
+    <article class="summary-card"><small>Final Claim Result</small><strong class="pass">6 PASS / 0 unresolved</strong></article>
+    <article class="summary-card"><small>Final State</small><strong class="pass">DNS / Client / Records / Ping 복구</strong></article>
+  </div>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">환경</div><h2>실제 검증 토폴로지</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Node</th><th>Role / Actual</th></tr></thead>
+      <tbody>
+        <tr><td>PC1 / PC2</td><td>VPCS 0.8.4 · 192.0.2.10 / .11 · GW 192.0.2.1 · DNS 198.51.100.2</td></tr>
+        <tr><td>SW1</td><td>Cisco IOL L2 IOS 15.2 · Client LAN</td></tr>
+        <tr><td>R1</td><td>Cisco IOL L3 IOS 15.4(2)T4 · Gateway · 192.0.2.1 / 198.51.100.1</td></tr>
+        <tr><td>R2</td><td>Cisco IOL L3 IOS 15.4(2)T4 · Recursive/Caching DNS · 198.51.100.2 / .5</td></tr>
+        <tr><td>R3</td><td>Cisco IOL L3 IOS 15.4(2)T4 · lab.test Authority · 198.51.100.6 · Lo0 203.0.113.10</td></tr>
+        <tr><td>Capture</td><td>CP1 PC1 Edge · CP2 PC2 Edge · CP3 R1↔R2 · CP4 R2↔R3</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <article class="claim" id="dns-01">
+    <h2>DNS-01 · A Query / Response + 실제 IP 통신 <span class="pass">PASS</span></h2>
+    <p>PC1은 <code>app.lab.test</code> A/IN Query를 R2에 보냈고 Client-side DNS ID <code>21456</code>과 같은 ID의 Response에서 <code>A=203.0.113.10</code>, TTL 10을 받았습니다. 이후 Name Ping의 ICMP Request/Reply도 CP1/CP3/CP4에서 대응됐고 3/3 성공했습니다.</p>
+  </article>
+
+  <article class="claim" id="dns-02">
+    <h2>DNS-02 · Recursive / Upstream Resolution <span class="pass">PASS</span></h2>
+    <p>PC1 Query는 RD=1이었고 R2 Cache Miss 시 R2가 R3에 별도 Upstream Query를 보냈습니다. Client Leg DNS ID는 <code>21456</code>, Upstream Leg ID는 <code>31909</code>였으며 R3는 AA=1, A=203.0.113.10을 반환했습니다.</p>
+    <p><b>구현 경계:</b> Resolver가 Upstream DNS ID를 재작성했으므로 두 Leg를 ID equality만으로 연결하면 안 됩니다. QNAME/QTYPE, Endpoint, 시점과 각 Leg ID를 함께 봅니다.</p>
+  </article>
+
+  <article class="claim" id="dns-03">
+    <h2>DNS-03 · Cache Miss → Cache Hit <span class="pass">PASS</span></h2>
+    <p>첫 PC1 Query는 R3까지 가서 TTL 10 Answer를 만들었습니다. 약 3.6초 뒤 PC2가 같은 이름을 조회하자 R2는 TTL 6 Cached Answer를 반환했고 두 번째 Query에 대응하는 새 Upstream Query는 CP4에서 0이었습니다.</p>
+    <p class="evidence">First miss: AA1 / TTL10 · Second hit: AA0 / TTL6 · upstreamSecondQueries=0</p>
+  </article>
+
+  <article class="claim" id="dns-04">
+    <h2>DNS-04 · DNS Service Down / Recovery <span class="pass">PASS after revalidation</span></h2>
+    <p><b>최종 Run:</b> R2 DNS Service를 중지해도 PC1→203.0.113.10 IP Ping은 3/3 유지됐습니다. down.lab.test Query는 R2까지 도착했지만 DNS Response는 0, Upstream Query도 0이었고 Client는 <code>Cannot resolve</code> 후에도 같은 Process로 CLI를 계속 사용할 수 있었습니다. Service 복구 후 Client 재시작 없이 Name Ping 3/3이 복구됐습니다.</p>
+    <p><b>Actual 차이:</b> 이번 IOS는 DNS Service Down 시 ICMP Type3 Code3을 반환했습니다. 이를 모든 DNS 장애의 일반적인 “silent timeout”으로 가르치지 않습니다.</p>
+  </article>
+
+  <article class="claim" id="dns-05">
+    <h2>DNS-05 · Wrong Client DNS / Recovery <span class="pass">PASS after revalidation</span></h2>
+    <p>PC1 DNS를 존재하지 않는 <code>192.0.2.254</code>로 바꾸자 Direct IP Ping은 계속 3/3이었지만 .254 ARP Request 3개에 Reply는 0, 실제 R2 Resolver Query도 0이었습니다. DNS 주소만 198.51.100.2로 되돌린 뒤 Client 재시작 없이 wrong.lab.test Answer와 Name Ping 3/3이 복구됐습니다.</p>
+  </article>
+
+  <article class="claim" id="dns-06">
+    <h2>DNS-06 · NXDOMAIN vs Timeout <span class="pass">PASS</span></h2>
+    <p>R3에서 recover.lab.test Record를 제거하고 R2 Cache를 비운 뒤 Query하자 R3는 AA=1, <b>RCODE=3</b>, A Answer 0개의 NXDOMAIN Response를 실제로 반환했고 R2도 Client에 RCODE=3을 전달했습니다. Record 복구 후 PC2는 RCODE=0, A=203.0.113.10을 받아 Name Ping 3/3에 성공했습니다.</p>
+    <p><b>핵심:</b> NXDOMAIN은 DNS Error Response가 존재하는 상태이며 DNS Service Down의 “DNS Response 없음”과 다릅니다.</p>
+  </article>
+
+  <section class="resolution">
+    <div class="eyebrow">VALIDATION RESOLUTION</div>
+    <h2>첫 Run의 DNS-04/05 INCONCLUSIVE는 보존했습니다.</h2>
+    <p>첫 Run의 VPCS 1.0(0.8c)에서는 DNS 실패 경로 중 Worker segfault가 커널 로그에 남아 Service-only / DNS-setting-only Recovery를 같은 실행 Client에서 증명할 수 없었습니다. 공식 VPCS DNS 오류 수정이 포함된 upstream 0.8.4 고정 소스를 이 DNS Lab의 PC1/PC2에만 적용해 재검증했습니다.</p>
+    <p>최종 정식 재검증 구간의 Client 재시작은 <b>0회</b>였고 PID/start ticks/executable hash가 유지됐습니다. 구형 stripped PNET 바이너리의 정확한 fault instruction을 소스 줄에 독립 매핑한 것은 아니므로, “공식 결함과 일치하는 증상 + 수정본 재현 결과” 범위로만 원인을 설명합니다.</p>
+    <p><a href="https://github.com/GNS3/vpcs/commit/b7adc5fc9bc72f2cbcca56d42f801a41b416de5a">GNS3/VPCS 공식 DNS 오류 수정 commit</a></p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">DIAGNOSTIC MAP</div><h2>IP는 되는데 이름만 실패할 때</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>상태</th><th>Client/CP1</th><th>CP3 R1↔R2</th><th>CP4 R2↔R3</th><th>판단</th></tr></thead>
+      <tbody>
+        <tr><td>Normal miss</td><td>Query + Answer</td><td>Query + Answer</td><td>Upstream Query + AA Answer</td><td>정상 Resolution</td></tr>
+        <tr><td>Cache hit</td><td>PC2 Query + Answer</td><td>Query + Cached Answer</td><td>새 DNS Query 없음</td><td>R2 Cache Hit</td></tr>
+        <tr><td>R2 DNS Down</td><td>Cannot resolve · IP Ping 정상</td><td>Query 도착 · DNS Response 없음</td><td>Upstream Query 없음</td><td>Resolver Service 문제</td></tr>
+        <tr><td>Wrong DNS .254</td><td>.254 ARP · Reply 없음</td><td>실제 Resolver DNS Query 없음</td><td>DNS 없음</td><td>Client DNS 설정 문제</td></tr>
+        <tr><td>NXDOMAIN</td><td>RCODE3 Response</td><td>RCODE3 Response 전달</td><td>R3 AA1 / RCODE3</td><td>Name/Record 부재</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="warning">
+    <div class="eyebrow">검증 한계</div>
+    <h2>이번 Lab의 Actual 범위를 넘기지 않습니다.</h2>
+    <p>R2는 configured upstream R3를 사용하는 Cisco Caching Resolver입니다. Root/TLD 전체 Iterative Resolution을 검증하지 않았습니다. Authoritative A TTL은 이번 Run에서 10초, Cache Hit는 6초였으며 보편 TTL이 아닙니다.</p>
+    <p>Cache-miss forwarded Answer에서 AA=1, Cache-hit Answer에서 AA=0이 관찰됐지만 이를 모든 Resolver 구현의 고정 규칙으로 일반화하지 않습니다. VPCS는 A 실패 뒤 AAAA Query도 보냈으며 NXDOMAIN A Result와 분리해 원본 Evidence에 보존했습니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Integrity</div><h2>정식 Capture SHA-256</h2></div></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Capture</th><th>Bytes</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        <tr><td>CP1</td><td>66670</td><td class="evidence">49eebc751fdb7a3261b5126169fbfb5444f722c78587ac154b69f81fca4561ec</td></tr>
+        <tr><td>CP2</td><td>57393</td><td class="evidence">64513bee3f12e18ba264dea07c3acaaad75ca8a1067158c5d500760f1fbd82ba</td></tr>
+        <tr><td>CP3</td><td>55954</td><td class="evidence">e7f813d9282437864d302240b1a7ce38e1f53044831b12dcc59c838768d7a3a6</td></tr>
+        <tr><td>CP4</td><td>56075</td><td class="evidence">20a17e7f64b7d37caa63b88700593be8cf5ca15e5115dce94b57372c6fa1ebbd</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><div class="eyebrow">Sources</div><h2>표준과 공식 자료</h2></div></div>
+    <div class="card">
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1034.html">RFC 1034 · Domain Names: Concepts and Facilities</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc1035.html">RFC 1035 · Domain Names: Implementation and Specification</a></p>
+      <p><a href="https://www.rfc-editor.org/rfc/rfc2308.html">RFC 2308 · Negative Caching of DNS Queries</a></p>
+      <p><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipaddr_dns/configuration/12-4t/dns-12-4t-book/dns-config-dns.html">Cisco IOS · Configuring DNS</a></p>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="shell">DNS · Cisco IOL Validation + Revalidation Summary</div></footer>
+</body>
+</html>
