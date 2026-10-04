@@ -1,0 +1,40 @@
+name: OSPF page checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'labs/ospf.html'
+      - 'labs/ospf-simulator.html'
+      - 'tests/ospf-final.mjs'
+      - 'package.json'
+      - '.github/workflows/ospf-check.yml'
+  pull_request:
+    paths:
+      - 'labs/ospf.html'
+      - 'labs/ospf-simulator.html'
+      - 'tests/ospf-final.mjs'
+      - 'package.json'
+      - '.github/workflows/ospf-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node tests/ospf-final.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ospf-browser-evidence
+          path: test-results/
+          retention-days: 7
