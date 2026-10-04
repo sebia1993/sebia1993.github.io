@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NAT / PAT — 개념서</title>
+<meta name="description" content="Basic NAT, PAT, Return Translation, Static PAT와 대표 실패 조건을 실제 Cisco 검증 결과에 연결해 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.15rem,3vw,1.85rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.flow-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.92rem}.flow-card p{margin:0;color:var(--muted);font-size:.82rem}
+.topology-card{padding:18px;border:1px solid var(--line);border-radius:17px;background:var(--panel3);overflow:hidden}.topology-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden}.topology-stage{position:relative;width:900px;height:380px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}.topology-svg{position:absolute;inset:0;width:100%;height:100%}.link{stroke:#29455f;stroke-width:8;stroke-linecap:round}.inside-link{stroke:#3e6a91}.outside-link{stroke:#3f8b77}.router{position:absolute;width:160px;transform:translate(-50%,-50%);text-align:center}.router-icon{display:grid;place-items:center;width:76px;height:60px;margin:auto;border:2px solid #365675;border-radius:15px;background:#0d2032}.router-icon svg{width:50px;height:42px;stroke:#9fb8cf;fill:none;stroke-width:2}.router b{display:block;margin-top:7px}.router small{display:block;color:var(--muted);font-size:.72rem;line-height:1.4}.r1{left:15%;top:30%}.r4{left:15%;top:75%}.r2{left:51%;top:52%}.r3{left:85%;top:52%}
+.zone{position:absolute;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#091624;font-size:.72rem;font-weight:900}.inside-zone{left:18px;top:16px;color:var(--blue);border-color:#3e6a91}.outside-zone{right:18px;top:16px;color:var(--mint);border-color:#347968}.nat-badge{position:absolute;left:51%;top:18px;transform:translateX(-50%);padding:7px 11px;border:1px solid #8f6a38;border-radius:999px;background:#21170c;color:var(--amber);font-size:.74rem;font-weight:900}.cp{position:absolute;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#091624;color:#cbd9e7;font-size:.7rem;font-weight:850}.cp11{left:29%;top:26%}.cp14{left:29%;top:72%}.cp23{left:68%;top:46%}
+.translation-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.translation-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.translation-card h3{margin:5px 0 8px}.translation-card p{margin:0;color:var(--muted)}.tuple{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624;font:700 .77rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7e5f3}.tuple em{color:var(--mint);font-style:normal}
+.map-table{display:grid;gap:8px}.map-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.map-row code{font-size:.78rem}.map-row span{text-align:center;color:var(--muted);font-weight:900}
+.failure-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.failure-card{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:5px 0 7px}.failure-card p{margin:0;color:#d8e4ef}.failure-state{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:var(--muted);font-size:.78rem}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:1000px){.flow-grid{grid-template-columns:1fr 1fr}.translation-grid,.failure-grid,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid{grid-template-columns:1fr}.map-row{grid-template-columns:1fr}.map-row span{transform:rotate(90deg)}.topology-stage{width:760px;height:360px}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 요약</a><a href="#basic">Basic NAT</a><a href="#pat">PAT</a><a href="#static">Static PAT</a><a href="#failure">장애</a></nav></div></header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>NAT / PAT</h1>
+    <p>목표는 하나입니다. <b>Inside에서 Outside로 나갈 때 어떤 주소/Port가 바뀌고, Translation Table이 Return Traffic을 어느 Inside Host로 되돌리는지</b> 설명할 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>NAT는 “주소를 바꾸는 기능”만이 아닙니다.</strong><span>Outside에서 돌아오는 Packet을 원래 Inside Flow와 다시 연결하는 Translation State까지 함께 봐야 합니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line"><strong>Inside Local → Translation Table → Inside Global → Outside → Return Translation → Inside Local</strong><p>PAT는 여러 Inside Flow가 하나의 Global IP를 공유할 수 있도록 Flow 구분값을 함께 기록합니다.</p></div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>NAT는 Packet의 “Inside에서 보이는 값”과 “Outside에서 보이는 값”을 연결합니다.</h2></div></div>
+    <div class="flow-grid">
+      <article class="flow-card"><b>1</b><h3>Role</h3><p>Packet이 NAT inside에서 outside로 지나가는지 확인합니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>Match</h3><p>이 Packet이 NAT 대상으로 선택되는지 확인합니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>Translate</h3><p>Inside Local을 Inside Global로 바꾸고 Translation을 기록합니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>Return</h3><p>응답은 Translation Table을 이용해 원래 Inside endpoint로 돌아갑니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · TOPOLOGY</div><h2>R2만 NAT Edge이고 R1·R4는 Inside, R3는 Outside입니다.</h2></div></div>
+    <div class="topology-card">
+      <div class="topology-scroll">
+        <div class="topology-stage">
+          <svg class="topology-svg" viewBox="0 0 900 380" aria-hidden="true">
+            <line class="link inside-link" x1="190" y1="115" x2="385" y2="185"/>
+            <line class="link inside-link" x1="190" y1="285" x2="385" y2="210"/>
+            <line class="link outside-link" x1="515" y1="200" x2="720" y2="200"/>
+          </svg>
+          <span class="zone inside-zone">INSIDE</span><span class="zone outside-zone">OUTSIDE</span><span class="nat-badge">R2 · NAT EDGE</span>
+          <span class="cp cp11">CP11</span><span class="cp cp14">CP14</span><span class="cp cp23">CP23</span>
+          <div class="router r1"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R1</b><small>10.0.11.2<br>Inside A</small></div>
+          <div class="router r4"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R4</b><small>10.0.14.2<br>Inside B</small></div>
+          <div class="router r2"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R2</b><small>E0/0·E0/1 inside<br>E0/2 outside</small></div>
+          <div class="router r3"><div class="router-icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>R3</b><small>198.51.100.2<br>Outside</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>검증 설계:</b> Routing은 고정하고 NAT 변수만 바꿨습니다. 그래서 실패 Scenario에서도 Packet이 CP23까지 나가는지, 주소가 변환됐는지를 분리해서 판단할 수 있습니다.</div>
+  </div>
+</section>
+
+<section id="basic">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · BASIC NAT</div><h2>R1의 Inside Local 주소가 Outside에서는 198.51.100.5로 보였습니다.</h2></div></div>
+    <div class="translation-grid">
+      <article class="translation-card"><div class="eyebrow">INSIDE · CP11</div><h3>Source = 10.0.11.2</h3><p>R1이 R3로 ICMP를 보낼 때 Inside 구간에서는 원래 주소가 그대로 보입니다.</p><div class="tuple"><em>10.0.11.2</em> → 198.51.100.2</div></article>
+      <article class="translation-card"><div class="eyebrow">OUTSIDE · CP23</div><h3>Source = 198.51.100.5</h3><p>같은 Packet이 NAT Edge를 지나면 Source만 Inside Global 주소로 바뀌고 Destination은 유지됐습니다.</p><div class="tuple"><em>198.51.100.5</em> → 198.51.100.2</div></article>
+    </div>
+    <div class="map-table" style="margin-top:14px"><div class="map-row"><code>Inside Local · 10.0.11.2</code><span>→ NAT →</span><code>Inside Global · 198.51.100.5</code></div></div>
+    <div class="note" style="margin-top:14px"><b>Actual:</b> R1 Ping 3/3 성공, CP11/CP23 Packet과 Translation Table mapping이 일치했습니다.</div>
+  </div>
+</section>
+
+<section id="pat">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · PAT OVERLOAD</div><h2>R1과 R4가 하나의 Global IP를 동시에 공유했습니다.</h2></div></div>
+    <div class="map-table">
+      <div class="map-row"><code>10.0.11.2:25473</code><span>→</span><code>198.51.100.5:25473 → R3:23</code></div>
+      <div class="map-row"><code>10.0.14.2:46258</code><span>→</span><code>198.51.100.5:46258 → R3:23</code></div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>중요:</b> 이번 Run에서는 두 TCP source port가 NAT 전후에 그대로 유지됐습니다. 따라서 PAT를 “항상 Port 번호를 바꾼다”고 외우면 안 됩니다. 핵심은 <b>같은 Global IP에서 각 Flow를 구분할 수 있는 Translation mapping</b>입니다.</div>
+    <div class="translation-grid" style="margin-top:14px">
+      <article class="translation-card"><div class="eyebrow">RETURN · R1 SESSION</div><h3>Global :25473 → Local :25473</h3><p>R3의 응답은 Translation Table을 보고 CP11의 R1 Flow로만 되돌아왔습니다.</p></article>
+      <article class="translation-card"><div class="eyebrow">RETURN · R4 SESSION</div><h3>Global :46258 → Local :46258</h3><p>같은 Global IP를 쓰지만 R4 Flow는 CP14로 정확히 분리됐고 다른 Inside Link의 대응 응답은 0개였습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="static">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · STATIC PAT</div><h2>Outside의 :2323을 Inside R1의 :23 서비스로 연결했습니다.</h2></div></div>
+    <div class="map-table"><div class="map-row"><code>R3 → 198.51.100.5:2323</code><span>→ R2 NAT →</span><code>10.0.11.2:23 · R1</code></div></div>
+    <div class="translation-grid" style="margin-top:14px">
+      <article class="translation-card"><div class="eyebrow">OUTSIDE VIEW</div><h3>Destination = .5:2323</h3><p>R3에서 보낸 SYN은 CP23에서 Inside Global endpoint를 향했습니다.</p></article>
+      <article class="translation-card"><div class="eyebrow">INSIDE VIEW</div><h3>Destination = 10.0.11.2:23</h3><p>R2를 지난 뒤 CP11에서는 R1의 실제 서비스 endpoint로 변환됐고 3-way handshake와 prompt 도달이 확인됐습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · FAILURE / RECOVERY</div><h2>NAT 실패가 반드시 R2에서 Packet Drop을 의미하는 것은 아닙니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">NAT-05 · SELECTION MISMATCH</div><h3>R4는 “차단”이 아니라 “미변환”</h3>
+        <p>R1만 NAT 대상으로 선택하자 R4는 Translation entry가 생성되지 않았습니다. 하지만 R4 Request는 CP23까지 <b>10.0.14.2 그대로</b> 전달됐습니다.</p>
+        <div class="failure-state">R4 CP14 → R2 → CP23 · source 10.0.14.2 유지 · R3 return route 없음 → 0/3</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">NAT-06 · INSIDE ROLE MISSING</div><h3>Routing은 되지만 Translation이 없음</h3>
+        <p>R1 쪽 NAT inside role만 제거하자 R1 Packet은 CP23까지 나갔지만 Source가 10.0.11.2 그대로였습니다. 같은 시점 R4는 정상 변환돼 3/3이었습니다.</p>
+        <div class="failure-state">R1 0/3 · R4 control 3/3 · role 복구 후 R1/R4 모두 3/3</div>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>핵심:</b> NAT Selection list는 보안 ACL처럼 “Permit 아니면 Drop”으로 해석하면 안 됩니다. 이번 검증에서 R4 Packet은 실제로 Outside까지 Forward됐지만 Translation State가 없어 Return Path가 성립하지 않았습니다.</div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">06 · REVIEW</div><h2>여기까지만 연결해서 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card"><h3>⭐ 꼭 기억하세요</h3><ul>
+        <li><b>Inside Local</b>은 내부에서 보이는 주소, <b>Inside Global</b>은 외부에서 보이는 주소입니다.</li>
+        <li>Basic NAT는 주소 mapping, PAT는 여러 Flow가 같은 Global IP를 공유할 수 있게 mapping을 확장합니다.</li>
+        <li>Return Traffic은 <b>Translation Table</b>을 보고 정확한 Inside Flow로 되돌아옵니다.</li>
+        <li>Static PAT는 Global IP:Port를 Inside Service IP:Port에 고정 연결할 수 있습니다.</li>
+        <li>NAT 실패는 “Drop”과 “미변환 후 Return 실패”를 구분해야 합니다.</li>
+      </ul></article>
+      <article class="explain-yourself"><div class="eyebrow">내 말로 설명하기</div><h3>“R4 Packet이 CP23까지 나갔는데 왜 Ping은 실패할까?”</h3><p>NAT selection, Translation entry, untranslated source, Return Route라는 단어를 사용해 설명할 수 있다면 충분합니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>NAT 전후 Packet 값과 Translation Table을 직접 예상해 보세요.</h2><p>Basic NAT → PAT → Return Translation → Static PAT → Selection 실패 → Inside Role 복구 순서로 같은 토폴로지에서 확인합니다.</p></div><div class="actions"><a class="btn primary" href="nat-pat-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
+
+<section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> Run 2026-10-04-nat-pat-01, Cisco IOL L3 4대 / IOS 15.4(2)T4. NAT-01~06 모두 PASS했고 CP11/CP14/CP23 원본 PCAP, Translation Table, NAT role/state를 교차 검증했습니다. 최종 Baseline 복구와 임시 TCP 서비스 종료도 확인했습니다.</div></div></section>
+</main>
+<footer class="footer"><div class="shell">NAT / PAT · Concept → Interactive Lab</div></footer>
+</body>
+</html>
