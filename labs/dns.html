@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DNS — 개념서</title>
+<meta name="description" content="DNS Query/Response, Recursive Resolver, Cache, NXDOMAIN과 DNS 장애 분리를 짧게 이해하는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.concept-stage{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}
+.concept-stage strong{display:block;margin-bottom:4px}.concept-stage span{color:var(--muted);font-size:.88rem}
+.stage-chips{display:flex;gap:8px;flex-wrap:wrap}.stage-chip{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:800}.stage-chip.current{border-color:#3e6a91;color:var(--blue);background:rgba(88,184,255,.08)}
+.core-line{margin-top:18px;padding:21px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core-line strong{display:block;font-size:clamp(1.25rem,3vw,1.95rem);letter-spacing:-.03em}.core-line p{margin:7px 0 0;color:#b9c9d8}
+.flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.flow-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.flow-card b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue);margin-bottom:8px}.flow-card h3{margin:0 0 5px;font-size:.95rem}.flow-card p{margin:0;color:var(--muted);font-size:.84rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-card{padding:19px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.compare-card h3{margin:4px 0 7px}.compare-card p{margin:0;color:var(--muted)}
+.cache-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cache-card{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.cache-card h3{margin:4px 0 7px}.cache-card p{margin:0;color:var(--muted);font-size:.88rem}.cache-path{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:var(--muted);font-size:.77rem}
+.failure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.failure-card{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.failure-card h3{margin:4px 0 7px}.failure-card p{margin:0;color:#d4e0ec;font-size:.88rem}.failure-path{margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#091624;color:var(--muted);font-size:.77rem}
+.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.memory-card,.explain-yourself{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.memory-card h3,.explain-yourself h3{margin-top:0}.memory-card ul{margin:0;padding-left:1.15rem}.memory-card li{margin:.55rem 0}.explain-yourself{border-color:#8f6a38;background:rgba(255,191,105,.07)}
+.next-stage{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.next-stage h2{margin:5px 0 7px}.next-stage p{margin:0;color:var(--muted);max-width:720px}
+@media(max-width:900px){.flow-grid{grid-template-columns:1fr 1fr}.failure-grid{grid-template-columns:1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.compare-grid,.cache-grid{grid-template-columns:1fr}}
+@media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid{grid-template-columns:1fr}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
+    <nav class="nav">
+      <a href="#summary">30초 요약</a>
+      <a href="#query">Query</a>
+      <a href="#recursive">Recursive</a>
+      <a href="#cache">Cache</a>
+      <a href="#failure">장애</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="preview-hero">
+  <div class="shell">
+    <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
+    <h1>DNS</h1>
+    <p>목표는 하나입니다. <b>IP는 정상인데 이름만 실패할 때 DNS Query가 어디까지 갔고 어떤 Response가 돌아왔는지</b>로 문제 범위를 나눌 수 있으면 됩니다.</p>
+    <div class="concept-stage">
+      <div><strong>“Ping IP 성공”과 “DNS 정상”은 같은 뜻이 아닙니다.</strong><span>DNS Resolution과 실제 IP 통신은 서로 연결되지만 별도의 상태로 확인합니다.</span></div>
+      <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
+    </div>
+    <div class="core-line">
+      <strong>이름을 물어보고 → Resolver가 Cache 또는 Upstream에서 답을 찾고 → 실제 통신은 그 IP로 진행합니다.</strong>
+      <p>Query → Resolver → Cache/Upstream → Answer → IP Traffic</p>
+    </div>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>DNS는 Query/Response와 실제 IP 통신을 나눠서 봅니다.</h2></div></div>
+    <div class="test-guide">
+      <p><b>① Query:</b> Client가 <strong>QNAME + QTYPE</strong>을 DNS Server에 물어봅니다.</p>
+      <p><b>② Resolver:</b> Cache에 답이 없으면 Recursive/Caching Resolver가 configured Upstream DNS에 다시 Query합니다.</p>
+      <p><b>③ Cache:</b> TTL이 남아 있으면 같은 이름은 Upstream까지 가지 않고 Cache에서 바로 답할 수 있습니다.</p>
+      <p><b>④ 장애:</b> Response가 없는 상태와 <strong>NXDOMAIN(RCODE=3)</strong>처럼 Error Response가 돌아온 상태는 다릅니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="query">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · QUERY / RESPONSE</div><h2>이름 하나를 A Record로 해석하는 기본 흐름입니다.</h2></div></div>
+    <div class="flow-grid">
+      <article class="flow-card"><b>1</b><h3>Client Query</h3><p><code>app.lab.test</code>의 A Record를 198.51.100.2 Resolver에 요청합니다.</p></article>
+      <article class="flow-card"><b>2</b><h3>DNS Answer</h3><p>같은 Client-side DNS ID로 <code>A=203.0.113.10</code>이 돌아왔습니다.</p></article>
+      <article class="flow-card"><b>3</b><h3>TTL</h3><p>이번 Authoritative Answer의 TTL은 10초였습니다. 이 숫자를 보편값으로 일반화하지 않습니다.</p></article>
+      <article class="flow-card"><b>4</b><h3>실제 통신</h3><p>Name Resolution 뒤 203.0.113.10으로 ICMP Echo 3/3이 정상 전달됐습니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="recursive">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · RECURSIVE / UPSTREAM</div><h2>Cache Miss이면 R2가 R3에 다시 물어봅니다.</h2></div></div>
+    <div class="compare-grid">
+      <article class="compare-card">
+        <div class="eyebrow">CLIENT → R2</div>
+        <h3>RD=1 · DNS ID 21456</h3>
+        <p>PC1은 R2에 Recursion Desired Query를 보냈습니다. 이 Client-side Query와 최종 Client Response는 같은 DNS ID로 대응됐습니다.</p>
+      </article>
+      <article class="compare-card">
+        <div class="eyebrow">R2 → R3</div>
+        <h3>Upstream DNS ID 31909</h3>
+        <p>R2는 R3에 별도의 Upstream Query를 만들었습니다. <b>Resolver가 DNS ID를 다시 쓸 수 있으므로 두 Leg를 ID 동일성만으로 연결하면 안 됩니다.</b></p>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>이번 Lab의 범위:</b> R2가 configured Upstream Authoritative DNS인 R3에 Query하는 구조를 검증했습니다. Root/TLD 전체 Iterative Resolution을 재현했다고 표현하지 않습니다.</div>
+  </div>
+</section>
+
+<section id="cache">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · CACHE</div><h2>첫 Query와 두 번째 Query의 Upstream 경로가 달라졌습니다.</h2></div></div>
+    <div class="cache-grid">
+      <article class="cache-card">
+        <div class="eyebrow">CACHE MISS · PC1</div>
+        <h3>R2 → R3 Query 발생</h3>
+        <p>Cache를 비운 뒤 PC1이 app.lab.test를 조회하자 R2가 R3까지 Query했고 TTL 10의 A Record를 받았습니다.</p>
+        <div class="cache-path">PC1 → R2 → R3 → R2 → PC1</div>
+      </article>
+      <article class="cache-card">
+        <div class="eyebrow">CACHE HIT · PC2</div>
+        <h3>새 Upstream Query = 0</h3>
+        <p>약 3.6초 뒤 PC2가 같은 이름을 조회했을 때 R2가 TTL 6의 Cached Answer를 반환했고 R3로 새 Query는 없었습니다.</p>
+        <div class="cache-path">PC2 → R2 → PC2 · R3 Query 없음</div>
+      </article>
+    </div>
+    <div class="note" style="margin-top:14px"><b>관찰 포인트:</b> Cache Miss 전달 응답은 이번 IOS에서 AA=1, Cache Hit 응답은 AA=0이었습니다. 이 표기는 이번 구현 Actual로만 사용합니다.</div>
+  </div>
+</section>
+
+<section id="failure">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · 장애를 Response/Stop 위치로 구분</div><h2>“이름이 안 된다”는 증상도 원인은 서로 다릅니다.</h2></div></div>
+    <div class="failure-grid">
+      <article class="failure-card">
+        <div class="eyebrow">DNS SERVICE DOWN</div>
+        <h3>Query는 R2까지 도착</h3>
+        <p>R2의 DNS Service를 내리자 IP Ping은 3/3 유지됐고 Query는 R2까지 도착했지만 DNS Response는 없었습니다. 이번 IOS는 ICMP Type3 Code3도 반환했습니다.</p>
+        <div class="failure-path">IP ✓ · Query → R2 ✓ · DNS Response ✕ · Client Cannot resolve</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">WRONG CLIENT DNS</div>
+        <h3>실제 Resolver까지도 못 감</h3>
+        <p>PC1 DNS를 존재하지 않는 192.0.2.254로 바꾸자 .254 ARP만 발생했고 Reply는 0, 실제 R2 Query도 0이었습니다. IP Ping은 계속 정상입니다.</p>
+        <div class="failure-path">IP ✓ · ARP .254 ✕ · Query → R2 ✕</div>
+      </article>
+      <article class="failure-card">
+        <div class="eyebrow">NXDOMAIN</div>
+        <h3>Response는 존재함</h3>
+        <p>recover.lab.test Record를 제거하자 R3가 <b>RCODE=3</b> Response를 실제로 반환했고 Client도 NXDOMAIN을 받았습니다. 이는 Timeout이 아닙니다.</p>
+        <div class="failure-path">Query ✓ · DNS Response ✓ · RCODE 3 · A Answer ✕</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>여기까지만 기억하면 1단계 완료입니다.</h2></div></div>
+    <div class="memory-grid">
+      <article class="memory-card">
+        <h3>⭐ 꼭 기억하세요</h3>
+        <ul>
+          <li>DNS Query와 실제 IP Traffic은 <b>별도 단계</b>로 확인합니다.</li>
+          <li>Cache Miss는 Upstream Query가 필요하지만 <b>TTL-valid Cache Hit</b>는 생략할 수 있습니다.</li>
+          <li>Recursive Resolver가 Upstream에 Query할 때 <b>DNS ID가 달라질 수 있습니다.</b></li>
+          <li>DNS Server Down과 Wrong Client DNS는 <b>Query가 마지막으로 보이는 위치</b>가 다릅니다.</li>
+          <li><b>NXDOMAIN은 Response</b>이고, 무응답/Timeout과 다릅니다.</li>
+        </ul>
+      </article>
+      <article class="explain-yourself">
+        <div class="eyebrow">내 말로 설명하기</div>
+        <h3>“IP는 되는데 이름만 안 될 때 무엇부터 볼까?”</h3>
+        <p>Client DNS 주소, Query 위치, Response 유무, RCODE라는 네 단어를 사용해 설명할 수 있다면 충분합니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="next-stage">
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 토폴로지에서 Query가 어디까지 가는지 직접 비교하세요.</h2><p>A Query → Recursive/Upstream → Cache → DNS Service Down/Wrong DNS → NXDOMAIN 순서로 확인합니다.</p></div>
+      <div class="actions"><a class="btn primary" href="dns-simulator.html">Interactive Lab 시작 →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="basis">
+  <div class="shell">
+    <div class="note"><b>검증 기준:</b> 2026-10-04 Cisco IOL L3 3대 + IOL L2 1대 + VPCS 0.8.4 2대로 DNS-01~06을 최종 PASS했습니다. 첫 Run의 DNS-04/05 INCONCLUSIVE는 보존했고 수정본 재검증으로 해소했습니다. <a href="../learning/services/dns/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell">DNS · Concept → Interactive Lab</div></footer>
+</body>
+</html>
