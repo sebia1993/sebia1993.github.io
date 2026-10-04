@@ -5,7 +5,7 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:site": "python3 tests/check_site.py",
-    "test:browser": "node tests/ip-network-sim.mjs && node tests/ip-skill-review.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ip-scroll.mjs && node tests/ip-summary.mjs && node tests/ethernet-mac-final.mjs && node tests/icmp-troubleshooting-final.mjs && node tests/vlan-trunk-final.mjs && node tests/inter-vlan-routing-final.mjs && node tests/stp-final.mjs && node tests/lacp-final.mjs && node tests/dhcp-final.mjs && node tests/dns-final.mjs && node tests/routing-table-final.mjs && node tests/ospf-final.mjs && node tests/acl-final.mjs && node tests/nat-pat-final.mjs && node tests/nat-pat-responsive.mjs && node tests/firewall-vpn-final.mjs"
+    "test:browser": "node tests/ip-network-sim.mjs && node tests/ip-skill-review.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ip-scroll.mjs && node tests/ip-summary.mjs && node tests/ethernet-mac-final.mjs && node tests/icmp-troubleshooting-final.mjs && node tests/vlan-trunk-final.mjs && node tests/inter-vlan-routing-final.mjs && node tests/stp-final.mjs && node tests/lacp-final.mjs && node tests/dhcp-final.mjs && node tests/dns-final.mjs && node tests/routing-table-final.mjs && node tests/ospf-final.mjs && node tests/acl-final.mjs && node tests/nat-pat-final.mjs && node tests/nat-pat-responsive.mjs && node tests/firewall-vpn-final.mjs && node tests/wifi-rf-final.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"
