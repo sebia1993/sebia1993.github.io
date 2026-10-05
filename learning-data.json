@@ -1,7 +1,7 @@
 {
   "updated": "2026-10-05",
   "summary": {
-    "completedTopics": 16,
+    "completedTopics": 17,
     "labs": 16,
     "faultScenarios": 38,
     "packetCaptures": 58,
@@ -386,9 +386,9 @@
       "id": "wlan-association",
       "category": "5단계 · Enterprise WLAN",
       "title": "802.11 접속 / WPA2·WPA3",
-      "status": "planned",
-      "statusLabel": "예정",
-      "summary": "Scan, Authentication, Association, 4-Way Handshake와 보안 방식의 역할을 연결합니다.",
+      "status": "completed",
+      "statusLabel": "공개 자료 기반 · 2단계 학습 완료",
+      "summary": "공식 문서와 공개 PCAP을 대조해 Discovery·Authentication·Association·4-Way·SAE·PMF를 연결합니다. 실패·복구는 교육 모델로 구분하며 사용자 장비의 직접 실측은 미완료입니다.",
       "why": "클라이언트가 SSID를 발견한 뒤 실제 데이터 통신까지 가는 전 과정을 이해합니다.",
       "completeWhen": "Association 실패와 보안 Handshake 실패를 구분해 접속 단계를 설명할 수 있습니다.",
       "labs": 0,
@@ -397,7 +397,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": "./labs/wlan-association.html",
+      "detailLabel": "802.11 접속 / WPA2·WPA3 학습 시작 →",
+      "contentStatus": "completed",
+      "labStatus": "educational-model",
+      "validationMode": "public-reference-analysis",
+      "liveValidationStatus": "not-run"
     },
     {
       "id": "dot1x-radius",

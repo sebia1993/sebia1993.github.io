@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>802.11 접속 · WPA2 / WPA3 — 개념서</title>
+  <meta name="description" content="Discovery, Authentication, Association, WPA2 4-Way와 WPA3 SAE를 순서로 이해하는 개념서. 공식 문서·공개 PCAP과 교육 모델을 구분합니다.">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../lab-ui.css">
+  <link rel="stylesheet" href="wlan-association.css">
+</head>
+<body class="wlan-page">
+<a class="wlan-skip" href="#main">본문으로 건너뛰기</a>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav" aria-label="개념서 목차"><a href="#order">접속 순서</a><a href="#wpa2">WPA2 / WPA3</a><a href="#diagnosis">실패 구분</a><a href="#evidence">근거</a></nav></div></header>
+<main id="main">
+  <section class="wlan-hero"><div class="shell">
+    <div class="wlan-kicker"><span class="eyebrow">1단계 · CONCEPT GUIDE</span><span class="wlan-badge">공식 문서 + 공개 PCAP 기반 학습</span></div>
+    <h1>802.11 접속<br><em>WPA2 · WPA3</em></h1>
+    <p>Wi-Fi 이름을 찾은 뒤, 언제 연결하고 언제 암호를 확인할까요?<br><b>Authentication·Association·보안 Handshake를 구분</b>하는 것이 오늘의 목표입니다.</p>
+    <nav class="wlan-stage-nav" aria-label="학습 단계"><span aria-current="step">1 · 개념서</span><a href="wlan-association-simulator.html">2 · Interactive Lab →</a></nav>
+    <div class="wlan-keyline"><strong>AP 발견 → 인증 → 연결 협상 → Traffic Key 준비 → 보호된 데이터</strong><p>WPA2와 WPA3는 PMK를 준비하는 방식이 다르고, 이후 4-Way Handshake를 사용합니다.</p></div>
+    <div class="wlan-scope"><p>아래 흐름 그림은 <b>교육 모델</b>입니다. 공개 캡처의 관측 범위는 <a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">패킷 근거</a>에서 따로 확인합니다. <b>우리 AP·태블릿의 직접 패킷 실측은 완료하지 않았습니다.</b></p></div>
+  </div></section>
+
+  <section id="order"><div class="shell">
+    <div class="section-head"><div><div class="eyebrow">01 · FOUR QUESTIONS</div><h2>각 단계가 답하는 질문이 다릅니다.</h2></div></div>
+    <div class="wlan-stages">
+      <article class="wlan-stage"><b>DISCOVERY</b><h3>어느 AP가 있지?</h3><p>Beacon을 수신하거나 Probe Request/Response로 AP 정보를 찾습니다. Probe는 항상 필요한 것은 아닙니다.</p></article>
+      <article class="wlan-stage"><b>AUTHENTICATION</b><h3>인증 방식은?</h3><p>WPA2의 기본 접속은 Open System, 새 WPA3-Personal 접속은 SAE를 사용합니다.</p></article>
+      <article class="wlan-stage"><b>ASSOCIATION</b><h3>이 AP에 연결할까?</h3><p>기능과 보안 조건을 협상합니다. 성공 응답과 보안 Handshake 완료는 다른 상태입니다.</p></article>
+      <article class="wlan-stage"><b>4-WAY HANDSHAKE</b><h3>키를 준비했나?</h3><p>PMK를 바탕으로 Traffic Key를 도출·설치하고, 보호된 데이터 통신으로 진행합니다.</p></article>
+    </div>
+  </div></section>
+
+  <section id="wpa2"><div class="shell">
+    <div class="section-head"><div><div class="eyebrow">02 · WPA2 vs WPA3 PERSONAL</div><h2>SAE는 Association 전에, 4-Way는 그 뒤에.</h2></div></div>
+    <div class="wlan-grid">
+      <article class="wlan-card"><span class="wlan-compare-label">WPA2-PERSONAL · 기본 최초 접속</span><h3>Open System → Association → 4-Way</h3>
+        <ol class="wlan-mini-sequence"><li><b>Open System Authentication</b><small>요청·성공 응답. 여기서는 Wi-Fi 암호를 검증하지 않습니다.</small></li><li><b>Association</b><small>요청·성공 응답으로 연결 조건을 정합니다.</small></li><li><b>EAPOL-Key M1 → M2 → M3 → M4</b><small>PSK 기반 PMK에서 각 측이 키를 도출하고, 공유한 키 자료를 확인합니다.</small></li><li><b>Protected Data</b><small>암호화 프레임과 실제 통신 성공을 함께 확인합니다.</small></li></ol>
+        <div class="wlan-callout"><b>Open Authentication 성공 ≠ 올바른 암호.</b><br>Association 성공도 4-Way 완료를 뜻하지 않습니다.</div>
+      </article>
+      <article class="wlan-card"><span class="wlan-compare-label">WPA3-PERSONAL · 새 SAE 접속</span><h3>SAE → Association → 4-Way</h3>
+        <ol class="wlan-mini-sequence"><li><b>SAE Commit / Confirm</b><small>802.11 Authentication 단계에서 양측이 교환하여 PMK를 도출합니다.</small></li><li><b>Association</b><small>SAE 성공 뒤 연결 조건을 협상합니다.</small></li><li><b>EAPOL-Key M1 → M2 → M3 → M4</b><small>SAE로 준비한 PMK를 바탕으로 Traffic Key를 도출·설치합니다.</small></li><li><b>Protected Data</b><small>데이터 통신 성공은 별도 확인이 필요합니다.</small></li></ol>
+        <div class="wlan-callout"><b>새 접속과 캐시 재접속을 구분하세요.</b><br>PMKID 캐시를 사용하면 SAE 교환이 생략될 수 있습니다. SAE가 안 보인다는 이유만으로 WPA2라고 단정하지 않습니다.</div>
+      </article>
+    </div>
+  </div></section>
+
+  <section id="four-way"><div class="shell">
+    <div class="section-head"><div><div class="eyebrow">03 · MESSAGE SEQUENCE</div><h2>4-Way의 방향과 역할을 읽어 보세요.</h2></div></div>
+    <div class="wlan-grid">
+      <div class="wlan-sequence" aria-label="교육 모델: 태블릿과 AP의 WPA2 4-Way 순서">
+        <div class="wlan-lane-head"><div class="wlan-actor"><svg viewBox="0 0 64 54" aria-hidden="true"><rect x="15" y="3" width="34" height="48" rx="5"/><path d="M21 10h22v30H21zM29 46h6"/></svg><b>STA-A · 태블릿</b><small>Supplicant</small></div><div class="wlan-actor"><svg viewBox="0 0 64 54" aria-hidden="true"><rect x="7" y="30" width="50" height="16" rx="5"/><path d="M16 30V17m32 13V17M20 9q12-10 24 0M25 16q7-6 14 0M15 38h3m6 0h3"/></svg><b>AP-A</b><small>Authenticator</small></div></div>
+        <ol class="wlan-sequence-list">
+          <li class="wlan-event" data-direction="to-sta"><span class="wlan-message"><b>M1 · AP → STA</b><small>ANonce 전달</small></span><span class="wlan-event-line" aria-hidden="true"></span></li>
+          <li class="wlan-event" data-direction="to-ap"><span class="wlan-message"><b>M2 · STA → AP</b><small>SNonce + MIC</small></span><span class="wlan-event-line" aria-hidden="true"></span></li>
+          <li class="wlan-event" data-direction="to-sta"><span class="wlan-message"><b>M3 · AP → STA</b><small>키 설치에 필요한 정보 · 보호된 GTK</small></span><span class="wlan-event-line" aria-hidden="true"></span></li>
+          <li class="wlan-event" data-direction="to-ap"><span class="wlan-message"><b>M4 · STA → AP</b><small>확인 응답</small></span><span class="wlan-event-line" aria-hidden="true"></span></li>
+        </ol><p class="wlan-sequence-caption">교육 모델 · 화살표는 메시지 방향입니다. 실제 캡처의 프레임 번호·시간을 표시한 그림이 아닙니다.</p>
+      </div>
+      <article class="wlan-card"><h3>PMK는 M1에 실려 오지 않습니다.</h3><p>PMK는 양측이 이미 준비한 키 자료입니다. M1의 ANonce와 M2의 SNonce는 키 도출에 쓰이는 값이며 PMK 자체가 아닙니다.</p><ul class="wlan-checklist"><li><b>MIC</b>: 메시지 무결성과 키 보유 확인에 쓰입니다.</li><li><b>PTK / GTK</b>: 각각 개별 단말 통신과 그룹 통신에 사용하는 키입니다.</li><li><b>재전송</b>: 패킷이 네 개보다 많아도 4-Way일 수 있습니다.</li><li><b>판독</b>: 같은 STA/AP, Pairwise Key Type, 방향, replay counter를 함께 봅니다. Group Key 교환과 섞지 않습니다.</li></ul><div class="wlan-callout">캡처에 M3가 없다는 사실만으로 암호 오류를 확정하지 않습니다. 캡처 누락 가능성과 AP/STA 상태도 확인해야 합니다.</div></article>
+    </div>
+  </div></section>
+
+  <section id="diagnosis"><div class="shell">
+    <div class="section-head"><div><div class="eyebrow">04 · WHERE DID IT STOP?</div><h2>실패한 단계를 먼저 찾습니다.</h2></div></div>
+    <div class="wlan-grid">
+      <article class="wlan-card"><h3>Association 실패</h3><p>Association 응답이 실패 상태라면 연결 조건 협상에서 멈춘 것입니다. 그 뒤 4-Way가 완료됐다고 설명할 수 없습니다.</p></article>
+      <article class="wlan-card"><h3>보안 Handshake 실패</h3><p>틀린 WPA2 암호에서도 Auth/Assoc는 성공할 수 있습니다. 성공한 연결 협상 뒤 키 교환이 멈췄는지, AP/STA 로그와 통신 결과로 확인합니다. Auth/Assoc가 항상 성공한다는 뜻은 아닙니다.</p></article>
+    </div><div class="wlan-callout"><b>복구까지 확인:</b> 올바른 lab 설정으로 되돌린 뒤 새 연결의 4-Way 완료와 보호된 데이터 통신 성공을 확인합니다.</div>
+  </div></section>
+
+  <section id="pmf"><div class="shell">
+    <div class="section-head"><div><div class="eyebrow">05 · SAE / PMF / DATA</div><h2>인증과 관리 프레임 보호는 별개입니다.</h2></div></div>
+    <div class="wlan-grid">
+      <article class="wlan-card"><h3>SAE 선택과 PMF 협상 확인</h3><p>AP의 “WPA3 지원” 표시는 가능한 방식의 광고입니다. 실제 접속이 SAE를 선택했는지 Association의 RSN AKM과 PMF capability/requirement를 함께 확인합니다.</p><p><b>MFPC</b>는 보호 기능 지원(Capable), <b>MFPR</b>은 사용 요구(Required)입니다. AP 광고에서 <b>MFPC/MFPR</b> 순서로 1/1은 필수, 1/0은 선택, 0/0은 미지원 광고를 뜻합니다. 양측이 모두 MFPR=1이어야 한다는 뜻은 아닙니다.</p><p>WPA2/WPA3 혼합 모드 접속을 pure-mode 증거로 보지 않습니다. <a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 SAE 표본의 0/0과 별도 WPA2 MFP 표본의 1/1 비교</a>도 각 표본의 관측입니다.</p><div class="wlan-callout"><b>SAE 관측 ≠ WPA3 요구사항 전체 확인.</b><br>다른 WPA2 표본의 PMF를 합쳐 WPA3의 PMF 관측으로 만들지 않습니다.</div></article>
+      <article class="wlan-card"><h3>PMF ≠ 모든 프레임의 암호화</h3><p>PMF는 연결 후 Deauthentication, Disassociation, 일부 Action 같은 <b>robust management frame</b>을 보호합니다. 데이터 암호화와 역할이 다르며 Beacon·초기 Auth/Assoc까지 모두 암호화한다는 뜻은 아닙니다.</p><p>WPA3 암호와 4-Way만 알아도 데이터를 복호화할 수 있는 것은 아닙니다. Wireshark에는 해당 연결의 PMK가 필요합니다.</p></article>
+    </div>
+  </div></section>
+
+  <section><div class="shell"><div class="wlan-next"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>접속 단계가 보이면 실패 위치도 보입니다.</h2><p>6문제에서 예상하고, 메시지 순서를 관찰하고, 오답을 다시 풀어 보세요.</p></div><a class="btn primary" href="wlan-association-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+  <section id="evidence"><div class="shell"><div class="wlan-reference"><div class="eyebrow">REFERENCE & SCOPE</div><h2>공개 패킷 근거와 직접 실측의 범위</h2><p>공식 문서는 동작 원리를, 공개 PCAP은 해당 샘플에서 관측된 프레임을 뒷받침합니다. <b>공개 표본은 WPA3 인증·규격 준수 전체의 증거가 아닙니다.</b> 우리 AP·태블릿의 동작을 검증한 것도 아닙니다.</p><div class="wlan-reference-links"><a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 PCAP 분석과 관측 범위 →</a><a href="../learning/wireless/wlan-association/reference-evidence.json">패킷 근거 JSON</a></div><ul class="wlan-source-list"><li><a href="https://www.cisco.com/c/en/us/support/docs/wireless-mobility/80211/200527-Fundamentals-of-802-11-Wireless-Sniffing.html">Cisco · Authentication, Association, 4-Way</a></li><li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-sae-authentication">Microsoft · SAE와 PMKID 캐시 접속</a></li><li><a href="https://www.cisco.com/c/en/us/support/docs/wireless-mobility/wireless-lan-wlan/212576-configure-802-11w-management-frame-prote.html">Cisco · PMF와 관리 프레임 보호</a></li><li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-softap">Microsoft · WPA3·Transition과 PMF 조건</a></li><li><a href="https://wiki.wireshark.org/HowToDecrypt802.11">Wireshark · WPA3 복호화 조건</a></li></ul></div></div></section>
+</main>
+<footer class="footer"><div class="shell">802.11 접속 · WPA2 / WPA3 · Concept Guide → Interactive Lab</div></footer>
+</body>
+</html>
