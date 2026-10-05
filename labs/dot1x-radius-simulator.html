@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>802.1X / EAP / RADIUS — Interactive Lab</title>
+<meta name="description" content="802.1X의 EAPOL/RADIUS 경계, Access-Accept/Reject, 동적 VLAN, RADIUS Timeout/Recovery를 실제 검증값 기반으로 학습하는 2단계 Lab입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<link rel="stylesheet" href="dot1x-radius.css">
+<script src="dot1x-radius.js" defer></script>
+</head>
+<body class="dot-page">
+<a class="dot-skip" href="#lessonTitle">문제로 건너뛰기</a>
+<header><div class="shell topbar"><a class="brand" href="dot1x-radius.html">← 개념서</a><nav class="nav"><a href="../roadmap.html">학습 로드맵</a></nav></div></header>
+<main>
+<section class="dot-hero"><div class="shell">
+<div class="dot-kicker"><span class="eyebrow">2단계 · INTERACTIVE LAB</span><span class="dot-badge">Validated Lab Model · DOT1X-01~06 PASS</span></div>
+<h1>802.1X에서<br><em>어디까지 성공했는지 읽기</em></h1>
+<p>각 문제에서 먼저 결과를 예상하고, <b>EAPOL·RADIUS·Session·VLAN·Data</b> Evidence를 함께 보며 원인을 좁혀 보세요.</p>
+<nav class="dot-stage-nav"><a href="dot1x-radius.html">1 · 개념서</a><span aria-current="step">2 · Interactive Lab</span></nav>
+<div class="dot-scope">이 화면은 실제 Run의 검증 결과를 학습용으로 재구성합니다. Browser Animation은 Evidence가 아니며, 실제 근거는 Cisco Session/FreeRADIUS/PCAP에서 생성됐습니다.</div>
+</div></section>
+
+<section class="dot-workspace"><div class="shell">
+<div class="dot-progress"><div><b id="progressLabel">학습 진행</b><small>6개 검증 Claim</small></div><div class="dot-bar"><div id="progressBar"></div></div><div id="progressCount">0 / 6 완료</div></div>
+<nav class="dot-tabs" id="lessonTabs" aria-label="문제 선택"></nav>
+
+<article class="card dot-lab">
+<div class="coach"><div class="coach-icon" id="lessonNo">1</div><div><div class="coach-title" id="lessonTitle" tabindex="-1"></div><div class="coach-text" id="lessonText"></div><div class="start-state" id="startState"></div></div></div>
+
+<div class="dot-question">
+<h2 id="question"></h2>
+<div class="dot-options" id="options"></div>
+<div class="dot-controls"><button class="btn primary" id="runBtn" type="button" disabled>검증 결과 보기</button><button class="btn dot-hidden" id="recoverBtn" type="button">복구 확인</button><button class="btn" id="resetBtn" type="button">이 문제 다시 풀기</button></div>
+</div>
+
+<div class="dot-feedback dot-hidden" id="feedback">
+<strong id="feedbackTitle"></strong>
+<p><b>내 예상:</b> <span id="myAnswer"></span></p>
+<p><b>검증된 결과:</b> <span id="actualAnswer"></span></p>
+<p id="reasonText"></p>
+</div>
+
+<div class="dot-lab-grid">
+<div class="dot-panel">
+<h3>Role / Session State</h3>
+<div class="dot-state-list" id="stateList"></div>
+<div class="dot-note" id="scopeNote" style="margin-top:10px">실제 WLAN에서는 AP/Controller가 Authenticator 역할을 맡습니다.</div>
+</div>
+<div class="dot-panel">
+<h3>Message Sequence</h3>
+<div class="dot-sequence">
+<div class="dot-lanes"><div class="dot-lane"><b>Supplicant</b><small>EAPOL</small></div><div class="dot-lane"><b>Authenticator</b><small>Relay / Session</small></div><div class="dot-lane"><b>RADIUS</b><small>AAA</small></div></div>
+<div class="dot-event-list" id="eventList"></div>
+</div>
+</div>
+</div>
+
+<div class="dot-panel" style="margin-top:14px">
+<h3>실제 Evidence</h3>
+<div class="dot-state-list" id="evidenceList"></div>
+</div>
+
+<div class="lesson-nav"><button class="btn" id="prevBtn" type="button">← 이전 문제</button><button class="btn primary" id="nextBtn" type="button">다음 문제 →</button></div>
+</article>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">802.1X / EAP / RADIUS · 예상 → Evidence → 원인 구분 → 복구</div></footer>
+</body>
+</html>
