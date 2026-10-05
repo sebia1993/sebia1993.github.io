@@ -1,11 +1,11 @@
 {
   "updated": "2026-10-05",
   "summary": {
-    "completedTopics": 19,
-    "labs": 18,
-    "faultScenarios": 40,
-    "packetCaptures": 61,
-    "recoveryValidations": 39,
+    "completedTopics": 20,
+    "labs": 19,
+    "faultScenarios": 43,
+    "packetCaptures": 64,
+    "recoveryValidations": 42,
     "explainNotes": 1,
     "automations": 2
   },
