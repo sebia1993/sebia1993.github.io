@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>802.1X / EAP / RADIUS — 개념서</title>
+<meta name="description" content="Supplicant, Authenticator, RADIUS, Identity Store, VLAN/Role 인가와 Reject/Timeout 차이를 실제 격리 Lab Evidence로 배우는 1단계 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<link rel="stylesheet" href="dot1x-radius.css">
+</head>
+<body class="dot-page">
+<a class="dot-skip" href="#main">본문으로 건너뛰기</a>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav" aria-label="개념서 목차"><a href="#roles">역할</a><a href="#success">성공</a><a href="#authorization">VLAN/Role</a><a href="#failures">실패 구분</a></nav></div></header>
+<main id="main">
+<section class="dot-hero"><div class="shell">
+<div class="dot-kicker"><span class="eyebrow">1단계 · CONCEPT GUIDE</span><span class="dot-badge">실제 격리 802.1X Lab · 6 PASS</span></div>
+<h1>802.1X · EAP · RADIUS<br><em>인증과 인가를 분리해서 보기</em></h1>
+<p>이번 목표는 하나입니다. <b>Supplicant → Authenticator → RADIUS → Identity Store → VLAN/Role</b> 흐름을 따라가며, 잘못된 자격정보와 RADIUS 서버 장애를 구분할 수 있으면 됩니다.</p>
+<nav class="dot-stage-nav" aria-label="학습 단계"><span aria-current="step">1 · 개념서</span><a href="dot1x-radius-simulator.html">2 · Interactive Lab →</a></nav>
+<div class="dot-keyline"><strong>Supplicant — EAPOL → Authenticator — RADIUS → Authentication Server → Authorization</strong><p>인증이 성공한 뒤에 VLAN/Role 같은 인가 결과가 적용됩니다. “인증 성공”과 “어느 VLAN/Role을 받았는가”는 다른 질문입니다.</p></div>
+<div class="dot-scope"><b>검증 범위:</b> 실제 Lab은 Cisco L2 Switch를 Authenticator로 사용했습니다. Enterprise WLAN에서는 같은 역할 경계에서 AP/Controller가 Authenticator/NAS 역할을 맡습니다. 유선과 무선의 Data-plane enforcement 구현이 동일하다고 가르치지 않습니다.</div>
+</div></section>
+
+<section id="roles"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · WHO DOES WHAT?</div><h2>802.1X는 네 역할을 구분하면 흐름이 보입니다.</h2></div></div>
+<div class="dot-role-topology"><div class="dot-topology-scroll"><div class="dot-topology">
+<svg class="links" viewBox="0 0 980 330" aria-hidden="true">
+<line class="dot-link eap" x1="130" y1="178" x2="280" y2="178"/>
+<line class="dot-link radius" x1="390" y1="155" x2="545" y2="100"/>
+<line class="dot-link data" x1="390" y1="205" x2="545" y2="250"/>
+</svg>
+<span class="dot-cp cp-eap">CP-EAPOL</span><span class="dot-cp cp-radius">CP-RADIUS</span><span class="dot-cp cp-data">CP-DATA</span>
+<div class="dot-node n-supp"><div class="icon"><svg viewBox="0 0 64 48"><rect x="10" y="5" width="44" height="30" rx="3"/><path d="M20 42h24M32 35v7"/></svg></div><b>Supplicant</b><small>SUPP-LINUX<br>사용자 단말 역할</small></div>
+<div class="dot-node n-auth"><div class="icon"><svg viewBox="0 0 64 48"><rect x="7" y="14" width="50" height="23" rx="4"/><path d="M13 23h5m5 0h5m5 0h5m5 0h5M14 31h36"/></svg></div><b>Authenticator</b><small>SW1 Cisco L2<br>WLAN에서는 AP/Controller</small></div>
+<div class="dot-node n-radius"><div class="icon"><svg viewBox="0 0 64 48"><rect x="13" y="6" width="38" height="36" rx="4"/><path d="M19 15h26M19 24h26M19 33h26"/></svg></div><b>RADIUS / Identity Store</b><small>FreeRADIUS<br>Local test identities</small></div>
+<div class="dot-node n-gw"><div class="icon"><svg viewBox="0 0 64 48"><ellipse cx="32" cy="24" rx="25" ry="17"/><path d="M18 24h28M32 12v24"/></svg></div><b>Authorized Network</b><small>R1 Gateway/DHCP<br>VLAN20 / VLAN30</small></div>
+<div class="dot-zone"><b>Enterprise WLAN Mapping</b><span>STA = Supplicant<br>AP/Controller = Authenticator<br>ClearPass/RADIUS = Authentication Server<br>Role/VLAN = Authorization outcome</span></div>
+</div></div></div>
+</div></section>
+
+<section id="success"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · NORMAL SUCCESS</div><h2>EAPOL과 RADIUS는 서로 다른 구간에서 같은 EAP 대화를 운반합니다.</h2></div></div>
+<div class="dot-sequence">
+<div class="dot-lanes"><div class="dot-lane"><b>Supplicant</b><small>EAPOL</small></div><div class="dot-lane"><b>Authenticator</b><small>Relay / Policy Enforcer</small></div><div class="dot-lane"><b>RADIUS</b><small>EAP + AAA</small></div></div>
+<div class="dot-event-list">
+<div class="dot-event"><span>1 · EAPOL</span><code>Request / Identity ↔ Response / Identity</code></div>
+<div class="dot-event"><span>2 · RADIUS</span><code>Access-Request + EAP-Message</code></div>
+<div class="dot-event"><span>3 · CHALLENGE</span><code>Access-Challenge + next EAP Request</code></div>
+<div class="dot-event success"><span>4 · ACCEPT</span><code>Access-Accept → EAP Success → Authorized</code></div>
+<div class="dot-event success"><span>5 · DATA</span><code>DHCP / ARP / ICMP passes in authorized VLAN</code></div>
+</div>
+</div>
+<div class="dot-grid" style="margin-top:14px">
+<article class="dot-card"><div class="eyebrow">DOT1X-01 / 02 ACTUAL</div><h3>20개의 EAP Packet을 EAPOL ↔ RADIUS로 직접 대응</h3><p>정상 BLUE 인증에서 EAP 전체 바이트 SHA-256까지 대조해 20개 Relay를 동일 Packet으로 연결했습니다. Supplicant가 RADIUS를 직접 보내는 구조가 아니라 Authenticator가 EAP를 RADIUS에 실어 전달하는 구조가 확인됐습니다.</p></article>
+<article class="dot-card"><div class="eyebrow">DOT1X-03 ACTUAL</div><h3>PEAP/MSCHAPv2 → Access-Accept → Authorized</h3><p>실제 Method는 PEAPv0/MSCHAPv2 over TLS1.2였습니다. BLUE는 Access-Accept #324, EAP Success, Cisco Authorized, VLAN20, DHCP <code>10.77.20.10</code>, Ping 3/3까지 일치했습니다.</p></article>
+</div>
+<div class="dot-note" style="margin-top:14px"><b>Nuance:</b> 최초 <code>Request/Identity</code>는 SW1 Authenticator가 로컬로 생성했습니다. 모든 EAP Frame이 RADIUS에서 왔다고 단순화하면 안 됩니다.</div>
+</div></section>
+
+<section id="authorization"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · AUTHENTICATION ≠ AUTHORIZATION</div><h2>둘 다 Access-Accept여도 결과 VLAN은 다를 수 있습니다.</h2></div></div>
+<div class="dot-vlan-table">
+<div class="dot-vlan-row"><b>BLUE</b><code>Access-Accept</code><span>VLAN 20</span><span>10.77.20.10 · Ping 3/3</span></div>
+<div class="dot-vlan-row"><b>GREEN</b><code>Access-Accept</code><span>VLAN 30</span><span>10.77.30.10 · Ping 3/3</span></div>
+</div>
+<div class="dot-grid" style="margin-top:14px">
+<article class="dot-card"><h3>Authentication</h3><p>“이 Identity가 유효한가?”를 판단합니다. BLUE와 GREEN은 둘 다 성공했습니다.</p><div class="dot-path">Access-Accept</div></article>
+<article class="dot-card"><h3>Authorization</h3><p>“성공한 사용자를 어디에 배치할까?”를 결정합니다. RADIUS Tunnel Attributes가 VLAN20/30을 구분했고 Cisco Session VLAN과 실제 DHCP 주소가 따라갔습니다.</p><div class="dot-path">Tunnel-Type=13 · Medium-Type=6 · Private-Group-ID=20/30</div></article>
+</div>
+</div></section>
+
+<section id="failures"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · TWO FAILURES, DIFFERENT ROOT CAUSES</div><h2>EAP Failure 한 줄만 보고 “비밀번호 오류”라고 판단하면 안 됩니다.</h2></div></div>
+<div class="dot-compare">
+<article class="dot-state"><div class="eyebrow">DOT1X-04 · EXPLICIT REJECT</div><h3>BAD Credential → Access-Reject</h3><p>BLUE Identity에 잘못된 Lab Password를 한 번 사용하자 RADIUS <b>Access-Reject #371</b>, EAP Failure, Unauthorized, Ping 0/3이 확인됐습니다.</p><div class="dot-path">EAP starts → Access-Reject → EAP Failure → Unauthorized → DATA STOP</div><span class="dot-pill bad">명시적 인증 실패</span></article>
+<article class="dot-state"><div class="eyebrow">DOT1X-06 · NO RESPONSE</div><h3>RADIUS Service Down → Retry / Timeout</h3><p>Lab FreeRADIUS만 중단하자 동일 EAP payload의 Access-Request가 3회 전송됐지만 Access-Accept/Reject는 0개였습니다. Cisco Timeout/Unauthorized와 Ping 0/3이 확인됐습니다.</p><div class="dot-path">Access-Request ×3 → no RADIUS reply → timeout → Unauthorized</div><span class="dot-pill warn">AAA 서버 응답 실패</span></article>
+</div>
+<div class="dot-note" style="margin-top:14px"><b>중요:</b> RADIUS UDP Port가 닫혀 Linux가 ICMP Type3 Code3을 반환한 Packet도 실제로 있었습니다. 따라서 “IP 응답이 전혀 없었다”가 아니라 <b>“RADIUS 응답이 없었다”</b>가 정확한 표현입니다.</div>
+<div class="dot-grid" style="margin-top:14px">
+<article class="dot-card"><div class="eyebrow">REJECT RECOVERY</div><h3>정상 BLUE 복구</h3><p>올바른 Lab Credential로 되돌리자 Access-Accept #416과 Ping 3/3이 복구됐습니다.</p></article>
+<article class="dot-card"><div class="eyebrow">TIMEOUT RECOVERY</div><h3>RADIUS Service 복구</h3><p>서비스를 복구한 뒤 Access-Accept #523, Authorized, Ping 3/3으로 돌아왔고 최종 BLUE/VLAN20 Baseline을 확인했습니다.</p></article>
+</div>
+</div></section>
+
+<section id="review"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>이 다섯 문장을 연결해서 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="dot-memory">
+<article><h3>⭐ 꼭 기억하세요</h3><ul>
+<li>Supplicant↔Authenticator는 <b>EAPOL</b>, Authenticator↔RADIUS는 <b>RADIUS</b>입니다.</li>
+<li>Access-Accept는 인증 성공을 뜻하지만 VLAN/Role은 별도의 <b>인가 결과</b>입니다.</li>
+<li>Access-Reject와 RADIUS 무응답은 다른 장애입니다.</li>
+<li>EAP Failure만으로 실패 원인을 단정하지 않습니다.</li>
+<li>실제 WLAN에서는 AP/Controller가 Authenticator 역할을 맡습니다.</li>
+</ul></article>
+<article class="dot-explain"><div class="eyebrow">내 말로 설명하기</div><h3>“사용자가 무선랜에 못 붙을 때 어느 구간부터 확인할까?”</h3><p>EAPOL → RADIUS Request/Response → Authentication Result → Authorization Attributes → Client/Session VLAN 순서로 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="dot-next"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>정상 인증과 두 장애를 직접 구분해 보세요.</h2><p>Protocol Boundary → Relay → Accept → VLAN Authorization → Reject → Timeout/Recovery 순서로 진행합니다.</p></div><a class="btn primary" href="dot1x-radius-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+
+<section><div class="shell"><div class="dot-scope"><b>검증 기준:</b> Run <code>2026-10-05-dot1x-radius-01</code>, Cisco IOL + wired Linux Supplicant + FreeRADIUS. DOT1X-01~06 모두 PASS, 원본 PCAP 3개 총 2,238 frames. 이 Run은 유선 802.1X 역할·프로토콜 경계를 검증한 것이며 실제 AP/Controller나 WPA-Enterprise RF 접속을 직접 검증한 것은 아닙니다.</div></div></section>
+</main>
+<footer class="footer"><div class="shell">802.1X / EAP / RADIUS · Concept Guide → Interactive Lab</div></footer>
+</body>
+</html>
