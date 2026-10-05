@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>802.11 접속 · WPA2 / WPA3 — Interactive Lab</title>
+  <meta name="description" content="태블릿과 AP의 접속 순서를 6문제로 배우는 교육 모델. 예상, 단계 관찰, 정오답, 오답 복습과 최종 점수를 제공합니다.">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../lab-ui.css">
+  <link rel="stylesheet" href="wlan-association.css">
+  <script src="wlan-association.js" defer></script>
+</head>
+<body class="wlan-page">
+<a class="wlan-skip" href="#lessonTitle">문제로 건너뛰기</a>
+<header><div class="shell topbar"><a class="brand" href="wlan-association.html">← 개념서</a><nav class="nav" aria-label="학습 탐색"><a href="../roadmap.html">학습 로드맵</a><a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 패킷 근거</a></nav></div></header>
+<main>
+  <section class="wlan-hero"><div class="shell">
+    <div class="wlan-kicker"><span class="eyebrow">2단계 · INTERACTIVE LAB</span><span class="wlan-badge">교육 모델 · 실장비에 명령을 보내지 않음</span></div>
+    <h1>Wi-Fi가 연결되는<br><em>순서를 읽어 보세요.</em></h1>
+    <p>메시지 이름을 외우기보다, <b>어느 단계에서 무엇을 확인하는지</b> 예상해 보세요.</p>
+    <nav class="wlan-stage-nav" aria-label="학습 단계"><a href="wlan-association.html">1 · 개념서</a><span aria-current="step">2 · Interactive Lab</span></nav>
+    <ol class="wlan-lab-intro"><li><b>1 · 예상</b><span>세 보기 중 하나를 선택합니다.</span></li><li><b>2 · 실행·관찰</b><span>교육 모델의 단계를 넘겨 봅니다.</span></li><li><b>3 · 확인·복습</b><span>정오답을 확인하고 다시 풉니다.</span></li></ol>
+    <div class="wlan-scope"><p>순서와 상태는 설명을 위한 <b>교육 모델</b>입니다. 실제 프레임 번호나 시간이 아닙니다. <b>우리 AP·태블릿의 직접 실측은 미완료</b>이며, <a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 PCAP 근거</a>는 따로 볼 수 있습니다.</p></div>
+    <noscript><div class="wlan-noscript">이 실습은 JavaScript가 필요합니다. <a href="wlan-association.html">개념서</a>에서 같은 접속 순서와 설명을 읽을 수 있습니다.</div></noscript>
+  </div></section>
+
+  <section class="wlan-workspace"><div class="shell">
+    <div class="wlan-progress"><strong id="progressLabel">학습 진행</strong><span id="progressCount">0 / 6 관찰 완료</span><progress id="courseProgress" value="0" max="6" aria-labelledby="progressLabel"></progress></div>
+    <nav class="wlan-tabs" id="lessonTabs" aria-label="문제 선택"></nav>
+    <div class="wlan-review-banner" id="reviewBanner" hidden><b>오답 복습 · 최초 점수는 유지됩니다.</b><button class="btn" id="exitReviewBtn" type="button">전체 문제 보기</button></div>
+    <article class="wlan-lesson" id="lesson" data-phase="predict" data-lesson="0">
+      <div class="wlan-lesson-heading"><span class="wlan-lesson-number" id="lessonNo">1</span><div><h2 id="lessonTitle" tabindex="-1">문제를 준비하고 있습니다.</h2><p id="lessonDescription"></p></div></div>
+      <div class="wlan-lab-grid">
+        <div>
+          <fieldset class="wlan-prediction" id="prediction"><legend id="question">예상해 보세요.</legend><div id="options"></div></fieldset>
+          <div class="wlan-controls"><button class="btn primary" id="runBtn" type="button" disabled>교육 모델 실행</button><button class="btn" id="retryBtn" type="button" hidden>이 문제 다시 풀기</button></div>
+          <p class="wlan-hint" id="predictionHint">보기를 고른 뒤 실행하세요. 모든 관찰 단계를 보면 정오답이 나타납니다.</p>
+          <div class="wlan-feedback" id="feedback" hidden><h3 id="feedbackTitle"></h3><p id="answerText"></p><p id="reasonText"></p><a id="reviewLink" href="wlan-association.html">해당 개념 다시 읽기 →</a></div>
+        </div>
+        <div>
+          <div class="wlan-observation-head"><h3>태블릿 STA ↔ AP</h3><span id="stepCount">관찰 대기</span></div>
+          <div class="wlan-sequence" aria-label="교육 모델의 메시지 순서">
+            <div class="wlan-lane-head"><div class="wlan-actor"><svg viewBox="0 0 64 54" aria-hidden="true"><rect x="15" y="3" width="34" height="48" rx="5"/><path d="M21 10h22v30H21zM29 46h6"/></svg><b>STA-A · 태블릿</b><small>시험 단말 역할</small></div><div class="wlan-actor"><svg viewBox="0 0 64 54" aria-hidden="true"><rect x="7" y="30" width="50" height="16" rx="5"/><path d="M16 30V17m32 13V17M20 9q12-10 24 0M25 16q7-6 14 0M15 38h3m6 0h3"/></svg><b>AP-A</b><small>무선 AP 역할</small></div></div>
+            <ol class="wlan-sequence-list" id="sequenceList" tabindex="0" aria-label="교육용 메시지 순서. 스크롤하여 이전 단계를 볼 수 있습니다."><li class="wlan-empty-sequence">예상을 선택하면 메시지 흐름을 관찰할 수 있습니다.</li></ol>
+            <p class="wlan-sequence-caption">교육 모델 · 화살표 = 메시지 방향 · 점선 = 내부 상태/중단</p>
+          </div>
+          <div class="wlan-step-detail" id="stepDetail" role="status" aria-live="polite" aria-atomic="true"><b id="eventTitle">아직 실행하지 않았습니다.</b><p id="eventDetail">실제 무선 패킷을 수집하는 기능은 없습니다.</p></div>
+          <div class="wlan-controls"><button class="btn primary" id="nextStepBtn" type="button" disabled>다음 관찰 단계 →</button><button class="btn" id="showAllBtn" type="button" disabled>전체 단계 보기</button></div>
+        </div>
+      </div>
+      <div class="wlan-next-lesson"><button class="btn" id="prevBtn" type="button" disabled>← 이전 문제</button><button class="btn" id="finishBtn" type="button" disabled>최종 점수 보기</button><button class="btn primary" id="nextBtn" type="button">다음 문제 →</button></div>
+    </article>
+
+    <section class="wlan-summary" id="summary" aria-labelledby="summaryTitle" hidden>
+      <div class="eyebrow">LEARNING RESULT</div><h2 id="summaryTitle" tabindex="-1">6문제 관찰을 마쳤습니다.</h2><div class="wlan-score" id="finalScore">0 / 6</div><p id="scoreDescription">최초 제출 기준 점수입니다. 재시도는 점수를 중복해서 더하지 않습니다.</p><ul class="wlan-score-list" id="scoreList"></ul><p>이 점수는 <b>개념 학습 결과</b>입니다. 우리 AP·태블릿의 직접 실측 완료나 장비 검증 통과를 뜻하지 않습니다.</p><div class="wlan-controls"><button class="btn primary" id="reviewWrongBtn" type="button">오답만 다시 풀기</button><button class="btn" id="restartBtn" type="button">점수 초기화 · 처음부터</button><a class="btn" href="wlan-association.html">개념서로 돌아가기</a></div>
+    </section>
+    <div class="wlan-reference" style="margin-top:22px"><b>실제 패킷은 별도 근거에서 확인하세요.</b><p>이 화면의 단계는 교육용입니다. 공개 캡처의 출처·프레임·관측 한계는 아래 자료에 있습니다. 공개 SAE 표본은 WPA3 인증·규격 준수 전체의 증거가 아니며, SAE 흐름 관측과 PMF 요구사항을 분리합니다.</p><div class="wlan-reference-links"><a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 PCAP 분석 →</a><a href="../learning/wireless/wlan-association/reference-evidence.json">패킷 근거 JSON</a></div></div>
+  </div></section>
+</main>
+<footer class="footer"><div class="shell">802.11 접속 · WPA2 / WPA3 · 예상 → 실행 → 관찰 → 복습</div></footer>
+</body>
+</html>

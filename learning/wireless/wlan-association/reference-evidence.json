@@ -1,0 +1,557 @@
+{
+  "schema_version": 1,
+  "topic": "802.11 접속 / WPA2·WPA3",
+  "slug": "wlan-association",
+  "report_date": "2026-10-05",
+  "timezone": "Asia/Seoul",
+  "created_utc": "2026-10-05T07:55:28.277710+00:00",
+  "mode": "OFFICIAL_REFERENCE_REVIEW_PLUS_PUBLIC_PCAP",
+  "overall_result": "REFERENCE_REVIEW_COMPLETE_WITH_LIMITATIONS",
+  "live_environment": {
+    "execution": "NOT_RUN",
+    "Actual": null,
+    "own_captures": 0,
+    "scope": "Frozen WLAN-01~06 user-device claim validation; public references are not execution of this experiment.",
+    "prior_reports": "PRESERVED_UNCHANGED",
+    "prior_capability_attempts": "Separate retained diagnostics; this field does not claim no probes were ever attempted."
+  },
+  "counts": {
+    "public_reference_samples": 3,
+    "public_reference_frames_analyzed": 183,
+    "own_captures": 0,
+    "own_capture_count_scope": "Usable claim captures contributed to this reference report. Prior capability probes remain separate.",
+    "packet_results": {
+      "OBSERVED_IN_REFERENCE": 2,
+      "PARTIALLY_OBSERVED": 2,
+      "NOT_TESTED": 1,
+      "NOT_CONFIRMED": 1
+    },
+    "all_claims_pass": false
+  },
+  "claims": [
+    {
+      "id": "WLAN-01",
+      "title": "Discovery",
+      "packet_result": "PARTIALLY_OBSERVED",
+      "packet_result_label": "일부 관측",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "Beacon으로 수동 탐색할 수 있고, 능동 탐색에서는 Probe 교환을 사용한다.",
+        "source_ids": [
+          "S1"
+        ],
+        "conditions": [
+          "Probe는 모든 연결의 필수 단계가 아니다.",
+          "Beacon을 캡처했다는 사실만으로 특정 STA의 수신을 증명하지 않는다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-01 — Discovery Before Join\n\n\nClaim: Client는 Beacon을 수신하거나 Probe Request/Response를 사용해 WLAN/AP 정보를 발견한 뒤 연결할 AP를 선택한다.\n\n\nExpected:\n- RF capture에서 Beacon frame 관측\n- test client가 Probe를 사용하면 Probe Request/Response도 관측\n- Discovery frame은 Authentication/Association보다 앞선 단계\n- Beacon만으로 발견한 경우 Probe가 반드시 있어야 한다고 강제하지 않음",
+        "validation_request_section_verbatim": "## 2. WLAN-01 — Discovery\n\n\nExpected: Beacon from AP-LAB. Probe Request/Response는 test STA가 실제로 active probing을 사용할 때만 요구한다. Discovery evidence는 Authentication/Association보다 앞서야 한다.\n\n\nEvidence: frame number/time, frame subtype, anonymized AP-A/STA-A aliases.\n\n\nPASS: 실제 client behavior에 맞는 Discovery evidence가 존재."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": "wpa2-psk-ccmp-tkip.pcapng",
+        "frame_numbers": [
+          1,
+          2,
+          3
+        ],
+        "summary": "AP-A Beacon frames 1,2 precede this STA-A's authentication frame 3. No probe request/response in any of the three samples.",
+        "limitations": "Beacon observation supports passive discovery context, not the STA's internal scan decision; active probe flow is not observed."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "AP-A → STA-A: Beacon",
+          "선택 분기: Probe Request/Response",
+          "STA-A: AP 선택"
+        ],
+        "grading": "탐색이 인증/연결보다 앞서는지 평가한다. Probe 없는 수동 탐색도 허용한다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    },
+    {
+      "id": "WLAN-02",
+      "title": "Open Authentication before Association",
+      "packet_result": "OBSERVED_IN_REFERENCE",
+      "packet_result_label": "공개 표본에서 관측",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "일반적인 최초 WPA2-Personal 연결은 Open Authentication 응답 후 Association으로 진행한다. Open Authentication은 비밀번호 검증이 아니다.",
+        "source_ids": [
+          "S1",
+          "S2"
+        ],
+        "conditions": [
+          "최초 연결과 로밍/캐시 재접속을 분리한다.",
+          "Association 성공만으로 보안 세션 또는 인터넷 성공을 판단하지 않는다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-02 — 802.11 Authentication Before Association\n\n\nClaim: WPA2-Personal 기본 접속에서 802.11 Open System Authentication Request/Response가 Association Request/Response보다 먼저 완료된다.\n\n\nExpected:\n- STA → AP Authentication Request\n- AP → STA Authentication Response success\n- 그 뒤 Association Request / Response success\n- Association success status/AID는 decoder가 제공하면 기록\n- 이 단계는 4-Way Handshake 완료와 다른 상태",
+        "validation_request_section_verbatim": "## 3. WLAN-02 — Authentication Before Association\n\n\nWPA2-Personal success flow에서 확인한다.\n\n\nExpected order:\n1. STA-A → AP-A Open System Authentication Request\n2. AP-A → STA-A Authentication Response success\n3. STA-A → AP-A Association Request\n4. AP-A → STA-A Association Response success\n5. Security handshake follows afterward\n\n\nRequired Evidence: management-frame order, auth algorithm/status, assoc status/AID where decoded."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": "wpa2-psk-ccmp-tkip.pcapng",
+        "frame_numbers": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "summary": "Open System auth request/response 3,4 (algorithm 0; sequences 1,2; status 0), association request/response 5,6 (status 0, AID 1), same AP-A/STA-A.",
+        "limitations": "Authentication status 0 here is not proof that a WPA2 shared secret has been validated."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "STA-A → AP-A: Open Authentication request",
+          "AP-A → STA-A: Authentication response 성공",
+          "STA-A → AP-A: Association request",
+          "AP-A → STA-A: Association response 성공/AID"
+        ],
+        "grading": "Authentication → Association 순서와 상태를 평가한다. 이 단계가 비밀번호 일치를 증명한다는 답은 오답이다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    },
+    {
+      "id": "WLAN-03",
+      "title": "WPA2 pairwise 4-Way Handshake",
+      "packet_result": "OBSERVED_IN_REFERENCE",
+      "packet_result_label": "공개 표본에서 관측",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "M1은 ANonce, M2는 SNonce와 MIC를 포함한다. 공유 PMK를 기반으로 키를 도출·확인하며 PMK 자체를 이 무선 교환에서 보내지 않는다.",
+        "source_ids": [
+          "S1",
+          "S3",
+          "S6",
+          "S8"
+        ],
+        "conditions": [
+          "M3에는 보호된 Key Data가 실릴 수 있다. PMKID는 PMK 자체가 아니다.",
+          "M4는 EAPOL-Key 메시지이며 802.11 control ACK와 다르다.",
+          "재전송을 제외한 논리적 M1~M4와 실제 프레임 수는 다르다. Protected bit만으로 DHCP/Ping 성공을 판정하지 않는다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-03 — WPA2-Personal 4-Way Handshake\n\n\nClaim: WPA2-Personal에서 성공한 Association 뒤 AP와 STA는 4개의 EAPOL-Key message로 4-Way Handshake를 완료해 PTK/GTK를 설치하고, 그 뒤 보호된 Data 통신을 시작한다.\n\n\nExpected:\n- Association success가 먼저 존재\n- EAPOL-Key M1 AP→STA, M2 STA→AP, M3 AP→STA, M4 STA→AP\n- exact replay counter / nonce는 Actual로 기록\n- Handshake 완료 뒤 DHCP/ARP/ICMP 등 test traffic 정상 진행\n- PMK 자체가 over-the-air로 전달된다고 기록하지 않음",
+        "validation_request_section_verbatim": "## 4. WLAN-03 — WPA2 4-Way Handshake\n\n\nSame successful WPA2 connection as WLAN-02.\n\n\nExpected order: Association success → EAPOL-Key M1 → M2 → M3 → M4 → protected Data success.\n\n\nEvidence: EAPOL frame number/time/order and fields sufficient to classify M1~M4, plus post-handshake DHCP/ARP/ICMP/application success.\n\n\nAccuracy: only values actually decoded in the capture are written as Actual."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": "wpa2-psk-ccmp-tkip.pcapng",
+        "frame_numbers": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          18,
+          19
+        ],
+        "summary": "Association response 6 precedes pairwise M1/M2/M3/M4 7/8/9/10; replay counters 1/1/2/2. Protected data 11-22. Public fixture keys decrypt ICMP Echo Request 18 and matching Reply 19, id 14849/seq 1, reversed IP aliases.",
+        "limitations": "This proves a data round-trip in the public recording. No current user's client command or current AP result is implied. PMK non-transmission is a protocol property, not inferred solely from a missing field."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "Association 성공",
+          "AP-A → STA-A: M1",
+          "STA-A → AP-A: M2",
+          "AP-A → STA-A: M3",
+          "STA-A → AP-A: M4",
+          "교육용 정상 데이터"
+        ],
+        "grading": "방향, 논리적 순서, PMK 비전송을 평가한다. 캡처에서는 같은 AP/STA의 Key Information/replay counter와 재전송도 확인한다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    },
+    {
+      "id": "WLAN-04",
+      "title": "Wrong secret and recovery",
+      "packet_result": "NOT_TESTED",
+      "packet_result_label": "미시험",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "Cisco의 잘못된 PSK 사례는 M2 MIC 불일치, M1 재전송, 연결 해제를 보인다. 정상 사례는 M4 이후 DHCP/RUN까지 진행한다.",
+        "source_ids": [
+          "S2"
+        ],
+        "conditions": [
+          "Open Authentication/Association은 성공할 수 있다.",
+          "재시도 횟수, 시간, reason code는 구현에 따라 달라진다.",
+          "프레임 부재만으로 비밀번호 오류를 확정하지 않는다. 문헌의 실패/성공 사례는 사용자 장비에서 수행한 장애/복구 실측이 아니다.",
+          "원래 Research Brief의 WLAN-04 Expected는 Open Authentication success 및 Association success의 실제 관측을 요구한다. Validation Request는 두 단계가 성공할 수 있다고 표현한다. 이 차이는 그대로 보존한다. 이번 사용자 승인 방법 전환의 교육 모델은 조건부 동작을 설명하며, Brief의 실측 요구를 Request로 대체하거나 원래 실측 판정을 변경하지 않는다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-04 — WPA2 보안정보 불일치 시 Handshake 실패\n\n\nClaim: WPA2-Personal에서 AP와 Client의 lab security secret이 일치하지 않으면 802.11 Authentication/Association 자체는 성공할 수 있지만 4-Way Handshake가 완료되지 않아 보호된 Data 통신으로 진행하지 못한다.\n\n\nExpected Failure:\n- controlled lab SSID only\n- test client의 lab secret을 의도적으로 불일치시킨 bounded attempt\n- Open System Authentication success 관측\n- Association success 관측\n- EAPOL-Key exchange가 시작되지만 정상 M1~M4 완료 sequence가 성립하지 않음\n- exact retry / disconnect pattern은 구현별 Actual로 기록\n- failed attempt 뒤 protected test flow 없음\n\n\nRecovery:\n- correct lab security secret restore\n- reconnect\n- complete M1~M4\n- protected Data success",
+        "validation_request_section_verbatim": "## 5. WLAN-04 — WPA2 Failure / Recovery\n\n\nBreak/Recover는 user-controlled lab WLAN과 test STA에서만 수행한다.\n\n\nFailure Expected:\n- Open System Authentication은 성공할 수 있음\n- Association은 성공할 수 있음\n- EAPOL exchange가 시작되지만 정상 M1→M2→M3→M4 완료 sequence는 성립하지 않음\n- protected Data session은 성공하지 않음\n- retry/disconnect pattern은 실제 구현 관측값으로 기록\n\n\nRecovery: 정상 lab 설정을 복구하고 다시 연결하여 Authentication → Association → complete M1~M4 → protected Data를 확인한다."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": null,
+        "frame_numbers": [],
+        "summary": "No documented deliberately wrong-secret attempt followed by correct-secret recovery is present in the selected samples.",
+        "limitations": "Incomplete traffic alone cannot identify a wrong secret. Do not turn absence into a fault/recovery result or change the frozen expectation."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "잘못된 비밀번호 선택",
+          "Open Authentication/Association 성공 가능",
+          "M1 → M2 → MIC 불일치; 완전한 세션 미성립",
+          "재시도 또는 해제(예시)",
+          "정상 비밀번호 복구 → 새 연결 4-Way 완료 → 데이터"
+        ],
+        "grading": "실패를 키 확인 단계와 연결한다. 복구는 정상 키로 새 연결을 성립시키는 것으로 평가하고 반복 횟수는 출제하지 않는다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    },
+    {
+      "id": "WLAN-05",
+      "title": "Fresh SAE before Association",
+      "packet_result": "PARTIALLY_OBSERVED",
+      "packet_result_label": "일부 관측",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "캐시를 사용하지 않는 WPA3-Personal 연결의 기본 흐름은 양측 SAE Commit/Confirm, Association, 4-Way 순서다.",
+        "source_ids": [
+          "S3",
+          "S4",
+          "S6"
+        ],
+        "conditions": [
+          "Microsoft PMKID 캐시 경로에서는 SAE 대신 Open Authentication과 (Re)Association을 사용할 수 있다. SAE 부재만으로 WPA2라고 판단하지 않는다.",
+          "Commit/Confirm을 고정 4프레임 법칙으로 가르치지 않는다. 재전송 및 추가 교환이 가능하다.",
+          "Transition 광고와 해당 연결의 SAE 선택은 별개다. WPA3 암호화 데이터 해독에는 세션별 키가 필요하다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-05 — WPA3-Personal SAE Before Association\n\n\nClaim: WPA3-Personal은 SAE를 802.11 Authentication 단계에서 수행해 PMK를 만들고, SAE 성공 후 Association과 4-Way Handshake를 거쳐 Traffic Key를 설치한다.\n\n\nExpected:\n- WPA3-Personal lab WLAN\n- 802.11 Authentication algorithm = SAE\n- SAE Commit from STA and AP\n- SAE Confirm from STA and AP\n- SAE success before Association\n- Association Request / Response success\n- subsequent 4-Way Handshake\n- protected Data success\n- exact SAE group/scalar/element는 decoder가 제공하는 범위만 Actual로 기록",
+        "validation_request_section_verbatim": "## 6. WLAN-05 — WPA3 SAE\n\n\nUse WPA3-Personal pure-mode lab WLAN.\n\n\nExpected:\n- 802.11 Authentication algorithm = SAE\n- SAE Commit exchanges\n- SAE Confirm exchanges\n- SAE succeeds before Association\n- Association Request/Response success\n- subsequent 4-Way Handshake\n- protected Data success\n\n\nEvidence: Authentication algorithm, SAE transaction/status fields sufficient to classify Commit/Confirm, Association order, subsequent EAPOL sequence, Data success.\n\n\nIf only WPA2/WPA3 Transition Mode is available, record the negotiated AKM and do not automatically treat it as pure WPA3 proof."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": "wpa3-sae.pcapng",
+        "frame_numbers": [
+          1,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          114,
+          132,
+          133,
+          137
+        ],
+        "summary": "Fresh SAE Commit STA-A/AP-A 5,6 (algorithm 3, group 19), Confirm 8,9, Association 10,11, pairwise M1-M4 12-15. Beacon/Assoc/M2/M3 AKM type 8 only. Protected data 114+ decrypts DHCP Discover/Offer/Request/ACK 114/132/133/137 with the same xid 0x3ae6bb5f.",
+        "limitations": "Fresh SAE and subsequent data are observed; the fixture has PMF bits 0/0, so it is not proof of a fully compliant WPA3-Personal-only configuration. No ICMP round-trip is present in this sample."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "Fresh SAE 조건 표시",
+          "양측 SAE Commit",
+          "양측 SAE Confirm",
+          "Association 성공",
+          "4-Way 완료",
+          "교육용 보호 데이터"
+        ],
+        "grading": "fresh 조건에서 SAE가 Association보다 앞서는지 평가한다. 캐시 재연결은 별도 예외로 설명한다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    },
+    {
+      "id": "WLAN-06",
+      "title": "RSN, SAE AKM and PMF",
+      "packet_result": "NOT_CONFIRMED",
+      "packet_result_label": "확인 불가",
+      "official_result": "SUPPORTED_WITH_CONDITIONS",
+      "official_reference": {
+        "statement": "MFPC는 PMF 지원, MFPR은 요구를 나타낸다. required는 둘 다 1, optional 광고는 MFPC=1/MFPR=0이다. WPA3-Personal only에는 PMF가 요구된다.",
+        "source_ids": [
+          "S3",
+          "S5",
+          "S7",
+          "S9"
+        ],
+        "conditions": [
+          "Beacon의 AP 지원 광고와 Association의 해당 세션 선택을 구분한다.",
+          "고전적인 SAE suite는 00-0F-AC:8이다. 최신 SAE 계열을 무조건 type 8로 강제하지 않고 실제 OUI/type을 보존한다.",
+          "PMF 협상은 모든 관리 프레임 보호나 실제 위조 프레임 차단 시험의 증거가 아니다.",
+          "SAE/AKM8이 보여도 MFPC=0/MFPR=0이면 현대 WPA3-Personal 준수/PMF 증거로 인정하지 않는다. 별도 WPA2 PMF 예제도 동일 WPA3 세션 증거가 아니다."
+        ]
+      },
+      "frozen_expected": {
+        "preservation": "UNCHANGED",
+        "research_brief_section_verbatim": "### WLAN-06 — WPA3-Personal PMF Negotiation\n\n\nClaim: WPA3-Personal 연결에서는 Protected Management Frames 관련 capability/requirement가 협상되어야 하며 successful WPA3 association의 RSN information에서 SAE AKM과 PMF 관련 capability를 함께 확인할 수 있다.\n\n\nExpected:\n- WPA3-Personal successful association capture\n- Association Request/Response RSN information에 SAE AKM 존재\n- decoder가 제공하면 PMF/MFP capable/required semantics 확인\n- successful connection이 4-Way Handshake로 진행\n- PMF bit를 신뢰성 있게 확인하지 못하면 INCONCLUSIVE",
+        "validation_request_section_verbatim": "## 7. WLAN-06 — WPA3 PMF / RSN Negotiation\n\n\nUse the same successful WPA3 capture.\n\n\nExpected:\n- RSN information identifies SAE AKM\n- decoder가 제공하면 PMF/MFP capability/requirement semantics 확인\n- successful connection proceeds to 4-Way Handshake\n\n\nEvidence: Association Request/Response RSN information, AKM suite, PMF capable/required fields or equivalent decoded semantics, AP security configuration as secondary state evidence.\n\n\nIf PMF semantics cannot be exposed reliably by capture/decoder, Result = INCONCLUSIVE. WPA3 label만으로 PMF를 추정하지 않는다."
+      },
+      "Actual": null,
+      "live_actual": null,
+      "packet_actual": {
+        "sample": "wpa3-sae.pcapng",
+        "frame_numbers": [
+          1,
+          10,
+          11,
+          13,
+          14
+        ],
+        "summary": "SAE AKM 8 is present, but Beacon 1 has RSN capabilities 0x000c and Association Request 10 has 0x0000: MFPC=0/MFPR=0 in both. EAPOL M2 13 and decrypted M3 14 agree. Association Response 11 carries no RSN IE. No Group Management Cipher Suite field is decoded in this SAE session.",
+        "limitations": "The named SAE regression fixture does not demonstrate SAE plus required PMF. The separate WPA2-MFP sample (AKM 6) advertises/requires PMF and is only a comparison, never grafted into the SAE session."
+      },
+      "teaching_model": {
+        "kind": "ILLUSTRATIVE_OFFICIAL_REFERENCE_MODEL",
+        "label": "공식 자료 기반 교육용 시뮬레이션",
+        "steps": [
+          "AP-A: RSN 지원 광고",
+          "해당 연결 AKM/PMF 필드 비교",
+          "SAE 선택 및 PMF 조건 확인",
+          "Association/4-Way 정상 경로"
+        ],
+        "grading": "MFPC/MFPR과 광고/협상/보호 시험을 구분한다. 해독되지 않는 필드는 INCONCLUSIVE, 명시적 0 비트는 미지원 표기로 기록한다.",
+        "is_user_device_measurement": false,
+        "live_actual": null
+      }
+    }
+  ],
+  "frozen_inputs": [
+    {
+      "id": "brief",
+      "filename": "wlan-association-research-brief.md",
+      "sha256": "1d8b5b0ca0f1dede75946751bcd613cd3aa66b161aaa71c84d2f13e242d14340",
+      "preservation": "UNCHANGED"
+    },
+    {
+      "id": "request",
+      "filename": "wlan-association-validation-request.md",
+      "sha256": "afe63aac43802f4bde0e1198af1058f8cc434ad486e29ad9ed80a538d2f77feb",
+      "preservation": "UNCHANGED"
+    }
+  ],
+  "frozen_contract_caution": "WLAN-04의 frozen 입력에는 표현 차이가 있다. Research Brief Expected는 Auth/Assoc 성공 관측을 요구하고, Validation Request는 성공할 수 있다고 기술한다. 두 원문을 보존하며 이번 교육 모델의 조건부 설명은 원래 실측 요구나 판정을 완화·대체하지 않는다. 재시도 횟수는 별도로 구현 의존 사항이다.",
+  "analyzer": {
+    "name": "TShark",
+    "version": "4.6.9",
+    "build": "v4.6.9-0-g2d548b197c75",
+    "platform": "macOS offline analysis",
+    "source_url": "https://2.na.dl.wireshark.org/osx/Wireshark%204.6.9.dmg",
+    "sha256": "10bd54ccdc3f40457f6a1f0c517bc93703fcb327c4cd4b93002e7a623dacbf38",
+    "official_checksum_url": "https://www.wireshark.org/download/src/all-versions/SIGNATURES-4.6.9.txt",
+    "official_sha256_match": true,
+    "pgp_signature_verification": "NOT_RUN",
+    "live_capture_used": false
+  },
+  "source_commit": "069233180ed60e9b9f552227a8e4069186202aee",
+  "public_samples": [
+    {
+      "file": "wpa3-sae.pcapng.gz",
+      "repository": "wireshark/wireshark",
+      "commit": "069233180ed60e9b9f552227a8e4069186202aee",
+      "url": "https://raw.githubusercontent.com/wireshark/wireshark/069233180ed60e9b9f552227a8e4069186202aee/test/captures/wpa3-sae.pcapng.gz",
+      "download_utc": "2026-10-05T07:28:59.752995+00:00",
+      "bytes": 5981,
+      "sha256": "1fad55e31da189f6e813ec7ff00c1b6e6b89fa93b45a8dc87b7fa919fe07e29a",
+      "decompressed_file": "wpa3-sae.pcapng",
+      "decompressed_bytes": 35644,
+      "decompressed_sha256": "87fb513fb3bd0f23a1a6af3e77214103de1e717047368e9db21bfb27bbcf0dfe",
+      "frame_count": 143,
+      "encapsulation": "IEEE 802.11 + Radiotap (DLT 127)",
+      "origin": "OFFICIAL_PUBLIC_REGRESSION_FIXTURE",
+      "locally_rehosted": false,
+      "alias_scope": "Independent per sample; AP-A/STA-A do not identify user equipment.",
+      "aliased_frame_data": "frames/wpa3-sae-frames.json",
+      "aliased_decrypted_frame_data": "frames/wpa3-sae-decrypted-frames.json"
+    },
+    {
+      "file": "wpa2-psk-ccmp-tkip.pcapng.gz",
+      "repository": "wireshark/wireshark",
+      "commit": "069233180ed60e9b9f552227a8e4069186202aee",
+      "url": "https://raw.githubusercontent.com/wireshark/wireshark/069233180ed60e9b9f552227a8e4069186202aee/test/captures/wpa2-psk-ccmp-tkip.pcapng.gz",
+      "download_utc": "2026-10-05T07:29:00.133039+00:00",
+      "bytes": 4419,
+      "sha256": "95ac13101fe0f4f35b0856ef4dad8baad2d98bba043fbf8298305a48466615bd",
+      "decompressed_file": "wpa2-psk-ccmp-tkip.pcapng",
+      "decompressed_bytes": 6412,
+      "decompressed_sha256": "320652fac18c84386e96b8ba216c079dc95afdc0b5393baeeaf9949cb1928e06",
+      "frame_count": 22,
+      "encapsulation": "IEEE 802.11 + Radiotap (DLT 127)",
+      "origin": "OFFICIAL_PUBLIC_REGRESSION_FIXTURE",
+      "locally_rehosted": false,
+      "alias_scope": "Independent per sample; AP-A/STA-A do not identify user equipment.",
+      "aliased_frame_data": "frames/wpa2-psk-ccmp-tkip-frames.json",
+      "aliased_decrypted_frame_data": "frames/wpa2-psk-ccmp-tkip-decrypted-frames.json"
+    },
+    {
+      "file": "wpa2-psk-mfp.pcapng.gz",
+      "repository": "wireshark/wireshark",
+      "commit": "069233180ed60e9b9f552227a8e4069186202aee",
+      "url": "https://raw.githubusercontent.com/wireshark/wireshark/069233180ed60e9b9f552227a8e4069186202aee/test/captures/wpa2-psk-mfp.pcapng.gz",
+      "download_utc": "2026-10-05T07:29:00.436716+00:00",
+      "bytes": 3128,
+      "sha256": "b7ca74623cb80a2495751824c5540226f18449541fc115570879bf60096b0b0b",
+      "decompressed_file": "wpa2-psk-mfp.pcapng",
+      "decompressed_bytes": 4676,
+      "decompressed_sha256": "4720780611a41f8fc95494476f90a4364f5708d2918a1685f5b838c7874dfe3f",
+      "frame_count": 18,
+      "encapsulation": "IEEE 802.11 + Radiotap (DLT 127)",
+      "origin": "OFFICIAL_PUBLIC_REGRESSION_FIXTURE",
+      "locally_rehosted": false,
+      "alias_scope": "Independent per sample; AP-A/STA-A do not identify user equipment.",
+      "aliased_frame_data": "frames/wpa2-psk-mfp-frames.json",
+      "aliased_decrypted_frame_data": "frames/wpa2-psk-mfp-decrypted-frames.json"
+    }
+  ],
+  "official_sources": [
+    {
+      "id": "S1",
+      "title": "Cisco — Analyze and Troubleshoot 802.11 Wireless Sniffing",
+      "url": "https://www.cisco.com/c/en/us/support/docs/wireless-mobility/80211/200527-Fundamentals-of-802-11-Wireless-Sniffing.html",
+      "section": "Management Frames; WPA/WPA2 with PSK or EAP",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S2",
+      "title": "Cisco — Troubleshoot Identity PSK on Wireless LAN Controllers",
+      "url": "https://www.cisco.com/c/en/us/support/docs/wireless-mobility/wireless-lan-wlan/212316-troubleshoot-identity-psk-on-wireless-la.html",
+      "section": "Scenario 1; Scenario 2 Incorrect Password",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S3",
+      "title": "HPE Aruba — WPA3-Personal",
+      "url": "https://arubanetworking.hpe.com/techdocs/aos/wifi-design-deploy/security/modes/wpa3-personal/",
+      "section": "Protocol; Personal only mode; transition mode",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S4",
+      "title": "Microsoft — WiFiCx WPA3-SAE authentication",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-sae-authentication",
+      "section": "Authentication flow; Association using PMKID; Error handling",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S5",
+      "title": "Cisco — Configure 802.11w Management Frame Protection on WLC",
+      "url": "https://www.cisco.com/c/en/us/support/docs/wireless-mobility/wireless-lan-wlan/212576-configure-802-11w-management-frame-prote.html",
+      "section": "Changes to RSN IE; Configure",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S6",
+      "title": "Wireshark — HowToDecrypt802.11",
+      "url": "https://wiki.wireshark.org/HowToDecrypt802.11",
+      "section": "WPA/WPA2; WPA3",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S7",
+      "title": "Wireshark — IEEE 802.11 display filter reference",
+      "url": "https://www.wireshark.org/docs/dfref/w/wlan.html",
+      "section": "Authentication; RSN; frame-control fields",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S8",
+      "title": "Wireshark — RSNA EAPOL key display filter reference",
+      "url": "https://www.wireshark.org/docs/dfref/w/wlan_rsna_eapol.html",
+      "section": "EAPOL-Key descriptor fields",
+      "accessed_on": "2026-10-05"
+    },
+    {
+      "id": "S9",
+      "title": "Microsoft — WiFiCx WPA3 SoftAP",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-softap",
+      "section": "PMF support table",
+      "accessed_on": "2026-10-05"
+    }
+  ],
+  "reproduction": {
+    "method": [
+      "Downloaded .pcapng.gz and fixture files from raw.githubusercontent.com at the pinned commit; saved compressed originals and gzip-decompressed copies with UTC and SHA256.",
+      "Official macOS TShark used -n -r with selected fields only; no -i/-I, capture, driver, adapter, AP, or OS network change.",
+      "Ran decryption disabled first, then enabled using upstream's public 80211_keys.tmpl via per-process uat preferences. Stable 4.6.9 skips upstream 64-byte PMK entries it cannot support; required 32/48-byte public fixture keys remain available.",
+      "Aliased all extracted MAC, SSID and IP values before writing JSON. No public fixture keys are reproduced in analysis JSON/Markdown.",
+      "Capinfos independently confirmed pcapng, IEEE 802.11 plus Radiotap, and packet counts 22/18/143.",
+      "Frame numbers are local to each source; order, pairwise key type, direction, replay counter and matching ICMP identifier/sequence establish correlation.",
+      "Checksummed the official analyzer DMG against Wireshark SIGNATURES-4.6.9.txt. PGP signature verification was not run. Read-only DMG mount was detached; app bundle exists only inside this output folder.",
+      "Windows SSH was unreachable; no further remote attempts or changes were made. Analysis ran on macOS, not as a Windows compatibility or RF test."
+    ],
+    "profile_isolation": "WIRESHARK_CONFIG_DIR points to a dedicated empty analysis profile.",
+    "fixture_keys_url": "https://github.com/wireshark/wireshark/blob/069233180ed60e9b9f552227a8e4069186202aee/test/config/80211_keys.tmpl",
+    "upstream_tests_url": "https://github.com/wireshark/wireshark/blob/069233180ed60e9b9f552227a8e4069186202aee/test/suite_decryption.py#L77",
+    "example_offline_command": "tshark -n -r SOURCE.pcapng -o wlan.enable_decryption:FALSE -T fields -e frame.number -e wlan.fixed.auth.alg -e wlan.rsn.akms.type -e wlan.rsn.capabilities.mfpc -e wlan.rsn.capabilities.mfpr -e wlan_rsna_eapol.keydes.msgnr -e wlan_rsna_eapol.keydes.key_info -e eapol.keydes.replay_counter",
+    "download_integrity": "Compare .gz and decompressed PCAP SHA256 with public_samples before using frame numbers.",
+    "payload_reproduction": "Use the pinned public fixture keys and wlan.enable_decryption:TRUE in an isolated profile; inspect icmp.type/ident/seq or dhcp.option.dhcp/id. No user secrets.",
+    "scripts": [
+      "analyze_reference_pcaps.py",
+      "build_reference_report.py"
+    ]
+  },
+  "unconfirmed": [
+    "사용자 장비의 실제 관리/EAPOL 프레임 순서와 데이터 성공",
+    "Probe Request/Response 경로",
+    "의도적인 잘못된 암호의 실패 및 정상 복구",
+    "동일 SAE 세션의 필수 PMF",
+    "PMF 공격 차단 동작"
+  ],
+  "teaching_contract": {
+    "label": "공식 자료 기반 교육용 시뮬레이션",
+    "actors": [
+      "STA-A",
+      "AP-A",
+      "Observer"
+    ],
+    "layout": "sequence lanes",
+    "identifiers": "synthetic aliases only",
+    "timing": "illustrative order, not measured timestamps",
+    "evidence_badges": [
+      "문헌 근거",
+      "공개 PCAP 관측",
+      "사용자 장비 실측 미확인"
+    ],
+    "frame_numbers": "Only use separately verified capture frame numbers; do not number illustrative events as capture frames.",
+    "result_meaning": "퀴즈 정답 또는 문헌 검토는 사용자 장비 실측 PASS가 아니다."
+  },
+  "pmf_warning": "SAE sample MFPC=0/MFPR=0. Do not combine a separate WPA2-MFP sample with it to claim SAE plus PMF success.",
+  "publication": {
+    "raw_pcaps_rehosted": false,
+    "analyzer_binaries_rehosted": false,
+    "identifiers": "Aliased MAC/SSID/IP only",
+    "guide": "../../../labs/wlan-association.html",
+    "interactive_lab": "../../../labs/wlan-association-simulator.html"
+  }
+}
