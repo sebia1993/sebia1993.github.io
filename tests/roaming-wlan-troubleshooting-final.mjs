@@ -25,7 +25,17 @@ try{
       const page=await browser.newPage({viewport});
       const response=await page.goto(base+path,{waitUntil:'networkidle'});
       assert.equal(response.status(),200);
-      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,path+' overflow '+viewport.width);
+      const overflow=await page.evaluate(()=>({
+        bad:document.documentElement.scrollWidth>innerWidth+1,
+        doc:document.documentElement.scrollWidth,
+        win:innerWidth,
+        offenders:[...document.querySelectorAll('*')].map(el=>{
+          const r=el.getBoundingClientRect();
+          return {tag:el.tagName,cls:el.className||'',id:el.id||'',left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),scrollWidth:el.scrollWidth};
+        }).filter(x=>x.right>innerWidth+1||x.left<-1).slice(0,20)
+      }));
+      if(overflow.bad) console.log('OVERFLOW_DIAG',path,viewport.width,JSON.stringify(overflow));
+      assert.equal(overflow.bad,false,path+' overflow '+viewport.width);
       await page.close();
     }
   }
