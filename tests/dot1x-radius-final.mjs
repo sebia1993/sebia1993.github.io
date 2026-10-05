@@ -20,6 +20,15 @@ const base='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch();
 
 try{
+  {
+    const page=await browser.newPage({viewport:{width:390,height:844}});
+    const response=await page.goto(base+'/roadmap.html',{waitUntil:'networkidle'});
+    assert.equal(response.status(),200);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'roadmap overflow 390px');
+    assert.ok((await page.locator('body').innerText()).includes('802.1X / EAP / RADIUS'));
+    await page.close();
+  }
+
   for(const viewport of [{width:360,height:800},{width:768,height:1024},{width:1366,height:768},{width:1920,height:1080}]){
     for(const path of ['/labs/dot1x-radius.html','/labs/dot1x-radius-simulator.html']){
       const page=await browser.newPage({viewport});
