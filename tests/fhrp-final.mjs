@@ -91,6 +91,7 @@ try{
   await page.locator('#runBtn').click();
   assert.ok((await page.locator('#states').innerText()).includes('R2 Master'));
   assert.ok((await page.locator('#states').innerText()).includes('IP protocol 112'));
+  await page.locator('.evidence summary').click();
   assert.ok((await page.locator('#evidenceList').innerText()).includes('VRRP version 2'));
 
   await page.locator('#resetBtn').click();
