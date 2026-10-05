@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>FHRP</h2>
-      <p>Virtual Gateway를 중심으로 HSRPv2/VRRPv2 역할 전환, Priority·Preemption·upstream Tracking과 장애·복구를 Cisco IOL 실제 CLI/PCAP으로 검증했습니다.</p>
+      <h2>VRF</h2>
+      <p>Global/BLUE/RED의 독립 Routing Table, overlapping address, VRF별 forwarding, 기본 격리와 선택적 Route Leak을 Cisco IOL 실제 CLI/PCAP으로 검증했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/fhrp.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/fhrp-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/vrf.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/vrf-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -155,7 +155,9 @@ const interactiveUrls={
   'wifi-rf':'./labs/wifi-rf-simulator.html',
   'wlan-association':'./labs/wlan-association-simulator.html',
   'dot1x-radius':'./labs/dot1x-radius-simulator.html',
-  'roaming-wlan-troubleshooting':'./labs/roaming-wlan-troubleshooting-simulator.html'
+  'roaming-wlan-troubleshooting':'./labs/roaming-wlan-troubleshooting-simulator.html',
+  'fhrp':'./labs/fhrp-simulator.html',
+  'vrf':'./labs/vrf-simulator.html'
 };
 
 const summaryOverrides={
