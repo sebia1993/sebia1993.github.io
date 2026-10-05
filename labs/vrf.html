@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VRF — 개념서</title>
+<meta name="description" content="VRF의 독립 Routing Table, overlapping address, VRF별 forwarding, 기본 격리와 선택적 Route Leaking을 배우는 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.vrf-hero{padding:58px 0 30px}.vrf-hero h1{font-size:clamp(2.2rem,5vw,4.3rem);margin:.15em 0;letter-spacing:-.04em}.vrf-hero p{max-width:940px;color:var(--muted)}
+.scope-badge{display:inline-flex;padding:7px 11px;border:1px solid #347968;border-radius:999px;color:var(--mint);font-size:.76rem;font-weight:900;background:rgba(126,224,194,.06)}
+.core{margin-top:18px;padding:22px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core strong{display:block;font-size:clamp(1.1rem,3vw,1.7rem)}.core p{margin:7px 0 0;color:#bdcada}
+.grid2,.review{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card2{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.card2 h3{margin:5px 0 8px}.card2 p{margin:0;color:var(--muted)}
+.model{display:grid;grid-template-columns:1fr auto 1.1fr auto 1fr;gap:12px;align-items:center;padding:22px;border:1px solid var(--line);border-radius:18px;background:#081522}.box{padding:17px;border:1px solid #355d82;border-radius:15px;background:#0d2032;text-align:center}.box strong{display:block}.box small{display:block;color:var(--muted);margin-top:5px}.box.table{border-color:#347968;background:#0c211d}.box.table strong{color:var(--mint)}.arrow{color:var(--blue);font-size:1.45rem;font-weight:950}
+.contexts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.context{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.context h3{margin:6px 0}.context .tag{display:inline-flex;padding:5px 9px;border-radius:999px;border:1px solid #3e6a91;color:var(--blue);font-size:.72rem;font-weight:900}.context.blue{border-color:#3e6a91}.context.red{border-color:#8f5961}.context.global{border-color:#7e8793}.route{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:.82rem}.route:first-of-type{border-top:0}.route span{color:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.step b{display:grid;place-items:center;width:34px;height:34px;border:1px solid #3e6a91;border-radius:10px;color:var(--blue)}.step h3{margin:10px 0 6px;font-size:.96rem}.step p{margin:0;color:var(--muted);font-size:.82rem}
+.same-dst{display:grid;grid-template-columns:1fr 160px 1fr;gap:14px;align-items:center}.lane{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.lane h3{margin:5px 0 9px}.lane.blue{border-color:#3e6a91}.lane.red{border-color:#8f5961}.decision{padding:18px;border:1px solid #347968;border-radius:16px;background:rgba(126,224,194,.06);text-align:center}.decision strong{display:block;color:var(--mint)}.path{margin-top:10px;padding:10px;border-radius:11px;background:#081522;font-size:.83rem;color:#d7e3ef}
+.before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}.state{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.state h3{margin:5px 0 9px}.state.ok{border-color:#347968}.state.warn{border-color:#8f6a38}.switch-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.5rem;font-weight:950}.key{color:var(--mint);font-weight:900}.warntext{color:var(--amber);font-weight:900}
+.caution{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.caution h3{margin:4px 0 7px}.caution p{margin:0;color:#d6e2ef}.review>article{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.review ul{margin:0;padding-left:1.1rem}.review li{margin:.55rem 0}
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.cta h2{margin:4px 0 7px}.cta p{margin:0;color:var(--muted)}.refs{display:grid;gap:8px}.refs a{color:var(--blue);overflow-wrap:anywhere}.refs p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+@media(max-width:900px){.grid2,.review,.contexts{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.model{grid-template-columns:1fr}.model>.arrow{transform:rotate(90deg)}.same-dst{grid-template-columns:1fr}.before-after{grid-template-columns:1fr}.switch-arrow{transform:rotate(90deg)}.cta{display:grid}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.flow{grid-template-columns:1fr}.vrf-hero{padding-top:42px}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 요약</a><a href="#tables">Routing Table</a><a href="#same">같은 IP</a><a href="#leak">Route Leak</a></nav></div></header>
+<main>
+<section class="vrf-hero"><div class="shell">
+<span class="scope-badge">Cisco IOL VRF-Lite · VRF-01~06 실제 검증 완료</span>
+<div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
+<h1>VRF</h1>
+<p><b>같은 Router 안에서도 Routing Table을 여러 개로 분리할 수 있습니다.</b> 이번 주제의 목표는 목적지 IP만 보지 않고, 먼저 <b>어느 VRF Context에서 Route Lookup을 하는가</b>를 판단하는 습관을 만드는 것입니다.</p>
+<div class="core"><strong>VRF Context → 그 VRF의 Routing Table → 출력 경로</strong><p>Destination IP가 같아도 Context가 다르면 다른 Interface로 전달될 수 있습니다.</p></div>
+</div></section>
+<section id="summary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>VRF는 “Router 안의 별도 Routing Context”입니다.</h2></div></div>
+<div class="grid2">
+<article class="card2"><div class="eyebrow">WITHOUT SEPARATION</div><h3>Routing Table이 하나라면</h3><p>목적지 Prefix에 대한 Route는 하나의 공통 Context에서 경쟁하고 선택됩니다.</p></article>
+<article class="card2"><div class="eyebrow">WITH VRF</div><h3>먼저 어느 Table을 볼지가 정해집니다.</h3><p>BLUE는 BLUE Table, RED는 RED Table에서 Route를 찾습니다. Global Table도 별도입니다.</p></article>
+</div>
+<div class="model" style="margin-top:14px"><div class="box"><strong>Packet / Test</strong><small>VRF BLUE</small></div><div class="arrow">→</div><div class="box table"><strong>BLUE Routing Table</strong><small>해당 Context에서 Lookup</small></div><div class="arrow">→</div><div class="box"><strong>Ethernet0/0</strong><small>선택된 출력 경로</small></div></div>
+<div class="note" style="margin-top:12px"><b>실제 검증:</b> 같은 목적지 <code>10.10.10.10</code>에 대해 BLUE test는 Ethernet0/0 링크에서만, RED test는 Ethernet0/1 링크에서만 각각 Echo Request/Reply 3개가 관측됐습니다.</div>
+</div></section>
+<section id="tables"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · SEPARATE TABLES</div><h2>한 Router에 세 개의 Routing Context가 동시에 있었습니다.</h2></div></div>
+<div class="contexts">
+<article class="context blue"><span class="tag">VRF BLUE</span><h3>BLUE Table</h3><div class="route"><span>10.10.10.0/24</span><b>Ethernet0/0</b></div><div class="route"><span>10.20.20.1/32</span><b>Loopback10</b></div></article>
+<article class="context red"><span class="tag">VRF RED</span><h3>RED Table</h3><div class="route"><span>10.10.10.0/24</span><b>Ethernet0/1</b></div><div class="route"><span>10.30.30.1/32</span><b>Loopback20</b></div></article>
+<article class="context global"><span class="tag">GLOBAL</span><h3>Default Table</h3><div class="route"><span>192.0.2.0/24</span><b>Ethernet0/2</b></div><div class="route"><span>192.0.2.1/32</span><b>Local</b></div></article>
+</div>
+<div class="note" style="margin-top:12px"><b>Interface 소속이 중요합니다:</b> 이번 Cisco IOL에서 Ethernet0/0과 Loopback10은 BLUE, Ethernet0/1과 Loopback20은 RED, Ethernet0/2는 Global에 속했습니다. Connected/Local Route도 그 Context에 설치됐습니다.</div>
+</div></section>
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · NORMAL FLOW</div><h2>VRF Forwarding은 네 단계로 기억하세요.</h2></div></div>
+<div class="flow">
+<article class="step"><b>1</b><h3>Context 확인</h3><p>Packet이나 VRF-aware test가 어느 VRF에 속하는지 먼저 결정합니다.</p></article>
+<article class="step"><b>2</b><h3>해당 Table Lookup</h3><p>Global 전체가 아니라 선택된 VRF Routing Table에서 목적지 Route를 찾습니다.</p></article>
+<article class="step"><b>3</b><h3>출력 경로 선택</h3><p>그 Table의 Connected/Static Route가 가리키는 Interface 또는 Next Hop을 사용합니다.</p></article>
+<article class="step"><b>4</b><h3>다른 VRF는 그대로 분리</h3><p>명시적으로 Route를 공유하지 않았다면 다른 VRF의 Route는 자동으로 후보가 되지 않습니다.</p></article>
+</div></div></section>
+<section id="same"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · OVERLAPPING ADDRESS</div><h2>같은 IP라도 VRF가 다르면 서로 다른 대상이 될 수 있습니다.</h2></div></div>
+<div class="same-dst">
+<article class="lane blue"><div class="eyebrow">BLUE CONTEXT</div><h3>Destination 10.10.10.10</h3><div class="path">BLUE Table → 10.10.10.0/24 → Ethernet0/0 → PC-BLUE</div><p style="color:var(--muted);margin-bottom:0">실제 Ping 3/3 · CP-BLUE에서만 관측</p></article>
+<div class="decision"><strong>Destination IP는 같음</strong><span>달라지는 것은<br>VRF Context</span></div>
+<article class="lane red"><div class="eyebrow">RED CONTEXT</div><h3>Destination 10.10.10.10</h3><div class="path">RED Table → 10.10.10.0/24 → Ethernet0/1 → PC-RED</div><p style="color:var(--muted);margin-bottom:0">실제 Ping 3/3 · CP-RED에서만 관측</p></article>
+</div>
+<div class="note" style="margin-top:12px"><b>중복 주소 ≠ 오류:</b> 이번 격리 Lab에서는 BLUE와 RED 모두 Gateway <code>10.10.10.1/24</code>, Host <code>10.10.10.10/24</code>를 사용했고 서로 다른 L2 segment/VRF에서 정상 공존했습니다.</div>
+</div></section>
+<section id="leak"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · ISOLATION / ROUTE LEAK</div><h2>기본은 격리, 공유는 명시적으로 합니다.</h2></div></div>
+<div class="before-after">
+<article class="state"><div class="eyebrow">BEFORE LEAK</div><h3>BLUE에는 Global Route가 없습니다.</h3><div class="route"><span>192.0.2.0/24</span><b class="warntext">BLUE Table에 없음</b></div><div class="route"><span>BLUE → 192.0.2.10</span><b>출력 없음</b></div></article>
+<div class="switch-arrow">→</div>
+<article class="state ok"><div class="eyebrow">EXPLICIT LEAK</div><h3>선택한 /24만 BLUE에 추가</h3><div class="route"><span>192.0.2.0/24</span><b class="key">Static Route 추가</b></div><div class="route"><span>BLUE → Global</span><b class="key">Request 3개 전달</b></div></article>
+</div>
+<div class="caution" style="margin-top:14px"><h3>Route Leak은 왕복 통신 보장이 아닙니다.</h3><p>이번 Run은 BLUE→Global 방향만 Leak했습니다. CP-GLOBAL에는 Echo Request 3개와 PC-GLOBAL이 보낸 Echo Reply 3개가 모두 보였지만, Global Table에 BLUE source <code>10.20.20.1</code>로 돌아갈 Route가 없어 원래 BLUE Ping은 <b>0/3</b>이었습니다. <b>링크에서 Reply를 봤다는 것과 원래 VRF Context까지 Reply가 전달됐다는 것은 다릅니다.</b></p></div>
+<div class="note" style="margin-top:12px"><b>Recovery:</b> 정적 Leak Route를 제거하자 BLUE Table에서 <code>192.0.2.0/24</code>가 다시 사라졌고, BLUE/RED/Global 최종 대조 통신은 각각 3/3으로 Baseline을 회복했습니다.</div>
+</div></section>
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="review">
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>VRF는 하나의 Router 안에서 Routing/Forwarding Context를 분리합니다.</li><li>Interface가 어느 VRF에 속하느냐에 따라 Connected/Local Route가 설치되는 Table이 달라집니다.</li><li>서로 다른 VRF에는 같은 Prefix와 같은 IP 주소가 공존할 수 있습니다.</li><li>같은 Destination IP라도 VRF Context가 다르면 다른 Interface로 전달될 수 있습니다.</li><li>Route Leak은 선택 Route의 명시적 공유이며 Return Route는 별도로 확인해야 합니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“목적지 IP가 10.10.10.10으로 똑같은데 BLUE는 e0/0, RED는 e0/1로 가는 이유는?”</h3><p style="color:var(--muted)">VRF Context → Routing Table → Route → Interface 순서로 설명해 보세요.</p></article>
+</div></div></section>
+<section><div class="shell"><div class="cta"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 IP를 서로 다른 Table에서 Lookup해 보세요.</h2><p>독립 Table, Interface Membership, Overlapping Prefix, Same Destination Path, Isolation, Route Leak을 예상 → 실행 → 관찰 → 설명 순서로 확인합니다.</p></div><a class="btn primary" href="vrf-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
+<div class="refs">
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc4364.html">RFC 4364 · BGP/MPLS IP VPNs</a><p>VRF별 Forwarding Table과 겹치는 주소 공간, VRF Context에서의 lookup 원리를 확인했습니다. MPLS/BGP 전체 구조는 이번 범위에서 제외합니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9200/software/release/17-13/configuration_guide/rtng/b_1713_rtng_9200_cg/configuring_vrf_lite.html">Cisco · Configuring VRF-Lite</a><p>Interface의 VRF 귀속, 별도 Forwarding Table, overlapping address 동작을 공식 문서와 대조했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/support/docs/ip/ip-routing/200158-Configure-Route-Leaking-between-Global-a.html">Cisco · Route Leaking between Global and VRF</a><p>Global/VRF 사이 Route 공유는 명시적 구성이고 구현 방식이 플랫폼/릴리스에 따라 달라질 수 있음을 확인했습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4의 VRF-Lite에서 VRF-01~06을 CLI와 내부 링크 PCAP으로 PASS했습니다. Route Leak은 정적 Global-next-hop 방식 한 가지와 선택한 /24 한 개만 검증했으며 MP-BGP/MPLS, 동적 Route Import, 임의의 양방향 Reachability를 검증했다고 표현하지 않습니다.</div>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">VRF · Context → Routing Table → Path</div></footer>
+</body>
+</html>
