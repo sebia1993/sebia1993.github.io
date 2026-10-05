@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FHRP — 개념서</title>
+<meta name="description" content="FHRP의 Virtual Gateway, HSRP/VRRP 역할, Priority, Preemption, Tracking과 장애 전환 원리를 배우는 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.fhrp-hero{padding:58px 0 30px}.fhrp-hero h1{font-size:clamp(2.2rem,5vw,4.3rem);margin:.15em 0;letter-spacing:-.04em}.fhrp-hero p{max-width:930px;color:var(--muted)}
+.scope-badge{display:inline-flex;padding:7px 11px;border:1px solid #347968;border-radius:999px;color:var(--mint);font-size:.76rem;font-weight:900;background:rgba(126,224,194,.06)}
+.core{margin-top:18px;padding:22px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core strong{display:block;font-size:clamp(1.1rem,3vw,1.7rem)}.core p{margin:7px 0 0;color:#bdcada}
+.problem-grid,.control-grid,.compare-grid,.review{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card2{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.card2 h3{margin:5px 0 8px}.card2 p{margin:0;color:var(--muted)}
+.gateway-model{display:grid;grid-template-columns:1fr auto 1.2fr auto 1fr;gap:12px;align-items:center;padding:22px;border:1px solid var(--line);border-radius:18px;background:#081522}.device{padding:17px;border:1px solid #355d82;border-radius:15px;background:#0d2032;text-align:center}.device strong{display:block}.device small{display:block;color:var(--muted);margin-top:5px}.virtual{border-color:#8f6a38;background:#20170d}.virtual strong{color:var(--amber)}.arrow{color:var(--blue);font-size:1.45rem;font-weight:950}.routers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.routers .device.active{border-color:#347968;box-shadow:0 0 0 1px rgba(126,224,194,.15) inset}.routers .device.active strong{color:var(--mint)}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.step b{display:grid;place-items:center;width:34px;height:34px;border:1px solid #3e6a91;border-radius:10px;color:var(--blue)}.step h3{margin:10px 0 6px;font-size:.96rem}.step p{margin:0;color:var(--muted);font-size:.82rem}
+.control{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.control .tag{display:inline-flex;padding:5px 9px;border:1px solid #3e6a91;border-radius:999px;color:var(--blue);font-size:.72rem;font-weight:900}.control h3{margin:9px 0 7px}.control p{margin:0;color:var(--muted)}.control.warn{border-color:#8f6a38}
+.before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}.state{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.state h3{margin:5px 0 9px}.role-line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:.84rem}.role-line:first-of-type{border-top:0}.role-line span{color:var(--muted)}.keep{color:var(--mint);font-weight:900}.change{color:var(--amber);font-weight:900}.switch-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.5rem;font-weight:950}
+.compare{overflow:auto;border:1px solid var(--line);border-radius:15px}.compare table{width:100%;border-collapse:collapse;min-width:650px}.compare th,.compare td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.compare th{color:var(--blue);font-size:.78rem}.compare td{font-size:.83rem}.compare tr:last-child td{border-bottom:0}.compare small{color:var(--muted)}
+.caution{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.caution h3{margin:4px 0 7px}.caution p{margin:0;color:#d6e2ef}
+.review>article{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.review ul{margin:0;padding-left:1.1rem}.review li{margin:.55rem 0}
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.cta h2{margin:4px 0 7px}.cta p{margin:0;color:var(--muted)}
+.refs{display:grid;gap:8px}.refs a{color:var(--blue);overflow-wrap:anywhere}.refs p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+@media(max-width:900px){.problem-grid,.control-grid,.compare-grid,.review{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.gateway-model{grid-template-columns:1fr}.gateway-model>.arrow{transform:rotate(90deg);text-align:center}.routers{grid-template-columns:1fr 1fr}.before-after{grid-template-columns:1fr}.switch-arrow{transform:rotate(90deg)}.cta{display:grid}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.flow{grid-template-columns:1fr}.routers{grid-template-columns:1fr}.fhrp-hero{padding-top:42px}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#model">핵심 구조</a><a href="#controls">Priority</a><a href="#failover">Failover</a><a href="#compare">HSRP / VRRP</a></nav></div></header>
+<main>
+<section class="fhrp-hero"><div class="shell">
+<span class="scope-badge">Cisco IOL HSRPv2 + VRRPv2 실제 검증 완료</span>
+<div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
+<h1>FHRP</h1>
+<p><b>Host는 같은 Default Gateway를 계속 사용하고, 실제 Forwarding Router만 바뀝니다.</b> 이번 주제에서는 Virtual IP / Virtual MAC과 Active·Standby 또는 Master·Backup 역할이 어떻게 분리되는지 이해합니다.</p>
+<div class="core"><strong>같은 Virtual Gateway, 바뀌는 Forwarding Owner</strong><p>Host → Virtual IP → Virtual MAC → 현재 Active/Master Router → Upstream</p></div>
+</div></section>
+
+<section id="model"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>Host는 Router 두 대를 직접 고르는 것이 아닙니다.</h2></div></div>
+<div class="problem-grid">
+<article class="card2"><div class="eyebrow">WITHOUT FHRP</div><h3>Default Gateway 한 대에 장애가 나면?</h3><p>Host 설정에 등록된 Gateway가 그 물리 Router 하나라면, 그 Router의 장애를 다른 Router가 자동으로 대신하기 어렵습니다.</p></article>
+<article class="card2"><div class="eyebrow">WITH FHRP</div><h3>Host는 Virtual Gateway만 바라봅니다.</h3><p>Router들이 하나의 Virtual IP/MAC을 공유하고, 현재 역할을 가진 Router가 실제 패킷을 전달합니다.</p></article>
+</div>
+
+<div class="gateway-model" style="margin-top:14px">
+<div class="device"><strong>PC1</strong><small>GW 10.10.10.1</small></div>
+<div class="arrow">→</div>
+<div class="device virtual"><strong>Virtual Gateway</strong><small>VIP 10.10.10.1 · Virtual MAC</small></div>
+<div class="arrow">→</div>
+<div class="routers">
+<div class="device active"><strong>R1 · Active</strong><small>현재 Forwarding</small></div>
+<div class="device"><strong>R2 · Standby</strong><small>대기</small></div>
+</div>
+</div>
+<div class="note" style="margin-top:12px"><b>검증된 핵심:</b> HSRP 정상 상태에서 PC1의 Gateway는 10.10.10.1, ARP는 HSRP Virtual MAC으로 해석됐고 실제 Echo Request는 R1 uplink로 전달됐습니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · NORMAL FLOW</div><h2>정상 상태는 네 단계로 기억하면 충분합니다.</h2></div></div>
+<div class="flow">
+<article class="step"><b>1</b><h3>Gateway는 VIP</h3><p>Host의 Default Gateway 설정은 물리 R1/R2 주소가 아니라 Virtual IP입니다.</p></article>
+<article class="step"><b>2</b><h3>ARP는 Virtual MAC</h3><p>Host는 VIP를 FHRP가 제공하는 Virtual MAC으로 해석합니다.</p></article>
+<article class="step"><b>3</b><h3>한 Router가 Owner</h3><p>HSRP는 Active, VRRP는 Master가 현재 Forwarding 역할을 가집니다.</p></article>
+<article class="step"><b>4</b><h3>Peer를 계속 감시</h3><p>Hello/Advertisement와 상태 정보를 바탕으로 역할 변경 조건을 판단합니다.</p></article>
+</div>
+</div></section>
+
+<section id="controls"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · PRIORITY / PREEMPT / TRACKING</div><h2>세 설정은 역할이 서로 다릅니다.</h2></div></div>
+<div class="control-grid">
+<article class="control"><span class="tag">PRIORITY</span><h3>누가 더 선호되는가?</h3><p>이번 HSRP Lab에서 R1=110, R2=100으로 두었고 안정 상태에서 R1이 Active가 됐습니다.</p></article>
+<article class="control"><span class="tag">PREEMPT</span><h3>더 좋은 Router가 돌아오면 되찾는가?</h3><p>R1 복구 후 priority 110과 preempt가 유지된 상태에서 R1이 다시 Active가 되는 것을 확인했습니다.</p></article>
+<article class="control warn"><span class="tag">TRACKING</span><h3>LAN이 살아 있어도 upstream은 죽을 수 있습니다.</h3><p>R1의 client-facing LAN은 Up인 채 upstream만 Down시켜 priority를 110→90으로 낮추자 R2가 Active를 가져갔습니다.</p></article>
+<article class="control"><span class="tag">IMPORTANT</span><h3>역할 전환 = 무손실 보장은 아닙니다.</h3><p>Tracking 전환·복구 구간에서는 일시적 Timeout/ICMP 오류가 관측됐습니다. FHRP는 장애 전환 메커니즘이지 무손실을 보장하는 문장이 아닙니다.</p></article>
+</div>
+</div></section>
+
+<section id="failover"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · FAILOVER / RECOVERY</div><h2>Host 관점에서 유지되는 것과 바뀌는 것을 분리합니다.</h2></div></div>
+<div class="before-after">
+<article class="state"><div class="eyebrow">NORMAL</div><h3>R1 Active / R2 Standby</h3><div class="role-line"><span>Host Gateway</span><b class="keep">10.10.10.1 유지</b></div><div class="role-line"><span>Virtual MAC</span><b class="keep">유지</b></div><div class="role-line"><span>Forwarding Owner</span><b>R1</b></div></article>
+<div class="switch-arrow">→</div>
+<article class="state"><div class="eyebrow">R1 LAN/FHRP FAILURE</div><h3>R2 Active</h3><div class="role-line"><span>Host Gateway</span><b class="keep">10.10.10.1 유지</b></div><div class="role-line"><span>Virtual MAC</span><b class="keep">유지</b></div><div class="role-line"><span>Forwarding Owner</span><b class="change">R1 → R2</b></div></article>
+</div>
+<div class="caution" style="margin-top:14px"><h3>Recovery에서는 Preemption을 따로 봅니다.</h3><p>장애가 끝났다고 무조건 원래 Router가 즉시 역할을 되찾는다고 가정하면 안 됩니다. 이번 HSRP Lab은 두 Router에 preempt를 설정했고, R1 복구 후 다시 Active가 됐습니다.</p></div>
+</div></section>
+
+<section id="compare"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · HSRP VS VRRP</div><h2>Mental Model은 비슷하지만 프로토콜은 같은 것이 아닙니다.</h2></div></div>
+<div class="compare">
+<table>
+<thead><tr><th>구분</th><th>HSRP</th><th>VRRP</th><th>이번 실제 Lab</th></tr></thead>
+<tbody>
+<tr><td>Forwarding 역할</td><td>Active</td><td>Master</td><td>R1 선호, 장애 시 R2 인계</td></tr>
+<tr><td>대기 역할</td><td>Standby</td><td>Backup</td><td>Peer 역할 전환 확인</td></tr>
+<tr><td>Host가 쓰는 주소</td><td>Virtual IP / MAC</td><td>Virtual IP / MAC</td><td>VIP 10.10.10.1 유지</td></tr>
+<tr><td>실제 검증 버전</td><td>HSRPv2</td><td>VRRPv2</td><td>VRRPv3를 실측했다고 표현하지 않음</td></tr>
+<tr><td>Control</td><td>이번 Run: 224.0.0.102, UDP 1985</td><td>이번 Run: 224.0.0.18, IP protocol 112</td><td><small>구현/버전 세부는 범용 Mental Model과 분리</small></td></tr>
+</tbody>
+</table>
+</div>
+<div class="note" style="margin-top:12px"><b>MAC 주의:</b> 같은 프로토콜 안에서 Owner가 R1↔R2로 바뀔 때 Host에 제시되는 Virtual MAC은 유지됐습니다. 그러나 HSRP에서 VRRP로 프로토콜 자체를 바꾸면 Virtual MAC 형식도 달랐습니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="review">
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>Host는 물리 Router가 아니라 Virtual IP를 Default Gateway로 사용합니다.</li><li>ARP는 Virtual IP를 Virtual MAC으로 해석합니다.</li><li>장애 시 Host 설정은 그대로이고 Forwarding Owner가 바뀔 수 있습니다.</li><li>Priority는 선호도, Preemption은 복구 후 역할 재탈환, Tracking은 경로 상태를 Priority에 반영합니다.</li><li>HSRP와 VRRP는 같은 Virtual-Gateway Mental Model을 공유하지만 역할명과 Control Protocol은 다릅니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“PC의 Default Gateway는 그대로인데 R1 장애 후 왜 R2로 통신할 수 있을까?”</h3><p style="color:var(--muted)">Virtual IP → Virtual MAC → Active/Master → Failover 순서로 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="cta"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>Gateway는 그대로 두고 Owner만 바꿔 보세요.</h2><p>Virtual Gateway, Priority, Failover, Preemption, Tracking, VRRP를 예상 → 실행 → 관찰 → 설명 순서로 확인합니다.</p></div><a class="btn primary" href="fhrp-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
+<div class="refs">
+<article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html">Cisco · Configuring HSRP</a><p>Virtual Gateway, Active/Standby, Priority, Preemption의 공식 설명을 대조했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc3768.html">RFC 3768 · VRRP Version 2</a><p>이번 실제 VRRPv2 패킷과 Virtual Router 동작을 대조했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-vrrp-0.html">Cisco · Configuring VRRP</a><p>VRRP 역할, Priority, Preemption과 Cisco 구현 범위를 확인했습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 기반 격리 Lab에서 FHRP-01~06을 CLI와 PCAP으로 PASS했습니다. 실측된 전환 손실과 타이머는 이 Run의 Actual이며, 모든 환경의 성능 보장값으로 일반화하지 않습니다.</div>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">FHRP · Virtual Gateway → Owner Failover</div></footer>
+</body>
+</html>
