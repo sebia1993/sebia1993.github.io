@@ -42,6 +42,18 @@ try{
       if(overflow.bad) console.log('OVERFLOW_DIAG',path,viewport.width,JSON.stringify(overflow));
       assert.equal(overflow.bad,false,path+' overflow '+viewport.width);
       assert.deepEqual(errors,[],path+' console errors '+viewport.width);
+      if(path.includes('simulator') && viewport.width>=1366){
+        const clipping=await page.evaluate(()=>{
+          const topo=document.querySelector('.topo-desktop');
+          const r3=topo && topo.querySelector('[data-node="r3"]');
+          if(!topo||!r3) return {bad:true,reason:'missing topology or R3'};
+          const a=topo.getBoundingClientRect(), b=r3.getBoundingClientRect();
+          return {bad:b.left<a.left-1||b.right>a.right+1||b.top<a.top-1||b.bottom>a.bottom+1,
+            topo:{left:a.left,right:a.right,top:a.top,bottom:a.bottom},
+            r3:{left:b.left,right:b.right,top:b.top,bottom:b.bottom}};
+        });
+        assert.equal(clipping.bad,false,path+' internal topology clipping '+viewport.width+' '+JSON.stringify(clipping));
+      }
       if(viewport.width===360||viewport.width===1366){
         const name=path.includes('simulator')?'simulator':'concept';
         await page.screenshot({path:resolve(repo,'test-results/fhrp/'+name+'-'+viewport.width+'.png'),fullPage:true});
