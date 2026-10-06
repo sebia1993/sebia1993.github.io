@@ -28,10 +28,10 @@ async function summaryCheck(page,expected){
  assert.equal(await page.locator('#complete').isVisible(),true);
  assert.equal(await page.locator('#summaryList').getAttribute('role'),'list');
  const c=expected.filter(g=>g==='correct').length;
- assert.equal(await page.locator('#completionScore').innerText(),`결과 확인 4 / 4 · 정답 ${c} · 오답 ${4-c}`);
+ assert.equal(await page.locator('#completionScore').innerText(),`완료 4 / 4 · 정답 ${c} · 다시 볼 문제 ${4-c}`);
  assert.equal(await page.locator('#completionScore .summary-chip').count(),3);
  assert.equal(await page.locator('.summary-chip[data-grade=correct]').innerText(),`정답 ${c}`);
- assert.equal(await page.locator('.summary-chip[data-grade=incorrect]').innerText(),`오답 ${4-c}`);
+ assert.equal(await page.locator('.summary-chip[data-grade=incorrect]').innerText(),`다시 볼 문제 ${4-c}`);
  for(let i=0;i<4;i++){
   const row=rows.nth(i),ok=expected[i]==='correct';
   assert.equal(await row.getAttribute('data-grade'),expected[i]);
@@ -78,8 +78,8 @@ async function checkSurface(url,name){
    const pt=await wrong.evaluate(e=>{const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;return {x,y,hit:e.contains(document.elementFromPoint(x,y))};});assert.ok(pt.hit);
    if(touch)await page.touchscreen.tap(pt.x,pt.y);else await page.mouse.click(pt.x,pt.y);
    assert.equal(await page.locator('#lessonNo').innerText(),'문제 3 / 4');assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
-   assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 즉시 패킷 폐기');
-   await page.reload({waitUntil:'networkidle'});assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 즉시 패킷 폐기');
+   assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 바로 버린다');
+   await page.reload({waitUntil:'networkidle'});assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 바로 버린다');
    await page.locator('#resetBtn').click();await page.locator('#choices [data-value="on"]').click();await page.locator('#runBtn').click();await page.locator('#nextBtn').click();await page.locator('#nextBtn').click();
    await summaryCheck(page,['correct','correct','correct','correct']);
    // Correct-answer review still works from keyboard, without resetting it.
