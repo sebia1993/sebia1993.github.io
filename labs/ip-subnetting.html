@@ -1,6 +1,6 @@
 <!doctype html>
 <html id="ipConceptRoot" lang="ko">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="concept-visual-version" content="20261003-concept-visual-v1">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="concept-visual-version" content="20261006-concept-visual-v2">
 <title>IP 주소 / Subnetting — 개념서</title><meta name="description" content="IPv4 Prefix와 Subnet Mask로 네트워크 경계를 계산하고 목적지가 on-link인지 gateway 경유인지 판단하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -127,7 +127,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 <article class="term-card"><h3>ARP</h3><p>같은 L2 네트워크에서 실제로 프레임을 보낼 상대의 <b>MAC 주소를 확인하는 절차</b>입니다. 이 페이지에서는 “누구의 MAC을 찾는가”만 보면 됩니다.</p></article>
 </div><div class="note"><b>용어 읽는 법:</b> 같은 Subnet을 <b>on-link</b>, 다른 Subnet을 <b>off-link</b>라고 부릅니다. <b>next-hop</b>은 목적지로 가기 위해 “다음에 넘길 장치”라는 뜻이며, 이 페이지의 off-link 예시에서는 Gateway가 next-hop입니다.</div></div></section>
 <section id="prefix"><div class="shell"><div class="section-head"><div><div class="eyebrow">02 · PREFIX / MASK</div><h2>/25는 왜 .127과 .128 사이에서 나뉠까요?</h2></div><p>/25 = 255.255.255.128</p></div>
-<figure class="visual" aria-labelledby="bitGuideCaption"><span class="v-label">이진수 계산을 외우기 전에 “네트워크 부분이 한 칸 늘어난다”만 이해하세요.</span><div class="bit-guide">
+<figure id="bitGuideVisual" class="visual" data-visual="prefix-bits" aria-labelledby="bitGuideCaption"><span class="v-label">이진수 계산을 외우기 전에 “네트워크 부분이 한 칸 늘어난다”만 이해하세요.</span><div class="bit-guide">
 <div class="bit-row" data-prefix="24"><span class="bit-label">/24</span><div class="bit-bar"><span class="network">Network 24비트</span><span class="host">Host 8비트</span></div></div>
 <div class="bit-row" data-prefix="25"><span class="bit-label">/25</span><div class="bit-bar"><span class="network">Network 25비트</span><span class="host">Host 7비트</span></div></div>
 </div><div class="note"><b>/25는 /24보다 Network 비트를 1개 더 사용합니다.</b> 이 1비트는 0 또는 1 두 가지 값을 가지므로, 기존 /24 주소 공간이 <b>두 개의 /25 범위</b>로 나뉩니다.</div><div class="split-result"><div><strong>첫 번째 /25</strong><span>.0 ~ .127 · 128개 주소</span></div><div><strong>두 번째 /25</strong><span>.128 ~ .255 · 128개 주소</span></div></div><figcaption id="bitGuideCaption">그래서 10.77.10.0/24를 /25로 나누면 경계가 <b>.127과 .128 사이</b>에 생깁니다. 지금은 복잡한 이진수 계산보다 이 경계가 만들어지는 이유만 이해하면 됩니다.</figcaption></figure>
