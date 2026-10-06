@@ -49,8 +49,8 @@
     {
       "id": "stage6",
       "title": "6단계 · 고급 엔터프라이즈",
-      "goal": "이중화·분리·경로 정책을 이용해 대규모 네트워크 설계를 확장합니다.",
-      "exitCriteria": "FHRP, VRF, BGP, Redistribution의 정상 상태와 실패 조건을 검증합니다."
+      "goal": "Virtual Gateway, Routing Context, 경로 정책처럼 벤더를 넘어 재사용되는 고급 원리를 먼저 배우고 구현 차이를 구분합니다.",
+      "exitCriteria": "VRRP/HSRP를 포함한 First-Hop Redundancy, VRF, BGP, Redistribution의 공통 원리와 Vendor 구현 범위를 구분해 설명합니다."
     },
     {
       "id": "stage7",
@@ -84,7 +84,12 @@
       "detailUrl": "./labs/ip-subnetting.html",
       "detailLabel": "IP/Subnetting 학습 연습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "IP addressing / prefix / on-link decision",
+        "standardOrProtocol": "IETF IPv4 addressing/CIDR references",
+        "vendorImplementation": "Cisco/VPCS는 검증 구현"
+      }
     },
     {
       "id": "ethernet-mac-table",
@@ -103,7 +108,12 @@
       "automations": 1,
       "detailUrl": "./labs/ethernet-mac-table.html",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Ethernet switching / FDB learning",
+        "standardOrProtocol": "IEEE 802 bridging behavior",
+        "vendorImplementation": "Cisco IOL L2는 검증 구현"
+      }
     },
     {
       "id": "arp-default-gateway",
@@ -120,7 +130,12 @@
       "recoveryValidations": 5,
       "explainNotes": 1,
       "automations": 1,
-      "detailUrl": "./labs/arp-default-gateway.html"
+      "detailUrl": "./labs/arp-default-gateway.html",
+      "scope": {
+        "coreConcept": "Neighbor resolution / next-hop selection",
+        "standardOrProtocol": "IETF ARP/IPv4 host behavior",
+        "vendorImplementation": "Lab platform은 구현 예"
+      }
     },
     {
       "id": "icmp-troubleshooting",
@@ -140,17 +155,22 @@
       "detailUrl": "./labs/icmp-troubleshooting.html",
       "detailLabel": "ICMP / Ping / Traceroute 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "ICMP diagnostics / hop discovery",
+        "standardOrProtocol": "IETF ICMP behavior",
+        "vendorImplementation": "Traceroute probe 방식은 OS/Vendor 구현 차이"
+      }
     },
     {
       "id": "vlan-trunk",
       "category": "1단계 · Campus LAN",
-      "title": "VLAN / Access / Trunk",
+      "title": "VLAN / 802.1Q",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Access Port의 Untagged Frame, 802.1Q Trunk Tag, VLAN 분리, Native/Allowed VLAN과 두 불일치 장애를 Cisco IOL L2에서 검증했습니다.",
-      "why": "하나의 물리적 스위치 인프라에서 논리적으로 네트워크를 분리하는 기본입니다.",
-      "completeWhen": "Access/Trunk의 프레임 차이를 설명하고 VLAN 누락·불일치 장애를 재현하고 복구할 수 있습니다.",
+      "summary": "VLAN 분리와 802.1Q Tagged/Untagged 전달을 핵심으로 학습하고, Cisco Access/Trunk/Native 동작은 구현 사례로 검증했습니다.",
+      "why": "벤더와 관계없이 VLAN과 802.1Q Frame 처리 원리를 이해해야 이후 STP와 L3 Gateway 설계를 정확히 연결할 수 있습니다.",
+      "completeWhen": "VLAN 분리와 Tagged/Untagged 전달을 설명하고, Cisco Access/Trunk/Allowed/Native 설정을 구현 예로 구분해 대표 불일치 장애를 설명할 수 있습니다.",
       "labs": 1,
       "faultScenarios": 2,
       "packetCaptures": 4,
@@ -160,7 +180,12 @@
       "detailUrl": "./labs/vlan-trunk.html",
       "detailLabel": "VLAN / Access / Trunk 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "VLAN separation / tagged-untagged forwarding",
+        "standardOrProtocol": "IEEE 802.1Q",
+        "vendorImplementation": "Access/Trunk/Native와 Cisco CLI는 구현 용어"
+      }
     },
     {
       "id": "inter-vlan-routing",
@@ -168,7 +193,7 @@
       "title": "Inter-VLAN Routing",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Same-VLAN 직접 L2 전달과 Inter-VLAN의 Gateway ARP, SVI Routing, TTL 감소, L2 재캡슐화, SVI/Gateway 장애를 Cisco IOL에서 검증했습니다.",
+      "summary": "서로 다른 VLAN 사이에서는 L3 Gateway가 IP Packet을 Routing하고 새 L2 Header를 구성합니다. Cisco SVI는 이 공통 원리를 검증한 구현 사례입니다.",
       "why": "L2 분리와 L3 전달을 한 흐름으로 연결하는 지점입니다.",
       "completeWhen": "같은 VLAN 통신과 다른 VLAN 통신의 프레임·패킷 경로 차이를 설명할 수 있습니다.",
       "labs": 1,
@@ -180,7 +205,12 @@
       "detailUrl": "./labs/inter-vlan-routing.html",
       "detailLabel": "Inter-VLAN Routing 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "L3 gateway between VLANs",
+        "standardOrProtocol": "IP routing + IEEE 802.1Q context",
+        "vendorImplementation": "SVI는 Cisco에서 널리 쓰는 구현 용어"
+      }
     },
     {
       "id": "stp",
@@ -188,7 +218,7 @@
       "title": "STP / RSTP",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Root 선출, Port Role, Alternate/Discarding, Path Cost, Link 장애 재수렴과 Root 변경을 Cisco Rapid-PVST+에서 검증했습니다.",
+      "summary": "Root 선출, Port Role, Path Cost와 재수렴이라는 공통 STP/RSTP 원리를 학습하고, Cisco Rapid-PVST+를 구현 사례로 검증했습니다.",
       "why": "이중화된 L2 네트워크에서 Broadcast Loop를 막는 핵심 제어 기술입니다.",
       "completeWhen": "Root 선출과 포트 역할을 계산하고 링크 장애 후 토폴로지 변화를 설명할 수 있습니다.",
       "labs": 1,
@@ -200,7 +230,12 @@
       "detailUrl": "./labs/stp.html",
       "detailLabel": "STP / RSTP 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Loop-free bridged topology / convergence",
+        "standardOrProtocol": "IEEE 802.1Q STP/RSTP",
+        "vendorImplementation": "Rapid-PVST+는 Cisco 구현"
+      }
     },
     {
       "id": "lacp",
@@ -208,9 +243,9 @@
       "title": "LACP / Link Aggregation",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Active/Passive LACP Bundle, Logical Po1, src-mac Flow Hash, 단일 Member와 전체 Bundle 장애를 Cisco IOL에서 검증·재검증했습니다.",
+      "summary": "여러 Physical Link를 하나의 LAG로 다루는 Link Aggregation과 LACP 협상을 학습하고, Cisco Port-Channel/EtherChannel은 구현 사례로 검증했습니다.",
       "why": "대역폭 확장과 링크 이중화를 동시에 다루는 실무 빈도가 높은 주제입니다.",
-      "completeWhen": "개별 Member 장애와 Port-Channel 전체 장애를 구분하고 상태 정보를 근거로 진단할 수 있습니다.",
+      "completeWhen": "LAG와 Physical Member를 구분하고 LACP 협상, Flow별 Member 선택, Member 장애와 전체 LAG 장애 차이를 설명할 수 있습니다.",
       "labs": 1,
       "faultScenarios": 3,
       "packetCaptures": 6,
@@ -220,7 +255,12 @@
       "detailUrl": "./labs/lacp.html",
       "detailLabel": "LACP / Link Aggregation 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Link Aggregation Group / LACP",
+        "standardOrProtocol": "IEEE 802.1AX",
+        "vendorImplementation": "Port-Channel/EtherChannel/Po1은 Cisco 구현 용어"
+      }
     },
     {
       "id": "dhcp",
@@ -240,7 +280,12 @@
       "detailUrl": "./labs/dhcp.html",
       "detailLabel": "DHCP / DHCP Relay 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Dynamic host configuration / relay",
+        "standardOrProtocol": "IETF DHCP",
+        "vendorImplementation": "Cisco/VPCS 관측은 구현 Actual"
+      }
     },
     {
       "id": "dns",
@@ -260,7 +305,12 @@
       "detailUrl": "./labs/dns.html",
       "detailLabel": "DNS 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Name resolution / caching / response states",
+        "standardOrProtocol": "IETF DNS",
+        "vendorImplementation": "IOS/VPCS 관측은 구현 Actual"
+      }
     },
     {
       "id": "routing-table",
@@ -280,7 +330,12 @@
       "detailUrl": "./labs/routing-table.html",
       "detailLabel": "Routing Table / Static / Default Route 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Route lookup / LPM / static-default routing",
+        "standardOrProtocol": "IP routing standards",
+        "vendorImplementation": "Cisco RIB/CLI와 ICMP 구현 차이는 별도"
+      }
     },
     {
       "id": "ospf",
@@ -300,17 +355,22 @@
       "detailUrl": "./labs/ospf.html",
       "detailLabel": "OSPF 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Link-state IGP / adjacency / LSDB / SPF",
+        "standardOrProtocol": "IETF OSPF",
+        "vendorImplementation": "Cisco IOS는 검증 구현"
+      }
     },
     {
       "id": "acl",
       "category": "4단계 · 보안과 Edge",
-      "title": "ACL",
+      "title": "Packet Filtering / ACL",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Extended ACL의 Protocol/Port Match, First Match, Implicit Deny, Interface Direction과 One-way/Bidirectional 정책을 Cisco IOL에서 검증했습니다. ACL-06 원래 Expected FAIL은 보존하고 echo-only 보완 검증을 반영했습니다.",
-      "why": "통신 경로가 정상이어도 정책 때문에 차단되는 상황을 네트워크 장애와 구분해야 합니다.",
-      "completeWhen": "Source/Destination/Protocol/Port와 Interface/Direction을 보고 First Match·Implicit Deny·Packet Stop 위치를 예측하고, 단방향/양방향 정책을 구분할 수 있습니다.",
+      "summary": "Packet의 Source/Destination/Protocol/Port를 Match해 Permit/Deny하는 공통 정책 모델을 학습하고, First Match·Implicit Deny·Interface Direction은 Cisco IOS ACL 구현으로 검증했습니다.",
+      "why": "정책 기반 차단의 공통 Match→Action 구조를 이해한 뒤 Vendor별 ACL/Firewall 문법 차이를 분리하기 위해 필요합니다.",
+      "completeWhen": "Packet의 조건과 적용 지점을 보고 Match→Action 결과를 설명하고, Cisco IOS ACL의 First Match·Implicit Deny·Direction을 구현 규칙으로 구분할 수 있습니다.",
       "labs": 1,
       "faultScenarios": 6,
       "packetCaptures": 2,
@@ -320,7 +380,12 @@
       "detailUrl": "./labs/acl.html",
       "detailLabel": "ACL 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Packet filtering / rule evaluation / direction",
+        "standardOrProtocol": "정책 엔진의 공통 Match→Action 모델",
+        "vendorImplementation": "First-match/implicit deny/IOS syntax는 Cisco ACL 구현 범위"
+      }
     },
     {
       "id": "nat-pat",
@@ -328,7 +393,7 @@
       "title": "NAT / PAT",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Basic NAT, PAT Overload, Return Translation, Static PAT와 NAT selection/inside-role 실패·복구를 Cisco IOL에서 검증했습니다.",
+      "summary": "주소·Port Translation과 Return Translation State라는 공통 원리를 학습하고, Inside Local/Inside Global 및 IOS NAT role은 Cisco 구현 용어로 구분합니다.",
       "why": "사설망과 외부망 사이에서 세션이 어떻게 변환되는지 이해해야 Edge 장애를 볼 수 있습니다.",
       "completeWhen": "Inside Local/Global과 PAT mapping을 읽고 Translation Table로 Return path를 설명하며, 미변환과 보안 Drop을 구분할 수 있습니다.",
       "labs": 1,
@@ -340,7 +405,12 @@
       "detailUrl": "./labs/nat-pat.html",
       "detailLabel": "NAT / PAT 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Address/port translation / translation state",
+        "standardOrProtocol": "IETF NAT terminology references where applicable",
+        "vendorImplementation": "Inside Local/Global과 IOS NAT CLI는 Cisco 구현 용어"
+      }
     },
     {
       "id": "firewall-vpn",
@@ -348,7 +418,7 @@
       "title": "Stateful Firewall / VPN",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Stateful ZBF의 inspect/pass 차이와 unsolicited inbound 차단, Site-to-Site IPsec의 clear→ESP→clear, selector bypass, IKE 인증 실패·복구를 Cisco IOL에서 검증했습니다.",
+      "summary": "Stateful Policy의 Session 기반 허용/차단과 IPsec의 clear→encrypted→clear 경로를 분리해 이해하고, Cisco ZBF/IKEv1 Lab은 구현 사례로 검증했습니다.",
       "why": "Routing이 정상이어도 세션·정책·암호화 구간에서 통신이 실패할 수 있습니다.",
       "completeWhen": "Route, Policy, Session, NAT state, VPN SA, ESP path 순서로 정상/실패 지점을 설명하고 대표 장애를 복구할 수 있습니다.",
       "labs": 1,
@@ -360,7 +430,12 @@
       "detailUrl": "./labs/firewall-vpn.html",
       "detailLabel": "Stateful Firewall / VPN 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Stateful policy / session state + IPsec tunnel path",
+        "standardOrProtocol": "IETF IPsec + 일반 Stateful policy model",
+        "vendorImplementation": "Cisco ZBF/IKEv1 Lab은 구현 예"
+      }
     },
     {
       "id": "wifi-rf",
@@ -380,7 +455,12 @@
       "detailUrl": "./labs/wifi-rf.html",
       "detailLabel": "Wi-Fi / RF 기초 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "802.11 RF fundamentals",
+        "standardOrProtocol": "IEEE 802.11",
+        "vendorImplementation": "Vendor RF 최적화 기능은 구현 차이"
+      }
     },
     {
       "id": "wlan-association",
@@ -402,7 +482,12 @@
       "contentStatus": "completed",
       "labStatus": "educational-model",
       "validationMode": "public-reference-analysis",
-      "liveValidationStatus": "not-run"
+      "liveValidationStatus": "not-run",
+      "scope": {
+        "coreConcept": "802.11 association / WPA2-WPA3 security flow",
+        "standardOrProtocol": "IEEE/Wi-Fi Alliance behavior",
+        "vendorImplementation": "Vendor trace는 Reference/Implementation evidence"
+      }
     },
     {
       "id": "dot1x-radius",
@@ -422,7 +507,12 @@
       "detailUrl": "./labs/dot1x-radius.html",
       "detailLabel": "802.1X / EAP / RADIUS 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Supplicant-Authenticator-AAA role boundary",
+        "standardOrProtocol": "IEEE 802.1X + IETF RADIUS/EAP",
+        "vendorImplementation": "Cisco switch/FreeRADIUS/ClearPass는 구현 예"
+      }
     },
     {
       "id": "roaming-wlan-troubleshooting",
@@ -444,17 +534,22 @@
       "contentStatus": "completed",
       "labStatus": "completed",
       "validationMode": "reference-scope-resolved+evidence-reuse",
-      "liveValidationStatus": "roam-mode-a-inconclusive"
+      "liveValidationStatus": "roam-mode-a-inconclusive",
+      "scope": {
+        "coreConcept": "Roaming fact + layered WLAN diagnosis",
+        "standardOrProtocol": "IEEE 802.11 k/v/r concepts where applicable",
+        "vendorImplementation": "Cisco/Aruba 자료는 구현·참고 사례"
+      }
     },
     {
       "id": "fhrp",
       "category": "6단계 · 고급 엔터프라이즈",
-      "title": "FHRP",
+      "title": "First-Hop Redundancy / FHRP",
       "status": "completed",
       "statusLabel": "검증·2단계 학습 완료",
-      "summary": "Virtual Gateway, HSRPv2/VRRPv2 역할 전환, Priority/Preempt, upstream Tracking과 장애·복구를 Cisco IOL에서 CLI/PCAP으로 검증했습니다.",
-      "why": "Default Gateway 이중화를 이해하면 엔터프라이즈 LAN의 가용성 설계를 연결할 수 있습니다.",
-      "completeWhen": "Host의 VIP/Virtual MAC과 실제 Forwarding Owner를 분리하고, Priority·Preemption·Tracking이 장애와 복구 시 역할 전환에 미치는 영향을 설명할 수 있습니다.",
+      "summary": "Virtual Router/Virtual Gateway와 Forwarding Owner 전환이라는 공통 원리를 학습합니다. VRRPv3(RFC 9568)를 표준 기준으로 두고, HSRP와 Cisco IOL의 HSRPv2/VRRPv2 결과는 구현 Evidence로 구분합니다.",
+      "why": "Default Gateway 이중화의 공통 Mental Model을 익히고 VRRP 같은 표준 프로토콜과 Vendor 고유 구현을 구분하기 위해 필요합니다.",
+      "completeWhen": "Host의 Virtual Gateway와 실제 Forwarding Owner를 분리하고 장애·복구 시 역할 전환을 설명하며, VRRP 표준과 HSRP Vendor 구현을 구분할 수 있습니다.",
       "labs": 1,
       "faultScenarios": 3,
       "packetCaptures": 3,
@@ -464,7 +559,12 @@
       "detailUrl": "./labs/fhrp.html",
       "detailLabel": "FHRP 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "First-hop gateway redundancy / virtual router failover",
+        "standardOrProtocol": "VRRPv3 RFC 9568",
+        "vendorImplementation": "HSRP는 Cisco 구현, Cisco IOL의 HSRPv2/VRRPv2 검증은 Implementation Evidence"
+      }
     },
     {
       "id": "vrf",
@@ -484,7 +584,12 @@
       "detailUrl": "./labs/vrf.html",
       "detailLabel": "VRF 학습 시작 →",
       "contentStatus": "completed",
-      "labStatus": "completed"
+      "labStatus": "completed",
+      "scope": {
+        "coreConcept": "Independent routing contexts / route isolation",
+        "standardOrProtocol": "공통 VRF routing-table isolation model",
+        "vendorImplementation": "Cisco VRF-Lite와 static route leak은 검증 구현"
+      }
     },
     {
       "id": "bgp",
@@ -501,7 +606,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "Inter-domain path-vector routing / policy",
+        "standardOrProtocol": "IETF BGP",
+        "vendorImplementation": "Vendor CLI/policy syntax는 구현 차이"
+      }
     },
     {
       "id": "redistribution",
@@ -518,7 +628,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "Routing-domain boundary / route control",
+        "standardOrProtocol": "프로토콜별 표준 + 공통 정책 원리",
+        "vendorImplementation": "Vendor route-map/policy syntax는 구현 차이"
+      }
     },
     {
       "id": "observability",
@@ -535,7 +650,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "Packet/log/telemetry evidence correlation",
+        "standardOrProtocol": "표준 포맷/프로토콜 우선",
+        "vendorImplementation": "Vendor show/debug/telemetry는 구현 예"
+      }
     },
     {
       "id": "network-automation",
@@ -552,7 +672,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "State collection / intent validation / repeatability",
+        "standardOrProtocol": "API/data model/transport 표준 우선",
+        "vendorImplementation": "Vendor SDK/CLI는 adapter 계층"
+      }
     },
     {
       "id": "aws-network",
@@ -569,7 +694,12 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "Cloud logical routing/security constructs",
+        "standardOrProtocol": "Cloud provider architecture",
+        "vendorImplementation": "AWS 구성요소는 특정 구현으로 온프레미스 원리와 비교"
+      }
     },
     {
       "id": "dc-fabric",
@@ -586,7 +716,19 @@
       "recoveryValidations": 0,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null
+      "detailUrl": null,
+      "scope": {
+        "coreConcept": "Underlay/overlay/fabric forwarding",
+        "standardOrProtocol": "IETF/IEEE relevant protocols",
+        "vendorImplementation": "Vendor EVPN/VXLAN fabric 구현은 별도"
+      }
     }
-  ]
+  ],
+  "learningPolicy": {
+    "core": "Vendor-Neutral Core",
+    "principle": "네트워크의 공통 원리와 표준을 먼저 학습하고, Vendor별 구현은 그 원리를 실현하는 사례로 구분합니다.",
+    "standardFirst": "IETF RFC, IEEE 등 공개 표준이 있는 주제는 표준 동작을 학습 기준으로 우선합니다.",
+    "vendorImplementation": "Cisco, Aruba/HPE, Juniper, Arista 등 Vendor별 용어·CLI·세부 동작은 공통 원리와 분리합니다.",
+    "validationPlatform": "별도 지정이 없으면 실제 Lab 검증은 Cisco IOL/IOS를 사용하되, 관측 결과를 모든 Vendor의 공통 동작으로 일반화하지 않습니다."
+  }
 }
