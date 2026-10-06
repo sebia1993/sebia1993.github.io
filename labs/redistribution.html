@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Redistribution / Route Control — 개념서</title>
+<meta name="description" content="서로 다른 Routing Protocol 사이에서 Route를 재분배하고 Prefix·Tag 정책과 RIB 선택을 제어하는 원리를 배우는 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.redist-hero{padding:58px 0 30px}.redist-hero h1{font-size:clamp(2.1rem,5vw,4.1rem);margin:.15em 0;letter-spacing:-.04em}.redist-hero p{max-width:960px;color:var(--muted)}
+.scope-badge{display:inline-flex;max-width:100%;padding:7px 11px;border:1px solid #347968;border-radius:999px;color:var(--mint);font-size:.76rem;font-weight:900;background:rgba(126,224,194,.06);white-space:normal;flex-wrap:wrap;overflow-wrap:anywhere}
+.core{margin-top:18px;padding:22px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core strong{display:block;font-size:clamp(1.08rem,3vw,1.62rem)}.core p{margin:7px 0 0;color:#bdcada}
+.grid2,.review,.policy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card2,.policy-card{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.card2 h3,.policy-card h3{margin:5px 0 8px}.card2 p,.policy-card p{margin:0;color:var(--muted)}
+.first-q{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:20px;border:1px solid var(--line);border-radius:18px;background:#081522}.route-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);text-align:center}.route-card strong{display:block}.route-card small{display:block;margin-top:5px;color:var(--muted)}.question-mark{display:grid;place-items:center;width:54px;height:54px;border:1px solid #3e6a91;border-radius:50%;color:var(--blue);font-size:1.5rem;font-weight:950}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.step b{display:grid;place-items:center;width:34px;height:34px;border:1px solid #3e6a91;border-radius:10px;color:var(--blue)}.step h3{margin:10px 0 6px;font-size:.93rem}.step p{margin:0;color:var(--muted);font-size:.81rem}
+.topology{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:14px;align-items:stretch}.zone{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel3)}.zone.boundary{border-color:#3e6a91;background:rgba(88,184,255,.05)}.zone h3{margin:5px 0 10px}.router{display:flex;justify-content:center;padding:12px;border:1px solid #43647f;border-radius:13px;background:#0b1b2a;font-weight:900}.zone small{display:block;margin-top:8px;color:var(--muted)}.arrow-line{margin:14px 0;padding:8px;border-radius:10px;background:#081522;text-align:center;color:#cbd8e6;font-size:.8rem}
+.route-pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;align-items:stretch}.pipe{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3);text-align:center}.pipe strong{display:block}.pipe span{display:block;color:var(--muted);font-size:.76rem;margin-top:4px}.pipe.highlight{border-color:#347968;background:rgba(126,224,194,.05)}
+.before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}.state{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.state h3{margin:5px 0 9px}.state.ok{border-color:#347968}.state.policy{border-color:#8f6a38}.switch-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.5rem;font-weight:950}.line-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:.82rem}.line-item:first-of-type{border-top:0}.line-item span{color:var(--muted)}.key{color:var(--mint);font-weight:900}.amber{color:var(--amber);font-weight:900}
+.term-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.term{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.term h3{margin:5px 0}.term p{margin:0;color:var(--muted);font-size:.82rem}.term .plain{display:block;margin-top:8px;padding:9px;border-radius:9px;background:#081522;color:#d6e2ef;font-size:.8rem}
+.rule-stack{display:grid;gap:8px;margin-top:12px}.rule{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#081522;font-size:.8rem}.rule.deny{border-color:#8f5961}.rule.permit{border-color:#347968}.rule b{color:var(--blue)}.rule em{font-style:normal;color:var(--muted)}.rule strong{white-space:nowrap}
+.choice-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}.candidate{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.candidate.installed{border-color:#347968;background:rgba(126,224,194,.05)}.candidate h3{margin:5px 0 9px}.badge-mini{display:inline-flex;padding:5px 9px;border-radius:999px;border:1px solid #347968;color:var(--mint);font-size:.71rem;font-weight:900}
+.caution{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.caution h3{margin:4px 0 7px}.caution p{margin:0;color:#d6e2ef}.review>article{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.review ul{margin:0;padding-left:1.1rem}.review li{margin:.55rem 0}
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.cta h2{margin:4px 0 7px}.cta p{margin:0;color:var(--muted)}.refs{display:grid;gap:8px}.refs a{color:var(--blue);overflow-wrap:anywhere}.refs p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+@media(max-width:980px){.flow,.route-pipeline{grid-template-columns:1fr 1fr}.topology{grid-template-columns:1fr}.before-after{grid-template-columns:1fr}.switch-arrow{transform:rotate(90deg)}.term-row{grid-template-columns:1fr}}
+@media(max-width:760px){.grid2,.review,.policy-grid,.choice-compare{grid-template-columns:1fr}.first-q{grid-template-columns:1fr}.question-mark{margin:auto}.flow,.route-pipeline{grid-template-columns:1fr}.cta{display:grid}.rule{grid-template-columns:50px 1fr}.rule strong{grid-column:2;white-space:normal}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.redist-hero{padding-top:42px}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 핵심</a><a href="#boundary">재분배 경계</a><a href="#policy">Policy</a><a href="#rib">RIB 선택</a></nav></div></header>
+<main>
+<section class="redist-hero"><div class="shell">
+<span class="scope-badge">RFC 2328 + RFC 4271 + Cisco IOL 15.4(2)T4 · REDIST-01~06 실제 검증 완료</span>
+<div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
+<h1>Redistribution / Route Control</h1>
+<p><b>한 Router가 OSPF와 BGP를 둘 다 알고 있으면, OSPF 경로가 BGP로 자동 전달될까요?</b> 아닙니다. 서로 다른 Routing Protocol 사이에서 경로 정보를 넘기려면 어떤 Route를 어느 방향으로 보낼지 명시적으로 정해야 합니다.</p>
+<div class="core"><strong>원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → RIB 선택</strong><p>Redistribution은 Packet을 복사하거나 강제로 보내는 기능이 아니라 <b>Routing Information을 다른 Protocol에 주입하는 Control-Plane 동작</b>입니다.</p></div>
+</div></section>
+
+<section id="summary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 첫 질문</div><h2>R1이 OSPF 경로를 안다고 R3도 자동으로 알까?</h2></div></div>
+<div class="first-q">
+<article class="route-card"><strong>R1</strong><small>OSPF로 10.10.10.10/32를 알고 있음</small></article>
+<div class="question-mark" aria-hidden="true">?</div>
+<article class="route-card"><strong>R3</strong><small>BGP Peer · 재분배 전에는 TARGET을 모름</small></article>
+</div>
+<div class="note" style="margin-top:12px"><b>30초 핵심:</b> Protocol마다 자신의 경로 정보를 관리합니다. 다른 Protocol로 넘길 때는 <b>Redistribution Boundary</b>에서 Route를 선택하고 Policy를 적용한 뒤 새 Protocol의 Route로 주입합니다.</div>
+</div></section>
+
+<section id="boundary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · ROUTING DOMAIN BOUNDARY</div><h2>R1이 두 Routing Domain 사이의 “번역 경계” 역할을 합니다.</h2></div></div>
+<div class="topology">
+<article class="zone"><div class="eyebrow">OSPF DOMAIN</div><h3>R2 · Route Source</h3><div class="router">R2</div><div class="arrow-line">OSPF Area 0 → R1</div><small>TARGET/BLOCK은 OSPF Internal, TAGGED/CONFLICT는 Static→OSPF External로 들어옵니다.</small></article>
+<article class="zone boundary"><div class="eyebrow">REDISTRIBUTION BOUNDARY</div><h3>R1 · OSPF + BGP</h3><div class="router">R1</div><div class="arrow-line">Route 확인 → Policy → Target Protocol 주입</div><small>이번 Lab에서 OSPF→BGP Route-map이 실제 경계입니다.</small></article>
+<article class="zone"><div class="eyebrow">BGP DOMAIN</div><h3>R3 · eBGP Peer</h3><div class="router">R3</div><div class="arrow-line">R1 → BGP UPDATE → R3</div><small>허용된 Route만 R3의 BGP Table에 나타납니다.</small></article>
+</div>
+<div class="route-pipeline" style="margin-top:14px">
+<div class="pipe"><strong>1 · Source</strong><span>OSPF / Static / BGP</span></div>
+<div class="pipe"><strong>2 · Boundary</strong><span>R1에서 재분배</span></div>
+<div class="pipe highlight"><strong>3 · Policy</strong><span>Prefix / Tag로 선별</span></div>
+<div class="pipe"><strong>4 · Target</strong><span>다른 Protocol에 주입</span></div>
+<div class="pipe"><strong>5 · RIB</strong><span>설치할 Route 선택</span></div>
+</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · STATIC → OSPF</div><h2>다른 곳에서 들어온 Route는 OSPF 안에서 “외부 경로”가 될 수 있습니다.</h2></div></div>
+<div class="before-after">
+<article class="state"><div class="eyebrow">BEFORE</div><h3>R2의 Static Route</h3><div class="line-item"><span>Prefix</span><b>198.51.100.0/24</b></div><div class="line-item"><span>Source</span><b>Static · Null0</b></div><div class="line-item"><span>OSPF</span><b>아직 없음</b></div></article>
+<div class="switch-arrow">→</div>
+<article class="state ok"><div class="eyebrow">AFTER REDISTRIBUTION</div><h3>R1에서 OSPF External로 관측</h3><div class="line-item"><span>Route Type</span><b class="key">O E1</b></div><div class="line-item"><span>Seed Metric</span><b>20</b></div><div class="line-item"><span>Route Tag</span><b>65002</b></div></article>
+</div>
+<div class="note" style="margin-top:12px"><b>실제 관측:</b> Type 5 LSA의 seed metric은 20이었고 R1 RIB의 E1 metric은 <b>30</b>이었습니다. 이번 토폴로지에서는 ASBR까지의 내부 cost 10이 더해졌기 때문입니다. “재분배 metric=20이면 항상 RIB도 20”이라고 일반화하지 않습니다.</div>
+</div></section>
+
+<section id="policy"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · ROUTE POLICY</div><h2>모든 Route를 넘기지 않고, 필요한 Route만 선별합니다.</h2></div></div>
+<div class="policy-grid">
+<article class="policy-card"><div class="eyebrow">PREFIX POLICY</div><h3>주소 범위로 허용</h3><p>R1은 TARGET은 BGP로 넘기지만 BLOCK은 기본적으로 넘기지 않았습니다. 임시 Permit을 추가했을 때만 BLOCK이 R3에 나타났고, 제거 후 다시 철회됐습니다.</p></article>
+<article class="policy-card"><div class="eyebrow">TAG GUARD</div><h3>표식으로 재유입 차단</h3><p>TAGGED Route는 OSPF 안에 Tag 65002를 가지고 있었습니다. 앞선 Tag Deny가 뒤의 Prefix Permit보다 먼저 적용되어 BGP 재분배를 막았습니다.</p></article>
+</div>
+<div class="rule-stack" aria-label="검증된 route-map 순서 예시">
+<div class="rule deny"><b>SEQ 5</b><em>Tag 65002를 가진 Route</em><strong>DENY</strong></div>
+<div class="rule permit"><b>SEQ 10</b><em>TARGET Prefix</em><strong>PERMIT</strong></div>
+<div class="rule permit"><b>SEQ 15</b><em>TAGGED Prefix</em><strong>PERMIT</strong></div>
+</div>
+<div class="caution" style="margin-top:12px"><h3>Route-map Filter ≠ Packet ACL</h3><p>여기서 Permit/Deny는 데이터 Packet을 통과·차단하는 뜻이 아니라 <b>어떤 Routing Information을 다른 Protocol에 주입할지</b> 결정합니다. Tag도 Metric이나 AD가 아니라 Policy가 Match할 수 있는 행정용 표식입니다.</p></div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · 세 숫자의 역할</div><h2>Metric, Tag, AD는 서로 다른 질문에 답합니다.</h2></div></div>
+<div class="term-row">
+<article class="term"><div class="eyebrow">METRIC</div><h3>그 Protocol 안에서 경로를 어떻게 평가할까?</h3><p>이번 OSPF E1에서는 외부 seed metric과 내부 cost가 경로 metric에 반영됐습니다.</p><span class="plain">“같은 Protocol 내부 경로 계산”</span></article>
+<article class="term"><div class="eyebrow">ROUTE TAG</div><h3>이 Route가 어디서 왔는지 표시할까?</h3><p>Tag 65002를 붙이고 다음 Redistribution Boundary에서 Match해 재유입을 막았습니다.</p><span class="plain">“Policy가 읽는 표식”</span></article>
+<article class="term"><div class="eyebrow">ADMINISTRATIVE DISTANCE</div><h3>서로 다른 Route Source 중 무엇을 RIB에 설치할까?</h3><p>이번 Cisco IOL에서는 eBGP AD20과 OSPF AD110이 같은 Prefix를 제공했을 때 낮은 AD의 BGP Route가 설치됐습니다.</p><span class="plain">“Cisco의 Local Source Preference”</span></article>
+</div>
+</div></section>
+
+<section id="rib"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · SAME PREFIX, DIFFERENT SOURCE</div><h2>같은 Prefix를 두 Protocol이 알려도 RIB에는 하나가 설치될 수 있습니다.</h2></div></div>
+<div class="choice-compare">
+<article class="candidate installed"><span class="badge-mini">INSTALLED</span><h3>eBGP Candidate</h3><div class="line-item"><span>Prefix</span><b>10.30.30.0/24</b></div><div class="line-item"><span>Cisco AD</span><b>20</b></div><div class="line-item"><span>Baseline RIB</span><b class="key">BGP 설치</b></div></article>
+<article class="candidate"><div class="eyebrow">ALTERNATE CANDIDATE</div><h3>OSPF External Candidate</h3><div class="line-item"><span>Prefix</span><b>10.30.30.0/24</b></div><div class="line-item"><span>Cisco AD</span><b>110</b></div><div class="line-item"><span>Baseline RIB</span><b>후보로 존재</b></div></article>
+</div>
+<div class="before-after" style="margin-top:14px">
+<article class="state ok"><div class="eyebrow">BGP PRESENT</div><h3>eBGP AD20 설치</h3><div class="line-item"><span>Session</span><b>Established</b></div><div class="line-item"><span>RIB Source</span><b class="key">BGP</b></div></article>
+<div class="switch-arrow">→</div>
+<article class="state policy"><div class="eyebrow">BGP PREFIX WITHDRAWN</div><h3>OSPF AD110으로 Fallback</h3><div class="line-item"><span>BGP Session</span><b>계속 Established</b></div><div class="line-item"><span>RIB Source</span><b class="amber">OSPF E1</b></div></article>
+</div>
+<div class="note" style="margin-top:12px"><b>복구:</b> R3가 CONFLICT Prefix를 다시 BGP로 광고하자 R1 RIB는 다시 eBGP AD20 경로를 선택했습니다. AD 값과 선택 방식은 이번 Cisco 구현 범위로 두며 다른 Vendor의 공통 규칙처럼 표현하지 않습니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">06 · 실제 검증에서 배운 운영 감각</div><h2>Policy 변화는 즉시 한 순간에 끝난다고 가정하지 않습니다.</h2></div></div>
+<div class="grid2">
+<article class="card2"><h3>Withdrawal은 비동기적으로 보일 수 있습니다.</h3><p>BLOCK Permit을 제거한 직후 첫 조회에는 경로가 잠시 남았고, 추가 조작 없이 settled 상태에서 철회됐습니다. 고정된 수렴 시간을 주장하지 않습니다.</p></article>
+<article class="card2"><h3>Recovery를 끝까지 확인합니다.</h3><p>최종 상태에서 OSPF Full, BGP Established, TARGET 존재, BLOCK/TAGGED 부재, CONFLICT는 BGP 설치, 임시 Permit은 제거된 상태까지 확인했습니다.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">07 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="review">
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>Routing Protocol은 서로의 Route를 자동으로 교환하지 않습니다.</li><li>Redistribution은 Routing Information을 다른 Protocol에 주입하는 Control-Plane 동작입니다.</li><li>Prefix와 Tag Policy로 넘길 Route를 제한할 수 있습니다.</li><li>Route Tag, Metric, Administrative Distance는 서로 다른 목적의 값입니다.</li><li>같은 Prefix의 여러 Source가 있어도 RIB에는 한 Source가 설치될 수 있습니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“R1이 OSPF와 BGP를 둘 다 실행하는데도 왜 모든 OSPF Route가 R3에 보이지 않을까?”</h3><p style="color:var(--muted)">Source Route → Redistribution Boundary → Policy → Target Protocol → RIB 순서로 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="cta"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>어떤 Route가 경계를 넘고, 어떤 Route가 멈추는지 직접 예측해 보세요.</h2><p>No Redistribution → OSPF External → Prefix Policy → Tag Guard → AD Fallback을 예상 → 실행 → 관찰 → 설명 순서로 확인합니다.</p></div><a class="btn primary" href="redistribution-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
+<div class="refs">
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc2328.html">RFC 2328 · OSPF Version 2</a><p>OSPF AS-external Route, Type 5 LSA, External metric type과 Route Tag의 표준 의미를 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc4271.html">RFC 4271 · BGP-4</a><p>BGP UPDATE, NLRI, AS_PATH와 Route Advertisement/Withdrawal의 표준 동작을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/49111-route-map-bestp.html">Cisco · Route Maps Applied with Redistribution</a><p>Redistribution에서 Route-map 순서, Prefix/Tag Match와 Permit/Deny 동작을 구현 근거로 사용했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/15986-admin-distance.html">Cisco · Administrative Distance</a><p>같은 Prefix가 서로 다른 Routing Source에서 올 때 Cisco RIB가 Source를 선택하는 구현 동작을 확인했습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 3대의 격리 PNETLab에서 REDIST-01~06을 CLI 163개 assertion과 내부 링크 PCAP 2개·packet assertion 57개로 PASS했습니다. 실제 지속 Routing Loop는 만들지 않았고 Tag Guard 효과만 검증했습니다. Null0 Prefix는 Route Advertisement 검증용이며 Host Service 성공을 뜻하지 않습니다. 정확한 수렴 시간도 일반화하지 않습니다.</div>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">Redistribution / Route Control · Source → Boundary → Policy → Target → RIB</div></footer>
+</body>
+</html>
