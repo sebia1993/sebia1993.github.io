@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stateful Firewall / VPN — 개념서</title>
-<meta name="description" content="Stateful Firewall의 session 기반 return traffic 허용과 Site-to-Site IPsec의 clear-to-ESP-to-clear 흐름을 실제 Cisco 검증 결과에 연결하는 1단계 개념서입니다.">
+<title>Stateful Firewall / IPsec VPN — 개념서</title>
+<meta name="description" content="Stateful Policy의 Session State와 IPsec의 Selector/SA/ESP 경로를 하나의 Edge 상태 모델로 구분하고, Cisco ZBF/IKEv1 Lab은 구현 사례로 확인하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -30,10 +30,11 @@
 <main>
 <section class="preview-hero"><div class="shell">
 <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-<h1>Stateful Firewall / VPN</h1>
+<h1>Stateful Firewall / <em>IPsec VPN</em></h1>
 <p>이번 목표는 하나입니다. <b>Stateful Firewall이 Return Traffic을 허용하는 이유와, Site-to-Site IPsec이 LAN Traffic을 ESP Transit으로 바꾸는 흐름</b>을 한 경로에서 설명할 수 있으면 됩니다.</p>
 <div class="concept-stage"><div><strong>Route가 정상이어도 Policy·Session·SA 때문에 통신은 실패할 수 있습니다.</strong><span>진단 순서는 Route → Policy → Session → NAT State → VPN SA → ESP Path로 잡습니다.</span></div><div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div></div>
-<div class="core-line"><strong>Firewall: Inspect → Session → Return Permit &nbsp; | &nbsp; VPN: Selector → SA → ESP → Decrypt</strong><p>Stateful Firewall은 세션을 기억하고, IPsec은 보호 대상으로 선택된 Traffic만 암호화합니다.</p></div>
+<div class="core-line"><strong>Stateful Policy: First Flow → Session State → Return Match &nbsp; | &nbsp; IPsec: Selector → SA → ESP → Decrypt</strong><p>공통 핵심은 같은 Route 위에서도 Policy/Session State와 Encryption/SA State가 서로 다른 판단 계층이라는 점입니다.</p></div>
+<div class="note" style="margin-top:14px"><b>구현 범위:</b> Firewall의 <code>inspect/pass</code>와 ZBF Zone-Pair는 Cisco IOS Zone-Based Firewall 구현입니다. IPsec의 Selector/SA/ESP Mental Model은 표준 중심으로 보고, 이번 IKEv1/AES/SHA 조합은 Lab 구현 Evidence로만 사용합니다.</div>
 </div></section>
 
 <section id="summary"><div class="shell">
@@ -88,6 +89,6 @@
 <section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 토폴로지에서 Session과 SA 상태를 직접 예상하세요.</h2><p>Inspect → Unsolicited → Pass → Protected ESP → Bypass → IKE Failure/Recovery 순서로 확인합니다.</p></div><div class="actions"><a class="btn primary" href="firewall-vpn-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
 <section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> Run 2026-10-05-firewall-vpn-01, Cisco IOL IOS 15.4(2)T4. FWVPN-01~06 모두 PASS. VPN은 Lab 호환 IKEv1/AES-128/SHA/DH14 및 ESP AES/SHA 구성이며 운영 보안 권고로 일반화하지 않습니다. ASA/FTD, NGFW, NAT-T, Remote Access, IKEv2 성능/동작은 이번 검증 범위가 아닙니다.</div></div></section>
 </main>
-<footer class="footer"><div class="shell">Stateful Firewall / VPN · Concept → Interactive Lab</div></footer>
+<footer class="footer"><div class="shell">Stateful Firewall / IPsec VPN · Concept → Interactive Lab</div></footer>
 </body>
 </html>
