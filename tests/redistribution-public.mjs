@@ -21,7 +21,7 @@ async function waitForPublished(path, expected){
 }
 
 try{
-  let page=await waitForPublished('/labs/redistribution.html','원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → RIB 선택');
+  let page=await waitForPublished('/labs/redistribution.html','원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → 최종 Routing Table(RIB) 선택');
   const concept=await page.locator('body').innerText();assert.ok(concept.includes('Route-map Filter ≠ Packet ACL'));assert.ok(concept.includes('eBGP AD20'));assert.ok(concept.includes('OSPF AD110'));
   await page.screenshot({path:resolve(repo,'test-results/redistribution-public/concept-1366.png'),fullPage:true});await page.close();
 
