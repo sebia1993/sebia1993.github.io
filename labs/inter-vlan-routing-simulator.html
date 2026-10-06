@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Inter-VLAN Routing — 인터랙티브 실습</title>
-<meta name="description" content="Same-VLAN, Default Gateway, SVI Routing, Reply Path, SVI Down, Wrong Gateway를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<meta name="description" content="Same-VLAN과 L3 Gateway Routing의 공통 원리를 예상하고, Cisco SVI Routing/Down 및 Wrong Gateway 구현 사례와 비교하는 2단계 Interactive Lab입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -37,6 +37,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
     <small>2단계 · INTERACTIVE LAB</small>
     <h1>Inter-VLAN Routing</h1>
     <p>결과를 먼저 예상한 뒤, <b>Peer MAC인지 Gateway MAC인지</b>, 그리고 Routing 전후 <b>IP·TTL·Ethernet Header</b>가 어떻게 달라지는지 확인합니다.</p>
+    <div class="scope-note" style="margin:14px 0;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> Off-link Packet은 L3 Gateway로 보내고 Router는 새 L2 Header로 Forward합니다. SVI는 이번 Cisco IOL에서 사용한 Gateway Interface 구현입니다.</div>
     <div class="start-guide">
       <div class="guide-step"><b>1</b><span><strong>Next-Hop 예상</strong>같은 VLAN인지 다른 VLAN인지 먼저 판단합니다.</span></div>
       <div class="guide-step"><b>2</b><span><strong>실행</strong>ARP 대상과 Frame 경로를 확인합니다.</span></div>
