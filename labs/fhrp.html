@@ -91,13 +91,13 @@
 <div class="note" style="margin-bottom:12px"><b>현재 표준:</b> VRRPv3는 RFC 9568(IPv4/IPv6)입니다. 아래 표의 VRRPv2 값은 이번 Cisco IOL에서 실제 검증한 <b>Implementation Evidence</b>이며, 현재 표준 자체를 VRRPv2로 가르치지 않습니다.</div>
 <div class="compare">
 <table>
-<thead><tr><th>구분</th><th>HSRP</th><th>VRRP</th><th>이번 실제 Lab</th></tr></thead>
+<thead><tr><th>구분</th><th>VRRPv3 · RFC 9568</th><th>HSRP · Cisco</th><th>이번 실제 Lab</th></tr></thead>
 <tbody>
-<tr><td>Forwarding 역할</td><td>Active</td><td>Master</td><td>R1 선호, 장애 시 R2 인계</td></tr>
-<tr><td>대기 역할</td><td>Standby</td><td>Backup</td><td>Peer 역할 전환 확인</td></tr>
+<tr><td>Forwarding 역할</td><td>Active</td><td>Active</td><td>HSRPv2: R1 Active · VRRPv2 Evidence: Master 역할 관측</td></tr>
+<tr><td>대기 역할</td><td>Backup</td><td>Standby</td><td>장애 시 Peer 역할 전환 확인</td></tr>
 <tr><td>Host가 쓰는 주소</td><td>Virtual IP / MAC</td><td>Virtual IP / MAC</td><td>VIP 10.10.10.1 유지</td></tr>
-<tr><td>실제 검증 버전</td><td>HSRPv2</td><td>VRRPv2</td><td>VRRPv3를 실측했다고 표현하지 않음</td></tr>
-<tr><td>Control</td><td>이번 Run: 224.0.0.102, UDP 1985</td><td>이번 Run: 224.0.0.18, IP protocol 112</td><td><small>구현/버전 세부는 범용 Mental Model과 분리</small></td></tr>
+<tr><td>학습/검증 범위</td><td>현재 표준 기준</td><td>Vendor 구현 비교</td><td>Cisco IOL HSRPv2 + VRRPv2 실제 검증</td></tr>
+<tr><td>Control</td><td>VRRP · IP protocol 112</td><td>이번 HSRPv2 Run: 224.0.0.102, UDP 1985</td><td><small>버전별 패킷 세부는 공통 Mental Model과 분리</small></td></tr>
 </tbody>
 </table>
 </div>
