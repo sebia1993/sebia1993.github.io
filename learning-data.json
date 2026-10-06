@@ -1,13 +1,13 @@
 {
   "updated": "2026-10-07",
   "summary": {
-    "completedTopics": 24,
-    "labs": 23,
-    "faultScenarios": 44,
-    "packetCaptures": 74,
-    "recoveryValidations": 50,
+    "completedTopics": 25,
+    "labs": 24,
+    "faultScenarios": 46,
+    "packetCaptures": 75,
+    "recoveryValidations": 52,
     "explainNotes": 1,
-    "automations": 2
+    "automations": 3
   },
   "stages": [
     {
@@ -673,23 +673,27 @@
       "id": "network-automation",
       "category": "7단계 · 자동화와 관측",
       "title": "Network Automation",
-      "status": "planned",
-      "statusLabel": "병행 과정",
-      "summary": "Python, REST API, SSH 자동화로 상태 수집·검증·리포트 생성을 단계적으로 구현합니다.",
-      "why": "운영 경험을 반복 가능한 도구로 전환해 정확성과 처리 속도를 높입니다.",
-      "completeWhen": "여러 장비에서 동일 항목을 자동 수집하고 정상 기준과 비교해 결과를 구조화할 수 있습니다.",
-      "labs": 0,
-      "faultScenarios": 0,
-      "packetCaptures": 0,
-      "recoveryValidations": 0,
+      "status": "completed",
+      "statusLabel": "검증·2단계 학습 완료",
+      "summary": "하나의 Inventory/Intent에서 Cisco IOL 3대의 동일 상태를 SSH로 수집하고, Raw CLI를 정규화해 PASS/MISMATCH/ERROR로 분리한 뒤 JSON Report와 복구 재실행으로 반복성을 검증했습니다.",
+      "why": "수동 점검을 반복 가능한 수집·비교·리포트 흐름으로 바꾸고, 장비 상태 불일치와 자동화 수집 실패를 명확히 구분하기 위해 필요합니다.",
+      "completeWhen": "Inventory→Collect→Normalize→Compare→Report→Re-run 흐름을 설명하고, MISMATCH와 ERROR의 차이와 복구 후 Baseline 재현을 설명할 수 있습니다.",
+      "labs": 1,
+      "faultScenarios": 2,
+      "packetCaptures": 1,
+      "recoveryValidations": 2,
       "explainNotes": 0,
-      "automations": 0,
-      "detailUrl": null,
+      "automations": 1,
+      "detailUrl": "./labs/network-automation.html",
       "scope": {
-        "coreConcept": "State collection / intent validation / repeatability",
-        "standardOrProtocol": "API/data model/transport 표준 우선",
-        "vendorImplementation": "Vendor SDK/CLI는 adapter 계층"
-      }
+        "coreConcept": "Inventory-driven state collection / normalization / intent validation / repeatability",
+        "standardOrProtocol": "IETF SSH RFC 4253 + JSON RFC 8259",
+        "vendorImplementation": "Cisco IOL + Python/Netmiko SSH CLI collection are validation implementations"
+      },
+      "detailLabel": "Network Automation 학습 시작 →",
+      "contentStatus": "completed",
+      "labStatus": "completed",
+      "validationMode": "live-cisco-iol+python-netmiko-ssh-cli-json"
     },
     {
       "id": "aws-network",
