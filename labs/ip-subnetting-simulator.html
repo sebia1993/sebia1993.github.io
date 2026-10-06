@@ -290,6 +290,7 @@
   <dl class="answer-compare"><dt>내 답</dt><dd id="chosenAnswer"></dd><dt>올바른 답</dt><dd id="correctAnswer"></dd></dl>
   <p><span class="explain-label">이유</span><span id="explainText"></span></p>
  </div>
+ <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
 
  <section class="reason-card" id="calculationDetails" aria-labelledby="reasonTitle">
   <div class="reason-head"><span class="reason-step" aria-hidden="true">①</span><div><h3 id="reasonTitle">왜 이런 답일까요?</h3><p>그림에서 본 <b>같은 그룹 / 다른 그룹</b> 판단을 이제 숫자로 확인합니다. /25는 주소를 두 그룹으로 나누는 경계 표시입니다.</p></div></div>
@@ -321,7 +322,6 @@
    <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
   </div>
   <p id="modelEvent"></p>
-  <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
   <details class="optional sim-flow-details" id="simFlowDetails"><summary>더 궁금한 사람만 · 실제 전달 전에 상대를 찾는 과정(ARP) 보기</summary><div class="optional-body">
    <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
    <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
