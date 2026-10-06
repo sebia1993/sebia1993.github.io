@@ -46,7 +46,7 @@ async function testSurface(url,surface){
    assert.equal(await page.locator('body > header').evaluate(e=>getComputedStyle(e).position),'static');
    const text=await page.locator('body').innerText();
    assert.ok(text.includes('내 컴퓨터는 상대에게 바로 보내야 할까?'));
-   assert.ok(text.includes('이런 주소를')&&text.includes('IP 주소라고 합니다.'));
+   assert.ok(text.includes('이런 주소를')&&text.includes('IP 주소')&&text.includes('라고 합니다.'),'IP 주소 소개 문장이 마크업 공백과 무관하게 유지되어야 합니다.');
    assert.ok(text.includes('하나의 그룹을')&&text.includes('Subnet(서브넷)'));
    assert.ok(text.includes('그 경계를 알려주는 표시가')&&text.includes('/25'));
    assert.ok(text.includes('Default Gateway')&&text.includes('Router'));
