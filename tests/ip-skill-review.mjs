@@ -127,7 +127,8 @@ async function surface(url,name){
    await page.addStyleTag({content:'html{font-size:200%}'});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
-   assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.140'));
+   const forcedColorMeaning=await page.locator('#modelEvent').innerText();
+    assert.ok(forcedColorMeaning.includes('다른 네트워크 동네')&&forcedColorMeaning.includes('Gateway'),'forced-colors must preserve the route decision in text');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    assert.deepEqual(errors,[]);
    checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','same-run-details','replay-keeps-grade','sequential-next','summary-return','summary-reload','actual-prefix','source-links','200%-text','forced-colors']});
