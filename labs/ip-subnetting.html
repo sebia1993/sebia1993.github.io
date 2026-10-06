@@ -281,11 +281,11 @@ html#ipConceptRoot{scroll-behavior:auto}
     <div class="route-drawing three">
      <div class="mini-device"><span class="circle">PC1</span><strong>.10</strong><span>동네 A</span></div>
      <span class="route-arrow" aria-hidden="true">→</span>
-     <div class="mini-device"><span class="circle">출구</span><strong>Router</strong><span>.1</span></div>
+     <div class="mini-device"><span class="circle">출구</span><strong>출구 장치</strong><span>주소 .1</span></div>
      <span class="route-arrow" aria-hidden="true">→</span>
      <div class="mini-device"><span class="circle">PC2</span><strong>.140</strong><span>동네 B</span></div>
     </div>
-    <div class="route-result">다른 Subnet → 이번 예제에서는 출구 역할의 Router를 먼저 사용합니다.</div>
+    <div class="route-result">다른 Subnet → 이번 예제에서는 네트워크의 출구 역할을 하는 장치를 먼저 사용합니다.</div>
     <figcaption id="differentCaption">PC1은 .10과 .140이 서로 다른 그룹이라고 판단하므로 다른 네트워크로 나가는 경로를 선택합니다.</figcaption>
    </figure>
   </div>
@@ -333,12 +333,12 @@ html#ipConceptRoot{scroll-behavior:auto}
  <div class="shell">
   <div class="section-head">
    <div><div class="eyebrow">07 · 마지막에 이유 붙이기</div><h2>그럼 왜 이름이 하필 “/25”일까요?</h2></div>
-   <p>여기서 처음으로 bit를 봅니다.</p>
+   <p>여기서 처음으로 컴퓨터가 쓰는 0과 1의 자리를 봅니다.</p>
   </div>
   <details class="deep-dive" open>
    <summary>그림으로 /24와 /25의 차이 보기</summary>
    <div>
-    <p>IPv4 주소는 컴퓨터 내부에서 <b>0과 1로 된 32개의 자리</b>로 표현됩니다. 이 한 자리를 <b>bit(비트)</b>라고 합니다.</p>
+    <p>지금 배우는 IP 주소 형식인 IPv4는 컴퓨터 내부에서 <b>0과 1로 된 32개의 자리</b>로 표현됩니다. 이 한 자리를 <b>bit(비트)</b>라고 합니다.</p>
     <figure id="bitVisual" class="visual" data-visual="bits" aria-labelledby="bitCaption">
      <span class="v-label">그림 7 · / 뒤 숫자는 앞에서 몇 bit를 네트워크 구분에 쓰는지 나타냅니다.</span>
      <div class="bits">
