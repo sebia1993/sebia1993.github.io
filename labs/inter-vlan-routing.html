@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Inter-VLAN Routing — 개념서</title>
-<meta name="description" content="같은 VLAN과 다른 VLAN 통신에서 Default Gateway, SVI, TTL, Ethernet 재캡슐화가 어떻게 달라지는지 이해하는 1단계 개념서입니다.">
+<meta name="description" content="같은 VLAN과 다른 VLAN 통신에서 Default Gateway, L3 Gateway, TTL, Ethernet 재캡슐화가 어떻게 달라지는지 이해하고 Cisco SVI를 구현 사례로 구분하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -44,7 +44,7 @@
     <h1><em>Inter-VLAN</em> Routing</h1>
     <p>목표는 하나입니다. <b>같은 VLAN은 직접 L2로 보내고, 다른 VLAN은 Default Gateway를 거쳐 Routing된다는 차이</b>를 Ethernet과 IP Header까지 연결해 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
-      <div><strong>이 페이지에서는 경계만 정확히 봅니다.</strong><span>Routing Table이나 CLI를 외우기보다 “Host가 누구의 MAC을 쓰는가 → L3 Switch가 무엇을 바꾸는가”에 집중합니다.</span></div>
+      <div><strong>이 페이지에서는 L2/L3 경계만 정확히 봅니다.</strong><span>Routing Table이나 CLI를 외우기보다 “Host가 누구의 MAC을 쓰는가 → L3 Gateway가 무엇을 바꾸는가”에 집중합니다.</span></div>
       <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
     </div>
     <div class="core-line">
@@ -60,7 +60,7 @@
     <div class="test-guide">
       <p><b>① Same VLAN:</b> 목적지가 on-link라면 <strong>최종 Host를 ARP</strong>하고 그 Host MAC으로 직접 보냅니다.</p>
       <p><b>② Different VLAN:</b> 목적지가 off-link라면 <strong>Default Gateway를 ARP</strong>하고 Gateway MAC으로 보냅니다.</p>
-      <p><b>③ L3 Switch:</b> IP Destination은 그대로 두고 <strong>TTL을 감소</strong>시킨 뒤 다른 VLAN에 맞는 새 Ethernet Header로 전송합니다.</p>
+      <p><b>③ L3 Gateway:</b> IP Destination은 그대로 두고 <strong>TTL을 감소</strong>시킨 뒤 다른 VLAN에 맞는 새 Ethernet Header로 전송합니다. 이번 Cisco Lab에서는 이 역할을 SVI가 수행합니다.</p>
       <p><b>④ Reply:</b> 반대편 Host도 똑같이 독립 판단합니다. Return Path 역시 자기 Gateway를 사용합니다.</p>
     </div>
   </div>
@@ -86,11 +86,11 @@
 
 <section id="routing">
   <div class="shell">
-    <div class="section-head"><div><div class="eyebrow">02 · SVI ROUTING</div><h2>L3 Switch를 지나면 Ethernet Header는 새로 만들어집니다.</h2></div><p>이번 실제 검증에서 동일 Echo Request를 VLAN10과 VLAN20 링크에서 대조했습니다.</p></div>
+    <div class="section-head"><div><div class="eyebrow">02 · L3 GATEWAY ROUTING</div><h2>L3 Gateway를 지나면 Ethernet Header는 새로 만들어집니다.</h2></div><p>이번 실제 검증에서는 Cisco SVI가 Gateway Interface 역할을 했고 동일 Echo Request를 VLAN10과 VLAN20 링크에서 대조했습니다.</p></div>
     <div class="flow" aria-label="PC10A에서 SVI Routing을 거쳐 PC20A로 전달되는 흐름">
       <article class="flow-node"><b>PC10A</b><span>VLAN10 · TTL 64</span></article>
       <div class="flow-link"><strong>→ Gateway MAC</strong><span>IP dst = PC20A</span></div>
-      <article class="flow-node"><b>SW1 SVI</b><span>Route Lookup · TTL -1</span></article>
+      <article class="flow-node"><b>L3 Gateway</b><span>Cisco SVI · Route Lookup · TTL -1</span></article>
       <div class="flow-link"><strong>→ PC20A MAC</strong><span>새 Ethernet Header</span></div>
       <article class="flow-node"><b>PC20A</b><span>VLAN20 · TTL 63</span></article>
     </div>
@@ -172,7 +172,7 @@
 <section>
   <div class="shell">
     <div class="next-stage">
-      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 VLAN과 다른 VLAN의 Frame을 직접 비교하세요.</h2><p>먼저 Next-Hop을 예상하고, Gateway MAC·TTL·새 L2 Header·SVI Down·Wrong Gateway 중단 지점을 확인합니다.</p></div>
+      <div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 VLAN과 다른 VLAN의 Frame을 직접 비교하세요.</h2><p>먼저 Next-Hop을 예상하고, Gateway MAC·TTL·새 L2 Header·Gateway Interface(SVI) Down·Wrong Gateway 중단 지점을 확인합니다.</p></div>
       <div class="actions"><a class="btn primary" href="inter-vlan-routing-simulator.html">Interactive Lab 시작 →</a></div>
     </div>
   </div>
