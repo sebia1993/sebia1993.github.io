@@ -33,8 +33,8 @@
 <span class="scope-badge">RFC 4271 + Cisco IOL 15.4(2)T4 · BGP-01~06 실제 검증 완료</span>
 <div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
 <h1>BGP / Route Policy</h1>
-<p><b>같은 목적지로 갈 수 있는 길이 여러 개라면 어떤 길을 사용할까요?</b> BGP는 단순히 “가장 가까운 길” 하나만 찾는 것이 아니라, 받은 경로의 정보와 운영 정책을 함께 보고 사용할 경로를 고릅니다.</p>
-<div class="core"><strong>후보 경로 → Path Attribute / Policy 비교 → Best Path → Routing Table · 광고</strong><p>핵심은 “길이 존재한다”와 “그 길을 선택한다”, “그 길을 다른 이웃에게 보여준다”를 구분하는 것입니다.</p></div>
+<p><b>같은 목적지로 갈 수 있는 길이 여러 개라면 어떤 길을 사용할까요?</b> BGP(Border Gateway Protocol)는 네트워크 운영 영역 사이에서 경로 정보를 주고받고, 받은 경로의 정보와 운영 정책을 함께 보고 사용할 길을 고르는 프로토콜입니다.</p>
+<div class="core"><strong>후보 경로 → 경로에 딸린 정보·정책 → 사용할 길(Best Path) → Routing Table · 광고</strong><p>전문용어로는 경로에 딸린 정보를 <b>Path Attribute</b>라고 합니다. 핵심은 “길이 존재한다”와 “그 길을 선택한다”, “그 길을 다른 이웃에게 보여준다”를 구분하는 것입니다.</p></div>
 </div></section>
 
 <section id="summary"><div class="shell">
@@ -73,6 +73,7 @@
 
 <section id="paths"><div class="shell">
 <div class="section-head"><div><div class="eyebrow">03 · PREFIX + ATTRIBUTES</div><h2>Route는 목적지 주소만 있는 정보가 아닙니다.</h2></div></div>
+<div class="note" style="margin-bottom:12px"><b>표를 읽기 전에:</b> <b>AS_PATH</b>는 경로가 거쳐 온 AS 정보, <b>LOCAL_PREF</b>는 같은 AS 내부에서 어느 출구를 더 선호할지 나타내는 값, <b>NEXT_HOP</b>은 다음에 전달할 Router를 뜻합니다.</div>
 <div class="candidates">
 <article class="candidate best"><span class="best-tag">BASELINE BEST</span><h3>R2에서 받은 후보</h3><div class="attr"><span>Prefix</span><b>203.0.113.1/32</b></div><div class="attr"><span>AS_PATH</span><b>65002</b></div><div class="attr"><span>LOCAL_PREF</span><b>100</b></div><div class="attr"><span>NEXT_HOP</span><b>10.0.12.2</b></div></article>
 <article class="candidate"><div class="eyebrow">OTHER CANDIDATE</div><h3>R3에서 받은 후보</h3><div class="attr"><span>Prefix</span><b>203.0.113.1/32</b></div><div class="attr"><span>AS_PATH</span><b>65003 65003 65003</b></div><div class="attr"><span>LOCAL_PREF</span><b>100</b></div><div class="attr"><span>NEXT_HOP</span><b>10.0.13.2</b></div></article>
