@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LACP / Link Aggregation — 인터랙티브 실습</title>
-<meta name="description" content="LACP 협상, Logical Port-Channel, Flow Hash, Member 장애와 Bundle 장애를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<meta name="description" content="LACP 협상, Logical LAG, Flow Hash, Member 장애와 Bundle 장애를 예상하고 확인하는 2단계 Interactive Lab입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -43,7 +43,8 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
   <small>2단계 · INTERACTIVE LAB</small>
   <h1>LACP / Link Aggregation</h1>
   <p>같은 Physical Topology에서 <b>LACP Control Plane, Po1 Logical State, 실제 Flow가 선택한 Member, Member/Bundle 장애</b>를 구분해 확인합니다.</p>
-  <div class="start-guide">
+  <div class="scope" style="margin-top:14px;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> IEEE 802.1AX Link Aggregation Group(LAG). Po1/Port-Channel/EtherChannel 표시는 Cisco IOL 검증 구현입니다.</div>
+<div class="start-guide">
     <div class="guide-step"><b>1</b><span><strong>상태 예상</strong>active/passive, Member, Po1 상태를 먼저 판단합니다.</span></div>
     <div class="guide-step"><b>2</b><span><strong>실행</strong>실제 검증 기반 Member Path를 보여줍니다.</span></div>
     <div class="guide-step"><b>3</b><span><strong>관찰</strong>LACPDU와 User Data를 구분합니다.</span></div>
