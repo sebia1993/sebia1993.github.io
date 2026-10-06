@@ -35,7 +35,7 @@
 <div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
 <h1>Redistribution / Route Control</h1>
 <p><b>한 Router가 OSPF와 BGP를 둘 다 알고 있으면, OSPF 경로가 BGP로 자동 전달될까요?</b> 아닙니다. 서로 다른 Routing Protocol 사이에서 경로 정보를 넘기려면 어떤 Route를 어느 방향으로 보낼지 명시적으로 정해야 합니다.</p>
-<div class="core"><strong>원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → RIB 선택</strong><p>Redistribution은 Packet을 복사하거나 강제로 보내는 기능이 아니라 <b>Routing Information을 다른 Protocol에 주입하는 Control-Plane 동작</b>입니다.</p></div>
+<div class="core"><strong>원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → 최종 Routing Table(RIB) 선택</strong><p>Redistribution은 Packet을 복사하거나 강제로 보내는 기능이 아니라 <b>Routing Information을 다른 Protocol에 주입하는 라우팅 제어 영역(Control Plane)의 동작</b>입니다.</p></div>
 </div></section>
 
 <section id="summary"><div class="shell">
@@ -51,7 +51,7 @@
 <section id="boundary"><div class="shell">
 <div class="section-head"><div><div class="eyebrow">01 · ROUTING DOMAIN BOUNDARY</div><h2>R1이 두 Routing Domain 사이의 “번역 경계” 역할을 합니다.</h2></div></div>
 <div class="topology">
-<article class="zone"><div class="eyebrow">OSPF DOMAIN</div><h3>R2 · Route Source</h3><div class="router">R2</div><div class="arrow-line">OSPF Area 0 → R1</div><small>TARGET/BLOCK은 OSPF Internal, TAGGED/CONFLICT는 Static→OSPF External로 들어옵니다.</small></article>
+<article class="zone"><div class="eyebrow">OSPF DOMAIN</div><h3>R2 · OSPF 쪽 Route Source</h3><div class="router">R2</div><div class="arrow-line">OSPF Area 0 → R1</div><small>TARGET/BLOCK은 OSPF Internal, TAGGED/CONFLICT는 Static에서 OSPF External Route로 주입됩니다.</small></article>
 <article class="zone boundary"><div class="eyebrow">REDISTRIBUTION BOUNDARY</div><h3>R1 · OSPF + BGP</h3><div class="router">R1</div><div class="arrow-line">Route 확인 → Policy → Target Protocol 주입</div><small>이번 Lab에서 OSPF→BGP Route-map이 실제 경계입니다.</small></article>
 <article class="zone"><div class="eyebrow">BGP DOMAIN</div><h3>R3 · eBGP Peer</h3><div class="router">R3</div><div class="arrow-line">R1 → BGP UPDATE → R3</div><small>허용된 Route만 R3의 BGP Table에 나타납니다.</small></article>
 </div>
@@ -60,7 +60,7 @@
 <div class="pipe"><strong>2 · Boundary</strong><span>R1에서 재분배</span></div>
 <div class="pipe highlight"><strong>3 · Policy</strong><span>Prefix / Tag로 선별</span></div>
 <div class="pipe"><strong>4 · Target</strong><span>다른 Protocol에 주입</span></div>
-<div class="pipe"><strong>5 · RIB</strong><span>설치할 Route 선택</span></div>
+<div class="pipe"><strong>5 · Routing Table</strong><span>설치할 Route 선택</span></div>
 </div>
 </div></section>
 
@@ -69,9 +69,9 @@
 <div class="before-after">
 <article class="state"><div class="eyebrow">BEFORE</div><h3>R2의 Static Route</h3><div class="line-item"><span>Prefix</span><b>198.51.100.0/24</b></div><div class="line-item"><span>Source</span><b>Static · Null0</b></div><div class="line-item"><span>OSPF</span><b>아직 없음</b></div></article>
 <div class="switch-arrow">→</div>
-<article class="state ok"><div class="eyebrow">AFTER REDISTRIBUTION</div><h3>R1에서 OSPF External로 관측</h3><div class="line-item"><span>Route Type</span><b class="key">O E1</b></div><div class="line-item"><span>Seed Metric</span><b>20</b></div><div class="line-item"><span>Route Tag</span><b>65002</b></div></article>
+<article class="state ok"><div class="eyebrow">AFTER REDISTRIBUTION</div><h3>R1에서 OSPF External로 관측</h3><div class="line-item"><span>Route Type</span><b class="key">O E1</b></div><div class="line-item"><span>시작 Metric(Seed)</span><b>20</b></div><div class="line-item"><span>Route Tag</span><b>65002</b></div></article>
 </div>
-<div class="note" style="margin-top:12px"><b>실제 관측:</b> Type 5 LSA의 seed metric은 20이었고 R1 RIB의 E1 metric은 <b>30</b>이었습니다. 이번 토폴로지에서는 ASBR까지의 내부 cost 10이 더해졌기 때문입니다. “재분배 metric=20이면 항상 RIB도 20”이라고 일반화하지 않습니다.</div>
+<div class="note" style="margin-top:12px"><b>실제 관측:</b> OSPF가 외부 Route를 알리는 Type 5 LSA의 시작 metric은 20이었고 R1 Routing Table의 E1 metric은 <b>30</b>이었습니다. 이번 토폴로지에서는 외부 Route를 주입한 R2까지의 OSPF 내부 cost 10이 더해졌기 때문입니다. “재분배 metric=20이면 항상 RIB도 20”이라고 일반화하지 않습니다.</div>
 </div></section>
 
 <section id="policy"><div class="shell">
@@ -98,7 +98,7 @@
 </div></section>
 
 <section id="rib"><div class="shell">
-<div class="section-head"><div><div class="eyebrow">05 · SAME PREFIX, DIFFERENT SOURCE</div><h2>같은 Prefix를 두 Protocol이 알려도 RIB에는 하나가 설치될 수 있습니다.</h2></div></div>
+<div class="section-head"><div><div class="eyebrow">05 · SAME PREFIX, DIFFERENT SOURCE</div><h2>같은 Prefix를 두 Protocol이 알려도 Routing Table(RIB)에는 하나가 설치될 수 있습니다.</h2></div></div>
 <div class="choice-compare">
 <article class="candidate installed"><span class="badge-mini">INSTALLED</span><h3>eBGP Candidate</h3><div class="line-item"><span>Prefix</span><b>10.30.30.0/24</b></div><div class="line-item"><span>Cisco AD</span><b>20</b></div><div class="line-item"><span>Baseline RIB</span><b class="key">BGP 설치</b></div></article>
 <article class="candidate"><div class="eyebrow">ALTERNATE CANDIDATE</div><h3>OSPF External Candidate</h3><div class="line-item"><span>Prefix</span><b>10.30.30.0/24</b></div><div class="line-item"><span>Cisco AD</span><b>110</b></div><div class="line-item"><span>Baseline RIB</span><b>후보로 존재</b></div></article>
@@ -123,7 +123,7 @@
 <div class="section-head"><div><div class="eyebrow">07 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
 <div class="review">
 <article><h3>⭐ 꼭 기억하세요</h3><ul><li>Routing Protocol은 서로의 Route를 자동으로 교환하지 않습니다.</li><li>Redistribution은 Routing Information을 다른 Protocol에 주입하는 Control-Plane 동작입니다.</li><li>Prefix와 Tag Policy로 넘길 Route를 제한할 수 있습니다.</li><li>Route Tag, Metric, Administrative Distance는 서로 다른 목적의 값입니다.</li><li>같은 Prefix의 여러 Source가 있어도 RIB에는 한 Source가 설치될 수 있습니다.</li></ul></article>
-<article><div class="eyebrow">내 말로 설명하기</div><h3>“R1이 OSPF와 BGP를 둘 다 실행하는데도 왜 모든 OSPF Route가 R3에 보이지 않을까?”</h3><p style="color:var(--muted)">Source Route → Redistribution Boundary → Policy → Target Protocol → RIB 순서로 설명해 보세요.</p></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“R1이 OSPF와 BGP를 둘 다 실행하는데도 왜 모든 OSPF Route가 R3에 보이지 않을까?”</h3><p style="color:var(--muted)">Source Route → Redistribution Boundary → Policy → Target Protocol → Routing Table 순서로 설명해 보세요.</p></article>
 </div>
 </div></section>
 
@@ -140,6 +140,6 @@
 <div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 3대의 격리 PNETLab에서 REDIST-01~06을 CLI 163개 assertion과 내부 링크 PCAP 2개·packet assertion 57개로 PASS했습니다. 실제 지속 Routing Loop는 만들지 않았고 Tag Guard 효과만 검증했습니다. Null0 Prefix는 Route Advertisement 검증용이며 Host Service 성공을 뜻하지 않습니다. 정확한 수렴 시간도 일반화하지 않습니다.</div>
 </div></section>
 </main>
-<footer class="footer"><div class="shell">Redistribution / Route Control · Source → Boundary → Policy → Target → RIB</div></footer>
+<footer class="footer"><div class="shell">Redistribution / Route Control · Source → Boundary → Policy → Target → Routing Table</div></footer>
 </body>
 </html>
