@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NAT / PAT — 인터랙티브 실습</title>
-<meta name="description" content="Basic NAT, PAT, Return Translation, Static PAT와 NAT 실패/복구를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<meta name="description" content="Translation State와 External Mapping을 먼저 예상하고, Cisco IOS Basic NAT/PAT/Static PAT 구현 결과와 비교하는 2단계 Interactive Lab입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -34,6 +34,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 <header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><div class="nav"><a href="nat-pat.html">1단계 개념서</a></div></div></header>
 <main>
 <section class="hero"><div class="wrap"><small>2단계 · INTERACTIVE LAB</small><h1>NAT / PAT</h1><p>R1/R4 → R2 NAT Edge → R3 구조에서 <b>NAT 전후 주소·Port와 Translation Table</b>을 먼저 예상하고 실제 검증값과 비교합니다.</p>
+<div class="scope-note" style="margin:14px 0;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> Internal Endpoint ↔ External Mapping ↔ Translation State. Inside Local/Global과 inside/outside role은 Cisco IOS 구현 용어입니다.</div>
 <div class="start-guide"><div class="guide-step"><b>1</b><span><strong>예상</strong>Inside/Outside에서 무엇이 보일지 고릅니다.</span></div><div class="guide-step"><b>2</b><span><strong>관찰</strong>CP11/CP14/CP23와 Translation Table을 봅니다.</span></div><div class="guide-step"><b>3</b><span><strong>복구</strong>실패 장면은 원복까지 확인해야 완료됩니다.</span></div></div></div></section>
 
 <section><div class="wrap">
