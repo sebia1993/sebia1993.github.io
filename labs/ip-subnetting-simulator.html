@@ -31,6 +31,20 @@
 #ipLab .question h2{font-size:clamp(1.3rem,3vw,1.8rem);line-height:1.35;margin:6px 0 10px;scroll-margin-top:16px}
 #ipLab .question p{margin:0 0 8px;color:var(--text)}
 #ipLab .question .context-note{font-size:.86rem;color:var(--muted)}
+#ipLab .beginner-map{margin:16px 0 4px;padding:16px;border:1px solid #466783;border-radius:14px;background:#0e2234}
+#ipLab .beginner-map>strong{display:block;margin-bottom:10px;font-size:.94rem}
+#ipLab .map-range{display:grid;grid-template-columns:1fr 1fr;border:1px solid #5d7a92;border-radius:11px;overflow:hidden;min-height:76px}
+#ipLab .map-half{display:grid;place-items:center;text-align:center;padding:12px;background:#12322f;font-size:.82rem}
+#ipLab .map-half:last-child{background:#14314b;border-left:2px solid #7895aa}
+#ipLab .map-half b,#ipLab .map-half span{display:block}
+#ipLab .map-half span{color:#c7d7e4;margin-top:3px}
+#ipLab .map-range[data-prefix="24"]{grid-template-columns:1fr}
+#ipLab .map-range[data-prefix="24"] .map-half:first-child{grid-column:1;background:#2d3422}
+#ipLab .map-range[data-prefix="24"] .map-half:last-child{display:none}
+#ipLab .map-markers{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:.78rem;color:#c5d5e3}
+#ipLab .map-marker{padding:5px 8px;border:1px solid #607e96;border-radius:999px;background:#142d43}
+#ipLab .map-marker.current{border-color:var(--blue);color:#dff2ff;font-weight:850}
+#ipLab .map-note{margin:10px 0 0;font-size:.84rem;color:#c4d4e1;line-height:1.55}
 #ipLab .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 12px}
 #ipLab .choice{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:7px;padding:14px;min-height:104px;border:2px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);min-width:0}
 #ipLab .choice .choice-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.74rem;min-height:22px;color:var(--muted)}
@@ -261,11 +275,13 @@
 </style></head><body>
 <div class="lab-wrap" id="ipLab">
 <a class="back" href="ip-subnetting.html">← 1단계 개념서</a>
-<header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>네트워크를 처음 보는 사람도 괜찮습니다. 먼저 두 주소가 같은 네트워크인지 예상하고, 답을 제출한 뒤 숫자가 왜 그렇게 판단되는지 순서대로 확인합니다.</p><p class="model-notice">외울 필요 없습니다 · 화면의 ① 계산 → ② 판단 → ③ 보내는 모습 순서만 따라가세요.</p></header>
+<header class="hero"><small>2단계 · INTERACTIVE LAB</small><h1>IP 주소 / Subnetting</h1><p>먼저 <b>그림의 같은 그룹 / 다른 그룹</b>을 보고 예상합니다. 그 다음 /25라는 표시만 보고도 같은 판단을 할 수 있는지 확인합니다.</p><p class="model-notice">그림 → 내 예상 → 이유 확인 → 보내는 길 확인. 전문용어를 먼저 외우지 않아도 됩니다.</p></header>
 <nav class="tabs" id="tabs" aria-label="문제 선택 및 이전 답안 보기"></nav>
 <div class="progress"><strong id="progressText">풀이 완료 0 / 4</strong><span id="scoreText">정답 0 · 다시 볼 문제 0 · 남은 문제 4</span></div>
 <main class="card" id="lessonCard">
-<section class="question" aria-labelledby="question"><small id="lessonNo"></small><h2 id="question" tabindex="-1"></h2><p id="questionHelp"></p><p id="questionContext" class="context-note"></p><details class="start-conditions" id="startConditions"><summary>시작 조건과 생략 범위</summary><p id="initialConditions"></p></details></section>
+<section class="question" aria-labelledby="question"><small id="lessonNo"></small><h2 id="question" tabindex="-1"></h2><p id="questionHelp"></p><p id="questionContext" class="context-note"></p>
+<div class="beginner-map" id="beginnerMap" aria-label="현재 문제의 주소 그룹 그림"><strong id="mapTitle">주소 그룹을 그림으로 먼저 확인하세요.</strong><div class="map-range" id="mapRange" data-prefix="25"><div class="map-half"><div><b>.0 ~ .127</b><span>첫 번째 네트워크 그룹</span></div></div><div class="map-half"><div><b>.128 ~ .255</b><span>두 번째 네트워크 그룹</span></div></div></div><div class="map-markers"><span class="map-marker current">PC1 · .10</span><span class="map-marker" id="mapDestination">상대 · .20</span></div><p class="map-note" id="mapNote"></p></div>
+<details class="start-conditions" id="startConditions"><summary>더 궁금한 사람만 · 실습의 상세 시작 조건</summary><p id="initialConditions"></p></details></section>
 <div class="choices" id="choices" role="group" aria-label="내 예상 답 선택"></div>
 <div id="submitRow"><button class="primary" id="runBtn" type="button" disabled>답안 제출 · 결과 확인</button><span id="feedback" role="status" aria-live="polite">먼저 예상 답을 선택하세요.</span></div>
 <section id="resultArea" hidden aria-label="답안 판정과 해설">
@@ -276,7 +292,7 @@
  </div>
 
  <section class="reason-card" id="calculationDetails" aria-labelledby="reasonTitle">
-  <div class="reason-head"><span class="reason-step" aria-hidden="true">①</span><div><h3 id="reasonTitle">왜 이런 답일까요?</h3><p>PC1은 자신의 Mask를 <b>내 IP</b>와 <b>목적지 IP</b>에 똑같이 적용합니다. 두 계산 결과가 같은지만 먼저 보면 됩니다.</p></div></div>
+  <div class="reason-head"><span class="reason-step" aria-hidden="true">①</span><div><h3 id="reasonTitle">왜 이런 답일까요?</h3><p>그림에서 본 <b>같은 그룹 / 다른 그룹</b> 판단을 이제 숫자로 확인합니다. /25는 주소를 두 그룹으로 나누는 경계 표시입니다.</p></div></div>
   <div class="reason-body">
    <p class="basis" id="calculationBasis"></p>
    <div class="calc"><div class="endpoint"><small>내 컴퓨터 · PC1</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow" aria-hidden="true">→</div><div class="endpoint"><small id="destinationLabel">상대방</small><strong id="dstIp"></strong><code id="dstNet"></code></div></div>
@@ -286,27 +302,27 @@
    <div class="mask-try" id="maskTry" hidden><div class="mask-try-head"><strong>직접 바꿔보기 · PC1의 Mask</strong><span>답안과 점수에는 영향이 없습니다.</span></div><div class="mask-buttons"><button class="secondary mask-choice" id="maskTry25" type="button">/25 정상</button><button class="secondary mask-choice" id="maskTry24" type="button">/24 오설정</button></div><p id="maskTryResult"></p></div>
   </div>
  </section> <figure class="model-observation network-simulator" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
-  <div class="model-heading"><strong id="modelTitle">③ 네트워크에서는 이렇게 보냅니다</strong><span id="modelRunLabel"></span></div>
+  <div class="model-heading"><strong id="modelTitle">② 보낼 길을 그림으로 확인합니다</strong><span id="modelRunLabel"></span></div>
   <div class="sim-topology" id="simTopology" data-step="0">
    <section class="sim-zone sim-zone-a" data-sim-id="lana" aria-label="LAN A 실제 구성 10.77.10.0/25">
-    <div class="sim-zone-heading"><strong>LAN A</strong><span>실제 구성 · 10.77.10.0/25</span></div>
+    <div class="sim-zone-heading"><strong>네트워크 동네 A</strong><span>Subnet A · 10.77.10.0/25</span></div>
     <div class="sim-host-stack">
      <div class="sim-node sim-source" data-sim-id="pc1"><span class="sim-device-type">PC</span><strong>PC1</strong><small id="modelSource"></small></div>
      <div class="sim-node" data-sim-id="pc3"><span class="sim-device-type">PC</span><strong>PC3</strong><small>10.77.10.20/25</small></div>
     </div>
    </section>
    <div class="sim-connector" data-sim-id="link-a-r1" aria-hidden="true"><span>↔</span></div>
-   <div class="sim-router" data-sim-id="r1"><span class="sim-device-type">ROUTER</span><strong>R1</strong><small>LAN A · .1/25</small><small>LAN B · .129/25</small></div>
+   <div class="sim-router" data-sim-id="r1"><span class="sim-device-type">출구 · ROUTER</span><strong>R1</strong><small>동네 A · .1/25</small><small>동네 B · .129/25</small></div>
    <div class="sim-connector" data-sim-id="link-r1-b" aria-hidden="true"><span>↔</span></div>
    <section class="sim-zone sim-zone-b" data-sim-id="lanb" aria-label="LAN B 실제 구성 10.77.10.128/25">
-    <div class="sim-zone-heading"><strong>LAN B</strong><span>실제 구성 · 10.77.10.128/25</span></div>
+    <div class="sim-zone-heading"><strong>네트워크 동네 B</strong><span>Subnet B · 10.77.10.128/25</span></div>
     <div class="sim-node" data-sim-id="pc2"><span class="sim-device-type">PC</span><strong>PC2</strong><small>10.77.10.140/25</small></div>
    </section>
    <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
   </div>
   <p id="modelEvent"></p>
   <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
-  <details class="optional sim-flow-details" id="simFlowDetails"><summary>ARP / IPv4 흐름을 단계별로 보기</summary><div class="optional-body">
+  <details class="optional sim-flow-details" id="simFlowDetails"><summary>더 궁금한 사람만 · 실제 전달 전에 상대를 찾는 과정(ARP) 보기</summary><div class="optional-body">
    <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
    <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
     <button class="secondary" id="simPrev" type="button">← 이전 흐름</button>
@@ -329,10 +345,10 @@
 (function(){
 'use strict';
   var lessons=[
-    {title:'10과 20은 같은 네트워크일까?',label:'1 · .10 → .20',src:'10.77.10.10',dst:'10.77.10.20',prefix:25,answer:'on',choices:[['on','같은 네트워크 · 목적지 .20에게 바로 보낸다'],['gw','다른 네트워크 · Gateway(.1)에 먼저 보낸다'],['drop','IP가 다르므로 보낼 수 없다']],next:'목적지 .20',decision:'ON-LINK',validated:'PASS',explain:'PC1이 /25를 적용하면 .10과 .20 모두 10.77.10.0/25로 계산됩니다. 그래서 같은 네트워크라고 판단합니다.',evidence:'CP1에서 PC1이 10.77.10.20에 직접 ARP했고 ICMP 3/3이 성공했습니다.'},
-    {title:'10과 140은 같은 네트워크일까?',label:'2 · .10 → .140',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','같은 네트워크 · .140에게 바로 보낸다'],['gw','다른 네트워크 · Gateway(.1)에 먼저 보낸다'],['rewrite','Gateway로 보낼 때 목적지 IP를 .1로 바꾼다']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'PC1의 /25로 계산하면 .10은 10.77.10.0/25, .140은 10.77.10.128/25입니다. 서로 다르므로 Gateway(.1)에 먼저 보냅니다. 최종 목적지 IP는 계속 .140입니다.',evidence:'CP1에서 gateway .1 ARP/Reply가 관측됐고, 원격 ICMP의 IPv4 Destination은 .140으로 유지되었습니다. 같은 설정의 추가 정상 시험은 3/3 성공했습니다.'},
-    {title:'PC1의 Mask가 /24로 잘못 설정되면?',label:'3 · /24 오설정',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','그래도 Gateway(.1)에 먼저 보낸다'],['on','같은 네트워크라고 잘못 판단해 .140을 직접 찾는다'],['drop','Mask가 다르면 바로 버린다']],next:'목적지 .140 직접',decision:'ON-LINK로 오판',validated:'PASS',explain:'PC1이 /24를 쓰면 .10과 .140을 모두 10.77.10.0/24로 계산합니다. 실제로는 서로 다른 LAN에 있지만, PC1은 같은 네트워크라고 잘못 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
-    {title:'PC1의 Mask를 /25로 되돌리면?',label:'4 · /25 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 .140을 직접 찾는다'],['gw','다시 다른 네트워크로 판단해 Gateway(.1)에 먼저 보낸다'],['none','ARP 없이 바로 데이터를 보낸다']],next:'gateway 10.77.10.1',decision:'VIA GATEWAY',validated:'PASS',explain:'PC1의 Mask를 /25로 되돌리면 두 네트워크 계산 결과가 다시 달라집니다. 그래서 Gateway(.1)를 정상적으로 선택합니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
+    {title:'그림에서 .10과 .20은 같은 그룹일까요?',label:'1 · 그림으로 같은 그룹',src:'10.77.10.10',dst:'10.77.10.20',prefix:25,answer:'on',choices:[['on','같은 그룹 · PC3(.20)을 전달 대상으로 본다'],['gw','다른 그룹 · 출구 Gateway(.1)를 먼저 이용한다'],['drop','주소 숫자가 다르면 보낼 수 없다']],next:'목적지 .20',decision:'같은 Subnet',validated:'PASS',explain:'그림에서 .10과 .20은 모두 첫 번째 주소 그룹(.0~.127)에 있습니다. 네트워크 용어로는 같은 Subnet입니다.',evidence:'CP1에서 PC1이 10.77.10.20에 직접 ARP했고 ICMP 3/3이 성공했습니다.'},
+    {title:'그림에서 .10과 .140은 같은 그룹일까요?',label:'2 · 그림으로 다른 그룹',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','같은 그룹 · .140을 전달 대상으로 본다'],['gw','다른 그룹 · 출구 Gateway(.1)를 먼저 이용한다'],['rewrite','출구를 이용하면 목적지 IP를 .1로 바꾼다']],next:'gateway 10.77.10.1',decision:'다른 Subnet',validated:'PASS',explain:'.10은 첫 번째 그룹(.0~.127), .140은 두 번째 그룹(.128~.255)에 있습니다. 따라서 다른 Subnet이고 이번 예제에서는 출구 Gateway(.1)를 먼저 이용합니다.',evidence:'CP1에서 gateway .1 ARP/Reply가 관측됐고, 원격 ICMP의 IPv4 Destination은 .140으로 유지되었습니다. 같은 설정의 추가 정상 시험은 3/3 성공했습니다.'},
+    {title:'경계 규칙이 /24로 바뀌면 .10과 .140은 어떻게 보일까요?',label:'3 · 경계를 바꿔 보기',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','여전히 두 그룹이므로 출구를 이용한다'],['on','하나의 큰 그룹으로 보여 같은 Subnet이라고 판단한다'],['drop','경계가 달라지면 바로 버린다']],next:'목적지 .140 직접',decision:'같은 Subnet으로 오판',validated:'PASS',explain:'/24에서는 PC1이 .10과 .140을 하나의 10.77.10.0/24 범위로 봅니다. 실제 배치는 그대로인데 PC1의 경계 기준만 넓어져 같은 Subnet이라고 잘못 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
+    {title:'경계를 다시 /25로 돌리면 어떤 길을 선택할까요?',label:'4 · 정상 경계로 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 같은 그룹으로 보고 .140을 직접 찾는다'],['gw','다시 두 그룹으로 보이므로 출구 Gateway(.1)를 이용한다'],['none','아무 확인 없이 바로 보낸다']],next:'gateway 10.77.10.1',decision:'다른 Subnet으로 복구',validated:'PASS',explain:'경계 규칙을 /25로 되돌리면 .10은 첫 번째 그룹, .140은 두 번째 그룹으로 다시 나뉩니다. 따라서 출구 Gateway(.1)를 이용하는 정상 판단으로 돌아옵니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
   ];
 // Actual destination configuration is distinct from the sender's calculation mask.
 lessons.forEach(function(l,i){
@@ -456,11 +472,15 @@ function renderSummary(){
 }
 function render(){
  var l=lessons[idx];$('lessonNo').textContent='문제 '+(idx+1)+' / 4';$('question').textContent=l.title;
- $('questionHelp').textContent='PC1 '+l.src+'/'+l.prefix+' → '+l.dstNode+' '+l.dst+'/'+l.dstPrefix;
- if(idx===2){$('questionContext').textContent='PC1의 Mask만 /24로 잘못 바꿨습니다. PC2의 주소와 실제 네트워크 위치는 그대로입니다.';}
- else if(idx===3){$('questionContext').textContent='이번에는 PC1의 Mask를 정상 /25로 되돌렸습니다. 다른 설정은 그대로입니다.';}
- else {$('questionContext').textContent='아직 ARP나 라우터는 생각하지 않아도 됩니다. 두 주소가 같은 네트워크 범위인지부터 예상해 보세요.';}
- $('initialConditions').textContent='각 문제는 서로 독립적입니다. PC1의 Gateway는 '+l.gateway+'입니다. PC3(.20)은 PC1과 같은 LAN A에 있고, PC2(.140)는 라우터 건너편 LAN B에 있습니다. 처음에는 ARP Cache가 비어 있다고 가정합니다. Proxy ARP와 별도 Host Route는 사용하지 않습니다. 스위치 내부 처리와 ICMP 왕복은 이 학습 모델에서 생략합니다.';
+ $('questionHelp').textContent='PC1 주소 '+l.src+' · 경계 규칙 /'+l.prefix+' → '+l.dstNode+' 주소 '+l.dst;
+ if(idx===2){$('questionContext').textContent='주소와 실제 배치는 그대로 두고, PC1이 사용하는 경계 규칙만 /25에서 /24로 바꿨습니다.';}
+ else if(idx===3){$('questionContext').textContent='이번에는 PC1의 경계 규칙을 정상 /25로 되돌렸습니다.';}
+ else {$('questionContext').textContent='먼저 그림에서 두 주소가 같은 색 그룹인지 확인한 뒤 내 예상을 고르세요.';}
+ $('mapRange').dataset.prefix=String(l.prefix);
+ $('mapDestination').textContent=l.dstNode+' · .'+l.dst.split('.').pop();
+ $('mapTitle').textContent=l.prefix===25?'현재 경계 규칙 /25 · 주소가 두 그룹으로 나뉩니다.':'현재 경계 규칙 /24 · PC1 눈에는 하나의 큰 주소 그룹입니다.';
+ $('mapNote').textContent=l.prefix===25?(l.dst.endsWith('.20')?'.10과 .20은 왼쪽 첫 번째 그룹에 함께 있습니다.':'.10은 첫 번째 그룹, .140은 두 번째 그룹에 있습니다.'):'/24에서는 PC1이 .10과 .140을 같은 큰 범위 안에 있다고 계산합니다.';
+ $('initialConditions').textContent='각 문제는 서로 독립적입니다. PC1의 Gateway는 '+l.gateway+'입니다. PC3(.20)은 PC1과 같은 네트워크 동네 A에 있고, PC2(.140)는 Router 건너편 네트워크 동네 B에 있습니다. 아래 상세 설명에서는 제작 검증 조건을 확인할 수 있습니다.';
  $('evidenceDetails').open=false;$('startConditions').open=false;$('simFlowDetails').open=false;traceStep=0;
  renderTabs();renderProgress();renderChoices();renderResult();renderSummary();
 }
@@ -527,8 +547,8 @@ function renderObservation(){
  $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 보내는 순서 확인';
  $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
  $('modelTargetLabel').textContent='먼저 MAC 주소를 찾는 대상';$('simDecision').textContent=o.decision;
- $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 네트워크 → 목적지 '+o.arpTarget+'을 직접 찾습니다.':'✓ 다른 네트워크 → Gateway '+o.arpTarget+'를 먼저 찾습니다.'):'! PC1은 10.77.10.140을 직접 찾지만 실제로는 다른 LAN에 있어 응답이 없습니다 · 원격 전달 전 중단';
- $('modelCaption').textContent='LAN A와 LAN B는 이해를 위한 단순한 그림입니다. “직접 전달”은 PC끼리 케이블이 직결됐다는 뜻이 아니라, 라우터를 거치지 않고 같은 네트워크의 목적지를 다음 전달 대상으로 선택한다는 뜻입니다. SW1/SW2 내부 동작은 생략합니다.';
+ $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 네트워크 동네이므로 최종 목적지를 직접 전달 대상으로 선택합니다.':'✓ 다른 네트워크 동네이므로 출구 Router(Gateway)를 먼저 이용합니다.'):'! PC1은 같은 동네라고 잘못 판단했지만 실제 목적지는 다른 동네에 있어 전달이 여기서 막힙니다.';
+ $('modelCaption').textContent='큰 그림은 “같은 네트워크인가 → 출구가 필요한가”만 보여줍니다. 실제 장비에서는 전달 전에 MAC 주소를 확인하는 ARP 과정이 있으며, 궁금하면 아래 접힌 설명에서 볼 수 있습니다.';
  renderTrace();
 }
 function simElement(id){return $('simTopology').querySelector('[data-sim-id="'+id+'"]');}
