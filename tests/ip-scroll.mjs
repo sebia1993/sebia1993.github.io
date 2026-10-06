@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261003-answer-flow-v1';
+const version = '20261006-beginner-flow-v2';
 const key = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
@@ -60,7 +60,7 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('header.hero').evaluate(e => getComputedStyle(e).position), 'static');
       await page.evaluate(() => { window.__tabClicks = 0; document.querySelector('#tabs').addEventListener('click', () => window.__tabClicks++); });
       const selections = ['on','gw','gw','on']; // Video's two correct, two incorrect answers.
-      const decisions = ['ON-LINK','VIA GATEWAY','ON-LINK로 오판','VIA GATEWAY'];
+      const decisions = ['같은 네트워크 (ON-LINK)','다른 네트워크 → Gateway','같은 네트워크로 잘못 판단','다른 네트워크 → Gateway'];
       for (let i = 0; i < 4; i++) {
         assert.equal(await page.locator('#lessonNo').innerText(), `문제 ${i+1} / 4`);
         assert.equal(await page.locator('#runBtn').isDisabled(), true);
@@ -74,7 +74,7 @@ async function verifySurface(url, name) {
         assert.equal(await page.locator('#verdictTitle').innerText(), i < 2 ? '✓ 정답입니다' : '✕ 오답입니다');
         assert.equal(await page.locator('#choices button:disabled').count(), 3, 'submitted answers must be locked');
         assert.equal(await page.locator('#submitRow').isVisible(), false, 'primary action must change after submit');
-        assert.equal(await page.locator('#calculationDetails').getAttribute('open'), null);
+        assert.equal(await page.locator('#calculationDetails').isVisible(), true);
         assert.equal(await page.locator('#evidenceDetails').getAttribute('open'), null);
         assert.equal((await page.locator('body').innerText()).includes('PASS'), false, 'grade must not be confused with lab PASS');
         await atTop(page, '#verdictTitle', false);
@@ -85,17 +85,22 @@ async function verifySurface(url, name) {
         if ((width === 360 && height === 800 || width === 1366) && i === 2) {
           await page.screenshot({ path: resolve(output, `ip-answer-${name}-${width}.png`) });
         }
-        // No more than one short downward scroll is needed for the primary CTA
-        // in the collapsed result. The tab bar must not be needed at all.
+        // The beginner result intentionally shows the calculation before the topology.
+        // The primary CTA may sit lower than in the old collapsed design,
+        // but it must remain reachable without using the top tabs.
         const positions = await page.evaluate(() => ({ grade: document.querySelector('#verdictTitle').getBoundingClientRect().top + scrollY, next: document.querySelector('#nextBtn').getBoundingClientRect().bottom + scrollY }));
-        assert.ok(positions.next - positions.grade < 720, 'result-to-next distance is excessive');
-        await press(page, '#calculationDetails summary', touch);
+        assert.ok(positions.next - positions.grade < 1400, 'result-to-next distance is excessive');
         assert.equal(await page.locator('#decisionOut').innerText(), decisions[i]);
         if (i === 2) {
           assert.equal(await page.locator('#srcIp').innerText(), '10.77.10.10/24');
           assert.equal(await page.locator('#dstIp').innerText(), '10.77.10.140/25');
           assert.ok((await page.locator('#dstNet').innerText()).includes('10.77.10.0/24'));
-          assert.ok((await page.locator('#calculationBasis').innerText()).includes('실제 설정은 /25'));
+          assert.ok((await page.locator('#calculationBasis').innerText()).includes('자신의 Mask /24'));
+          assert.equal(await page.locator('#maskTry').isVisible(), true);
+          await press(page, '#maskTry25', touch);
+          assert.ok((await page.locator('#maskTryResult').innerText()).includes('Gateway(.1)'));
+          await press(page, '#maskTry24', touch);
+          assert.ok((await page.locator('#maskTryResult').innerText()).includes('직접 찾으려'));
         }
         for (const sel of ['#srcIp','#dstIp','#explainTitle','#decisionOut']) await atTop(page, sel);
         await press(page, '#evidenceDetails summary', touch);
@@ -111,23 +116,23 @@ async function verifySurface(url, name) {
       }
       assert.equal(await page.evaluate(() => window.__tabClicks), 0, 'four questions must be solvable without returning to top tabs');
       assert.equal(await page.locator('#complete').isVisible(), true);
-      assert.equal(await page.locator('#completionScore').innerText(), '결과 확인 4 / 4 · 정답 2 · 오답 2');
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 오답 2 · 미응답 0');
+      assert.equal(await page.locator('#completionScore').innerText(), '완료 4 / 4 · 정답 2 · 다시 볼 문제 2');
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 2 · 남은 문제 0');
       // Returning to an answered question restores its exact submitted choice.
       await press(page, '#reviewWrongBtn', touch);
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 3 / 4');
-      assert.equal(await page.locator('#chosenAnswer').innerText(), '기존 gateway .1을 계속 사용');
+      assert.equal(await page.locator('#chosenAnswer').innerText(), '그래도 Gateway(.1)에 먼저 보낸다');
       assert.equal(await page.locator('#verdictTitle').innerText(), '✕ 오답입니다');
       await page.reload({ waitUntil: 'networkidle' });
       assert.equal(await page.locator('#verdictTitle').innerText(), '✕ 오답입니다');
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 오답 2 · 미응답 0');
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 2 · 남은 문제 0');
       await press(page, '#resetBtn', touch);
       assert.equal(await page.locator('#resultArea').isVisible(), false);
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 오답 1 · 미응답 1');
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 1 · 남은 문제 1');
       await press(page, '#choices [data-value="on"]', touch);
       await press(page, '#runBtn', touch);
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 3 · 오답 1 · 미응답 0');
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 3 · 다시 볼 문제 1 · 남은 문제 0');
       // Revisit preserves; retry resets only its own answer. Keyboard path too.
       await page.locator('.tab').nth(0).click();
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
