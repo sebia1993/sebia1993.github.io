@@ -35,7 +35,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 <small>2단계 · INTERACTIVE LAB</small>
 <h1>BGP / Route Policy</h1>
 <p>먼저 결과를 예상한 다음, 실제 Cisco IOL 검증에서 관측된 상태와 비교합니다. 목표는 명령어를 외우는 것이 아니라 <b>후보 경로 → 정책 → Best Path → 광고</b>의 연결을 눈으로 확인하는 것입니다.</p>
-<div class="scope"><b>검증 기반:</b> Cisco IOL IOS 15.4(2)T4 · BGP-01~06 PASS · 내부 링크 PCAP 3개. AS_PATH prepend는 물리 Hop 수가 아니며, Prefix Filter는 Packet ACL이 아닙니다.</div>
+<div class="scope"><b>검증 기반:</b> Cisco IOL IOS 15.4(2)T4 · BGP-01~06 PASS · 내부 링크 PCAP 3개. 아래 문제에서 AS 관계, 경로 정보, 경로 선택, 광고 정책을 순서대로 확인합니다.</div>
 <div class="start-guide">
 <div class="guide-step"><b>1</b><span><strong>예상</strong>결과를 보기 전에 하나를 선택합니다.</span></div>
 <div class="guide-step"><b>2</b><span><strong>실행</strong>검증된 상태를 화면에 적용합니다.</span></div>
