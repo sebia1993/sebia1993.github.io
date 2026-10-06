@@ -99,7 +99,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 
     <section class="observation" id="observation" hidden>
       <div class="topology">
-        <h3>검증 기반 Learning Topology · VLAN 10</h3>
+        <h3>검증 기반 Learning Topology · VLAN 10 · STP/RSTP Common Model</h3>
         <div class="topology-scroll">
           <div class="topology-stage" id="topologyStage" aria-label="PC1 SW1 SW2 SW3 PC3 STP Triangle">
             <svg class="topology-svg" viewBox="0 0 680 410" aria-hidden="true">
@@ -159,7 +159,7 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
     <details class="scope-details">
       <summary>가정과 실제 검증 근거 보기</summary>
       <div>
-        이 화면은 2026-10-04 PNETLab의 Cisco IOL Rapid-PVST+ Switch 3대 + VPCS 2대 실제 검증 결과를 학습용으로 단순화한 시뮬레이션입니다.
+        이 화면은 Root/Port Role/Cost/재수렴이라는 STP/RSTP 공통 원리를 학습용으로 재현합니다. 실제 Evidence는 2026-10-04 PNETLab의 Cisco IOL Rapid-PVST+ Switch 3대 + VPCS 2대에서 수집했습니다.
         모든 Link는 Access VLAN10이고 Trunk/802.1Q는 없습니다. Alternate/BLK는 Cable Down과 다르며 BPDU Control Plane과 User Data Path를 구분해서 표시합니다.
         <a href="../learning/campus/stp/cisco-validation-2026-10-04.html">실제 검증 요약 →</a>
       </div>
