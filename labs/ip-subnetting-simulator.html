@@ -542,7 +542,7 @@ function renderObservation(){
  $('modelObservation').dataset.claims=o.claimIds.join(' ');$('modelRunLabel').textContent='문제 '+(idx+1)+' · 보내는 순서 확인';
  $('modelSource').textContent=l.src+'/'+l.prefix;$('modelTarget').textContent=o.arpTarget;
  $('modelTargetLabel').textContent='먼저 MAC 주소를 찾는 대상';$('simDecision').textContent=o.decision;
- $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 네트워크 동네입니다. PC3(10.77.10.20)를 최종 전달 대상으로 선택합니다.':'✓ 다른 네트워크 동네입니다. 출구 Router(Gateway '+o.arpTarget+')를 먼저 이용합니다.'):'! PC1은 10.77.10.140을 같은 동네라고 잘못 판단하지만 실제로는 다른 동네에 있어 응답을 받지 못합니다 · 원격 전달 전 중단';
+ $('modelEvent').textContent=o.resolved?(o.onLink?'✓ 같은 네트워크 동네입니다. PC3(10.77.10.20)를 최종 전달 대상으로 선택합니다.':'✓ 다른 네트워크 동네입니다. 최종 목적지는 PC2(10.77.10.140) 그대로 두고, 출구 Router(Gateway '+o.arpTarget+')를 먼저 이용합니다.'):'! PC1은 10.77.10.140을 같은 동네라고 잘못 판단하지만 실제로는 다른 동네에 있어 응답을 받지 못합니다 · 원격 전달 전 중단';
  $('modelCaption').textContent='큰 그림은 “같은 네트워크인가 → 출구가 필요한가”를 보여줍니다. 여기서 직접 전달은 케이블 직결이 아니라 같은 네트워크의 최종 목적지를 전달 대상으로 본다는 뜻입니다. 실제 장비의 SW1/SW2 내부 동작은 생략하며, ARP 과정은 아래 접힌 설명에서 볼 수 있습니다.';
  renderTrace();
 }
