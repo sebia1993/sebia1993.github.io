@@ -1,11 +1,11 @@
 {
   "updated": "2026-10-06",
   "summary": {
-    "completedTopics": 22,
-    "labs": 21,
+    "completedTopics": 23,
+    "labs": 22,
     "faultScenarios": 43,
-    "packetCaptures": 70,
-    "recoveryValidations": 45,
+    "packetCaptures": 72,
+    "recoveryValidations": 49,
     "explainNotes": 1,
     "automations": 2
   },
@@ -621,23 +621,27 @@
       "id": "redistribution",
       "category": "6단계 · 고급 엔터프라이즈",
       "title": "Redistribution / Route Control",
-      "status": "planned",
-      "statusLabel": "심화 단계",
-      "summary": "Static/OSPF/BGP 사이 경로 재분배와 Loop 방지, Filtering을 다룹니다.",
-      "why": "서로 다른 Routing Domain을 연결할 때 생기는 실제 운영 위험을 이해합니다.",
-      "completeWhen": "재분배 지점과 경로 출처를 추적하고 Loop·비대칭 경로 위험을 설명할 수 있습니다.",
-      "labs": 0,
+      "status": "completed",
+      "statusLabel": "검증·2단계 학습 완료",
+      "summary": "OSPF/Static/BGP 사이 명시적 Redistribution, OSPF External E1·Tag, Prefix/Tag Route-map 제어, 같은 Prefix의 eBGP↔OSPF AD fallback·복구를 Cisco IOL 실제 CLI/PCAP으로 검증했습니다.",
+      "why": "서로 다른 Routing Domain을 연결할 때 어떤 Route를 넘기고 어떤 Route를 막을지, 그리고 재유입·과도한 광고·Route Source 충돌 위험을 제어하는 원리를 이해하기 위해 필요합니다.",
+      "completeWhen": "Route Source→Redistribution Boundary→Policy→Target Protocol→RIB 순서로 경로를 추적하고, Prefix/Tag 정책과 Cisco AD fallback이 결과를 어떻게 바꾸는지 설명할 수 있습니다.",
+      "labs": 1,
       "faultScenarios": 0,
-      "packetCaptures": 0,
-      "recoveryValidations": 0,
+      "packetCaptures": 2,
+      "recoveryValidations": 4,
       "explainNotes": 0,
       "automations": 0,
-      "detailUrl": null,
+      "detailUrl": "./labs/redistribution.html",
       "scope": {
-        "coreConcept": "Routing-domain boundary / route control",
-        "standardOrProtocol": "프로토콜별 표준 + 공통 정책 원리",
-        "vendorImplementation": "Vendor route-map/policy syntax는 구현 차이"
-      }
+        "coreConcept": "Routing-domain boundary / route redistribution / route-policy control",
+        "standardOrProtocol": "OSPF external routing RFC 2328 + BGP advertisement RFC 4271",
+        "vendorImplementation": "Cisco redistribute/route-map/tag/Administrative Distance는 구현 Evidence"
+      },
+      "detailLabel": "Redistribution / Route Control 학습 시작 →",
+      "contentStatus": "completed",
+      "labStatus": "completed",
+      "validationMode": "live-cisco-iol-cli-pcap"
     },
     {
       "id": "observability",
