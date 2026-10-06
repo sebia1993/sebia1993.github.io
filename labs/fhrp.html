@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FHRP — 개념서</title>
-<meta name="description" content="FHRP의 Virtual Gateway, HSRP/VRRP 역할, Priority, Preemption, Tracking과 장애 전환 원리를 배우는 개념서입니다.">
+<title>First-Hop Redundancy / FHRP — 개념서</title>
+<meta name="description" content="First-Hop Redundancy의 Virtual Router/Virtual Gateway와 Failover 공통 원리를 먼저 배우고, VRRP 표준과 HSRP Cisco 구현을 구분하는 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -26,14 +26,14 @@
 </style>
 </head>
 <body>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#model">핵심 구조</a><a href="#controls">Priority</a><a href="#failover">Failover</a><a href="#compare">HSRP / VRRP</a></nav></div></header>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#model">핵심 구조</a><a href="#controls">Priority</a><a href="#failover">Failover</a><a href="#compare">VRRP / HSRP</a></nav></div></header>
 <main>
 <section class="fhrp-hero"><div class="shell">
-<span class="scope-badge">Cisco IOL HSRPv2 + VRRPv2 실제 검증 완료</span>
+<span class="scope-badge">표준 기준 · VRRPv3 RFC 9568 | 검증 구현 · Cisco IOL HSRPv2 + VRRPv2</span>
 <div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
-<h1>FHRP</h1>
-<p><b>Host는 같은 Default Gateway를 계속 사용하고, 실제 Forwarding Router만 바뀝니다.</b> 이번 주제에서는 Virtual IP / Virtual MAC과 Active·Standby 또는 Master·Backup 역할이 어떻게 분리되는지 이해합니다.</p>
-<div class="core"><strong>같은 Virtual Gateway, 바뀌는 Forwarding Owner</strong><p>Host → Virtual IP → Virtual MAC → 현재 Active/Master Router → Upstream</p></div>
+<h1>First-Hop Redundancy <em>/ FHRP</em></h1>
+<p><b>Host는 같은 Virtual Gateway를 계속 사용하고, 실제 Forwarding 책임을 가진 Router만 바뀔 수 있습니다.</b> 먼저 Virtual Router / VIP / Virtual MAC / Forwarding Owner라는 공통 Mental Model을 만든 뒤, VRRP의 Active/Backup과 HSRP의 Active/Standby 용어를 구현별로 구분합니다.</p>
+<div class="core"><strong>같은 Virtual Gateway, 바뀌는 Forwarding Owner</strong><p>Host → Virtual Router(IP/MAC) → 현재 Forwarding Owner → Upstream</p></div>
 </div></section>
 
 <section id="model"><div class="shell">
@@ -49,8 +49,8 @@
 <div class="device virtual"><strong>Virtual Gateway</strong><small>VIP 10.10.10.1 · Virtual MAC</small></div>
 <div class="arrow">→</div>
 <div class="routers">
-<div class="device active"><strong>R1 · Active</strong><small>현재 Forwarding</small></div>
-<div class="device"><strong>R2 · Standby</strong><small>대기</small></div>
+<div class="device active"><strong>R1 · Forwarding Owner</strong><small>프로토콜별 역할명: Active/Master</small></div>
+<div class="device"><strong>R2 · Backup Router</strong><small>프로토콜별 역할명: Standby/Backup</small></div>
 </div>
 </div>
 <div class="note" style="margin-top:12px"><b>검증된 핵심:</b> HSRP 정상 상태에서 PC1의 Gateway는 10.10.10.1, ARP는 HSRP Virtual MAC으로 해석됐고 실제 Echo Request는 R1 uplink로 전달됐습니다.</div>
@@ -87,7 +87,8 @@
 </div></section>
 
 <section id="compare"><div class="shell">
-<div class="section-head"><div><div class="eyebrow">04 · HSRP VS VRRP</div><h2>Mental Model은 비슷하지만 프로토콜은 같은 것이 아닙니다.</h2></div></div>
+<div class="section-head"><div><div class="eyebrow">04 · STANDARD / IMPLEMENTATION</div><h2>VRRP 표준과 HSRP Vendor 구현을 구분합니다.</h2></div></div>
+<div class="note" style="margin-bottom:12px"><b>현재 표준:</b> VRRPv3는 RFC 9568(IPv4/IPv6)입니다. 아래 표의 VRRPv2 값은 이번 Cisco IOL에서 실제 검증한 <b>Implementation Evidence</b>이며, 현재 표준 자체를 VRRPv2로 가르치지 않습니다.</div>
 <div class="compare">
 <table>
 <thead><tr><th>구분</th><th>HSRP</th><th>VRRP</th><th>이번 실제 Lab</th></tr></thead>
@@ -106,8 +107,8 @@
 <section><div class="shell">
 <div class="section-head"><div><div class="eyebrow">05 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
 <div class="review">
-<article><h3>⭐ 꼭 기억하세요</h3><ul><li>Host는 물리 Router가 아니라 Virtual IP를 Default Gateway로 사용합니다.</li><li>ARP는 Virtual IP를 Virtual MAC으로 해석합니다.</li><li>장애 시 Host 설정은 그대로이고 Forwarding Owner가 바뀔 수 있습니다.</li><li>Priority는 선호도, Preemption은 복구 후 역할 재탈환, Tracking은 경로 상태를 Priority에 반영합니다.</li><li>HSRP와 VRRP는 같은 Virtual-Gateway Mental Model을 공유하지만 역할명과 Control Protocol은 다릅니다.</li></ul></article>
-<article><div class="eyebrow">내 말로 설명하기</div><h3>“PC의 Default Gateway는 그대로인데 R1 장애 후 왜 R2로 통신할 수 있을까?”</h3><p style="color:var(--muted)">Virtual IP → Virtual MAC → Active/Master → Failover 순서로 설명해 보세요.</p></article>
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>Host는 물리 Router가 아니라 Virtual IP를 Default Gateway로 사용합니다.</li><li>ARP는 Virtual IP를 Virtual MAC으로 해석합니다.</li><li>장애 시 Host 설정은 그대로이고 Forwarding Owner가 바뀔 수 있습니다.</li><li>Priority는 선호도, Preemption은 복구 후 역할 재탈환, Tracking은 경로 상태를 Priority에 반영합니다.</li><li>VRRP는 표준 프로토콜이고 HSRP는 Cisco 구현입니다. 둘은 Virtual-Gateway Mental Model을 공유하지만 역할명과 Control Protocol은 다릅니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“PC의 Default Gateway는 그대로인데 R1 장애 후 왜 R2로 통신할 수 있을까?”</h3><p style="color:var(--muted)">Virtual Router → Forwarding Owner → Failover → 프로토콜별 역할명 순서로 설명해 보세요.</p></article>
 </div>
 </div></section>
 
@@ -117,12 +118,13 @@
 <div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
 <div class="refs">
 <article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html">Cisco · Configuring HSRP</a><p>Virtual Gateway, Active/Standby, Priority, Preemption의 공식 설명을 대조했습니다.</p></article>
-<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc3768.html">RFC 3768 · VRRP Version 2</a><p>이번 실제 VRRPv2 패킷과 Virtual Router 동작을 대조했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc9568.html">RFC 9568 · VRRP Version 3</a><p>현재 VRRP 표준 기준입니다. IPv4/IPv6 Virtual Router, Active/Backup과 Failover 원리를 학습 기준으로 사용합니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc3768.html">RFC 3768 · VRRP Version 2 (Historical Validation)</a><p>이번 Cisco IOL에서 실제 수집한 VRRPv2 패킷 Evidence를 해석하기 위한 구현·역사 범위 자료입니다.</p></article>
 <article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-vrrp-0.html">Cisco · Configuring VRRP</a><p>VRRP 역할, Priority, Preemption과 Cisco 구현 범위를 확인했습니다.</p></article>
 </div>
 <div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 기반 격리 Lab에서 FHRP-01~06을 CLI와 PCAP으로 PASS했습니다. 실측된 전환 손실과 타이머는 이 Run의 Actual이며, 모든 환경의 성능 보장값으로 일반화하지 않습니다.</div>
 </div></section>
 </main>
-<footer class="footer"><div class="shell">FHRP · Virtual Gateway → Owner Failover</div></footer>
+<footer class="footer"><div class="shell">First-Hop Redundancy · Virtual Gateway → Owner Failover</div></footer>
 </body>
 </html>
