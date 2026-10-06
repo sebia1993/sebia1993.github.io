@@ -59,11 +59,11 @@
   <div class="shell focus">
     <article class="focus-main">
       <span class="badge active">검증·2단계 학습 완료</span>
-      <h2>Redistribution / Route Control</h2>
-      <p>OSPF·Static·BGP 사이 명시적 Redistribution, Prefix/Tag Route Policy, OSPF External Route와 같은 Prefix의 eBGP↔OSPF AD fallback·복구를 Cisco IOL 실제 CLI/PCAP으로 검증했습니다.</p>
+      <h2>Packet / Log / SNMP 관측</h2>
+      <p>하나의 인터페이스 장애를 Packet Capture, Syslog, SNMP GET/Trap으로 함께 관측하고, 서로 다른 시각의 Evidence를 같은 사건으로 연결해 Baseline→Failure→Recovery를 검증했습니다.</p>
       <div class="focus-actions">
-        <a class="btn primary" href="./labs/redistribution.html">1단계 · 개념서 →</a>
-        <a class="btn" href="./labs/redistribution-simulator.html">2단계 · Interactive Lab →</a>
+        <a class="btn primary" href="./labs/observability.html">1단계 · 개념서 →</a>
+        <a class="btn" href="./labs/observability-simulator.html">2단계 · Interactive Lab →</a>
       </div>
     </article>
     <article class="card">
@@ -159,7 +159,8 @@ const interactiveUrls={
   'fhrp':'./labs/fhrp-simulator.html',
   'vrf':'./labs/vrf-simulator.html',
   'bgp':'./labs/bgp-simulator.html',
-  'redistribution':'./labs/redistribution-simulator.html'
+  'redistribution':'./labs/redistribution-simulator.html',
+  'observability':'./labs/observability-simulator.html'
 };
 
 const summaryOverrides={
@@ -174,7 +175,8 @@ const summaryOverrides={
   'dhcp':'DORA, Lease/Option과 DHCP Relay의 giaddr, 주소 미할당 장애 위치를 연결해 이해합니다.',
   'dns':'A Query/Response, Recursive Resolver, Cache와 DNS 장애의 Packet 위치를 연결해 이해합니다.',
   'bgp':'같은 Prefix의 여러 후보 경로에서 Path Attribute와 Policy가 Best Path와 Route Advertisement를 어떻게 바꾸는지 이해합니다.',
-  'redistribution':'Route Source가 재분배 경계에서 Prefix·Tag Policy를 거쳐 다른 Protocol로 넘어가고, 최종 RIB Source가 어떻게 선택되는지 이해합니다.'
+  'redistribution':'Route Source가 재분배 경계에서 Prefix·Tag Policy를 거쳐 다른 Protocol로 넘어가고, 최종 RIB Source가 어떻게 선택되는지 이해합니다.',
+  'observability':'하나의 장애를 Packet·Syslog·SNMP GET/Trap의 서로 다른 Evidence로 확인하고 시간·인터페이스·상태 변화 기준으로 연결합니다.'
 };
 
 fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
