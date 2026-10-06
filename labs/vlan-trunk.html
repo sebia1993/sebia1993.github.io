@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VLAN / Access / Trunk — 개념서</title>
-<meta name="description" content="Access Port, 802.1Q Trunk, Native VLAN, Allowed VLAN과 VLAN 불일치를 짧게 이해하는 1단계 개념서입니다.">
+<title>VLAN / 802.1Q — 개념서</title>
+<meta name="description" content="VLAN 분리와 IEEE 802.1Q Tagged/Untagged 전달을 먼저 이해하고, Access/Trunk/Native/Allowed는 Cisco 구현 용어로 구분하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -50,6 +50,7 @@
       <strong>Access에서는 VLAN을 정하고, Trunk에서는 VLAN 정보를 들고 이동합니다.</strong>
       <p>Access VLAN → 802.1Q VLAN ID → 같은 VLAN의 Access Port</p>
     </div>
+    <div class="note" style="margin-top:14px"><b>Vendor-Neutral Core:</b> 학습 기준은 VLAN 분리와 IEEE 802.1Q의 Tagged/Untagged 전달입니다. <b>Access / Trunk / Native / Allowed</b>는 이번 Cisco IOL 검증에서 사용한 구성·운영 용어로 보고, 표준 개념과 구분합니다.</div>
   </div>
 </section>
 
@@ -176,6 +177,6 @@
   </div>
 </section>
 </main>
-<footer class="footer"><div class="shell">VLAN / Access / Trunk · Concept → Interactive Lab</div></footer>
+<footer class="footer"><div class="shell">VLAN / 802.1Q · Concept → Interactive Lab</div></footer>
 </body>
 </html>
