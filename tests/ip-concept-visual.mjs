@@ -41,7 +41,7 @@ async function geometry(page){
   assert.equal(layout.display,'grid',layout.selector+' diagram layout is missing');
   assert.equal(layout.columns,layout.expectedColumns,layout.selector+' responsive columns');
  }
- assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'document overflows');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+1),false,'document overflows its layout viewport');
  const bad=await page.evaluate(()=>Array.from(document.querySelectorAll('[data-visual]')).flatMap(f=>{
   const box=f.getBoundingClientRect();return Array.from(f.querySelectorAll('.device-card,.neighborhood,.number-half,.rule-card,.route-card,.mini-device,.gateway-box,.notation-card,.bit-bar,figcaption')).map(e=>{const r=e.getBoundingClientRect();return {id:f.id,text:e.textContent.slice(0,80),bad:r.left<box.left-1||r.right>box.right+1||e.scrollWidth>e.clientWidth+2};}).filter(x=>x.bad);
  }));assert.deepEqual(bad,[],'diagram overflows or clips its labels');
@@ -85,7 +85,7 @@ async function testSurface(url,surface){
    assert.ok(await cta.evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));}));
    if(!inline){const r=await context.request.get(`${url}/labs/ip-subnetting-simulator.html`);assert.ok(r.ok(),'stage 2 link');}
    await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});await geometry(page);
-   if(width===320||width===360)for(const id of figures)await page.locator('#'+id).screenshot({path:resolve(out,`${surface}-${id}-${width}-text200.png`)});
+   if(width===320||width===360)await page.screenshot({path:resolve(out,`${surface}-concept-${width}-text200.png`),fullPage:true});
    assert.ok((await page.locator('#groupVisual').innerText()).includes('네트워크 동네 A'));
    await page.emulateMedia({forcedColors:'active'});await geometry(page);
    assert.ok((await page.locator('#rangeVisual').innerText()).includes('두 번째 그룹'));
