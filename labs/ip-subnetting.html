@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="concept-visual-version" content="20261006-general-public-v3">
+<meta name="concept-visual-version" content="20261007-general-public-v4">
 <title>IP 주소와 네트워크 나누기 — Subnetting 입문</title>
 <meta name="description" content="IT 용어를 모르는 사람도 주소, 같은 네트워크, /25, Subnet Mask, Default Gateway의 관계를 그림부터 이해할 수 있도록 구성한 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
@@ -39,7 +39,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .device-card strong{display:block;font-size:1rem}
 #ipConcept .device-card span{display:block;margin-top:5px;color:#c6d7e5;font-size:.88rem}
 #ipConcept .plain-callout{margin-top:14px;padding:14px 16px;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;background:#10292c;line-height:1.7}
-#ipConcept .term-badge{display:block;width:fit-content;max-width:100%;margin-top:10px;padding:7px 12px;border:1px solid #4d7595;border-radius:14px;background:#132d43;color:#dcedfb;font-weight:850;font-size:.84rem;line-height:1.65
+#ipConcept .term-badge{display:block;width:fit-content;max-width:100%;margin-top:10px;padding:7px 12px;border:1px solid #4d7595;border-radius:14px;background:#132d43;color:#dcedfb;font-weight:850;font-size:.84rem;line-height:1.65}
 #ipConcept .neighborhoods{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:stretch}
 #ipConcept .neighborhood{position:relative;min-width:0;padding:18px;border:2px solid #3f806f;border-radius:16px;background:#102c2c}
 #ipConcept .neighborhood.b{border-color:#3e759e;background:#122b42}
@@ -256,7 +256,7 @@ html#ipConceptRoot{scroll-behavior:auto}
    <div class="rule-card"><strong>컴퓨터에게는 “주소를 어디서 나눌지” 알려주는 규칙이 필요합니다.</strong><span>이번 예제에서 그 경계를 알려주는 표시가 <b>/25</b>입니다.</span></div>
    <figcaption id="rangeCaption">따라서 10.77.10.10/25와 10.77.10.20/25는 같은 그룹, 10.77.10.140/25는 다른 그룹에 있습니다.</figcaption>
   </figure>
-  <div class="term-badge">주소를 어디까지 같은 네트워크 부분으로 볼지 나타내는 표시를 → <b>Prefix(프리픽스)</b>라고 합니다.</div>
+  <div class="term-badge">주소의 앞에서 몇 bit까지를 네트워크 부분으로 볼지 나타내는 숫자를 → <b>Prefix Length(프리픽스 길이)</b>라고 합니다.</div>
  </div>
 </section>
 
@@ -319,13 +319,13 @@ html#ipConceptRoot{scroll-behavior:auto}
   <figure id="maskVisual" class="visual" data-visual="mask" aria-labelledby="maskCaption">
    <span class="v-label">그림 6 · 같은 네트워크 경계를 두 방식으로 표시합니다.</span>
    <div class="notation">
-    <div class="notation-card"><strong>/25</strong><span>Prefix 표기</span></div>
+    <div class="notation-card"><strong>/25</strong><span>Prefix Length 표기</span></div>
     <div class="notation-eq" aria-hidden="true">=</div>
     <div class="notation-card"><strong>255.255.255.128</strong><span>숫자 네 묶음 표기</span></div>
    </div>
    <figcaption id="maskCaption">둘 다 이번 예제에서 .0~.127과 .128~.255를 나누는 같은 경계를 나타냅니다.</figcaption>
   </figure>
-  <div class="term-badge">Prefix의 경계를 숫자 네 묶음으로 표시한 값 → <b>Subnet Mask</b></div>
+  <div class="term-badge">Prefix Length가 나타내는 같은 경계를 숫자 네 묶음으로 표시한 값 → <b>Subnet Mask</b></div>
  </div>
 </section>
 
@@ -378,8 +378,8 @@ html#ipConceptRoot{scroll-behavior:auto}
   <div class="term-list">
    <article class="term-item"><strong>IP 주소</strong><p>네트워크에서 장치를 구분하는 주소.</p></article>
    <article class="term-item"><strong>Subnet</strong><p>같은 네트워크 범위로 묶인 하나의 그룹.</p></article>
-   <article class="term-item"><strong>Prefix</strong><p>주소 중 어디까지를 네트워크 부분으로 볼지 나타내는 표시. 예: /25.</p></article>
-   <article class="term-item"><strong>Subnet Mask</strong><p>Prefix와 같은 경계를 숫자 네 묶음으로 표현한 값. 예: 255.255.255.128.</p></article>
+   <article class="term-item"><strong>Prefix Length</strong><p>주소의 앞에서 몇 bit까지를 네트워크 부분으로 볼지 나타내는 숫자. 예: /25는 앞 25bit가 네트워크 부분이라는 뜻.</p></article>
+   <article class="term-item"><strong>Subnet Mask</strong><p>Prefix Length가 나타내는 네트워크 경계를 숫자 네 묶음으로 표현한 값. 예: /25와 255.255.255.128은 같은 경계를 나타냅니다.</p></article>
    <article class="term-item"><strong>Router</strong><p>서로 다른 네트워크 사이로 데이터를 전달하는 장치.</p></article>
    <article class="term-item"><strong>Default Gateway</strong><p>내 네트워크 밖으로 갈 때 기본으로 사용하는 Router의 주소.</p></article>
   </div>
@@ -423,12 +423,12 @@ html#ipConceptRoot{scroll-behavior:auto}
   <div class="note refs">
    <b>Reference</b>
    <span><a href="https://www.rfc-editor.org/rfc/rfc1122.html">RFC 1122 §3.3.1.1</a> · 같은 연결 네트워크인지 판단하고, 아니면 gateway로 보내는 원리</span>
-   <span><a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632 §3.1</a> · IPv4 32bit와 CIDR Prefix 표기</span>
+   <span><a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632 §3.1</a> · IPv4 32bit와 CIDR Prefix Length 표기</span>
    <span><a href="https://www.cisco.com/en/US/docs/security/pix/pix50/configuration/guide/subnets.html">Cisco · Subnet Masking and Addressing</a> · /25와 .128 mask의 주소 범위 참고</span>
   </div>
   <!-- Author validation evidence remains separate from the learner flow.
        Existing PASS claims/evidence: IPSUB-01..04, run 2026-10-03-ip-subnetting-01.
-       This rewrite changes teaching order and wording only; it does not alter Expected/Actual. -->
+       This revision fixes CSS parsing and terminology only; it does not alter Expected/Actual. -->
  </div>
 </section>
 </main>
