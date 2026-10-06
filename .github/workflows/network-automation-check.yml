@@ -1,0 +1,38 @@
+name: Network Automation page checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'labs/network-automation.html'
+      - 'labs/network-automation-simulator.html'
+      - 'tests/network-automation-final.mjs'
+      - 'package.json'
+      - '.github/workflows/network-automation-check.yml'
+  pull_request:
+    paths:
+      - 'labs/network-automation.html'
+      - 'labs/network-automation-simulator.html'
+      - 'tests/network-automation-final.mjs'
+      - 'package.json'
+      - '.github/workflows/network-automation-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: pnpm/action-setup@v4
+        with: {version: 11.19.0}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node tests/network-automation-final.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: network-automation-browser-evidence
+          path: test-results/network-automation/
+          retention-days: 7
