@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VLAN / Access / Trunk — 인터랙티브 실습</title>
-<meta name="description" content="Access, 802.1Q Trunk, Native VLAN, Allowed VLAN과 Access VLAN mismatch를 예상하고 확인하는 2단계 Interactive Lab입니다.">
+<title>VLAN / 802.1Q — 인터랙티브 실습</title>
+<meta name="description" content="VLAN과 802.1Q Tagged/Untagged 전달을 예상하고, Cisco Access/Trunk/Native/Allowed 구현 사례와 비교하는 2단계 Interactive Lab입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -154,9 +154,10 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 <div class="wrap">
   <header class="hero">
     <small>2단계 · INTERACTIVE LAB</small>
-    <h1>VLAN / Access / Trunk</h1>
+    <h1>VLAN / 802.1Q</h1>
     <p>1단계에서 배운 흐름을 직접 확인합니다. <b>먼저 결과를 예상</b>하고, Access → Trunk → Access에서 Tagged/Untagged와 장애 중단 지점을 비교하세요.</p>
-    <div class="start-guide">
+    <div class="scope" style="margin-top:14px;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> VLAN membership + 802.1Q Tagged/Untagged. 화면의 Access/Trunk/Native는 Cisco IOL 검증 구현을 표현합니다.</div>
+<div class="start-guide">
       <div class="guide-step"><b>1</b><span><strong>문제 읽기</strong>이번 문제의 한 가지 판단만 봅니다.</span></div>
       <div class="guide-step"><b>2</b><span><strong>먼저 예상</strong>Frame이 어느 VLAN·형태로 갈지 선택합니다.</span></div>
       <div class="guide-step"><b>3</b><span><strong>실행 후 관찰</strong>내 답과 검증 기반 모델 흐름을 비교합니다.</span></div>
