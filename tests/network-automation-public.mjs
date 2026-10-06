@@ -6,10 +6,10 @@ import { chromium } from 'playwright';
 const repo=fileURLToPath(new URL('../',import.meta.url));const origin='https://sebia1993.github.io';
 await mkdir(resolve(repo,'test-results/network-automation-public'),{recursive:true});
 const browser=await chromium.launch();
-async function waitFor(path,expected,viewport={width:1366,height:768}){const page=await browser.newPage({viewport});let last='';try{for(let i=0;i<24;i++){try{const r=await page.goto(origin+path,{waitUntil:'networkidle',timeout:30000});const body=await page.locator('body').innerText();last='status='+(r?.status()??'none')+' body='+body.slice(0,180);if(r&&r.ok()&&body.includes(expected))return page;}catch(e){last=String(e)}await page.waitForTimeout(5000);}throw new Error('not published '+path+' '+last);}catch(e){await page.close();throw e;}}
+async function waitFor(path,expected,viewport={width:1366,height:768},selector=null){const page=await browser.newPage({viewport});let last='';try{for(let i=0;i<36;i++){try{const r=await page.goto(origin+path,{waitUntil:'networkidle',timeout:30000});const body=await page.locator('body').innerText();const selectorReady=!selector||(await page.locator(selector).count())>0;last='status='+(r?.status()??'none')+' selector='+selectorReady+' body='+body.slice(0,180);if(r&&r.ok()&&body.includes(expected)&&selectorReady)return page;}catch(e){last=String(e)}await page.waitForTimeout(5000);}throw new Error('not published '+path+' '+last);}catch(e){await page.close();throw e;}}
 try{
-  let page=await waitFor('/labs/network-automation.html','확인할 장비와 정상 기준 → 자동 수집 → 같은 형태로 정리 → 비교 → 결과 기록 → 다시 실행');
-  let body=await page.locator('body').innerText();assert.ok(body.includes('PASS, MISMATCH, ERROR는 서로 다릅니다'));assert.ok(body.includes('이름-값 구조의 텍스트 형식인 JSON'));
+  let page=await waitFor('/labs/network-automation.html','확인할 장비와 정상 기준 → 자동 수집 → 같은 형태로 정리 → 비교 → 결과 기록 → 다시 실행',{width:1366,height:768},'.status.pass-state');
+  let body=await page.locator('body').innerText();assert.ok(body.includes('PASS, MISMATCH, ERROR는 서로 다릅니다'));assert.ok(body.includes('이름-값 구조의 텍스트 형식인 JSON'));assert.equal(await page.locator('.status.pass').count(),0);assert.equal(await page.locator('.status.pass-state').count(),1);
   await page.screenshot({path:resolve(repo,'test-results/network-automation-public/concept-1366.png'),fullPage:true});await page.close();
 
   page=await waitFor('/labs/network-automation-simulator.html','Network Automation');
