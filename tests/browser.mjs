@@ -42,7 +42,7 @@ try{
    const page=await browser.newPage({viewport:{width,height:960}}),errors=errorsFor(page);
    try{
     assert.equal((await page.goto(`${base}/labs/ip-subnetting.html`,{waitUntil:'networkidle'})).status(),200);
-    const body=await page.locator('body').innerText();assert.ok(body.includes('Mask를 적용한 Network Prefix가 같으면 on-link'));assert.ok(body.includes('10.77.10.10/25'));assert.ok(body.includes('10.77.10.140/25'));
+    const body=await page.locator('body').innerText();assert.ok(body.includes('내 IP와 목적지 IP가 같은 네트워크 범위인지 먼저 판단합니다.'));assert.ok(body.includes('처음 보는 용어는 이 정도 뜻으로 시작하면 됩니다.'));assert.ok(body.includes('/25는 /24보다 Network 비트를 1개 더 사용합니다.'));assert.ok(body.includes('10.77.10.10/25'));assert.ok(body.includes('10.77.10.140/25'));
     assert.equal(await page.locator('a[href="ip-subnetting-simulator.html"]').count(),1);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
     await page.screenshot({path:resolve(output,`ip-subnetting-concept-${width}.png`),fullPage:true});
