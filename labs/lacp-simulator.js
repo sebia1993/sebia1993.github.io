@@ -16,15 +16,15 @@
         ['oneonly','M1만 사용되고 M2는 자동 Standby']
       ],
       correct:'po1',
-      reason:'LACP가 호환 Member 두 개를 하나의 EtherChannel로 묶었고 Cisco CLI에서 Po1(SU), M1(P), M2(P)로 확인됐습니다. STP도 M1/M2가 아니라 Po1 하나를 Forwarding Port로 표시했습니다.',
+      reason:'LACP가 호환 Member 두 개를 하나의 LAG로 묶는 것이 공통 원리입니다. 이번 Cisco CLI에서는 그 LAG가 Po1(SU)로, Member는 M1(P), M2(P)로 확인됐고 STP도 Po1 하나의 Forwarding Link로 표시했습니다.',
       metric1:['LACP State','Po1(SU) · M1(P) · M2(P)'],
       metric2:['Upper Layer','STP = Po1 하나'],
-      conclusion:'Physical Member는 두 개지만 상위 Layer에는 하나의 Logical Port-Channel로 보입니다.',
+      conclusion:'Physical Member는 두 개지만 상위 Layer에는 하나의 Logical LAG로 보입니다.',
       steps:[
         {kind:'LACP CONTROL',title:'SW1 active → LACPDU 전송',detail:'SW1이 협상을 시작하고 SW2 passive가 응답합니다.',po:'up',m1:'control',m2:'control',nodes:['sw1','sw2'],marker:{text:'LACPDU',type:'control',left:355,top:142}},
         {kind:'PARTNER MATCH',title:'Actor / Partner와 Key 확인',detail:'M1/M2의 Actor/Partner System ID와 Operational Key가 양쪽에서 일치했습니다.',po:'up',m1:'control',m2:'control',nodes:['sw1','sw2'],marker:{text:'KEY 1',type:'control',left:355,top:198}},
-        {kind:'BUNDLED',title:'M1 + M2 → Port-channel1',detail:'두 Member 모두 Bundled / In-use 상태가 되고 Po1이 Up이 됩니다.',po:'up',m1:'bundled',m2:'bundled',nodes:['sw1','sw2']},
-        {kind:'LOGICAL LINK',title:'STP에는 Po1 하나',detail:'Layer2 EtherChannel은 M1/M2 두 독립 Port가 아니라 Po1 하나의 Forwarding Link로 나타났습니다.',po:'up',m1:'bundled',m2:'bundled',nodes:['sw1','sw2']}
+        {kind:'BUNDLED',title:'M1 + M2 → LAG 형성 (Cisco Po1)',detail:'두 Member 모두 Bundled / In-use 상태가 되고 Po1이 Up이 됩니다.',po:'up',m1:'bundled',m2:'bundled',nodes:['sw1','sw2']},
+        {kind:'LOGICAL LINK',title:'STP에는 Po1 하나',detail:'상위 Layer에는 하나의 LAG로 보이며, 이번 Cisco 구현에서는 Po1 하나의 Forwarding Link로 나타났습니다.',po:'up',m1:'bundled',m2:'bundled',nodes:['sw1','sw2']}
       ]
     },
     {
@@ -41,12 +41,12 @@
         ['half','M1만 Bundle되고 M2는 제외']
       ],
       correct:'none',
-      reason:'둘 다 passive이면 어느 쪽도 정상 협상을 먼저 시작하지 않습니다. 이번 IOL에서는 안정화 후 Po1(SD), Member(s) 상태였고 정상 Remote Port-Channel Data Path가 형성되지 않았습니다.',
+      reason:'둘 다 passive이면 어느 쪽도 정상 협상을 먼저 시작하지 않습니다. 이번 IOL에서는 안정화 후 Po1(SD), Member(s) 상태였고 정상 Remote LAG Data Path가 형성되지 않았습니다.',
       metric1:['Passive/Passive','Po1(SD) · members(s)'],
       metric2:['Recovery','SW1 active → M1/M2(P) · Po1(SU)'],
       conclusion:'LACP passive는 “기다리면 시작”이 아니라 수신 LACP에 응답하는 Mode입니다.',
       steps:[
-        {kind:'CLEAN STATE',title:'기존 EtherChannel State 제거',detail:'기존 active/passive Session을 지우고 Channel Group이 없는 상태를 먼저 확인했습니다.',po:'wait',m1:'idle',m2:'idle',nodes:['sw1','sw2']},
+        {kind:'CLEAN STATE',title:'기존 LAG(EtherChannel) State 제거',detail:'기존 active/passive Session을 지우고 Channel Group이 없는 상태를 먼저 확인했습니다.',po:'wait',m1:'idle',m2:'idle',nodes:['sw1','sw2']},
         {kind:'PASSIVE / PASSIVE',title:'양쪽 모두 passive',detail:'안정 관찰 구간에서 정상 LACPDU 협상이 시작되지 않았습니다.',po:'wait',m1:'idle',m2:'idle',nodes:['sw1','sw2']},
         {kind:'NO BUNDLE',title:'정상 Bundle 미형성',detail:'Po1은 정상 Forwarding Bundle이 아니었고 Remote Port-Channel 통신도 형성되지 않았습니다. Physical Cable Down과는 다른 상태입니다.',po:'wait',m1:'wait',m2:'wait',nodes:['sw1','sw2']},
         {kind:'RECOVERY',title:'SW1만 active로 변경',detail:'LACPDU 협상이 다시 시작되고 M1/M2가 Bundled, Po1 Up, Remote Ping 3/3으로 복구됐습니다.',po:'up',m1:'control',m2:'control',nodes:['sw1','sw2'],marker:{text:'LACPDU',type:'control',left:355,top:170}}
