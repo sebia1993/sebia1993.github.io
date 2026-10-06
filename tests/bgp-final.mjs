@@ -39,7 +39,8 @@ try{
       const layout=await page.evaluate(()=>({
         overflow:document.documentElement.scrollWidth>innerWidth+1,
         width:document.documentElement.scrollWidth,
-        inner:innerWidth
+        inner:innerWidth,
+        offenders:Array.from(document.querySelectorAll('body *')).map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,id:el.id,cls:el.className?.baseVal??el.className,text:(el.textContent||'').trim().slice(0,70),left:r.left,right:r.right,width:r.width};}).filter(x=>x.right>innerWidth+1||x.left<-1).slice(0,12)
       }));
       assert.equal(layout.overflow,false,path+' horizontal overflow '+viewport.width+' '+JSON.stringify(layout));
       assert.deepEqual(errors,[],path+' console/page errors '+viewport.width);
