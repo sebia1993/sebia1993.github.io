@@ -3,6 +3,10 @@ on:
   push:
     branches: [main]
     paths:
+      - 'labs/bgp.html'
+      - 'labs/bgp-simulator.html'
+      - 'roadmap.html'
+      - 'learning-data.json'
       - 'tests/bgp-public.mjs'
       - '.github/workflows/bgp-public-check.yml'
   workflow_dispatch:
