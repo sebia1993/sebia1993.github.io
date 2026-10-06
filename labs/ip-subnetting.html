@@ -39,7 +39,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .device-card strong{display:block;font-size:1rem}
 #ipConcept .device-card span{display:block;margin-top:5px;color:#c6d7e5;font-size:.88rem}
 #ipConcept .plain-callout{margin-top:14px;padding:14px 16px;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;background:#10292c;line-height:1.7}
-#ipConcept .term-badge{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:7px 10px;border:1px solid #4d7595;border-radius:999px;background:#132d43;color:#dcedfb;font-weight:850;font-size:.84rem}
+#ipConcept .term-badge{display:block;width:fit-content;max-width:100%;margin-top:10px;padding:7px 12px;border:1px solid #4d7595;border-radius:14px;background:#132d43;color:#dcedfb;font-weight:850;font-size:.84rem;line-height:1.65
 #ipConcept .neighborhoods{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:stretch}
 #ipConcept .neighborhood{position:relative;min-width:0;padding:18px;border:2px solid #3f806f;border-radius:16px;background:#102c2c}
 #ipConcept .neighborhood.b{border-color:#3e759e;background:#122b42}
@@ -332,11 +332,11 @@ html#ipConceptRoot{scroll-behavior:auto}
 <section id="why25">
  <div class="shell">
   <div class="section-head">
-   <div><div class="eyebrow">07 · 마지막에 이유 붙이기</div><h2>그럼 왜 이름이 하필 “/25”일까요?</h2></div>
-   <p>여기서 처음으로 컴퓨터가 쓰는 0과 1의 자리를 봅니다.</p>
+   <div><div class="eyebrow">07 · 선택 심화</div><h2>궁금하면: 왜 이름이 하필 “/25”일까요?</h2></div>
+   <p>같은/다른 그룹 판단을 이해했다면 이 부분은 나중에 펼쳐봐도 됩니다.</p>
   </div>
-  <details class="deep-dive" open>
-   <summary>그림으로 /24와 /25의 차이 보기</summary>
+  <details class="deep-dive">
+   <summary>0과 1의 32자리로 /24와 /25의 차이 보기</summary>
    <div>
     <p>지금 배우는 IP 주소 형식인 IPv4는 컴퓨터 내부에서 <b>0과 1로 된 32개의 자리</b>로 표현됩니다. 이 한 자리를 <b>bit(비트)</b>라고 합니다.</p>
     <figure id="bitVisual" class="visual" data-visual="bits" aria-labelledby="bitCaption">
