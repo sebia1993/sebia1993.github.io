@@ -68,7 +68,7 @@ try{
     assert.equal(await page.locator('#nextBtn').isVisible(),true);assert.equal(await page.locator('#choices button:disabled').count(),3);
     assert.equal((await page.locator('body').innerText()).includes('PASS'),false,'author validation is optional, not the learner grade');
     await page.locator('#resetBtn').click();assert.equal(await page.locator('#runBtn').isDisabled(),true);assert.equal(await page.locator('#resultArea').isVisible(),false);
-    assert.equal(await page.locator('#progressText').innerText(),'결과 확인 0 / 4');
+    assert.equal(await page.locator('#progressText').innerText(),'풀이 완료 0 / 4');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
     await page.screenshot({path:resolve(output,`ip-subnetting-simulator-${width}.png`),fullPage:true});
    }finally{await page.close();}
