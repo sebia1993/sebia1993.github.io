@@ -41,24 +41,25 @@
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
     <h1>LACP / <em>Link Aggregation</em></h1>
-    <p>목표는 하나입니다. <b>여러 Physical Member가 하나의 Logical Port-Channel을 만들고, Flow별 Member 선택과 Member 장애가 어떻게 다르게 나타나는지</b> 설명할 수 있으면 됩니다.</p>
+    <p>목표는 하나입니다. <b>여러 Physical Member가 하나의 Logical LAG을 만들고, Flow별 Member 선택과 Member 장애가 어떻게 다르게 나타나는지</b> 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>“Cable 두 개 = 모든 Packet이 절반씩”이라고 생각하지 않습니다.</strong><span>협상, Logical Bundle, Flow Hash, Member Failure를 순서대로 연결합니다.</span></div>
       <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
     </div>
+    <div class="note" style="margin:18px 0 0"><b>표준 기준:</b> IEEE 802.1AX의 핵심 단위는 <b>Link Aggregation Group (LAG)</b>입니다. Port-Channel, EtherChannel, Po1은 이번 Cisco 구현에서 보이는 용어·표시입니다.</div>
     <div class="core-line">
       <strong>LACP는 Member를 묶고, Hash는 Flow마다 Member 하나를 고릅니다.</strong>
-      <p>Negotiation → Port-Channel → Flow Hash → Member Failure → Bundle State</p>
+      <p>Negotiation → LAG → Flow Hash → Member Failure → Bundle State</p>
     </div>
   </div>
 </section>
 
 <section id="summary">
   <div class="shell">
-    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>Physical Member와 Logical Port-Channel을 따로 봅니다.</h2></div></div>
+    <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>Physical Member와 Logical LAG을 따로 봅니다.</h2></div></div>
     <div class="test-guide">
       <p><b>① 협상:</b> <strong>active</strong>는 LACP 협상을 시작하고 <strong>passive</strong>는 수신 LACP에 응답합니다.</p>
-      <p><b>② Bundle:</b> 호환되는 M1/M2가 묶이면 상위 기능에는 <strong>Po1 하나의 Logical Link</strong>로 보입니다.</p>
+      <p><b>② Bundle:</b> 호환되는 M1/M2가 묶이면 상위 기능에는 <strong>하나의 Logical LAG</strong>로 보이며, 이번 Cisco 구현에서는 <b>Po1</b>으로 표시됩니다.로 보입니다.</p>
       <p><b>③ Hash:</b> 한 Flow는 Hash 결과에 따라 <strong>한 Member에 일관되게</strong> 매핑될 수 있고, 다른 Flow는 다른 Member를 사용할 수 있습니다.</p>
       <p><b>④ 장애:</b> Member 하나가 unavailable이어도 남은 Member가 있으면 Po1은 유지될 수 있지만, <strong>모든 Member가 사라지면 Po1도 Down</strong>됩니다.</p>
     </div>
