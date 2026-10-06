@@ -5,9 +5,9 @@
     {
       id:'path20',
       claim:'VLAN-01 / VLAN-02',
-      tab:'1 · Access와 Trunk는 어떻게 다를까?',
-      title:'같은 VLAN 20 Frame의 Access → Trunk → Access를 비교합니다.',
-      text:'검증에서는 동일 VLAN 20 Traffic이 Host-facing 링크에서는 Untagged, Switch 간 Trunk에서는 VLAN 20 Tagged로 관찰됐습니다.',
+      tab:'1 · Tagged/Untagged는 어디서 달라질까?',
+      title:'같은 VLAN 20 Frame이 링크별로 Tagged/Untagged로 어떻게 보이는지 비교합니다.',
+      text:'표준 관점에서는 VLAN membership과 802.1Q Tag 유무를 봅니다. 이번 Cisco 검증에서는 Host-facing Access Link는 Untagged, Switch 간 Trunk는 VLAN 20 Tagged였습니다.',
       start:['PC20A Port = Access VLAN 20','SW1↔SW2 = Trunk','Native VLAN = 99'],
       question:'PC20A → PC20B VLAN 20 Frame은 각 링크에서 어떻게 보일까요?',
       options:[
@@ -16,10 +16,10 @@
         ['alluntag','모든 링크에서 Untagged']
       ],
       correct:'tagged',
-      reason:'Access Port는 Host의 Untagged Frame을 VLAN 20으로 분류하고, Non-native VLAN 20은 Trunk에서 802.1Q Tag를 사용합니다. 반대 Access Link에서는 다시 Untagged로 나갑니다.',
+      reason:'핵심은 ingress Frame을 VLAN 20에 분류하고 링크 간에 VLAN ID가 필요할 때 802.1Q Tag로 전달하는 것입니다. 이번 Cisco 구현에서는 이를 Access → Trunk → Access로 확인했습니다.',
       metric1:['Access Link','Untagged'],
       metric2:['Trunk Link','802.1Q · VLAN 20'],
-      conclusion:'Access는 Port 설정으로 VLAN을 정하고, Trunk는 Tag로 VLAN 정보를 전달합니다.',
+      conclusion:'공통 원리는 VLAN membership과 802.1Q Tag입니다. Access/Trunk는 이번 Cisco 구현에서 그 원리를 구성하는 방식입니다.',
       steps:[
         {kind:'ACCESS IN',title:'PC20A → SW1 · Untagged',detail:'PC20A의 일반 Ethernet Frame이 SW1 Access VLAN 20 Port로 들어옵니다.',lane20:'active',nodes:['v20a','v20trunk'],links:{v20left:'active'},arrows:{v20left:'→'}},
         {kind:'TRUNK',title:'SW1 → SW2 · 802.1Q VLAN 20',detail:'VLAN 20은 Native VLAN이 아니므로 Trunk에서 VLAN ID 20 Tag가 관찰됩니다.',lane20:'active',nodes:['v20trunk'],links:{v20left:'active',v20right:'tagged'},arrows:{v20left:'→',v20right:'→ 20'}},
