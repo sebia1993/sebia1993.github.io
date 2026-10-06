@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ACL — 개념서</title>
-<meta name="description" content="Extended ACL의 Source/Destination/Protocol/Port, First Match, Implicit Deny, Interface Direction을 실제 Cisco 검증 결과에 연결해 이해하는 1단계 개념서입니다.">
+<title>Packet Filtering / ACL — 개념서</title>
+<meta name="description" content="Packet Filtering의 Match→Action 공통 모델을 먼저 이해하고, Cisco IOS Extended ACL의 First Match, Implicit Deny, Interface Direction을 구현 규칙으로 구분하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -43,8 +43,8 @@
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>ACL</h1>
-    <p>목표는 하나입니다. <b>패킷의 Source/Destination/Protocol/Port와 ACL이 적용된 Interface/Direction을 보고 Permit/Deny 결과와 Packet Stop 지점</b>을 설명할 수 있으면 됩니다.</p>
+    <h1>Packet Filtering / <em>ACL</em></h1>
+    <p>목표는 하나입니다. <b>Packet Header의 조건을 Match하고 Policy Action이 어디에서 적용되는지</b> 설명할 수 있으면 됩니다. 이번 Lab의 First Match·Implicit Deny·Interface Direction은 Cisco IOS Extended ACL 구현으로 확인합니다.</p>
     <div class="concept-stage">
       <div><strong>Route가 정상이라고 Packet이 반드시 통과하는 것은 아닙니다.</strong><span>R2에서 ACL이 Match하면 Routing은 그대로여도 특정 Packet만 멈출 수 있습니다.</span></div>
       <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
@@ -53,6 +53,7 @@
       <strong>Interface / Direction → Top-down ACE → First Match → Permit or Deny → Implicit Deny</strong>
       <p>ACL은 세션을 추측하는 것이 아니라 현재 Packet Header를 평가합니다.</p>
     </div>
+    <div class="note" style="margin-top:14px"><b>Vendor-Neutral Core:</b> 공통 학습 모델은 <b>Policy Point → Match 조건 → Action(Permit/Deny)</b>입니다. 아래의 Top-down First Match, Implicit Deny, Interface in/out은 이번 Cisco IOS ACL 구현에서 실제 검증한 규칙입니다.</div>
   </div>
 </section>
 
@@ -206,6 +207,6 @@
   </div>
 </section>
 </main>
-<footer class="footer"><div class="shell">ACL · Concept → Interactive Lab</div></footer>
+<footer class="footer"><div class="shell">Packet Filtering / ACL · Concept → Interactive Lab</div></footer>
 </body>
 </html>
