@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const path='labs/ip-subnetting.html',version='20261003-concept-visual-v1';
+const path='labs/ip-subnetting.html',version='20261006-concept-visual-v2';
 const normalize=s=>s.replace(/\r\n/g,'\n').trim();
 const source=await readFile(resolve(root,path),'utf8');
 const styles=Object.fromEntries(await Promise.all(['styles.css','lab-ui.css'].map(async f=>[f,await readFile(resolve(root,f),'utf8')])));
@@ -24,7 +24,7 @@ if(!base&&!inline){
 }
 const browser=await chromium.launch(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{}),checks=[];
 const matrix=[[320,640,true],[360,800,true],[390,844,true],[412,915,true],[800,360,true],[768,1024,true],[980,720,false],[1366,768,false],[1920,1080,false]];
-const figures=['rangeVisual','decisionVisual','routeVisual','maskVisual'];
+const figures=['bitGuideVisual','rangeVisual','decisionVisual','routeVisual','maskVisual'];
 async function open(page,url){
  if(inline){let html=source;for(const [name,css] of Object.entries(styles))html=html.replace(new RegExp(`<link[^>]+href="../${name.replace('.','\\.')}"[^>]*>`),()=>'<style>'+css+'</style>');await page.setContent(html);}
  else assert.equal((await page.goto(`${url}/${path}`,{waitUntil:'networkidle'})).status(),200);
@@ -32,7 +32,7 @@ async function open(page,url){
 async function geometry(page){
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'document overflows');
  const bad=await page.evaluate(()=>Array.from(document.querySelectorAll('[data-visual]')).flatMap(f=>{
-  const box=f.getBoundingClientRect();return Array.from(f.querySelectorAll('.v-block,.v-calc,.v-branch,.v-device,.v-small-block,.v-one-block,.v-mask-panel,figcaption,.v-tag,.v-host,.v-mask')).map(e=>{const r=e.getBoundingClientRect();return {id:f.id,text:e.textContent.slice(0,80),bad:r.left<box.left-1||r.right>box.right+1||e.scrollWidth>e.clientWidth+2};}).filter(x=>x.bad);
+  const box=f.getBoundingClientRect();return Array.from(f.querySelectorAll('.bit-bar,.split-result div,.v-block,.v-calc,.v-branch,.v-device,.v-small-block,.v-one-block,.v-mask-panel,figcaption,.v-tag,.v-host,.v-mask')).map(e=>{const r=e.getBoundingClientRect();return {id:f.id,text:e.textContent.slice(0,80),bad:r.left<box.left-1||r.right>box.right+1||e.scrollWidth>e.clientWidth+2};}).filter(x=>x.bad);
  }));assert.deepEqual(bad,[],'diagram overflows or clips its labels');
 }
 async function testSurface(url,surface){
@@ -42,10 +42,12 @@ async function testSurface(url,surface){
   try{
    await open(page,url);
    assert.equal(await page.locator('meta[name="concept-visual-version"]').getAttribute('content'),version);
-   assert.equal(await page.locator('[data-visual]').count(),5);
+   assert.equal(await page.locator('[data-visual]').count(),6);
    assert.equal(await page.locator('body > header').evaluate(e=>getComputedStyle(e).position),'static');
    const text=await page.locator('body').innerText();
-   assert.ok(text.includes('Mask를 적용한 Network Prefix가 같으면 on-link'));
+   assert.ok(text.includes('내 IP와 목적지 IP가 같은 네트워크 범위인지 먼저 판단합니다.'));
+   assert.ok(text.includes('처음 보는 용어는 이 정도 뜻으로 시작하면 됩니다.'));
+   assert.ok(text.includes('/25는 /24보다 Network 비트를 1개 더 사용합니다.'));
    assert.ok(text.includes('이 /24 범위를 두 /25로'));
    assert.ok(text.includes('10.77.10.0/25')&&text.includes('10.77.10.128/25'));
    assert.ok(text.includes('PC2의 설정은 계속 /25'));
@@ -60,7 +62,8 @@ async function testSurface(url,surface){
     await page.locator('#'+id).evaluate(e=>window.scrollTo({top:scrollY+e.getBoundingClientRect().top,behavior:'instant'}));
     const visible=await page.locator('#'+id).evaluate(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.left+20,Math.max(1,r.top+20));return !!hit&&e.contains(hit);});assert.ok(visible,id+' is obscured');
    }
-   const details=page.locator('details.evidence-note');await details.locator('summary').focus();await page.keyboard.press('Enter');assert.equal(await details.getAttribute('open'),'');await page.keyboard.press('Enter');assert.equal(await details.getAttribute('open'),null);
+   assert.equal(await page.locator('.term-card').count(),6,'six beginner terminology cards');
+   assert.equal(await page.locator('details.evidence-note').count(),0,'author validation evidence stays out of learner flow');
    const cta=page.locator('a[href="ip-subnetting-simulator.html"]');assert.equal(await cta.count(),1);await cta.evaluate(e=>e.scrollIntoView({block:'center',behavior:'instant'}));
    assert.ok(await cta.evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));}));
    if(!inline){const r=await context.request.get(`${url}/labs/ip-subnetting-simulator.html`);assert.ok(r.ok(),'stage 2 link');}
@@ -69,7 +72,7 @@ async function testSurface(url,surface){
    await page.emulateMedia({forcedColors:'active'});await geometry(page);
    assert.ok((await page.locator('#rangeVisual').innerText()).includes('B · 두 번째 /25'));
    assert.deepEqual(errors,[]);
-   checks.push({surface,width,height,touch,javaScriptEnabled:false,status:'PASS',states:['normal','200%-text','forced-colors','scrolled','keyboard-details'],visuals:5});
+   checks.push({surface,width,height,touch,javaScriptEnabled:false,status:'PASS',states:['normal','200%-text','forced-colors','scrolled','terminology'],visuals:6});
    console.log(`PASS concept diagrams ${surface} ${width}x${height}`);
   }catch(e){await page.screenshot({path:resolve(out,`concept-fail-${surface}-${width}.png`),fullPage:true});throw e;}finally{await context.close();}
  }
