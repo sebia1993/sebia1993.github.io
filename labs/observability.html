@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Packet / Log / SNMP 관측 — 개념서</title>
+<meta name="description" content="하나의 네트워크 장애를 Packet Capture, Syslog, SNMP 상태와 알림으로 함께 확인하고 사건 타임라인으로 연결하는 원리를 배우는 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.obs-hero{padding:58px 0 30px}.obs-hero h1{font-size:clamp(2.08rem,5vw,4.05rem);margin:.15em 0;letter-spacing:-.04em}.obs-hero p{max-width:980px;color:var(--muted)}
+.scope-badge{display:inline-flex;max-width:100%;padding:7px 11px;border:1px solid #347968;border-radius:999px;color:var(--mint);font-size:.76rem;font-weight:900;background:rgba(126,224,194,.06);white-space:normal;flex-wrap:wrap;overflow-wrap:anywhere}
+.core{margin-top:18px;padding:22px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core strong{display:block;font-size:clamp(1.04rem,3vw,1.55rem)}.core p{margin:7px 0 0;color:#bdcada}
+.first-q{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:20px;border:1px solid var(--line);border-radius:18px;background:#081522}.q-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);text-align:center}.q-card strong{display:block}.q-card small{display:block;margin-top:5px;color:var(--muted)}.question-mark{display:grid;place-items:center;width:54px;height:54px;border:1px solid #3e6a91;border-radius:50%;color:var(--blue);font-size:1.5rem;font-weight:950}
+.topology{display:grid;grid-template-columns:1fr 1.08fr 1fr;gap:14px;align-items:stretch}.zone{min-width:0;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel3)}.zone.center{border-color:#347968;background:rgba(126,224,194,.05)}.zone h3{margin:5px 0 10px}.device{display:flex;justify-content:center;padding:12px;border:1px solid #43647f;border-radius:13px;background:#0b1b2a;font-weight:900}.linkbox{margin:12px 0;padding:9px;border-radius:10px;background:#081522;text-align:center;font-size:.8rem;color:#cad8e7}.zone small{display:block;color:var(--muted)}
+.evidence-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.evidence-card{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.evidence-card h3{margin:6px 0 7px}.evidence-card p{margin:0;color:var(--muted);font-size:.82rem}.evidence-card .plain{display:block;margin-top:9px;padding:9px;border-radius:9px;background:#081522;color:#d6e2ef;font-size:.79rem}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.step{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.step b{display:grid;place-items:center;width:32px;height:32px;border:1px solid #3e6a91;border-radius:9px;color:var(--blue)}.step h3{margin:9px 0 5px;font-size:.92rem}.step p{margin:0;color:var(--muted);font-size:.8rem}
+.timeline{display:grid;gap:10px}.phase{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.phase-label{font-weight:900;color:var(--blue)}.phase-events{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.event{padding:10px;border-radius:10px;background:#081522;font-size:.78rem}.event span{display:block;color:var(--muted);font-size:.7rem}.event b{display:block;margin-top:3px}.event.ok{border:1px solid #347968}.event.fail{border:1px solid #8f5961}.event.warn{border:1px solid #8f6a38}
+.compare{width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed}.compare th,.compare td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:.82rem;overflow-wrap:anywhere;word-break:break-word}.compare th{color:#a9bdd0}.compare td:first-child{font-weight:850}
+.grid2,.review{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card2{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.card2 h3{margin:5px 0 8px}.card2 p{margin:0;color:var(--muted)}
+.caution{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.caution h3{margin:4px 0 7px}.caution p{margin:0;color:#d6e2ef}.review>article{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.review ul{margin:0;padding-left:1.1rem}.review li{margin:.55rem 0}
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.cta h2{margin:4px 0 7px}.cta p{margin:0;color:var(--muted)}.refs{display:grid;gap:8px}.refs a{color:var(--blue);overflow-wrap:anywhere}.refs p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+@media(max-width:1050px){.evidence-grid{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}.topology{grid-template-columns:1fr}.phase-events{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.first-q,.grid2,.review{grid-template-columns:1fr}.question-mark{margin:auto}.evidence-grid,.flow,.phase-events{grid-template-columns:1fr}.phase{grid-template-columns:1fr}.cta{display:grid}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.obs-hero{padding-top:42px}.compare{min-width:0;table-layout:fixed}.compare th,.compare td{padding:8px 5px;font-size:.72rem}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 핵심</a><a href="#evidence">증거 종류</a><a href="#timeline">사건 연결</a><a href="#recovery">복구 확인</a></nav></div></header>
+<main>
+<section class="obs-hero"><div class="shell">
+<span class="scope-badge">RFC 5424 · RFC 3416 · RFC 2863 · RFC 3418 + 실제 Cisco/Net-SNMP 검증 · OBS-01~06 PASS</span>
+<div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
+<h1>Packet / Log / SNMP 관측</h1>
+<p><b>Ping이 끊겼다는 사실만 알면 장애 원인까지 알 수 있을까요?</b> 아닙니다. “통신이 안 됐다”와 “장비에서 어떤 일이 일어났는가”는 다른 질문입니다. 여러 종류의 증거를 같은 사건으로 연결해야 원인과 복구를 더 정확하게 설명할 수 있습니다.</p>
+<div class="core"><strong>사건 하나 → Packet · Log · 상태 조회 · 알림 → 시간과 대상 장비로 묶기 → 복구까지 확인</strong><p>한 증거가 모든 것을 말해 주지는 않습니다. 서로 다른 증거가 <b>같은 인터페이스의 같은 상태 변화</b>를 가리키는지 확인하는 것이 핵심입니다.</p></div>
+</div></section>
+
+<section id="summary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 첫 질문</div><h2>Ping 0/3이면 무엇까지 말할 수 있을까?</h2></div></div>
+<div class="first-q">
+<article class="q-card"><strong>관측된 사실</strong><small>R1에서 R2로 보낸 Ping 응답이 0/3</small></article>
+<div class="question-mark" aria-hidden="true">?</div>
+<article class="q-card"><strong>아직 모르는 것</strong><small>케이블? 인터페이스? 정책? 장비 상태? 어느 시점에 바뀌었나?</small></article>
+</div>
+<div class="note" style="margin-top:12px"><b>30초 핵심:</b> Packet Capture는 링크에서 무엇이 실제로 보였는지, Log는 장비가 어떤 사건을 기록했는지, SNMP는 장비 상태를 조회하거나 상태 변화 알림을 받는 데 사용합니다. 세 가지를 한 사건의 시간 흐름으로 연결합니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · PICTURE FIRST</div><h2>데이터 길과 관측 길을 분리해서 봅니다.</h2></div></div>
+<div class="topology">
+<article class="zone"><div class="eyebrow">DATA LINK</div><h3>R2 · 통신 상대</h3><div class="device">R2</div><div class="linkbox">CP-DATA ← ICMP를 실제 Capture</div><small>R1의 Data Interface가 내려가면 이 링크에서 시험 Packet이 사라집니다.</small></article>
+<article class="zone center"><div class="eyebrow">DEVICE UNDER OBSERVATION</div><h3>R1 · 관측 대상</h3><div class="device">R1</div><div class="linkbox">E0/0 = 장애 대상<br>E0/1 = 관측용 관리 링크</div><small>Data Interface만 shutdown하고 관리 링크는 유지해 장애 중에도 상태를 계속 관측했습니다.</small></article>
+<article class="zone"><div class="eyebrow">MANAGEMENT LINK</div><h3>NMS1 · 관측 단말</h3><div class="device">NMS1</div><div class="linkbox">CP-MGMT ← Syslog · SNMP</div><small>Linux/Net-SNMP는 Router가 아니라 상태를 묻고 알림을 받는 측정용 Test Host입니다.</small></article>
+</div>
+</div></section>
+
+<section id="evidence"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · EVIDENCE TYPES</div><h2>서로 다른 증거는 서로 다른 질문에 답합니다.</h2></div></div>
+<div class="evidence-grid">
+<article class="evidence-card"><div class="eyebrow">PACKET CAPTURE</div><h3>“링크에서 무엇이 보였나?”</h3><p>실제로 지나간 Packet과 그 시각을 확인합니다. 장애 때 Packet이 안 보였다는 주장에는 정상 전후 대조도 필요합니다.</p><span class="plain">Wire Evidence</span></article>
+<article class="evidence-card"><div class="eyebrow">SYSLOG</div><h3>“장비가 어떤 사건을 기록했나?”</h3><p>장비가 인터페이스 down/up 같은 사건을 문장 형태로 기록하거나 외부로 전송합니다.</p><span class="plain">Event Record</span></article>
+<article class="evidence-card"><div class="eyebrow">SNMP GET</div><h3>“지금 상태가 어떤가?”</h3><p>관리 단말이 장비에 질문을 보내고 응답으로 현재 값을 읽습니다. 이번 검증에서는 Admin/Oper 상태를 확인했습니다.</p><span class="plain">Request → Response</span></article>
+<article class="evidence-card"><div class="eyebrow">SNMP TRAP</div><h3>“상태가 바뀌었다고 알려왔나?”</h3><p>장비가 Manager의 질문을 기다리지 않고 상태 변화 Notification을 보냅니다.</p><span class="plain">Asynchronous Notification</span></article>
+</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · NORMAL FLOW</div><h2>관측은 다섯 단계로 기억하면 됩니다.</h2></div></div>
+<div class="flow">
+<article class="step"><b>1</b><h3>Baseline</h3><p>정상 통신과 정상 상태를 먼저 남깁니다.</p></article>
+<article class="step"><b>2</b><h3>Event</h3><p>한 가지 변화만 발생시킵니다.</p></article>
+<article class="step"><b>3</b><h3>Observe</h3><p>Packet·Log·상태·알림을 각각 확인합니다.</p></article>
+<article class="step"><b>4</b><h3>Correlate</h3><p>같은 장비·인터페이스·Phase인지 연결합니다.</p></article>
+<article class="step"><b>5</b><h3>Recover</h3><p>원복 후 모든 근거가 다시 정상인지 확인합니다.</p></article>
+</div>
+</div></section>
+
+<section id="timeline"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · CORRELATION</div><h2>이번 실제 검증에서는 이렇게 연결됐습니다.</h2></div></div>
+<div class="timeline">
+<div class="phase"><div class="phase-label">정상</div><div class="phase-events"><div class="event ok"><span>Packet</span><b>Ping 3/3</b></div><div class="event ok"><span>SNMP GET</span><b>Admin 1 / Oper 1</b></div><div class="event ok"><span>Management</span><b>관측 링크 정상</b></div><div class="event ok"><span>sysUpTime</span><b>증가 중</b></div></div></div>
+<div class="phase"><div class="phase-label">장애</div><div class="phase-events"><div class="event fail"><span>Packet</span><b>Ping 0/3</b></div><div class="event fail"><span>Syslog</span><b>E0/0 down 기록</b></div><div class="event fail"><span>SNMP GET</span><b>Admin 2 / Oper 2</b></div><div class="event warn"><span>Trap</span><b>linkDown 알림</b></div></div></div>
+<div class="phase"><div class="phase-label">복구</div><div class="phase-events"><div class="event ok"><span>Packet</span><b>Ping 3/3</b></div><div class="event ok"><span>Syslog</span><b>E0/0 up 기록</b></div><div class="event ok"><span>SNMP GET</span><b>Admin 1 / Oper 1</b></div><div class="event ok"><span>Trap</span><b>linkUp 알림</b></div></div></div>
+</div>
+<div class="caution" style="margin-top:12px"><h3>Trap이 항상 가장 먼저 오는 것은 아닙니다.</h3><p>이번 Run에서는 <b>linkDown Trap이 장애 상태 SNMP GET 응답보다 늦게</b> 도착했습니다. Syslog·Trap·Polling은 서로 비동기적일 수 있으므로 “정확히 같은 시각”보다 같은 인터페이스와 같은 상태 전환을 가리키는지 확인합니다.</p></div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · POLLING VS NOTIFICATION</div><h2>SNMP에서도 “묻기”와 “알려주기”는 다릅니다.</h2></div></div>
+<table class="compare" aria-label="SNMP GET과 Trap 비교">
+<thead><tr><th>구분</th><th>누가 시작?</th><th>무엇을 확인?</th><th>이번 관측</th></tr></thead>
+<tbody>
+<tr><td>SNMP GET</td><td>NMS1 Manager</td><td>현재 MIB 상태</td><td>1/1 → 2/2 → 1/1</td></tr>
+<tr><td>SNMP Trap</td><td>R1 Agent</td><td>상태 변화 알림</td><td>linkDown / linkUp</td></tr>
+</tbody>
+</table>
+<div class="grid2" style="margin-top:14px">
+<article class="card2"><div class="eyebrow">ADMIN vs OPER</div><h3>설정 상태와 실제 동작 상태를 구분합니다.</h3><p><b>ifAdminStatus</b>는 관리자가 의도한 상태, <b>ifOperStatus</b>는 실제 동작 상태입니다. 이번 shutdown에서는 둘 모두 1→2→1로 바뀌었습니다.</p></article>
+<article class="card2"><div class="eyebrow">TRAP LIMIT</div><h3>Trap에 없는 값을 만들어내지 않습니다.</h3><p>이번 linkDown/linkUp Trap에는 ifIndex와 인터페이스 설명은 있었지만 ifAdminStatus/ifOperStatus varbind는 없었습니다. 그 상태값은 GET 응답으로 확인했습니다.</p></article>
+</div>
+</div></section>
+
+<section id="recovery"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">06 · RECOVERY GATE</div><h2>“no shutdown 했다”와 “복구됐다”는 같은 말이 아닙니다.</h2></div></div>
+<div class="grid2">
+<article class="card2"><h3>복구 명령</h3><p>설정을 원래대로 돌리는 행동입니다. 이것만으로 서비스가 정상이라고 확정하지 않습니다.</p></article>
+<article class="card2"><h3>복구 Evidence</h3><p>Interface up/up, Ping 3/3, SNMP 1/1, Syslog up, linkUp Trap, 관리 경로 정상까지 서로 모순이 없는지 확인합니다.</p></article>
+</div>
+<div class="note" style="margin-top:12px"><b>추가 구분:</b> 이번 검증에서 sysUpTime은 장애 전후 계속 증가했습니다. 따라서 Data Interface가 내려갔다는 사건을 장비 전체 재부팅으로 오해하지 않습니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">07 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="review">
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>Ping 실패만으로 장애 원인을 확정하지 않습니다.</li><li>Packet, Syslog, SNMP는 서로 다른 종류의 증거입니다.</li><li>SNMP GET은 현재 상태를 묻고, Trap은 변화 사실을 비동기적으로 알립니다.</li><li>여러 Source의 timestamp가 정확히 같을 필요는 없습니다.</li><li>복구는 여러 Evidence가 다시 정상 상태와 일치할 때 확인합니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“Ping이 끊긴 순간, 어떤 증거를 어떤 순서로 확인하면 인터페이스 장애라고 더 자신 있게 말할 수 있을까?”</h3><p style="color:var(--muted)">Packet → Syslog → SNMP GET/Trap → 같은 인터페이스·상태 변화 연결 → Recovery 순서로 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="cta"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>같은 장애를 서로 다른 증거로 맞춰 보세요.</h2><p>정상 상태 → Packet gap → Syslog → SNMP GET/Trap → 복구 Evidence를 예상하고 실제 검증 상태와 비교합니다.</p></div><a class="btn primary" href="observability-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
+<div class="refs">
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc3416.html">RFC 3416 · SNMPv2 Protocol Operations</a><p>GET Request/Response와 SNMPv2 Trap Notification의 역할을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc2863.html">RFC 2863 · Interfaces Group MIB</a><p>ifAdminStatus, ifOperStatus와 linkDown/linkUp Notification 의미를 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc3418.html">RFC 3418 · SNMPv2-MIB</a><p>sysUpTime의 의미를 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc5424.html">RFC 5424 · The Syslog Protocol</a><p>Syslog event message의 표준 구조와 timestamp/host/message 개념을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.wireshark.org/docs/wsug_html/">Wireshark User’s Guide</a><p>Packet timestamp와 Capture/Display Filter의 역할을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.net-snmp.org/docs/man/snmpget.html">Net-SNMP · snmpget</a><p>실제 Manager 측 SNMP GET 구현 근거로 사용했습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL 15.4(2)T4 R1/R2 + PNETLab 내부 Debian 12/Net-SNMP 5.9.3 NMS1에서 OBS-01~06을 실제 검증했습니다. CP-DATA 85 frames, CP-MGMT 86 frames, kernel drop 0이며 원본 hash를 보존했습니다. SNMPv2c community가 들어 있는 private evidence 원본은 공개하지 않습니다.</div>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">Packet / Log / SNMP 관측 · Event → Evidence → Correlation → Recovery</div></footer>
+</body>
+</html>
