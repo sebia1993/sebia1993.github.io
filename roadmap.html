@@ -51,7 +51,7 @@
       </article>
     </div>
 
-    <div class="note" style="margin-top:16px"><b>현재 범위:</b> 모든 주제는 Concept Guide와 Interactive Lab의 두 단계만 사용합니다. 한 주제를 과도하게 확장하기보다 핵심 개념을 넓고 정확하게 연결하는 데 집중합니다.</div>
+    <div class="note" style="margin-top:16px"><b>현재 범위:</b> 모든 주제는 Concept Guide와 Interactive Lab의 두 단계만 사용합니다. 한 주제를 과도하게 확장하기보다 핵심 개념을 넓고 정확하게 연결하는 데 집중합니다.</div>\n    <div class="note" style="margin-top:10px"><b>Vendor-Neutral Core:</b> 학습 목표는 Cisco 명령어가 아니라 벤더 공통 네트워크 원리와 표준입니다. Cisco IOL/IOS는 실제 동작을 검증하는 기본 구현 환경으로 사용하며, Vendor 고유 용어와 동작은 공통 원리와 구분합니다.</div>
   </div>
 </section>
 
@@ -165,10 +165,10 @@ const summaryOverrides={
   'ethernet-mac-table':'Source MAC Learning과 Destination MAC Forwarding, Known/Unknown Unicast와 Broadcast를 이해합니다.',
   'arp-default-gateway':'같은 서브넷과 다른 서브넷에서 ARP와 Default Gateway가 어떤 MAC 주소를 선택하게 만드는지 이해합니다.',
   'icmp-troubleshooting':'Ping의 Echo 응답, TTL 감소, Time Exceeded와 Traceroute의 Hop 발견을 연결해 이해합니다.',
-  'vlan-trunk':'Access Port의 VLAN 소속과 802.1Q Trunk Tag, Native/Allowed VLAN을 연결해 이해합니다.',
+  'vlan-trunk':'VLAN 분리와 802.1Q Tagged/Untagged 전달을 먼저 이해하고, Access/Trunk/Native는 Cisco 구현 용어로 연결합니다.',
   'inter-vlan-routing':'같은 VLAN 직접 전달과 다른 VLAN의 Default Gateway·SVI Routing 차이를 연결해 이해합니다.',
-  'stp':'Root Bridge와 Port Role, Alternate/Discarding, Path Cost와 재수렴을 연결해 이해합니다.',
-  'lacp':'LACP 협상, Logical Port-Channel, Flow Hash와 Member 장애 범위를 연결해 이해합니다.',
+  'stp':'Root Bridge, Port Role, Path Cost와 재수렴이라는 STP/RSTP 공통 원리를 먼저 이해합니다.',
+  'lacp':'LACP 협상으로 여러 Physical Link가 하나의 LAG를 이루고, Flow와 Member 장애가 어떻게 처리되는지 이해합니다.',
   'dhcp':'DORA, Lease/Option과 DHCP Relay의 giaddr, 주소 미할당 장애 위치를 연결해 이해합니다.',
   'dns':'A Query/Response, Recursive Resolver, Cache와 DNS 장애의 Packet 위치를 연결해 이해합니다.'
 };
