@@ -52,7 +52,11 @@ async function testSurface(url,surface){
    assert.ok(text.includes('Default Gateway')&&text.includes('Router'));
    assert.ok(text.includes('/25')&&text.includes('255.255.255.128')&&text.includes('같은 경계를 다른 방식으로'),'Prefix와 Mask의 같은 경계 의미가 유지되어야 합니다.');
    assert.ok(text.includes('오늘 새로 배운 말'));
-   assert.ok(text.includes('10.77.10.0')&&text.includes('10.77.10.128')&&text.includes('/25'),'두 /25 주소 그룹이 마크업 줄바꿈과 무관하게 보여야 합니다.');
+   assert.ok((await page.locator('#rangeVisual').innerText()).includes('.0 ~ .127'));
+   assert.ok((await page.locator('#rangeVisual').innerText()).includes('.128 ~ .255'));
+   const deep=page.locator('details.deep-dive');
+   assert.equal(await deep.getAttribute('open'),null,'bit explanation must be collapsed for first-time learners');
+   await deep.evaluate(e=>{e.open=true;});
    assert.equal(text.includes('Proxy ARP'),false,'advanced validation detail must stay out of learner flow');
    assert.ok((await page.locator('#differentVisual').innerText()).includes('출구'));
    assert.ok((await page.locator('#gatewayVisual').innerText()).includes('Default Gateway'));
