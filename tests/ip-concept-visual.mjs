@@ -30,7 +30,18 @@ async function open(page,url){
  else assert.equal((await page.goto(`${url}/${path}`,{waitUntil:'networkidle'})).status(),200);
 }
 async function geometry(page){
- assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'document overflows');
+ // A missing CSS brace can leave later rules nested under .term-badge without
+ // necessarily causing overflow. Verify the diagrams retain their real layout.
+ const layouts=await page.evaluate(()=>['.neighborhoods','.route-compare','.notation'].map(selector=>{
+  const style=getComputedStyle(document.querySelector(selector));
+  const breakpoint=selector==='.route-compare'?850:650;
+  return {selector,display:style.display,columns:style.gridTemplateColumns.split(' ').length,expectedColumns:innerWidth<=breakpoint?1:selector==='.route-compare'?2:3};
+ }));
+ for(const layout of layouts){
+  assert.equal(layout.display,'grid',layout.selector+' diagram layout is missing');
+  assert.equal(layout.columns,layout.expectedColumns,layout.selector+' responsive columns');
+ }
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+1),false,'document overflows its layout viewport');
  const bad=await page.evaluate(()=>Array.from(document.querySelectorAll('[data-visual]')).flatMap(f=>{
   const box=f.getBoundingClientRect();return Array.from(f.querySelectorAll('.device-card,.neighborhood,.number-half,.rule-card,.route-card,.mini-device,.gateway-box,.notation-card,.bit-bar,figcaption')).map(e=>{const r=e.getBoundingClientRect();return {id:f.id,text:e.textContent.slice(0,80),bad:r.left<box.left-1||r.right>box.right+1||e.scrollWidth>e.clientWidth+2};}).filter(x=>x.bad);
  }));assert.deepEqual(bad,[],'diagram overflows or clips its labels');
@@ -63,7 +74,7 @@ async function testSurface(url,surface){
    assert.equal(await page.locator('svg:not([aria-hidden="true"])').count(),0,'icons must not replace text');
    for(const id of figures){const f=page.locator('#'+id),caption=await f.getAttribute('aria-labelledby');assert.ok(caption);assert.ok((await page.locator('#'+caption).innerText()).length>20);}
    await geometry(page);
-   if(width===360||width===1366){for(const id of figures)await page.locator('#'+id).screenshot({path:resolve(out,`${surface}-${id}-${width}.png`)});await page.screenshot({path:resolve(out,`${surface}-concept-${width}.png`),fullPage:true});}
+   if(width===320||width===360||width===1366){for(const id of figures)await page.locator('#'+id).screenshot({path:resolve(out,`${surface}-${id}-${width}.png`)});await page.screenshot({path:resolve(out,`${surface}-concept-${width}.png`),fullPage:true});}
    for(const id of figures){
     await page.locator('#'+id).evaluate(e=>window.scrollTo({top:scrollY+e.getBoundingClientRect().top,behavior:'instant'}));
     const visible=await page.locator('#'+id).evaluate(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.left+20,Math.max(1,r.top+20));return !!hit&&e.contains(hit);});assert.ok(visible,id+' is obscured');
@@ -74,6 +85,7 @@ async function testSurface(url,surface){
    assert.ok(await cta.evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));}));
    if(!inline){const r=await context.request.get(`${url}/labs/ip-subnetting-simulator.html`);assert.ok(r.ok(),'stage 2 link');}
    await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});await geometry(page);
+   if(width===320||width===360)await page.screenshot({path:resolve(out,`${surface}-concept-${width}-text200.png`),fullPage:true});
    assert.ok((await page.locator('#groupVisual').innerText()).includes('네트워크 동네 A'));
    await page.emulateMedia({forcedColors:'active'});await geometry(page);
    assert.ok((await page.locator('#rangeVisual').innerText()).includes('두 번째 그룹'));
