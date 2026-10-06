@@ -67,7 +67,13 @@ try{
     page=await browser.newPage({viewport:{width:360,height:800}});
     const response=await page.goto(origin+path,{waitUntil:'networkidle',timeout:30000});
     assert.ok(response && response.ok(),path+' public response');
-    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,path+' public 360 overflow');
+    const layout=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
+      width:document.documentElement.scrollWidth,
+      inner:innerWidth,
+      offenders:Array.from(document.querySelectorAll('body *')).map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,id:el.id,cls:el.className?.baseVal??el.className,text:(el.textContent||'').trim().slice(0,70),left:r.left,right:r.right,width:r.width};}).filter(x=>x.right>innerWidth+1||x.left<-1).slice(0,12)
+    }));
+    assert.equal(layout.overflow,false,path+' public 360 overflow '+JSON.stringify(layout));
     await page.screenshot({path:resolve(repo,'test-results/bgp-public/'+(path.includes('simulator')?'simulator':'concept')+'-360.png'),fullPage:true});
     await page.close();
   }
