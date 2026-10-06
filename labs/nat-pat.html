@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NAT / PAT — 개념서</title>
-<meta name="description" content="Basic NAT, PAT, Return Translation, Static PAT와 대표 실패 조건을 실제 Cisco 검증 결과에 연결해 이해하는 1단계 개념서입니다.">
+<meta name="description" content="Address/Port Translation과 Return Translation State의 공통 원리를 먼저 이해하고, Cisco IOS NAT 용어와 역할을 구현 사례로 구분하는 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -32,12 +32,13 @@
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
     <h1>NAT / PAT</h1>
-    <p>목표는 하나입니다. <b>Inside에서 Outside로 나갈 때 어떤 주소/Port가 바뀌고, Translation Table이 Return Traffic을 어느 Inside Host로 되돌리는지</b> 설명할 수 있으면 됩니다.</p>
+    <p>목표는 하나입니다. <b>내부 Endpoint가 외부에 어떤 Mapping으로 보이고, Translation State가 Return Traffic을 원래 Endpoint로 어떻게 되돌리는지</b> 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>NAT는 “주소를 바꾸는 기능”만이 아닙니다.</strong><span>Outside에서 돌아오는 Packet을 원래 Inside Flow와 다시 연결하는 Translation State까지 함께 봐야 합니다.</span></div>
       <div class="stage-chips"><span class="stage-chip current">1 · 개념서</span><span class="stage-chip">2 · Interactive Lab</span></div>
     </div>
-    <div class="core-line"><strong>Inside Local → Translation Table → Inside Global → Outside → Return Translation → Inside Local</strong><p>PAT는 여러 Inside Flow가 하나의 Global IP를 공유할 수 있도록 Flow 구분값을 함께 기록합니다.</p></div>
+    <div class="core-line"><strong>Internal Endpoint → Translation State → External Mapping → Return Translation → Internal Endpoint</strong><p>PAT/NAPT는 여러 내부 Flow가 하나의 외부 Address를 공유할 수 있도록 Port 등 Flow 식별값을 함께 사용합니다.</p></div>
+    <div class="note" style="margin-top:14px"><b>Vendor 용어 구분:</b> 아래 Lab의 <b>Inside Local / Inside Global / inside / outside</b>는 Cisco IOS NAT에서 사용하는 표현입니다. 공통 Mental Model은 내부 Endpoint ↔ 외부 Mapping ↔ Translation State입니다.</div>
   </div>
 </section>
 
