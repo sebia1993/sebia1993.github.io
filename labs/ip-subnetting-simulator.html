@@ -523,11 +523,6 @@ function buildObservation(l){
    ? {kind:'direct-path',text:'이제 PC1은 같은 LAN의 PC3에게 데이터를 보냅니다. 여기서 “직접”은 라우터를 거치지 않는다는 뜻입니다.',focus:finalRoute,packetAt:'pc3',packetLabel:'IPv4',tone:'success'}
    : {kind:'routed-path',text:'이제 PC1은 Gateway인 R1에게 먼저 보내고, R1이 PC2가 있는 LAN B로 전달합니다. 최종 목적지 IP는 .140 그대로입니다.',focus:finalRoute,packetAt:'pc2',packetLabel:'IPv4',tone:'success'});
  }
- if(resolved){
-  events.push(onLink
-   ? {kind:'direct-path',text:'이웃 MAC을 확인한 뒤 같은 LAN A에서 PC3로 IPv4 Packet을 전달합니다.',focus:finalRoute,packetAt:'pc3',packetLabel:'IPv4',tone:'success'}
-   : {kind:'routed-path',text:'IPv4 Destination '+l.dst+'을 유지한 채 R1을 거쳐 LAN B의 PC2로 전달합니다.',focus:finalRoute,packetAt:'pc2',packetLabel:'IPv4',tone:'success'});
- }
  events.forEach(function(e){if(e.focus)Object.freeze(e.focus);Object.freeze(e);});
  return Object.freeze({kind:'teaching-simulation',scenarioId:l.scenarioId,claimIds:Object.freeze(l.claimIds.slice()),sourceNetwork:sourceNetwork,destinationNetwork:destinationNetwork,arpTarget:target,targetRole:targetRole,onLink:onLink,decision:decision,resolved:resolved,destinationIp:l.dst,destinationPrefix:l.dstPrefix,route:Object.freeze(finalRoute.slice()),events:Object.freeze(events)});
 }
