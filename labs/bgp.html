@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BGP / Route Policy — 개념서</title>
+<meta name="description" content="BGP가 여러 경로 후보 중 Best Path를 고르고 Route Policy가 선택과 광고 범위를 바꾸는 원리를 배우는 개념서입니다.">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../lab-ui.css">
+<style>
+.bgp-hero{padding:58px 0 30px}.bgp-hero h1{font-size:clamp(2.15rem,5vw,4.2rem);margin:.15em 0;letter-spacing:-.04em}.bgp-hero p{max-width:960px;color:var(--muted)}
+.scope-badge{display:inline-flex;padding:7px 11px;border:1px solid #347968;border-radius:999px;color:var(--mint);font-size:.76rem;font-weight:900;background:rgba(126,224,194,.06)}
+.core{margin-top:18px;padding:22px;border:1px solid #355d82;border-radius:18px;background:linear-gradient(135deg,#0d2034,#10283c);text-align:center}.core strong{display:block;font-size:clamp(1.08rem,3vw,1.65rem)}.core p{margin:7px 0 0;color:#bdcada}
+.grid2,.review{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card2{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.card2 h3{margin:5px 0 8px}.card2 p{margin:0;color:var(--muted)}
+.first-q{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:20px;border:1px solid var(--line);border-radius:18px;background:#081522}.route-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);text-align:center}.route-card strong{display:block}.route-card small{display:block;margin-top:5px;color:var(--muted)}.question-mark{display:grid;place-items:center;width:54px;height:54px;border:1px solid #3e6a91;border-radius:50%;color:var(--blue);font-size:1.5rem;font-weight:950}
+.as-topology{position:relative;display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:14px;align-items:stretch}.as-zone{position:relative;min-height:175px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--panel3)}.as-zone h3{margin:4px 0 12px}.as-zone.core-as{border-color:#3e6a91;background:rgba(88,184,255,.05)}.router{display:flex;align-items:center;justify-content:center;gap:7px;width:max-content;max-width:100%;padding:9px 12px;border:1px solid #43647f;border-radius:12px;background:#0b1b2a;font-weight:900}.router.primary{border-color:#347968;color:var(--mint)}.peer-row{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:15px}.link-label{color:var(--muted);font-size:.74rem;text-align:center}.same-as{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}.same-as .line{height:2px;background:#3e6a91}.mini{font-size:.78rem;color:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.step b{display:grid;place-items:center;width:34px;height:34px;border:1px solid #3e6a91;border-radius:10px;color:var(--blue)}.step h3{margin:10px 0 6px;font-size:.94rem}.step p{margin:0;color:var(--muted);font-size:.81rem}
+.candidates{display:grid;grid-template-columns:1fr 1fr;gap:14px}.candidate{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.candidate.best{border-color:#347968;background:rgba(126,224,194,.05)}.candidate h3{margin:4px 0 9px}.attr{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.82rem}.attr:first-of-type{border-top:0}.attr span{color:var(--muted)}.best-tag{display:inline-flex;padding:5px 9px;border-radius:999px;border:1px solid #347968;color:var(--mint);font-size:.72rem;font-weight:900}
+.before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}.state{padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.state h3{margin:5px 0 9px}.state.ok{border-color:#347968}.state.policy{border-color:#8f6a38}.switch-arrow{display:grid;place-items:center;color:var(--blue);font-size:1.5rem;font-weight:950}.path{margin-top:10px;padding:11px;border-radius:11px;background:#081522;font-size:.84rem;color:#d7e3ef}.key{color:var(--mint);font-weight:900}.amber{color:var(--amber);font-weight:900}
+.policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.policy-card{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.policy-card h3{margin:6px 0}.policy-card .rule{margin-top:11px;padding:11px;border-radius:11px;background:#081522;font-size:.82rem}.policy-card ul{margin:10px 0 0;padding-left:1.05rem;color:var(--muted)}.policy-card li{margin:.45rem 0}
+.compare{width:100%;border-collapse:collapse}.compare th,.compare td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:.82rem}.compare th{color:#a9bdd0}.compare td:first-child{font-weight:800}
+.caution{padding:18px;border:1px solid #8f6a38;border-radius:15px;background:rgba(255,191,105,.05)}.caution h3{margin:4px 0 7px}.caution p{margin:0;color:#d6e2ef}.review>article{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel3)}.review ul{margin:0;padding-left:1.1rem}.review li{margin:.55rem 0}
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:24px;border:1px solid #347968;border-radius:18px;background:rgba(126,224,194,.07)}.cta h2{margin:4px 0 7px}.cta p{margin:0;color:var(--muted)}.refs{display:grid;gap:8px}.refs a{color:var(--blue);overflow-wrap:anywhere}.refs p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+@media(max-width:980px){.flow{grid-template-columns:1fr 1fr}.as-topology{grid-template-columns:1fr}.before-after{grid-template-columns:1fr}.switch-arrow{transform:rotate(90deg)}}
+@media(max-width:760px){.grid2,.review,.candidates,.policy-grid{grid-template-columns:1fr}.first-q{grid-template-columns:1fr}.question-mark{margin:auto}.flow{grid-template-columns:1fr}.cta{display:grid}.peer-row{align-items:flex-start}}
+@media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.bgp-hero{padding-top:42px}.compare{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 핵심</a><a href="#paths">후보 경로</a><a href="#policy">Route Policy</a><a href="#advertise">광고 제어</a></nav></div></header>
+<main>
+<section class="bgp-hero"><div class="shell">
+<span class="scope-badge">RFC 4271 + Cisco IOL 15.4(2)T4 · BGP-01~06 실제 검증 완료</span>
+<div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
+<h1>BGP / Route Policy</h1>
+<p><b>같은 목적지로 갈 수 있는 길이 여러 개라면 어떤 길을 사용할까요?</b> BGP는 단순히 “가장 가까운 길” 하나만 찾는 것이 아니라, 받은 경로의 정보와 운영 정책을 함께 보고 사용할 경로를 고릅니다.</p>
+<div class="core"><strong>후보 경로 → Path Attribute / Policy 비교 → Best Path → Routing Table · 광고</strong><p>핵심은 “길이 존재한다”와 “그 길을 선택한다”, “그 길을 다른 이웃에게 보여준다”를 구분하는 것입니다.</p></div>
+</div></section>
+
+<section id="summary"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">00 · 첫 질문</div><h2>목적지는 같은데 길이 두 개라면?</h2></div></div>
+<div class="first-q" aria-label="두 개의 BGP 후보 경로">
+<article class="route-card"><strong>경로 A · R2 방향</strong><small>목적지 203.0.113.1/32로 가는 후보</small></article>
+<div class="question-mark" aria-hidden="true">?</div>
+<article class="route-card"><strong>경로 B · R3 방향</strong><small>같은 목적지로 가는 또 다른 후보</small></article>
+</div>
+<div class="note" style="margin-top:12px"><b>30초 핵심:</b> BGP는 목적지 Prefix와 함께 경로의 속성(Path Attribute)을 받습니다. 여러 후보가 있으면 정책과 속성을 비교해 하나의 Best Path를 선택합니다.</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">01 · AS / BGP SESSION</div><h2>먼저 “어느 네트워크 운영 영역끼리 연결됐는가”를 봅니다.</h2></div></div>
+<div class="as-topology">
+<article class="as-zone"><div class="eyebrow">AS 65002</div><h3>다른 운영 영역</h3><div class="router">R2</div><p class="mini">R1과 AS 번호가 다르므로 eBGP 관계입니다.</p></article>
+<article class="as-zone core-as"><div class="eyebrow">AS 65001</div><h3>같은 운영 영역</h3><div class="same-as"><div class="router primary">R1</div><div><div class="line"></div><div class="link-label">iBGP</div></div><div class="router">R4</div></div><p class="mini"><b>AS(Autonomous System)</b>는 하나의 관리 정책 아래 운영되는 라우팅 영역을 번호로 식별한 것입니다.</p></article>
+<article class="as-zone"><div class="eyebrow">AS 65003</div><h3>다른 운영 영역</h3><div class="router">R3</div><p class="mini">R1과 AS 번호가 다르므로 eBGP 관계입니다.</p></article>
+</div>
+<div class="grid2" style="margin-top:14px">
+<article class="card2"><div class="eyebrow">eBGP</div><h3>서로 다른 AS 사이</h3><p>이번 검증에서는 R1↔R2, R1↔R3가 eBGP였습니다.</p></article>
+<article class="card2"><div class="eyebrow">iBGP</div><h3>같은 AS 내부</h3><p>R1↔R4는 같은 AS65001 내부의 iBGP였습니다. eBGP/iBGP는 케이블 종류가 아니라 AS 관계로 구분합니다.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">02 · MENTAL MODEL</div><h2>BGP의 흐름은 다섯 단계로 기억하세요.</h2></div></div>
+<div class="flow">
+<article class="step"><b>1</b><h3>Session</h3><p>Neighbor와 BGP 연결을 맺습니다.</p></article>
+<article class="step"><b>2</b><h3>Route 수신</h3><p>목적지 Prefix와 Path Attribute를 받습니다.</p></article>
+<article class="step"><b>3</b><h3>후보 비교</h3><p>쓸 수 있는 여러 경로를 비교합니다.</p></article>
+<article class="step"><b>4</b><h3>Best Path</h3><p>정책과 속성에 따라 사용할 경로를 고릅니다.</p></article>
+<article class="step"><b>5</b><h3>반영 · 광고</h3><p>선택 경로를 Routing Table에 반영하고 정책에 따라 다른 Neighbor에 광고합니다.</p></article>
+</div>
+</div></section>
+
+<section id="paths"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">03 · PREFIX + ATTRIBUTES</div><h2>Route는 목적지 주소만 있는 정보가 아닙니다.</h2></div></div>
+<div class="candidates">
+<article class="candidate best"><span class="best-tag">BASELINE BEST</span><h3>R2에서 받은 후보</h3><div class="attr"><span>Prefix</span><b>203.0.113.1/32</b></div><div class="attr"><span>AS_PATH</span><b>65002</b></div><div class="attr"><span>LOCAL_PREF</span><b>100</b></div><div class="attr"><span>NEXT_HOP</span><b>10.0.12.2</b></div></article>
+<article class="candidate"><div class="eyebrow">OTHER CANDIDATE</div><h3>R3에서 받은 후보</h3><div class="attr"><span>Prefix</span><b>203.0.113.1/32</b></div><div class="attr"><span>AS_PATH</span><b>65003 65003 65003</b></div><div class="attr"><span>LOCAL_PREF</span><b>100</b></div><div class="attr"><span>NEXT_HOP</span><b>10.0.13.2</b></div></article>
+</div>
+<div class="note" style="margin-top:12px"><b>실제 Baseline:</b> 두 후보 모두 Weight 0, LOCAL_PREF 100, Origin IGP로 통제했고 R2의 AS_PATH가 더 짧았습니다. Cisco IOL에서 R2가 Best Path가 되었고 실제 Ping도 R1-R2 링크에서만 3/3 관측됐습니다.</div>
+<div class="caution" style="margin-top:12px"><h3>AS_PATH 문자열을 실제 Router 개수로 읽지 마세요.</h3><p>이번 R3 경로의 반복된 65003은 실험을 위해 AS_PATH prepend 정책으로 만든 속성입니다. 물리적인 Router가 세 대 더 있다는 뜻이 아닙니다.</p></div>
+</div></section>
+
+<section id="policy"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">04 · ROUTE POLICY</div><h2>정책은 “어느 길을 더 선호할지” 바꿀 수 있습니다.</h2></div></div>
+<div class="before-after">
+<article class="state ok"><div class="eyebrow">BASELINE</div><h3>R2가 선택됨</h3><div class="path">R2 · LOCAL_PREF 100 · AS_PATH 65002 → <b class="key">Best</b></div><div class="path">R3 · LOCAL_PREF 100 · AS_PATH 65003 65003 65003</div></article>
+<div class="switch-arrow">→</div>
+<article class="state policy"><div class="eyebrow">POLICY APPLIED</div><h3>R3 LOCAL_PREF를 200으로 올림</h3><div class="path">R2 · LOCAL_PREF 100 · AS_PATH 65002</div><div class="path">R3 · <b class="amber">LOCAL_PREF 200</b> · 긴 AS_PATH → <b class="key">Best</b></div></article>
+</div>
+<div class="note" style="margin-top:12px"><b>실제 관측:</b> Cisco IOL의 통제된 조건에서 R3의 LOCAL_PREF를 200으로 높이자 Best/RIB Next Hop이 R2(10.0.12.2)에서 R3(10.0.13.2)로 바뀌었고, marker Ping 3/3도 R1-R3 링크에서만 보였습니다. 정책 제거 후 R2로 복구됐습니다.</div>
+<div class="caution" style="margin-top:12px"><h3>이번 페이지는 Cisco Best-Path 전체 순서를 외우는 과정이 아닙니다.</h3><p>표준 BGP의 핵심은 경로 속성과 정책을 이용해 선택을 제어한다는 점입니다. Cisco의 세부 Best-Path 비교 순서는 구현 Reference로 구분하며, 이번 실험은 선행 조건을 통제한 한 사례입니다.</p></div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">05 · iBGP PROPAGATION</div><h2>같은 AS 내부에도 선택 결과와 내부 선호 정보를 전달합니다.</h2></div></div>
+<table class="compare" aria-label="R4가 받은 iBGP 경로 속성 비교">
+<thead><tr><th>상태</th><th>R4 AS_PATH</th><th>LOCAL_PREF</th><th>NEXT_HOP</th></tr></thead>
+<tbody>
+<tr><td>Baseline</td><td>65002</td><td>100</td><td>10.0.14.1</td></tr>
+<tr><td>R3 정책 적용</td><td>65003 65003 65003</td><td>200</td><td>10.0.14.1</td></tr>
+<tr><td>복구</td><td>65002</td><td>100</td><td>10.0.14.1</td></tr>
+</tbody>
+</table>
+<div class="grid2" style="margin-top:14px">
+<article class="card2"><div class="eyebrow">STANDARD BEHAVIOR</div><h3>iBGP라고 AS_PATH에 내 AS가 자동 추가되지는 않습니다.</h3><p>R4가 받은 경로는 R1이 선택한 외부 AS_PATH를 그대로 반영했고, LOCAL_PREF도 같은 AS 내부에 전달됐습니다.</p></article>
+<article class="card2"><div class="eyebrow">EXPLICIT IMPLEMENTATION</div><h3>NEXT_HOP=R1은 next-hop-self 설정 결과입니다.</h3><p>이번 Lab은 R1→R4에 <code>next-hop-self</code>를 명시했습니다. iBGP 자체가 항상 NEXT_HOP을 자동 변경한다고 일반화하지 않습니다.</p></article>
+</div>
+</div></section>
+
+<section id="advertise"><div class="shell">
+<div class="section-head"><div><div class="eyebrow">06 · ADVERTISEMENT POLICY</div><h2>Route Policy는 “어떤 경로를 보여줄지”도 제어합니다.</h2></div></div>
+<div class="policy-grid">
+<article class="policy-card"><div class="eyebrow">TARGET-ONLY FILTER</div><h3>광고 허용 범위를 제한</h3><div class="rule">TARGET · 203.0.113.1/32 → 광고<br>EXTRA · 198.51.100.2/32 → 광고하지 않음</div><ul><li>R2 자체 BGP Table에는 둘 다 존재</li><li>R1에는 TARGET만 보임</li></ul></article>
+<article class="policy-card"><div class="eyebrow">REMOVE → RECOVER</div><h3>필터를 제거하면 EXTRA가 나타남</h3><div class="rule">필터 제거 → EXTRA 광고<br>필터 재적용 → EXTRA Withdrawal</div><ul><li>TARGET는 계속 유지</li><li>최종 상태에서 EXTRA는 다시 사라짐</li></ul></article>
+</div>
+<div class="caution" style="margin-top:12px"><h3>Prefix Filter ≠ Packet ACL</h3><p>여기서 Filter는 데이터 패킷을 Drop하는 규칙이 아니라, BGP Neighbor에게 어떤 <b>Route를 광고할지</b> 제어하는 정책입니다.</p></div>
+</div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">07 · REVIEW</div><h2>이 다섯 문장을 설명할 수 있으면 1단계 완료입니다.</h2></div></div>
+<div class="review">
+<article><h3>⭐ 꼭 기억하세요</h3><ul><li>eBGP/iBGP는 장비 종류가 아니라 AS 관계로 구분합니다.</li><li>BGP Route는 Prefix와 Path Attribute를 함께 다룹니다.</li><li>여러 후보 중 정책과 속성을 비교해 하나의 Best Path를 선택합니다.</li><li>LOCAL_PREF 같은 정책 값은 같은 AS에서 선호할 Exit를 바꿀 수 있습니다.</li><li>Prefix Filter는 Packet 차단이 아니라 Route Advertisement 범위를 제어합니다.</li></ul></article>
+<article><div class="eyebrow">내 말로 설명하기</div><h3>“R2 경로가 더 짧은데도 왜 정책 적용 후 R3로 Packet이 갔을까?”</h3><p style="color:var(--muted)">후보 경로 → LOCAL_PREF → Best Path → Routing Table → 실제 전달 경로 순서로 설명해 보세요.</p></article>
+</div>
+</div></section>
+
+<section><div class="shell"><div class="cta"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>어떤 경로가 선택되고 어떤 Route가 광고되는지 직접 예측해 보세요.</h2><p>AS 관계 → 후보 경로 → Best Path → LOCAL_PREF 정책 → iBGP 전달 → Prefix Filter를 예상 → 실행 → 관찰 → 설명 순서로 확인합니다.</p></div><a class="btn primary" href="bgp-simulator.html">Interactive Lab 시작 →</a></div></div></section>
+
+<section><div class="shell">
+<div class="section-head"><div><div class="eyebrow">REFERENCE</div><h2>이번 주제의 근거</h2></div></div>
+<div class="refs">
+<article class="card2"><a href="https://www.rfc-editor.org/rfc/rfc4271.html">RFC 4271 · A Border Gateway Protocol 4 (BGP-4)</a><p>eBGP/iBGP 관계, UPDATE, AS_PATH, NEXT_HOP, LOCAL_PREF와 BGP Decision Process의 표준 동작을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/13753-25.html">Cisco · Select BGP Best-path Algorithm</a><p>Cisco 구현에서 LOCAL_PREF와 AS_PATH가 비교되는 순서와 통제 조건을 확인했습니다.</p></article>
+<article class="card2"><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-routing/b-ip-routing/m_irg-external-sp-0.html">Cisco IOS XE · External BGP / Prefix Filtering</a><p>Neighbor 정책과 Prefix List를 이용한 Route Advertisement Filtering 구현을 확인했습니다.</p></article>
+</div>
+<div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 4대의 격리 PNETLab에서 BGP-01~06을 CLI와 내부 링크 PCAP 3개로 PASS했습니다. 두 외부 후보 경로, LOCAL_PREF 전환·복구, iBGP 속성 전달, TARGET-only Prefix Filter 제거·재적용만 검증했습니다. 전체 BGP Best-Path 알고리즘, 인터넷 규모 수렴 성능, 모든 Vendor 동작을 검증했다고 표현하지 않습니다.</div>
+</div></section>
+</main>
+<footer class="footer"><div class="shell">BGP / Route Policy · Candidate → Policy → Best Path → Advertisement</div></footer>
+</body>
+</html>
