@@ -76,3 +76,26 @@ Observed problems and fixes after those captures:
 No unexpected final answer, active final path or filled result was visible in the inspected initial captures. The completed captures showed prediction/result comparisons and device names consistently. Card text wrapped within the inspected layouts; the reported overlaps were concrete labels/overlays rather than invented general failures.
 
 **Status:** capture review performed; defects fixed in source. A fresh CI capture after these fixes is still required before marking the repaired visual cases PASS. The previous v2 captures are retained unchanged as evidence of the detected defects. Public click-path verification remains separate.
+
+## Post-fix visual verification — PASS
+
+CI run `37641266357`, commit `feee99d`. The five packet topics passed the automated suite. A further **25 original post-fix CI JPEGs** were opened and visually inspected:
+
+- ICMP, VLAN, Inter-VLAN: `/workspace/scratch/3ea555ad7246/qa/ci-verified/guide-aligned-v2-packet-switching/`
+- DHCP, DNS: `/workspace/scratch/3ea555ad7246/qa/ci-verified/guide-aligned-v2-services-routing/`
+- Exact inspected sets in those directories: each topic's `{360,768,1366,1920}-visual.jpg` (20 images), plus each topic's `360-idle.jpg` (5 full-page images).
+
+Post-fix findings:
+
+| Repaired item | Result | Visible evidence |
+| --- | --- | --- |
+| Sticky question tabs covering the diagram | PASS | All five 360 visual captures: no question tab over the topology |
+| Hidden observation panels leaving large idle gaps | PASS | All five 360 idle captures: event, reset/next and evidence follow without the prior large blank areas |
+| Inter-VLAN mobile diagram before packet fields | PASS | 360/768 visual captures: topology, caption, then IPv4/Ethernet/TTL fields |
+| DHCP capture-point labels covering devices | PASS | 1366/1920 visual captures: labels above cables, device symbols and names unobscured |
+| DNS transport labels covering routers | PASS | 1366/1920 visual captures: transport labels below devices; symbols, names and addresses remain visible |
+| VLAN zone caption behind top PC | PASS | 1366/1920 visual captures: both zone captions sit above their PC symbols |
+| Mobile links suggesting an extra common bus | PASS | VLAN/Inter-VLAN/DNS 360/768 visual captures: separate device-to-switch links |
+| Remaining generic status/copy translations | PASS for inspected screens | DHCP `같은 Subnet / 다른 Subnet`, DNS `이름 해석 후`, Korean DHCP/DNS headers and role notes |
+
+No remaining blocking layout defect was found in these inspected screenshots. The fixed bottom next-action bar is an intentional viewport overlay; these full/element screenshots are not evidence that all text is simultaneously visible without scrolling. The CI interaction suite and coordinating agent own its reachability checks. No further source changes were made during this post-fix review. This supersedes the earlier “fresh CI capture required” checkpoint for the listed defects; it does not imply that every scenario/state was manually reviewed or that public-site verification has been performed here.

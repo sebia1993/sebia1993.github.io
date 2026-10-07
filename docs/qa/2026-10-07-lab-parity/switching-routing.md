@@ -42,3 +42,13 @@
 - PASS: 수정 후 `node --test tests/roadmap-models.test.mjs` 5개 검사(원본 해시·보호 파일·명칭 대응·관찰 계획 순서/시간 포함).
 - NOT_RUN: 위 4개 화면 수정 이후 새 캡처 및 Public QA는 통합 담당의 다음 CI/공개 검수에서 판정한다. 기존 캡처를 수정 후 PASS 근거로 재사용하지 않는다.
 - 추가 한글화: 실제 화면에 남은 일반 설명 단어 Lab·State·Layer·Logical·Physical·Data를 presentation.labels에서 실습·상태·계층·논리·물리·데이터로 표시한다. 실제 CLI·evidence와 시나리오 원문은 보존한다.
+
+## 수정 후 최종 CI 화면 확인
+
+- 실행: GitHub Actions `37641266357`, 대상 커밋 `feee99d`.
+- 증거 루트: `/workspace/scratch/3ea555ad7246/qa/ci-verified/`의 각 `guide-aligned-v2-*` 그룹. 원본 `*-visual.jpg`를 분석용 연락 시트로 열어 재확인했다.
+- PASS: STP·LACP·Routing Table·FHRP의 360·768·1366·1920px 관찰 화면에서 문제 탭의 토폴로지 가림이 사라졌다. 노드/연결/설명에 새로운 차단 수준의 잘림이나 겹침이 없다.
+- PASS: LACP 360·768px에서 M1/M2 라벨과 Po1 상태 배지가 분리돼 각각 읽힌다.
+- PASS: FHRP의 CP-R1-UP·CP-R2-UP 실제 캡처 지점 식별자가 원문대로 표시된다. 768px에서 줄바꿈은 있으나 내용이 누락되지 않는다. 완료 단계의 IPv4 마커는 실제 전달 경로의 도착 지점에 표시된다.
+- PASS: OSPF `guide-aligned-v2-routing-security/ospf-{360,768,1366,1920}-visual.jpg`를 실제 확인했다. 네 폭 모두 CP12/CP23 Cost 10과 CP13 Cost 50이 보이고, Neighbor 완료 화면에 잘못 남던 IPv4 마커가 없다. 360px 세로 삼각형에서도 장비명·Cost·FULL 배지가 각각 읽히며 문제 탭의 가림이 없다.
+- 최종 판단: 담당 5개 주제의 지적한 화면 결함을 수정 후 CI 캡처로 재확인했으며 추가 차단 수준의 결함은 발견하지 못했다. 공개 주소 검수는 통합 Public QA 기록을 따른다.

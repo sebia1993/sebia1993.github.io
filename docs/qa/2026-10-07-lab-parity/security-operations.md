@@ -64,3 +64,27 @@
 | Animation, action, reverse policy 등 일반 영어 잔존 | 표시 사전을 추가하고 명령어·원본 근거는 보존 | 통합 재검수 대기 |
 
 모바일 고정 문제 탭이 그림을 가리는 현상과 초기 숨긴 상태 패널의 여백은 루트에 공유했다. 해당 공통 계층의 수정과 후속 CI/공개 검사 결과를 통합 보고서에서 기록한다. 이 최초 캡처의 시각 검수는 결함 발견 결과이므로 수정 후 PASS 증거로 재사용하지 않는다.
+
+## 수정 후 CI 재검수 (feee99d)
+
+실행 `37641266357`, 캡처 `qa/ci-verified/guide-aligned-v2-routing-security` 및 `guide-aligned-v2-operations`를 다시 확인했다. 5개 실습 × 4개 너비의 관찰 영역 20개와 각 모바일 초기/완료 화면을 검수했다.
+
+- PASS: ACL 차단 표시가 정상 높이이며 장비를 가리지 않음.
+- PASS: 데스크톱 토폴로지/상태 표/현재 사건 배치와 표 가독성.
+- PASS: 자동화 PC A 이름·설명이 연결선과 겹치지 않음.
+- PASS: 모바일 문제 탭의 그림 가림 해소 및 초기 숨은 패널의 큰 공백 제거.
+- PASS: 일반 영어 Animation/action/reverse policy 등 추가 번역 확인.
+- 후속 수정: 360px Firewall CP12가 상단 상태 배지 뒤에 숨고 관측 실습 초기 CP 두 개가 서로 겹치는 잔여 문제를 발견했다. 이 세 라벨만 해당 모바일 배치의 정해진 빈 공간으로 배치했다. 다른 너비/재생/데이터 로직은 변경하지 않았으며 마지막 대상 캡처를 기다린다.
+
+## 최종 라벨 재검수 — PASS
+
+배포 코드 `df81935`, main CI `37642699324`의 최종 원본 캡처 4개를 직접 확인했다.
+
+- `guide-aligned-v2-routing-security/firewall-vpn-360-idle.jpg`
+- `guide-aligned-v2-routing-security/firewall-vpn-360-visual.jpg`
+- `guide-aligned-v2-operations/observability-360-idle.jpg`
+- `guide-aligned-v2-operations/observability-360-visual.jpg`
+
+Firewall CP12는 초기·완료 모두 상단 상태 배지 아래에 온전히 보인다. CP23/CP34/CP45와 장비도 가려지지 않는다. 관측 실습의 CP-DATA/CP-MGMT는 각각 데이터/관리 경로의 바깥쪽에 분리되어 초기·완료 모두 서로 및 장비 설명과 겹치지 않는다. 마지막 잔여 라벨 문제는 PASS이며 추가 코드 수정은 하지 않았다. 앞선 4개 너비 검수와 합쳐 이 그룹의 발견된 시각 결함은 모두 해소됐다.
+
+공개 URL 전체 22개/120개 시나리오의 24,141개 검사 PASS는 루트가 수행한 공개 CI `37642699211`에 기록돼 있다. 이 문서의 육안 검수 범위와 공개 기능 검수 범위를 구분한다. 새로운 실장비 검증을 수행한 것은 아니다.

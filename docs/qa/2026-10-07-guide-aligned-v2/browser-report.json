@@ -1,0 +1,476 @@
+{
+  "source_run": "https://github.com/sebia1993/sebia1993.github.io/actions/runs/37641266357",
+  "source_commit": "feee99d82e30ebfe119df66944e17161d24a84c4",
+  "checks": 24141,
+  "scenarios": 120,
+  "capture_count": 528,
+  "groups": [
+    {
+      "group": "guide-aligned-v2-routing-security",
+      "checks": 5845,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "ospf",
+          "checks": 896,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 22,
+          "durations": [
+            1050,
+            1230,
+            1470,
+            1650,
+            2070
+          ]
+        },
+        {
+          "topic": "acl",
+          "checks": 1692,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 39,
+          "durations": [
+            600,
+            1020,
+            1050,
+            1860
+          ]
+        },
+        {
+          "topic": "nat-pat",
+          "checks": 1492,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 37,
+          "durations": [
+            600,
+            1020,
+            1050
+          ]
+        },
+        {
+          "topic": "firewall-vpn",
+          "checks": 1765,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 36,
+          "durations": [
+            600,
+            1020,
+            1050
+          ]
+        }
+      ]
+    },
+    {
+      "group": "guide-aligned-v2-services-routing",
+      "checks": 3812,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "lacp",
+          "checks": 954,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 21,
+          "durations": [
+            1230,
+            1650,
+            3330
+          ]
+        },
+        {
+          "topic": "dhcp",
+          "checks": 942,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 20,
+          "durations": [
+            1230,
+            1650,
+            2070,
+            2490
+          ]
+        },
+        {
+          "topic": "dns",
+          "checks": 803,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 19,
+          "durations": [
+            1230,
+            1650,
+            2070,
+            2490,
+            2910,
+            4590
+          ]
+        },
+        {
+          "topic": "routing-table",
+          "checks": 1113,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 22,
+          "durations": [
+            1050,
+            1230,
+            1470,
+            1650
+          ]
+        }
+      ]
+    },
+    {
+      "group": "guide-aligned-v2-resilience",
+      "checks": 2942,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "fhrp",
+          "checks": 1007,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 25,
+          "durations": [
+            1050,
+            1230,
+            1470,
+            2070,
+            2490
+          ]
+        },
+        {
+          "topic": "vrf",
+          "checks": 1007,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 25,
+          "durations": [
+            1650,
+            1800,
+            2100,
+            2400
+          ]
+        },
+        {
+          "topic": "bgp",
+          "checks": 928,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 20,
+          "durations": [
+            1650,
+            1800,
+            2100
+          ]
+        }
+      ]
+    },
+    {
+      "group": "guide-aligned-v2-packet-switching",
+      "checks": 3826,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "icmp-troubleshooting",
+          "checks": 909,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 18,
+          "durations": [
+            1230,
+            1650,
+            2070
+          ]
+        },
+        {
+          "topic": "vlan-trunk",
+          "checks": 807,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 18,
+          "durations": [
+            1230,
+            1650,
+            2070,
+            2490
+          ]
+        },
+        {
+          "topic": "inter-vlan-routing",
+          "checks": 822,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 22,
+          "durations": [
+            1230,
+            1650,
+            2070
+          ]
+        },
+        {
+          "topic": "stp",
+          "checks": 1288,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 27,
+          "durations": [
+            1050,
+            1230,
+            1650,
+            2070,
+            2490,
+            2910
+          ]
+        }
+      ]
+    },
+    {
+      "group": "guide-aligned-v2-wireless",
+      "checks": 3651,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "wifi-rf",
+          "checks": 772,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 18,
+          "durations": [
+            1470,
+            1800
+          ]
+        },
+        {
+          "topic": "wlan-association",
+          "checks": 1237,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 45,
+          "durations": [
+            1470,
+            1650,
+            2070
+          ]
+        },
+        {
+          "topic": "dot1x-radius",
+          "checks": 870,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 22,
+          "durations": [
+            1650,
+            1800
+          ]
+        },
+        {
+          "topic": "roaming-wlan-troubleshooting",
+          "checks": 772,
+          "scenarios": 6,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 18,
+          "durations": [
+            1650,
+            1800
+          ]
+        }
+      ]
+    },
+    {
+      "group": "guide-aligned-v2-operations",
+      "checks": 4065,
+      "screenshots": {
+        "format": "jpeg",
+        "quality": 82
+      },
+      "results": [
+        {
+          "topic": "redistribution",
+          "checks": 940,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 21,
+          "durations": [
+            1800,
+            2100
+          ]
+        },
+        {
+          "topic": "observability",
+          "checks": 1342,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 32,
+          "durations": [
+            600,
+            1020,
+            1050
+          ]
+        },
+        {
+          "topic": "network-automation",
+          "checks": 1783,
+          "scenarios": 5,
+          "viewports": [
+            360,
+            768,
+            1366,
+            1920
+          ],
+          "status": "PASS",
+          "events": 35,
+          "durations": [
+            600,
+            1020,
+            1050
+          ]
+        }
+      ]
+    }
+  ]
+}

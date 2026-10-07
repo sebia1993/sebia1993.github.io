@@ -9,6 +9,11 @@ import { createHash } from 'node:crypto';
 const repo = fileURLToPath(new URL('../', import.meta.url));
 const read = name => fs.readFileSync(path.join(repo, name), 'utf8');
 const digest = value => createHash('sha256').update(value).digest('hex');
+// Git may check text out as CRLF on Windows. Compare the repository's LF text
+// without ignoring spaces, words, attributes or any other substantive content.
+const protectedDigest = (name, value) => digest(/\.(?:html|css|js|svg)$/.test(name)
+  ? value.toString('utf8').replace(/\r\n/g, '\n')
+  : value);
 const fixtures = JSON.parse(read('tests/fixtures/roadmap-simulator-models.json'));
 const protectedPages = JSON.parse(read('tests/fixtures/roadmap-protected-pages.json'));
 
@@ -66,7 +71,10 @@ test('all 22 source models preserve the 120 previously verified scenarios', () =
 
 test('reference simulators and associated concept pages stay outside this change', () => {
   for (const [name, expected] of Object.entries(protectedPages.files)) {
-    assert.equal(digest(fs.readFileSync(path.join(repo, name))), expected, `${name}: protected baseline ${protectedPages.baseline}`);
+    const content = fs.readFileSync(path.join(repo, name));
+    assert.equal(protectedDigest(name, content), expected, `${name}: protected baseline ${protectedPages.baseline}`);
+    const windowsCheckout = content.toString('utf8').replace(/\r?\n/g, '\r\n');
+    assert.equal(protectedDigest(name, Buffer.from(windowsCheckout)), expected, `${name}: same protected content after Windows checkout`);
   }
 });
 
