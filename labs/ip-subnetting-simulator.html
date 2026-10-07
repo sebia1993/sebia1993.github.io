@@ -661,7 +661,7 @@ function revealObservationResult(){
  renderProgress();renderTabs();renderChoices();
  var ni=nextIndex();$('nextBtn').textContent=ni<0?'학습 결과 보기 →':idx===3?'미응답 문제 '+(ni+1)+'로 →':'다음 문제 · '+(ni+1)+' / 4 →';$('nextBtn').disabled=false;
  $('feedback').textContent='흐름 확인이 끝났습니다. 이제 내 예상과 실제 결과를 비교하세요.';
- $('verdictTitle').focus({preventScroll:true});updateAutoButton();
+ focusSection('verdictTitle',true);updateAutoButton();
 }
 async function playObservation(replay){
  if(!observation)return;
