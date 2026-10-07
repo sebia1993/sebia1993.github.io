@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#21364d"/></pattern>
+          <linearGradient id="device" x2="0" y2="1"><stop stop-color="#284e70"/><stop offset="1" stop-color="#122e49"/></linearGradient>
+          <filter id="shadow"><feDropShadow dy="6" stdDeviation="8" flood-opacity=".25"/></filter>
+          <marker id="arrowRequest" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#12a57e"/></marker>
+          <marker id="arrowReply" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#2f7fd0"/></marker>
+          <symbol id="pc" viewBox="0 0 100 85">
+            <rect x="10" y="5" width="80" height="54" rx="6" fill="url(#device)" stroke="#78bce9" stroke-width="2"/>
+            <rect x="17" y="12" width="66" height="38" rx="2" fill="#0b1c2c"/>
+            <path d="M30 30l9 7-9 7M48 44h20" fill="none" stroke="#6be0c0" stroke-width="3"/>
+            <path d="M45 59v15h-17m27-15v15h17" fill="none" stroke="#78bce9" stroke-width="4"/>
+          </symbol>
+          <symbol id="switch" viewBox="0 0 150 90">
+            <path d="M10 27l20-16h100l12 16v45H10Z" fill="url(#device)" stroke="#77b8df" stroke-width="2"/>
+            <path d="M10 27h132" stroke="#77b8df"/>
+            <g fill="#071725" stroke="#6eafd3"><rect x="24" y="41" width="14" height="15"/><rect x="44" y="41" width="14" height="15"/><rect x="64" y="41" width="14" height="15"/><rect x="84" y="41" width="14" height="15"/></g>
+            <g fill="#6ce0bb"><circle cx="31" cy="63" r="2"/><circle cx="51" cy="63" r="2"/><circle cx="71" cy="63" r="2"/></g>
+            <path d="M52 18h36m-8-5l8 5-8 5" stroke="#9ed9fa" fill="none"/>
+          </symbol>
+          <symbol id="router" viewBox="0 0 140 110">
+            <path d="M15 36v42c0 28 110 28 110 0V36" fill="url(#device)" stroke="#87bafa" stroke-width="2"/>
+            <ellipse cx="70" cy="36" rx="55" ry="28" fill="#264b77" stroke="#99c5ff" stroke-width="2"/>
+            <g stroke="#d1eaff" stroke-width="3" fill="none"><path d="M32 36h26m-7-6l7 6-7 6M108 36H82m7-6l-7 6 7 6M70 17v13m-6-6l6 6 6-6M70 55V42m-6 6l6-6 6 6"/></g>
+            <circle cx="103" cy="82" r="3" fill="#78e3bd"/>
+          </symbol>
+        </svg>

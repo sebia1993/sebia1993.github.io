@@ -54,28 +54,17 @@ try{
    const page=await browser.newPage({viewport:{width,height:960}}),errors=errorsFor(page);
    try{
     assert.equal((await page.goto(`${base}/labs/ip-subnetting-simulator.html`,{waitUntil:'networkidle'})).status(),200);
-    await page.emulateMedia({reducedMotion:'reduce'});
-    assert.equal(await page.locator('.tab').count(),4);
-    if(width<=390){
-     assert.equal(await page.evaluate(()=>{const t=document.querySelector('.tabs');return t.scrollWidth>t.clientWidth;}),true);
-     assert.equal(await page.evaluate(()=>document.querySelector('#question').getBoundingClientRect().top<innerHeight*.9),true);
-     const before=await page.evaluate(()=>scrollY);await page.locator('.tab').nth(1).click();
-     assert.ok(Math.abs((await page.evaluate(()=>scrollY))-before)<=2,'top tab should not cause a document jump');
-     await page.locator('.tab').nth(0).click();
-    }
-    assert.equal(await page.locator('#runBtn').isDisabled(),true);assert.equal(await page.locator('#resultArea').isVisible(),false);
-    await page.locator('#choices .choice').first().click();assert.equal(await page.locator('#runBtn').isEnabled(),true);
-    assert.equal(await page.locator('#runBtn').innerText(),'② 실행해서 확인하기');
+    assert.equal(await page.locator('.lesson-tab').count(),7);
+    assert.equal(await page.locator('#runBtn').isDisabled(),true);
+    assert.equal(await page.locator('#resultArea').isVisible(),false);
+    await page.locator('[data-prediction="192.168.10.64/26"]').click();
     await page.locator('#runBtn').click();
-    assert.equal(await page.locator('#modelObservation').isVisible(),true);
-    assert.equal(await page.locator('#verdict').isVisible(),false,'grade must wait for the observation flow');
-    assert.equal(await page.locator('#nextBtn').isVisible(),false,'Next must wait for the observation flow');
-    await page.waitForFunction(()=>document.querySelector('#modelObservation')?.dataset.flowState==='complete',undefined,{timeout:5000});
+    assert.equal(await page.locator('#resultArea').isVisible(),false);
+    await page.waitForFunction(()=>document.querySelector('#ipLab').dataset.state==='COMPLETED',undefined,{timeout:22000});
     assert.equal(await page.locator('#verdictTitle').innerText(),'✓ 정답입니다');
-    assert.equal(await page.locator('#nextBtn').isVisible(),true);assert.equal(await page.locator('#choices button:disabled').count(),3);
-    assert.equal((await page.locator('body').innerText()).includes('PASS'),false,'author validation is optional, not the learner grade');
-    await page.locator('#resetBtn').click();assert.equal(await page.locator('#runBtn').isDisabled(),true);assert.equal(await page.locator('#resultArea').isVisible(),false);
-    assert.equal(await page.locator('#progressText').innerText(),'풀이 완료 0 / 4');
+    await page.locator('#resetBtn').click();
+    assert.equal(await page.locator('#runBtn').isDisabled(),true);
+    assert.equal(await page.locator('#resultArea').isVisible(),false);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
     await page.screenshot({path:resolve(output,`ip-subnetting-simulator-${width}.png`),fullPage:true});
    }finally{await page.close();}

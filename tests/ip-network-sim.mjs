@@ -1,164 +1,74 @@
+// ARP-template parity, browser interaction, and subnet regression.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
-
-const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
-await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261007-topology-sim-v4';
-const normalize=s=>s.replace(/\r\n/g,'\n').trim(),checks=[];
-let server,base=process.env.BASE_URL;
-if(!base){
- server=createServer(async(req,res)=>{try{
-  const pth=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
-  if(pth==='/favicon.ico'){res.writeHead(204).end();return;}
-  const p=resolve(root,'.'+pth);if(!p.startsWith(resolve(root)+sep)){res.writeHead(403).end();return;}
-  const b=await readFile(p);res.writeHead(200,{'Content-Type':({'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json'}[extname(p)]||'application/octet-stream'),'Cache-Control':'no-store'}).end(b);
- }catch{res.writeHead(404).end('Not found');}});
- await new Promise(r=>server.listen(0,'127.0.0.1',r));base='http://127.0.0.1:'+server.address().port;
-}
-const browser=await chromium.launch(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{});
-const matrix=[[360,800,true],[412,915,true],[800,360,true],[768,1024,true],[1366,768,false],[1920,1080,false]];
-
-async function waitComplete(page){
- await page.waitForFunction(()=>document.querySelector('#modelObservation')?.dataset.flowState==='complete',undefined,{timeout:7000});
-}
-async function runScenario(page,tab,choice,{inspectStart=false}={}){
- await page.locator('.tab').nth(tab).click();
- if(await page.locator('#resetBtn').isVisible())await page.locator('#resetBtn').click();
- await page.locator('#choices [data-value="'+choice+'"]').click();
- assert.equal(await page.locator('#runBtn').innerText(),'② 실행해서 확인하기');
- await page.locator('#runBtn').click();
- assert.equal(await page.locator('#modelObservation').isVisible(),true);
- assert.equal(await page.locator('#verdict').isVisible(),false,'grade must stay hidden while the flow is playing');
- assert.equal(await page.locator('#resultActions').isVisible(),false,'Next/Retry must stay hidden while the flow is playing');
- if(inspectStart){
-  assert.equal(await page.locator('#simTopology [data-sim-id].on-route').count(),0,'prefix comparison must not pre-highlight the final route');
-  assert.equal(await page.locator('#simEventKind').innerText(),'PREFIX');
- }
- await waitComplete(page);
- assert.equal(await page.locator('#verdict').isVisible(),true);
- assert.equal(await page.locator('#resultActions').isVisible(),true);
- assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'complete');
-}
-async function openFlow(page){
- assert.equal(await page.locator('#simFlowDetails').isVisible(),true);
- if((await page.locator('#simFlowDetails').getAttribute('open'))===null)await page.locator('#simFlowDetails summary').click();
-}
-
-async function verify(url,surface){
- for(const [width,height,touch] of matrix){
-  const context=await browser.newContext({viewport:{width,height},isMobile:touch,hasTouch:touch}),page=await context.newPage(),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
-  try{
-   assert.equal((await page.goto(url+'/'+file,{waitUntil:'networkidle'})).status(),200);
-   assert.equal(await page.locator('meta[name=network-sim-version]').getAttribute('content'),version);
-   assert.equal(await page.locator('#modelObservation').isVisible(),false);
-   assert.equal(await page.locator('#simTopology [data-device-shape=host]').count(),3);
-   assert.equal(await page.locator('#simTopology [data-device-shape=router]').count(),1);
-   // The device SVG language is intentionally similar to Ethernet/MAC Table.
-   assert.equal(await page.locator('#simTopology [data-device-shape=host] svg[viewBox="0 0 100 85"]').count(),3);
-   assert.equal(await page.locator('#simTopology [data-device-shape=router] svg[viewBox="0 0 120 80"]').count(),1);
-
-   // Keep the full-motion playback on two representative widths; speed the rest up via Reduced Motion.
-   if(![360,1366].includes(width))await page.emulateMedia({reducedMotion:'reduce'});
-
-   // Same-subnet: one Run starts observation automatically and hides the grade until the flow completes.
-   await page.locator('#choices [data-value="gw"]').click(); // deliberately wrong prediction
-   await page.locator('#runBtn').click();
-   assert.equal(await page.locator('#verdict').isVisible(),false);
-   assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
-   assert.equal(await page.locator('#simEventKind').innerText(),'PREFIX');
-   assert.equal(await page.locator('#simTopology [data-sim-id].on-route').count(),0);
-
-   if([360,1366].includes(width)){
-    await page.waitForFunction(()=>document.querySelector('#simStepLabel')?.textContent==='흐름 2 / 4',undefined,{timeout:5000});
-    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'arp-request');
-    await page.locator('#simAutoBtn').click();
-    const paused=await page.locator('#simStepLabel').textContent();
-    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'paused');
-    await page.waitForTimeout(950);
-    assert.equal(await page.locator('#simStepLabel').textContent(),paused,'pause advanced to a new event');
-    await page.locator('#simAutoBtn').click();
-   }
-   await waitComplete(page);
-   assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
-   assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'direct-path');
-   assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
-   assert.equal(await page.locator('#simAutoBtn').innerText(),'↻ 흐름 다시 보기');
-
-   // Manual fallback is available only after the automatic observation completes.
-   const scoreAfterFirst=await page.locator('#scoreText').innerText();
-   await openFlow(page);
-   await page.locator('#simPrev').click();
-   assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'arp-reply');
-   await page.locator('#simNext').click();
-   assert.equal(await page.locator('#scoreText').innerText(),scoreAfterFirst,'manual review changed score');
-
-   // Routed case: final route must NOT be shown at Prefix/ARP-request steps.
-   await runScenario(page,1,'gw',{inspectStart:true});
-   assert.equal(await page.locator('#verdictTitle').innerText(),'✓ 정답입니다');
-   assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
-   assert.equal(await page.locator('#simTopology [data-sim-id=link-a-r1]').evaluate(e=>e.classList.contains('on-route')),true);
-   assert.equal(await page.locator('#simTopology [data-sim-id=link-r1-b]').evaluate(e=>e.classList.contains('on-route')),true);
-   assert.equal(await page.locator('#simTopology [data-sim-id=pc2]').evaluate(e=>e.classList.contains('is-current')),true);
-
-   // Replay is observation-only. Switching to a new completed/available problem cancels the replay.
-   const beforeReplay=await page.locator('#scoreText').innerText();
-   await page.locator('#simAutoBtn').click();
-   assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
-   await page.locator('.tab').nth(2).click();
-   await page.waitForTimeout(600);
-   assert.equal(await page.locator('#lessonNo').innerText(),'문제 3 / 4');
-   assert.equal(await page.locator('#resultArea').isVisible(),false);
-   assert.equal(await page.locator('#scoreText').innerText(),beforeReplay);
-
-   // Wrong /24: ARP never reaches the remote host and the final state stops at the LAN boundary/router side.
-   await page.locator('#choices [data-value="gw"]').click();await page.locator('#runBtn').click();await waitComplete(page);
-   assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
-   assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'unresolved-arp');
-   assert.equal(await page.locator('#simPacket').innerText(),'응답 없음');
-   assert.equal(await page.locator('#simTopology [data-sim-id=r1]').evaluate(e=>e.classList.contains('is-stop')),true);
-   assert.equal(await page.locator('#simTopology [data-sim-id=link-r1-b]').evaluate(e=>e.classList.contains('on-route')),false);
-   assert.equal(await page.locator('#simTopology [data-sim-id=pc2]').evaluate(e=>e.classList.contains('on-route')),false);
-
-   // Recovery returns to the validated routed path.
-   await runScenario(page,3,'gw',{inspectStart:true});
-   assert.equal(await page.locator('#verdictTitle').innerText(),'✓ 정답입니다');
-   assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
-   assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
-
-   const layout=await page.evaluate(()=>{
-    const a=document.querySelector('[data-sim-id=lana]').getBoundingClientRect(),r=document.querySelector('[data-sim-id=r1]').getBoundingClientRect(),b=document.querySelector('[data-sim-id=lanb]').getBoundingClientRect();
-    return {ordered:r.left>a.right-2&&b.left>r.right-2,inside:a.left>=0&&b.right<=innerWidth,overflow:document.documentElement.scrollWidth>innerWidth+1};
-   });
-   assert.equal(layout.overflow,false);assert.equal(layout.inside,true);assert.equal(layout.ordered,true);
-
-   await page.emulateMedia({reducedMotion:'reduce'});
-   await page.locator('#simAutoBtn').click();await waitComplete(page);
-   assert.equal(await page.locator('#simPacket').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
-   await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
-   assert.ok((await page.locator('#modelCaption').innerText()).includes('SW1/SW2 내부 동작은 생략'));
-   if([360,1366].includes(width))await page.locator('#modelObservation').screenshot({path:resolve(out,'network-sim-'+surface+'-'+width+'.png')});
-   assert.deepEqual(errors,[]);
-   checks.push({surface,width,height,touch,status:'PASS',checks:['single-run-observation','grade-after-observation','progressive-path-reveal','device-shaped-icons','packet-motion','pause-resume','replay','manual-fallback','timer-cancel','failure-stop','responsive','reduced-motion','forced-colors']});
-   console.log('PASS network sim '+surface+' '+width+'x'+height);
-  }finally{await context.close();}
- }
-}
-
+import {lessons,addressWindow,subnetInfo} from '../labs/ip-subnetting-model.js';
+const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');await mkdir(out,{recursive:true});
+let base=process.env.BASE_URL,server;const errors=[],checks=[];
+if(!base){server=createServer(async(req,res)=>{try{const pathname=new URL(req.url,'http://localhost').pathname;if(pathname==='/favicon.ico'){res.writeHead(204).end();return;}const f=resolve(root,'.'+pathname);if(!f.startsWith(root)){res.writeHead(403).end();return;}res.setHeader('Content-Type',({'.js':'text/javascript','.html':'text/html; charset=utf-8','.css':'text/css','.svg':'image/svg+xml','.json':'application/json'}[extname(f)]||'text/plain'));res.end(await readFile(f));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));base='http://127.0.0.1:'+server.address().port;}
+const browser=await chromium.launch({...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{}),args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']});
+const url=base+'/labs/ip-subnetting-simulator.html';
+function watch(page){page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});}
+async function finish(p){for(let i=0;i<7;i++)await p.clock.fastForward(6000);}
+async function done(p){await p.waitForFunction(()=>document.querySelector('#ipLab').dataset.state==='COMPLETED',null,{timeout:15000});}
+async function choose(p,i,id){await p.locator('[data-lesson="'+i+'"]').click();await p.locator('[data-prediction]').filter({hasText:lessons[i].choices.find(c=>c[0]===id)[1]}).click();await p.locator('#runBtn').click();}
+async function overflow(p){assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'page horizontal overflow');assert.equal(await p.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);return ids.length!==new Set(ids).size;}),false,'duplicate IDs');}
+const props=['backgroundColor','backgroundImage','color','borderRadius','borderTopColor','borderTopWidth','boxShadow','fontSize','fontFamily','fontWeight','padding','maxWidth'];
+async function style(p,selector){return p.locator(selector).first().evaluate((el,props)=>Object.fromEntries(props.map(k=>[k,getComputedStyle(el)[k]])),props);}
 try{
- await verify(base,process.env.BASE_URL?'requested-url':'local');
- if(!process.env.BASE_URL&&process.env.GITHUB_REPOSITORY==='sebia1993/sebia1993.github.io'&&process.env.GITHUB_REF==='refs/heads/main'){
-  const publicBase='https://sebia1993.github.io',expected=normalize(await readFile(resolve(root,file),'utf8')),context=await browser.newContext();let ready=false;
-  try{
-   for(let i=0;i<18;i++){try{const r=await context.request.get(publicBase+'/'+file+'?qa='+version+'-'+i,{timeout:15000});if(r.ok()&&normalize(await r.text())===expected){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,5000));}
-   assert.ok(ready,'tested simulator source not yet published');
-  }finally{await context.close();}
-  await verify(publicBase,'published');
+ for(const [width,height] of [[360,800],[768,1024],[1366,768],[1920,1080]]){
+  const context=await browser.newContext({viewport:{width,height}}),p=await context.newPage(),ref=await context.newPage();watch(p);watch(ref);
+  await ref.goto(base+'/labs/arp-default-gateway-simulator.html',{waitUntil:'networkidle'});await p.goto(url);
+  // Byte-shared styles also match computed styles across the requested breakpoints.
+  for(const s of ['body','.wrap','.hero','.hero h1','.card','.coach','.prediction-card','.prediction-copy h2','.prediction-options button','.ping-btn','.topology-shell','.live-event-strip','.soft-btn','.next-btn'])assert.deepEqual(await style(p,s),await style(ref,s),`style parity ${s} ${width}`);
+  await p.screenshot({path:resolve(out,`subnet-initial-${width}.png`),fullPage:true});await ref.screenshot({path:resolve(out,`arp-reference-${width}.png`),fullPage:true});
+  await overflow(p);assert.equal(await p.locator('#resultArea').isVisible(),false);assert.equal(await p.locator('#runBtn').isDisabled(),true);assert.equal(await p.locator('.address-block.active').count(),0);assert.equal(await p.locator('#networkOut').innerText(),'—');
+  await p.clock.install();await p.locator('[data-prediction="192.168.10.64/26"]').click();assert.equal(await p.locator('#runBtn').isEnabled(),true);await p.locator('#runBtn').click();
+  assert.equal(await p.locator('#resultArea').isVisible(),false);assert.equal(await p.locator('#networkOut').innerText(),'—');
+  await p.clock.runFor(7600);assert.equal(await p.locator('.address-block.active').getAttribute('data-network'),'192.168.10.64');assert.equal(await p.locator('#networkOut').innerText(),'—');
+  await p.locator('#playbackBtn').click();const before=await p.locator('#liveEventDetail').innerText();await p.clock.fastForward(6000);assert.equal(await p.locator('#liveEventDetail').innerText(),before);assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'PAUSED');
+  await p.screenshot({path:resolve(out,`subnet-paused-${width}.png`),fullPage:true});await p.locator('#playbackBtn').click();await finish(p);await done(p);
+  assert.equal(await p.locator('#verdictTitle').innerText(),'✓ 정답입니다');assert.match(await p.locator('#hostsOut').innerText(),/192.168.10.65 ~ 192.168.10.126/);await overflow(p);
+  const score=await p.locator('#scoreText').innerText();await p.locator('#playbackBtn').click();assert.equal(await p.locator('#resultArea').isVisible(),false);assert.match(await p.locator('#liveEventTitle').innerText(),/단계 01/);await finish(p);await done(p);assert.equal(await p.locator('#scoreText').innerText(),score);
+  await p.screenshot({path:resolve(out,`subnet-completed-${width}.png`),fullPage:true});
+  // A reset in motion must stay reset after the old flow's full duration.
+  await p.locator('#playbackBtn').click();await p.clock.runFor(500);await p.locator('#resetBtn').click();await p.clock.fastForward(25000);assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'IDLE');assert.equal(await p.locator('.address-block.active').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);
+  // Every original scenario remains selectable; only its current path lights.
+  for(let i=3;i<7;i++){
+   await choose(p,i,lessons[i].answer);assert.equal(await p.locator('#activeLinks path').count(),0);await p.clock.runFor(1700);assert.equal(await p.locator('#packetMarker').getAttribute('hidden'),null);await finish(p);await done(p);assert.equal(await p.locator('#verdictTitle').innerText(),'✓ 정답입니다');
+   assert.equal(await p.locator('#pc1Address').innerText(),lessons[i].src+'/'+lessons[i].prefix);await overflow(p);
+   if(i===5){assert.equal(await p.locator('#liveEventKind').innerText(),'응답 없음');}
+   if(i===4)await p.screenshot({path:resolve(out,`subnet-network-${width}.png`),fullPage:true});
+  }
+  // Prefix changes in optional comparison don't change grading.
+  await p.locator('#maskPanel summary').click();const oldScore=await p.locator('#scoreText').innerText();await p.locator('[data-mask="24"]').click();assert.match(await p.locator('#maskResult').innerText(),/같은 네트워크로 판단/);assert.equal(await p.locator('#scoreText').innerText(),oldScore);
+  await p.locator('#resetBtn').click();await choose(p,1,lessons[1].choices[0][0]);await finish(p);await done(p);assert.equal(await p.locator('#verdictTitle').innerText(),'✕ 예상과 결과가 달랐습니다');
+  await p.locator('#nextBtn').click();assert.equal(await p.locator('#resultArea').isVisible(),false);assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'IDLE');
+  // Scenario change during RUNNING cancels the old run, even for rapid changes.
+  await p.locator('[data-prediction]').first().click();await p.locator('#runBtn').click();await p.locator('[data-lesson="0"]').click();await p.clock.fastForward(25000);assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'IDLE');
+  await p.locator('[data-view-mode="advanced"]').click();await p.locator('#calculatorPanel summary').click();
+  for(const prefix of [8,16,24,25,26,27,28,29,30,31,32,0]){
+   await p.locator('#ipInput').fill('192.168.10.129');await p.locator('#prefixInput').fill(String(prefix));await p.locator('#calculatorForm button[type="submit"]').click();const info=subnetInfo('192.168.10.129',prefix);assert.equal(await p.locator('[data-field="network"]').innerText(),info.network);assert.equal(await p.locator('[data-field="broadcast"]').innerText(),info.broadcast??'없음');
+  }
+  await p.locator('#prefixInput').fill('33');await p.locator('#calculatorForm button[type="submit"]').click();assert.equal(await p.locator('#calculatorResult .kv').count(),0);assert.equal(await p.locator('#calculatorMessage').getAttribute('class'),'error');
+  await p.locator('#prefixInput').fill('26');await p.locator('#practiceInputBtn').click();assert.equal(await p.locator('#resultArea').isVisible(),false);assert.equal(await p.locator('#calculatorResult .kv').count(),0);await overflow(p);
+  await p.reload();assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'IDLE');assert.equal(await p.locator('#courseCount').innerText(),'0 / 7 완료');
+  if(width===1366){
+   for(let i=0;i<lessons.length;i++){
+    const choice=i===1?lessons[i].choices[0][0]:lessons[i].answer;
+    await p.locator('[data-prediction]').filter({hasText:lessons[i].choices.find(c=>c[0]===choice)[1]}).click();await p.locator('#runBtn').click();await finish(p);await done(p);await p.locator('#nextBtn').click();
+   }
+   assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 6 · 다시 볼 문제 1/);assert.equal(await p.locator('.summary-item').count(),7);
+   await p.locator('#reviewWrongBtn').click();assert.equal(await p.locator('#verdictTitle').innerText(),'✕ 예상과 결과가 달랐습니다');
+   await p.emulateMedia({reducedMotion:'reduce'});await p.locator('#playbackBtn').click();await finish(p);await done(p);assert.match(await p.locator('#scoreText').innerText(),/정답 6/);
+   await p.locator('[data-view-mode="advanced"]').click();await p.locator('#calculatorPanel summary').click();await p.locator('#randomBtn').click();assert.equal(await p.locator('#ipLab').getAttribute('data-state'),'IDLE');assert.match(await p.locator('#coachTitle').innerText(),/내 주소/);
+   await p.locator('[data-prediction]').first().click();await p.locator('#runBtn').click();await p.locator('#calculatorPanel summary').click();await p.locator('#ipInput').fill('10.1.2.3');await finish(p);assert.notEqual(await p.locator('#ipLab').getAttribute('data-state'),'RUNNING');
+  }
+  checks.push({width,height,styleParity:true,interaction:true,overflow:false});await context.close();
  }
-}catch(e){checks.push({status:'FAIL',message:e.message});throw e;}
-finally{await writeFile(resolve(out,'ip-network-sim-qa.json'),JSON.stringify({version,networkLabExecuted:false,checks},null,2));await browser.close();if(server)await new Promise(r=>server.close(r));}
+ assert.deepEqual(errors,[]);
+ await writeFile(resolve(out,'ip-arp-template-qa.json'),JSON.stringify({base,checks,errors},null,2));console.log(JSON.stringify({PASS:true,checks,errors}));
+}finally{await browser.close();if(server)await new Promise(r=>server.close(r));}
