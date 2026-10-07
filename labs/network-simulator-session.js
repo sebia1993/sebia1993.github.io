@@ -15,7 +15,8 @@ window.NetworkSimulator = {mount(adapter) {
     'MISMATCH':'기준 불일치','NOT_EVALUATED':'비교 미실행','ERROR':'오류',
     'BEFORE':'변경 전','AFTER':'변경 후','RECOVERY':'복구','OBSERVE':'관찰',
     'DECISION':'판단','INTERPRET':'해석','DESTINATION':'목적지','EXPIRE':'만료',
-    'Scope':'실습 범위','Baseline':'기본 조건','Snapshot':'관찰 기록'
+    'Scope':'실습 범위','Baseline':'기본 조건','Snapshot':'관찰 기록',
+    'Evidence':'검증 근거','Expected':'예상 결과','Actual':'관찰 결과','Run':'실행','Summary':'요약'
   };
   const replacements = {...commonLabels, ...(presentation.names || {}), ...(presentation.labels || {})};
   const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -167,7 +168,11 @@ window.NetworkSimulator = {mount(adapter) {
     }
     const pairs=Object.entries(presentation.names||{});
     const note=$('simModelNotes');
-    if(note)note.textContent=pairs.length?'학습 화면 명칭 대응: '+pairs.map(([a,b])=>`${a} → ${b}`).join(' · '):'';
+    if(note){
+      let mapping=note.querySelector('.sim-name-map');
+      if(!mapping){mapping=document.createElement('p');mapping.className='sim-name-map';note.prepend(mapping);}
+      mapping.textContent=pairs.length?'학습 화면 명칭 대응: '+pairs.map(([a,b])=>`${a} → ${b}`).join(' · '):'';
+    }
     options(); progress(); resetHint(); controls(); presentDOM(); datasets();
   }
   function defaultDuration(item) {
@@ -263,6 +268,7 @@ window.NetworkSimulator = {mount(adapter) {
     }
     for(let i=0;i<target;i++){plan[i].action?.();plan[i].animate?.(1);}
     step=target; elapsed=plan[step].duration; renderStep({review:true});
+    if(target===plan.length-1){if(mode==='normal')adapter.finish?.();visual.dataset.reveal='all';presentDOM();}
   }
   function next() {if(phase!=='COMPLETED')return;current<list.length-1?load(current+1):summary();}
   function summary() {
@@ -291,7 +297,7 @@ window.NetworkSimulator = {mount(adapter) {
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&phase==='RUNNING')playback();});
   window.addEventListener('pagehide',stop);
   window.addEventListener('pageshow',e=>{if(e.persisted){firstRecords=list.map(()=>null);records=list.map(()=>null);load(0);}});
-  window.addEventListener('resize',()=>{if(step>=0)animate(phase==='RUNNING'?(elapsed+performance.now()-started)/plan[step].duration:elapsed/plan[step].duration);});
+  window.addEventListener('resize',()=>{if(step>=0&&!$('simMain').hidden)animate(phase==='RUNNING'?(elapsed+performance.now()-started)/plan[step].duration:elapsed/plan[step].duration);});
   window.networkLessonSource=Object.freeze(adapter.raw);
   window.networkLessonModel=Object.freeze(list);
   window.networkLessonPresentation=presentation;
