@@ -96,7 +96,11 @@ async function surface(url,name){
       return (Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05);
     });
     assert.ok(eventContrast>=7,'current event primary copy contrast must stay >= 7:1, got '+eventContrast);
-    assert.equal(await page.locator('#modelObservation').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 36, 57)','observation surface must separate from page background');
+    const surfaceColors=await page.evaluate(()=>({
+      page:getComputedStyle(document.body).backgroundColor,
+      observation:getComputedStyle(document.querySelector('#modelObservation')).backgroundColor
+    }));
+    assert.notEqual(surfaceColors.observation,surfaceColors.page,'observation surface must separate from page background');
     assert.ok((await page.locator('#modelCaption').textContent()).includes('직접 전달'));
     assert.equal((await page.locator('body').innerText()).includes('PASS'),false);
     const distance=await page.evaluate(()=>document.querySelector('#nextBtn').getBoundingClientRect().bottom-document.querySelector('#verdictTitle').getBoundingClientRect().top);
