@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261006-beginner-flow-v2">
-<meta name="skill-review-version" content="20261003-observation-review-v1">\n<meta name="network-sim-version" content="20261003-topology-sim-v1">
+<meta name="lab-ui-version" content="20261007-beginner-flow-v3">
+<meta name="skill-review-version" content="20261007-observation-review-v2">
+<meta name="network-sim-version" content="20261007-topology-sim-v2">
 <meta name="summary-ui-version" content="20261003-summary-status-v1"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
 <meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
 /* Shared learning flow at every viewport; only layout changes by screen size. */
-#ipLab{width:min(100% - 32px,1040px);margin:auto;padding:22px 0 calc(48px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
+#ipLab{--lab-body:#d7e3ef;--lab-secondary:#b6c7d8;--lab-surface:#102439;--lab-raised:#142d43;--lab-border:#3e607d;width:min(100% - 32px,1040px);margin:auto;padding:22px 0 calc(48px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
 #ipLab [hidden]{display:none!important}
 #ipLab button,#ipLab summary{font:inherit;touch-action:manipulation}
 #ipLab button{cursor:pointer;min-height:46px}
@@ -15,7 +16,7 @@
 #ipLab .hero{position:static;top:auto;z-index:auto;backdrop-filter:none;background:none;border:0;padding:18px 0}
 #ipLab .hero small{font-size:.78rem;color:var(--blue);font-weight:800}
 #ipLab .hero h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;margin:8px 0}
-#ipLab .hero p{margin:0;color:var(--muted);font-size:.98rem}
+#ipLab .hero p{margin:0;color:var(--lab-body);font-size:.98rem}
 #ipLab .back{font-size:.88rem;color:var(--blue);text-decoration:none}
 #ipLab .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 14px}
 #ipLab .tab{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel3);color:var(--text);text-align:left;min-width:0}
@@ -25,7 +26,7 @@
 #ipLab .tab[data-grade=correct] small{color:var(--mint)}#ipLab .tab[data-grade=incorrect] small{color:var(--amber)}
 #ipLab .progress{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;font-size:.86rem;margin:12px 0;color:var(--muted)}
 #ipLab #progressText{color:var(--text)}
-#ipLab main.card{padding:24px;border-radius:18px;min-width:0}
+#ipLab main.card{padding:24px;border:1px solid var(--lab-border);border-radius:18px;background:linear-gradient(180deg,var(--lab-surface),#0f2133);min-width:0}
 #ipLab section{padding:0}
 #ipLab .question small{color:var(--blue);font-weight:800}
 #ipLab .question h2{font-size:clamp(1.3rem,3vw,1.8rem);line-height:1.35;margin:6px 0 10px;scroll-margin-top:16px}
@@ -58,7 +59,7 @@
 #ipLab .primary{background:var(--blue);color:#07111f;border:2px solid transparent;border-radius:11px;padding:11px 18px;font-weight:850;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:48px}
 #ipLab .primary:disabled{background:var(--panel2);color:var(--muted);border-color:var(--line)}
 #ipLab .secondary{border:1px solid var(--line);background:var(--panel3);color:var(--text);border-radius:10px;padding:10px 14px;text-decoration:none}
-#ipLab #feedback{font-size:.86rem;color:var(--muted)}
+#ipLab #feedback{font-size:.86rem;color:var(--lab-body)}
 #ipLab #resultArea{margin-top:16px;scroll-margin-top:16px}
 #ipLab .verdict{padding:20px;border:2px solid var(--mint);border-radius:14px;background:#102f2c}
 #ipLab .verdict[data-grade=incorrect]{border-color:var(--amber);background:#35291b}
@@ -148,17 +149,17 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* Skill review: a visible model observation, separate from answer grading. */
-#ipLab .model-notice{font-size:.8rem;color:#bad0e4;margin:7px 0 0}
+#ipLab .model-notice{font-size:.8rem;color:var(--lab-secondary);margin:7px 0 0}
 #ipLab .start-conditions{margin-top:8px;font-size:.83rem;color:#bfd2e5}
 #ipLab .start-conditions summary{cursor:pointer;min-height:44px;padding:8px 0;color:#dceafa}
 #ipLab .start-conditions p{line-height:1.65;margin:4px 0 10px}
-#ipLab .model-observation{margin:12px 0 0;padding:12px 14px;border:1px solid #52799a;border-radius:12px;background:#102b42;min-width:0}
+#ipLab .model-observation{margin:12px 0 0;padding:12px 14px;border:1px solid #52799a;border-radius:12px;background:var(--lab-surface);min-width:0}
 #ipLab .model-heading{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:#bedcf3}
 #ipLab .model-route{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;margin:9px 0}
 #ipLab .model-node{min-width:0;display:grid;gap:2px;font-size:.92rem;color:#edf6ff}
 #ipLab .model-node small{font-size:.74rem;color:#c2d8ea}
 #ipLab .model-direction{width:24px;height:24px;display:grid;place-items:center;color:#9ad6ff;font-size:1.25rem;pointer-events:none}
-#ipLab #modelEvent{color:#e7f2fd;font-size:.86rem;font-weight:750;margin:0;line-height:1.5}
+#ipLab #modelEvent{color:#f4f8fc;font-size:.86rem;font-weight:750;margin:0;line-height:1.5}
 #ipLab #modelObservation[data-outcome=unresolved]{background:#30281e;border-color:#d2a76d}
 #ipLab #modelObservation[data-outcome=unresolved] #modelEvent{color:#ffdb9c}
 #ipLab #modelCaption{font-size:.74rem;color:#c1d2e3;margin-top:5px;line-height:1.5}
@@ -182,11 +183,11 @@
 @media(forced-colors:active){#ipLab .model-observation{border-color:CanvasText}}
 
 /* Beginner network topology simulator: same state drives topology, packet marker and text. */
-#ipLab .reason-card{margin:16px 0 0;padding:18px;border:2px solid #4e7797;border-radius:16px;background:#0d2233}
+#ipLab .reason-card{margin:16px 0 0;padding:18px;border:2px solid #4e7797;border-radius:16px;background:var(--lab-surface)}
 #ipLab .reason-head{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;margin-bottom:14px}
 #ipLab .reason-step{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#184362;border:1px solid #6aa8d0;color:#dff3ff;font-weight:900}
 #ipLab .reason-head h3{margin:0 0 5px;font-size:1.2rem;color:#eef7ff}
-#ipLab .reason-head p{margin:0;color:#bfd1e1;font-size:.88rem;line-height:1.55}
+#ipLab .reason-head p{margin:0;color:var(--lab-body);font-size:.88rem;line-height:1.55}
 #ipLab .reason-body{display:grid;gap:10px}
 #ipLab .compare-banner{padding:12px 14px;border:1px solid #5c7e98;border-radius:11px;background:#132b3e;color:#eef7ff;font-weight:850;text-align:center}
 #ipLab .mask-try{margin-top:4px;padding:14px;border:1px dashed #6b88a0;border-radius:12px;background:#0a1b29}
@@ -200,16 +201,21 @@
 #ipLab .network-simulator{padding:14px 16px}
 #ipLab .sim-topology{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(104px,.55fr) 44px minmax(0,1fr);gap:8px;align-items:center;margin:12px 0;padding:12px;border:1px solid #3f607c;border-radius:14px;background:#091827;overflow:hidden;isolation:isolate}
 #ipLab .sim-zone,#ipLab .sim-router,#ipLab .sim-node,#ipLab .sim-connector{position:relative;z-index:1;transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease,opacity .18s ease}
-#ipLab .sim-zone{min-width:0;padding:10px;border:1px solid #36556f;border-radius:12px;background:#0d2233}
+#ipLab .sim-zone{min-width:0;padding:10px;border:1px solid var(--lab-border);border-radius:12px;background:var(--lab-surface)}
 #ipLab .sim-zone-heading{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;color:#dcecf8;font-size:.78rem}
 #ipLab .sim-zone-heading span{color:#9fbad0;font-size:.72rem}
 #ipLab .sim-host-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-#ipLab .sim-node,#ipLab .sim-router{min-width:0;padding:9px;border:1px solid #476881;border-radius:10px;background:#142b3e;color:#edf6ff;text-align:center}
+#ipLab .sim-node,#ipLab .sim-router{min-width:0;padding:9px;border:1px solid #52728d;border-radius:10px;background:var(--lab-raised);color:#f4f8fc;text-align:center}
 #ipLab .sim-node strong,#ipLab .sim-router strong,#ipLab .sim-node small,#ipLab .sim-router small{display:block}
 #ipLab .sim-node strong,#ipLab .sim-router strong{font-size:.92rem}
-#ipLab .sim-node small,#ipLab .sim-router small{font-size:.7rem;color:#b7ccdc;margin-top:2px}
+#ipLab .sim-node small,#ipLab .sim-router small{font-size:.7rem;color:var(--lab-secondary);margin-top:2px}
+#ipLab .sim-device-icon{display:grid;place-items:center;width:42px;height:34px;margin:0 auto 5px;border:1px solid #557a98;border-radius:9px;background:#0e2234;color:#cfeaff}
+#ipLab .sim-device-icon svg{display:block;width:32px;height:26px}
+#ipLab .sim-router .sim-device-icon{width:46px;color:#e1edf8}
+#ipLab [data-sim-id].is-current .sim-device-icon{border-color:#7ee0c2;color:#c8ffec;box-shadow:0 0 0 3px rgba(126,224,194,.20)}
+#ipLab [data-sim-id].is-stop .sim-device-icon{border-color:#ffbf69;color:#ffe1b1;box-shadow:0 0 0 3px rgba(255,191,105,.18)}
 #ipLab .sim-device-type{display:inline-flex;margin-bottom:5px;padding:2px 6px;border:1px solid #527998;border-radius:999px;color:#a9dafe;font-size:.62rem;font-weight:850;letter-spacing:.05em}
-#ipLab .sim-router{padding:12px 8px;border-color:#5c7691;background:#16283b}
+#ipLab .sim-router{padding:12px 8px;border-color:#66839e;background:var(--lab-raised)}
 #ipLab .sim-connector{height:4px;border-radius:999px;background:#41576a;align-self:center}
 #ipLab .sim-connector span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:0 4px;background:#091827;color:#7ea8c8;font-size:.8rem}
 #ipLab [data-sim-id].on-route{border-color:#5298c8;box-shadow:0 0 0 1px rgba(91,174,229,.25) inset}
@@ -290,34 +296,22 @@
   <dl class="answer-compare"><dt>내 답</dt><dd id="chosenAnswer"></dd><dt>올바른 답</dt><dd id="correctAnswer"></dd></dl>
   <p><span class="explain-label">이유</span><span id="explainText"></span></p>
  </div>
- <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
-
- <section class="reason-card" id="calculationDetails" aria-labelledby="reasonTitle">
-  <div class="reason-head"><span class="reason-step" aria-hidden="true">①</span><div><h3 id="reasonTitle">왜 이런 답일까요?</h3><p>그림에서 본 <b>같은 그룹 / 다른 그룹</b> 판단을 이제 숫자로 확인합니다. /25는 주소를 두 그룹으로 나누는 경계 표시입니다.</p></div></div>
-  <div class="reason-body">
-   <p class="basis" id="calculationBasis"></p>
-   <div class="calc"><div class="endpoint"><small>내 컴퓨터 · PC1</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow" aria-hidden="true">→</div><div class="endpoint"><small id="destinationLabel">상대방</small><strong id="dstIp"></strong><code id="dstNet"></code></div></div>
-   <div class="network-strip" id="networkStrip"></div>
-   <div class="compare-banner" id="explainTitle"></div>
-   <div class="result-grid"><div class="result"><small>PC1이 사용한 Mask</small><strong id="prefixOut"></strong></div><div class="result"><small>② PC1의 판단</small><strong id="decisionOut"></strong></div><div class="result"><small>먼저 보내는 곳</small><strong id="nextHopOut"></strong></div></div>
-   <div class="mask-try" id="maskTry" hidden><div class="mask-try-head"><strong>직접 바꿔보기 · PC1의 Mask</strong><span>답안과 점수에는 영향이 없습니다.</span></div><div class="mask-buttons"><button class="secondary mask-choice" id="maskTry25" type="button">/25 정상</button><button class="secondary mask-choice" id="maskTry24" type="button">/24 오설정</button></div><p id="maskTryResult"></p></div>
-  </div>
- </section> <figure class="model-observation network-simulator" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
-  <div class="model-heading"><strong id="modelTitle">② 보낼 길을 그림으로 확인합니다</strong><span id="modelRunLabel"></span></div>
+ <figure class="model-observation network-simulator" id="modelObservation" aria-labelledby="modelTitle" aria-describedby="modelCaption">
+  <div class="model-heading"><strong id="modelTitle">보낼 길을 그림으로 먼저 확인합니다</strong><span id="modelRunLabel"></span></div>
   <div class="sim-topology" id="simTopology" data-step="0">
    <section class="sim-zone sim-zone-a" data-sim-id="lana" aria-label="LAN A 실제 구성 10.77.10.0/25">
     <div class="sim-zone-heading"><strong>네트워크 동네 A</strong><span>Subnet A · 10.77.10.0/25</span></div>
     <div class="sim-host-stack">
-     <div class="sim-node sim-source" data-sim-id="pc1"><span class="sim-device-type">PC</span><strong>PC1</strong><small id="modelSource"></small></div>
-     <div class="sim-node" data-sim-id="pc3"><span class="sim-device-type">PC</span><strong>PC3</strong><small>10.77.10.20/25</small></div>
+     <div class="sim-node sim-source" data-sim-id="pc1"><span class="sim-device-icon" data-device-shape="host" aria-hidden="true"><svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="5" width="36" height="23" rx="3"/><path d="M18 28v6h12v-6M14 35h20"/></svg></span><span class="sim-device-type">PC</span><strong>PC1</strong><small id="modelSource"></small></div>
+     <div class="sim-node" data-sim-id="pc3"><span class="sim-device-icon" data-device-shape="host" aria-hidden="true"><svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="5" width="36" height="23" rx="3"/><path d="M18 28v6h12v-6M14 35h20"/></svg></span><span class="sim-device-type">PC</span><strong>PC3</strong><small>10.77.10.20/25</small></div>
     </div>
    </section>
    <div class="sim-connector" data-sim-id="link-a-r1" aria-hidden="true"><span>↔</span></div>
-   <div class="sim-router" data-sim-id="r1"><span class="sim-device-type">출구 · ROUTER</span><strong>R1</strong><small>동네 A · .1/25</small><small>동네 B · .129/25</small></div>
+   <div class="sim-router" data-sim-id="r1"><span class="sim-device-icon" data-device-shape="router" aria-hidden="true"><svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="9" width="38" height="22" rx="5"/><path d="M13 20h22M29 15l6 5-6 5M19 15l-6 5 6 5"/></svg></span><span class="sim-device-type">출구 · ROUTER</span><strong>R1</strong><small>동네 A · .1/25</small><small>동네 B · .129/25</small></div>
    <div class="sim-connector" data-sim-id="link-r1-b" aria-hidden="true"><span>↔</span></div>
    <section class="sim-zone sim-zone-b" data-sim-id="lanb" aria-label="LAN B 실제 구성 10.77.10.128/25">
     <div class="sim-zone-heading"><strong>네트워크 동네 B</strong><span>Subnet B · 10.77.10.128/25</span></div>
-    <div class="sim-node" data-sim-id="pc2"><span class="sim-device-type">PC</span><strong>PC2</strong><small>10.77.10.140/25</small></div>
+    <div class="sim-node" data-sim-id="pc2"><span class="sim-device-icon" data-device-shape="host" aria-hidden="true"><svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="5" width="36" height="23" rx="3"/><path d="M18 28v6h12v-6M14 35h20"/></svg></span><span class="sim-device-type">PC</span><strong>PC2</strong><small>10.77.10.140/25</small></div>
    </section>
    <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
   </div>
@@ -332,7 +326,19 @@
    <p class="sim-step-text" id="simStepText" role="status" aria-live="polite" aria-atomic="true"></p>
   </div></details>
   <figcaption class="sim-caption" id="modelCaption"></figcaption>
- </figure> <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div> <details class="optional" id="evidenceDetails"><summary>더 궁금한 사람만 · 제작자가 실제 장비로 확인한 내용</summary><div class="optional-body"><strong id="validatedOut"></strong><p id="evidenceMeaning">PASS는 제작자가 해당 동작을 검증했다는 뜻입니다. 내 답이 정답이거나 통신이 성공했다는 뜻은 아닙니다.</p><p id="evidenceText"></p><p class="trace-note" id="evidenceScope"></p><div class="source-links"><a href="../results/ip-subnetting.json">기존 검증 요약 · 2026-10-03</a><a href="ip-subnetting.html#decision">개념서의 판단 원리</a></div></div></details>
+ </figure> <div class="lesson-actions sim-primary-actions"><button class="secondary" id="resetBtn" type="button">이 문제 다시 풀기</button><button class="primary" id="nextBtn" type="button">다음 문제 →</button></div>
+
+ <section class="reason-card" id="calculationDetails" aria-labelledby="reasonTitle">
+  <div class="reason-head"><span class="reason-step" aria-hidden="true">＋</span><div><h3 id="reasonTitle">추가로 숫자로 확인해 봅니다.</h3><p>그림에서 본 <b>같은 그룹 / 다른 그룹</b> 판단을 이제 숫자로 확인합니다. /25는 주소를 두 그룹으로 나누는 경계 표시입니다.</p></div></div>
+  <div class="reason-body">
+   <p class="basis" id="calculationBasis"></p>
+   <div class="calc"><div class="endpoint"><small>내 컴퓨터 · PC1</small><strong id="srcIp"></strong><code id="srcNet"></code></div><div class="arrow" aria-hidden="true">→</div><div class="endpoint"><small id="destinationLabel">상대방</small><strong id="dstIp"></strong><code id="dstNet"></code></div></div>
+   <div class="network-strip" id="networkStrip"></div>
+   <div class="compare-banner" id="explainTitle"></div>
+   <div class="result-grid"><div class="result"><small>PC1이 사용한 Prefix Length</small><strong id="prefixOut"></strong></div><div class="result"><small>PC1의 판단</small><strong id="decisionOut"></strong></div><div class="result"><small>먼저 보내는 곳</small><strong id="nextHopOut"></strong></div></div>
+   <div class="mask-try" id="maskTry" hidden><div class="mask-try-head"><strong>직접 바꿔보기 · PC1의 Prefix Length</strong><span>답안과 점수에는 영향이 없습니다.</span></div><div class="mask-buttons"><button class="secondary mask-choice" id="maskTry25" type="button">/25 정상</button><button class="secondary mask-choice" id="maskTry24" type="button">/24 오설정</button></div><p id="maskTryResult"></p></div>
+  </div>
+ </section> <div class="summary-jump"><button class="secondary" id="summaryReturnBtn" type="button" hidden>전체 학습 결과로 돌아가기</button></div> <details class="optional" id="evidenceDetails"><summary>더 궁금한 사람만 · 제작자가 실제 장비로 확인한 내용</summary><div class="optional-body"><strong id="validatedOut"></strong><p id="evidenceMeaning">PASS는 제작자가 해당 동작을 검증했다는 뜻입니다. 내 답이 정답이거나 통신이 성공했다는 뜻은 아닙니다.</p><p id="evidenceText"></p><p class="trace-note" id="evidenceScope"></p><div class="source-links"><a href="../results/ip-subnetting.json">기존 검증 요약 · 2026-10-03</a><a href="ip-subnetting.html#decision">개념서의 판단 원리</a></div></div></details>
 
 </section>
 </main>
@@ -347,7 +353,7 @@
   var lessons=[
     {title:'그림에서 .10과 .20은 같은 그룹일까요?',label:'1 · 그림으로 같은 그룹',src:'10.77.10.10',dst:'10.77.10.20',prefix:25,answer:'on',choices:[['on','같은 그룹 · PC3(.20)을 전달 대상으로 본다'],['gw','다른 그룹 · 출구 Gateway(.1)를 먼저 이용한다'],['drop','주소 숫자가 다르면 보낼 수 없다']],next:'목적지 .20',decision:'같은 Subnet',validated:'PASS',explain:'그림에서 .10과 .20은 모두 첫 번째 주소 그룹(.0~.127)에 있습니다. 네트워크 용어로는 같은 Subnet입니다.',evidence:'CP1에서 PC1이 10.77.10.20에 직접 ARP했고 ICMP 3/3이 성공했습니다.'},
     {title:'그림에서 .10과 .140은 같은 그룹일까요?',label:'2 · 그림으로 다른 그룹',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','같은 그룹 · .140을 전달 대상으로 본다'],['gw','다른 그룹 · 출구 Gateway(.1)를 먼저 이용한다'],['rewrite','출구를 이용하면 목적지 IP를 .1로 바꾼다']],next:'gateway 10.77.10.1',decision:'다른 Subnet',validated:'PASS',explain:'.10은 첫 번째 그룹(.0~.127), .140은 두 번째 그룹(.128~.255)에 있습니다. 따라서 다른 Subnet이고 이번 예제에서는 출구 Gateway(.1)를 먼저 이용합니다.',evidence:'CP1에서 gateway .1 ARP/Reply가 관측됐고, 원격 ICMP의 IPv4 Destination은 .140으로 유지되었습니다. 같은 설정의 추가 정상 시험은 3/3 성공했습니다.'},
-    {title:'경계 규칙이 /24로 바뀌면 .10과 .140은 어떻게 보일까요?',label:'3 · 경계를 바꿔 보기',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','그래도 Gateway(.1)에 먼저 보낸다'],['on','하나의 큰 그룹으로 보여 같은 Subnet이라고 판단한다'],['drop','Mask가 다르면 바로 버린다']],next:'목적지 .140 직접',decision:'같은 Subnet으로 오판',validated:'PASS',explain:'/24에서는 PC1이 .10과 .140을 하나의 10.77.10.0/24 범위로 봅니다. 실제 배치는 그대로인데 PC1의 경계 기준만 넓어져 같은 Subnet이라고 잘못 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
+    {title:'경계 규칙이 /24로 바뀌면 .10과 .140은 어떻게 보일까요?',label:'3 · 경계를 바꿔 보기',src:'10.77.10.10',dst:'10.77.10.140',prefix:24,answer:'on',choices:[['gw','그래도 Gateway(.1)에 먼저 보낸다'],['on','하나의 큰 그룹으로 보여 같은 Subnet이라고 판단한다'],['drop','Prefix Length가 다르면 바로 버린다']],next:'목적지 .140 직접',decision:'같은 Subnet으로 오판',validated:'PASS',explain:'/24에서는 PC1이 .10과 .140을 하나의 10.77.10.0/24 범위로 봅니다. 실제 배치는 그대로인데 PC1의 경계 기준만 넓어져 같은 Subnet이라고 잘못 판단합니다.',evidence:'Proxy ARP를 끈 검증에서 PC1은 .140에 직접 ARP 3회를 보냈고 Reply는 0, remote ICMP도 0이었습니다. 같은 LAN의 .20 control ping은 3/3 성공했습니다.'},
     {title:'경계를 다시 /25로 돌리면 어떤 길을 선택할까요?',label:'4 · 정상 경계로 복구',src:'10.77.10.10',dst:'10.77.10.140',prefix:25,answer:'gw',choices:[['on','여전히 같은 그룹으로 보고 .140을 직접 찾는다'],['gw','다시 두 그룹으로 보이므로 출구 Gateway(.1)를 이용한다'],['none','아무 확인 없이 바로 보낸다']],next:'gateway 10.77.10.1',decision:'다른 Subnet으로 복구',validated:'PASS',explain:'경계 규칙을 /25로 되돌리면 .10은 첫 번째 그룹, .140은 두 번째 그룹으로 다시 나뉩니다. 따라서 출구 Gateway(.1)를 이용하는 정상 판단으로 돌아옵니다.',evidence:'복구 후 gateway .1 ARP/Reply가 다시 형성됐고 원격 ping 3/3이 성공했습니다. .140 직접 ARP는 나타나지 않았습니다.'}
   ];
 // Actual destination configuration is distinct from the sender's calculation mask.
@@ -430,7 +436,7 @@ function renderResult(){
  var g=grade(idx);$('verdict').dataset.grade=g;$('verdictTitle').textContent=g==='correct'?'✓ 정답입니다':'✕ 오답입니다';
  $('chosenAnswer').textContent=label(l,a.choice);$('correctAnswer').textContent=label(l,l.answer);$('explainText').textContent=l.explain;
  $('srcIp').textContent=l.src+'/'+l.prefix;$('dstIp').textContent=l.dst+'/'+l.dstPrefix;$('destinationLabel').textContent='상대방 · '+l.dstNode;
- $('calculationBasis').textContent='PC1은 자신의 Mask /'+l.prefix+'를 내 IP와 목적지 IP에 똑같이 적용합니다.';
+ $('calculationBasis').textContent='PC1은 자신의 Prefix Length /'+l.prefix+'를 내 IP와 목적지 IP에 똑같이 적용합니다.';
  var sn=observation.sourceNetwork,dn=observation.destinationNetwork;
  $('srcNet').textContent='계산 결과 → '+sn;$('dstNet').textContent='계산 결과 → '+dn;
  $('prefixOut').textContent='/'+l.prefix;$('decisionOut').textContent=observation.onLink?(observation.resolved?'같은 네트워크 (ON-LINK)':'같은 네트워크로 잘못 판단'):'다른 네트워크 → Gateway';$('nextHopOut').textContent=observation.targetRole+' '+observation.arpTarget;
