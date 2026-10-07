@@ -143,7 +143,7 @@ async function verifySurface(url, name) {
       await press(page, '#choices [data-value="on"]', touch);
       await press(page, '#runBtn', touch);
       await page.goto(`${url}/roadmap.html`, {waitUntil:'networkidle'});
-      await page.goBack({waitUntil:'networkidle'});
+      await page.goBack({waitUntil:'domcontentloaded'});
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#resultArea').isVisible(), false);
       assert.equal(await page.locator('#scoreText').innerText(), '정답 0 · 다시 볼 문제 0 · 남은 문제 4');
