@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261007-topology-sim-v2';
+const file='labs/ip-subnetting-simulator.html',version='20261007-topology-sim-v3';
 const normalize=s=>s.replace(/\r\n/g,'\n').trim(),checks=[];
 let server,base=process.env.BASE_URL;
 if(!base){
@@ -49,6 +49,29 @@ async function verify(url,surface){
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
    assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.20'));
    assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
+   assert.equal(await page.locator('#simAutoBtn').isVisible(),true);
+   assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
+   assert.ok((await page.locator('#simAutoEvent').innerText()).startsWith('흐름 1 / 4'));
+   if([360,1366].includes(width)){
+    const autoScore=await page.locator('#scoreText').innerText(),autoAnswer=await page.locator('#chosenAnswer').innerText();
+    await page.locator('#simAutoBtn').click();
+    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
+    await page.waitForFunction(()=>document.querySelector('#simStepLabel')?.textContent==='흐름 2 / 4',{timeout:5000});
+    await page.locator('#simAutoBtn').click();
+    const pausedStep=await page.locator('#simStepLabel').innerText();
+    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'paused');
+    await page.waitForTimeout(1250);
+    assert.equal(await page.locator('#simStepLabel').innerText(),pausedStep,'paused autoplay advanced unexpectedly');
+    await page.locator('#simAutoBtn').click();
+    await page.waitForFunction(()=>document.querySelector('#simAutoBtn')?.dataset.state==='complete',{timeout:6000});
+    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'direct-path');
+    assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
+    assert.equal(await page.locator('#scoreText').innerText(),autoScore,'autoplay changed score');
+    assert.equal(await page.locator('#chosenAnswer').innerText(),autoAnswer,'autoplay changed answer');
+    await page.locator('#simAutoBtn').click();
+    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4','replay must restart at first event');
+    await page.locator('#simAutoBtn').click();
+   }
    await openFlow(page);
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.20');
    assert.equal(await page.locator('#simDecision').innerText(),'ON-LINK');
@@ -107,7 +130,7 @@ async function verify(url,surface){
    assert.ok((await page.locator('#modelCaption').innerText()).includes('SW1/SW2 내부 동작은 생략'));
    if([360,1366].includes(width)){await page.locator('#modelObservation').screenshot({path:resolve(out,'network-sim-'+surface+'-'+width+'.png')});}
    assert.deepEqual(errors,[]);
-   checks.push({surface,width,height,touch,status:'PASS',scenarios:['same-subnet','different-subnet','wrong-mask','mask-recovery'],checks:['topology','step-playback','answer-independent-model','wrong-mask-stop','responsive-reflow','reduced-motion','forced-colors']});
+   checks.push({surface,width,height,touch,status:'PASS',scenarios:['same-subnet','different-subnet','wrong-mask','mask-recovery'],checks:['topology','auto-playback','pause-resume-replay','manual-step-fallback','answer-independent-model','wrong-mask-stop','responsive-reflow','reduced-motion','forced-colors']});
    console.log('PASS network sim '+surface+' '+width+'x'+height);
   }finally{await context.close();}
  }
