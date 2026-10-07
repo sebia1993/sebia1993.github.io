@@ -76,3 +76,12 @@ body.concept-page{--cg-text:#d7e3ef;--cg-muted:#b6c7d8;--cg-surface:#102439;--cg
 @media(forced-colors:active){.concept-page .cg-primary{border:2px solid ButtonText}.concept-page .cg-node,.concept-page .cg-question{border:1px solid CanvasText}}
 .concept-page .cg-symbol{transform:none}
 .concept-page .cg-table{min-width:0}
+.concept-page .cg-device{flex-direction:column;gap:5px}
+.concept-page .cg-node-name{font-size:1rem;line-height:1.4;word-break:keep-all}
+.concept-page .cg-node-path{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;max-width:100%}
+.concept-page .cg-node-path .cg-node-name{white-space:nowrap}
+.concept-page .cg-node-direction{font-size:.95rem;color:var(--cg-muted)}
+.concept-page .cg-node-detail{color:var(--cg-muted);font-size:.82rem;font-weight:400;line-height:1.6}
+.concept-page .cg-device-aliases{margin:16px;padding:14px 16px;border:1px solid var(--cg-line);border-radius:10px;color:var(--cg-text);font-size:.85rem;line-height:1.8}
+.concept-page .cg-device-aliases p{margin:0 0 8px}
+.concept-page .cg-device-aliases ul{display:flex;flex-wrap:wrap;gap:4px 24px;list-style:none;padding:0;margin:0}

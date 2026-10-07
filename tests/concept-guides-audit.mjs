@@ -19,6 +19,7 @@ async function dimensions(page){return page.evaluate(()=>{const visible=e=>{cons
 try{
 for(const t of topics){
  const row={id:t.id,viewports:[],errors:[],assets:[],links:[]};
+ const physical=t.id==='physical-network',evidenceSelector=physical?'.cg-evidence':'#cg-evidence';
  const page=await browser.newPage(contextOptions);page.on('pageerror',e=>row.errors.push(e.message));page.on('response',r=>{if(r.status()>=400)row.assets.push(r.status()+' '+r.url())});
  try{
  for(const [width,height] of [[360,800],[768,1024],[1366,768],[1920,1080]]){
@@ -27,10 +28,11 @@ for(const t of topics){
  if(!process.env.BASE_URL||width===360){const response=await page.goto(new URL(t.detailUrl,base).href,{waitUntil:'networkidle',timeout:60000});assert.equal(response.status(),200);}
  const actual=await dimensions(page);row.viewports.push({width,height,...actual});assert.equal(actual.overflow,false,'page overflow');assert.deepEqual(actual.duplicateIds,[],'duplicate IDs');assert.deepEqual(actual.brokenAnchors,[],'broken anchors');assert.equal(actual.h1,1,'one h1');assert.deepEqual(actual.clipped,[],'clipped learning copy');assert.equal(actual.visiblePrimary,1,'one visible simulator CTA');
  if(t.id!=='ip-subnetting'){
-  assert.equal(await page.locator('body').getAttribute('data-concept-audit'),'20261007','published revision');
-  await page.locator('a[href="#cg-flow"]').click();assert(await page.locator('#cg-flow h2').isVisible());
-  await page.locator('#cg-evidence>summary').click();assert.equal(await page.locator('#cg-evidence').getAttribute('open'),'');assert.equal((await dimensions(page)).overflow,false,'expanded evidence overflow');
-  await page.locator('#cg-evidence>summary').click();
+  if(!physical)assert.equal(await page.locator('body').getAttribute('data-concept-audit'),'20261007','published revision');
+  const section=physical?'#utp':'#cg-flow';
+  await page.locator(`a[href="${section}"]`).click();assert(await page.locator(`${section} h2`).isVisible());
+  await page.locator(`${evidenceSelector}>summary`).click();assert.equal(await page.locator(evidenceSelector).getAttribute('open'),'');assert.equal((await dimensions(page)).overflow,false,'expanded evidence overflow');
+  await page.locator(`${evidenceSelector}>summary`).click();
  }
  await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`${output}/${t.id}-${width}.png`,fullPage:true});
  const cta=page.locator(t.id==='ip-subnetting'?'a[href="ip-subnetting-simulator.html"]':'.cg-primary').first();await cta.scrollIntoViewIfNeeded();assert(await cta.evaluate(e=>{let r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),'CTA unobstructed');
@@ -41,8 +43,8 @@ for(const t of topics){
  await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});assert.equal((await dimensions(page)).overflow,false,'forced colors overflow');row.forcedColors='PASS';
  await zoomStyle.evaluate(e=>e.remove());if(!process.env.BASE_URL)await page.goto(new URL(t.detailUrl,base).href);await page.emulateMedia({forcedColors:'none'});
  if(t.id!=='ip-subnetting'){
- const summary=page.locator('#cg-evidence>summary');await summary.focus();await page.keyboard.press('Enter');assert.equal(await page.locator('#cg-evidence').getAttribute('open'),'');await page.keyboard.press('Enter');assert.equal(await page.locator('#cg-evidence').getAttribute('open'),null);row.keyboard='PASS';
- const oldId=await page.locator('.cg-archive [id]').first().getAttribute('id');if(oldId){await page.evaluate(id=>location.hash=id,oldId);await page.waitForTimeout(50);assert.equal(await page.locator('#cg-evidence').getAttribute('open'),'');row.legacyAnchor=oldId;}
+ const summary=page.locator(`${evidenceSelector}>summary`);await summary.focus();await page.keyboard.press('Enter');assert.equal(await page.locator(evidenceSelector).getAttribute('open'),'');await page.keyboard.press('Enter');assert.equal(await page.locator(evidenceSelector).getAttribute('open'),null);row.keyboard='PASS';
+ if(!physical){const oldId=await page.locator('.cg-archive [id]').first().getAttribute('id');if(oldId){await page.evaluate(id=>location.hash=id,oldId);await page.waitForTimeout(50);assert.equal(await page.locator(evidenceSelector).getAttribute('open'),'');row.legacyAnchor=oldId;}}
  }
  const links=await page.locator('a[href]').evaluateAll(es=>es.map(e=>e.getAttribute('href')));
  for(const link of links){if(/^(https?:|mailto:|#|javascript:)/.test(link))continue;const u=new URL(link,new URL(t.detailUrl,'http://local'));await access(resolve(root,'.'+decodeURIComponent(u.pathname)));}row.localLinks='PASS';
@@ -53,7 +55,7 @@ for(const t of topics){
  results.push(row);console.log(t.id+': '+row.result+(row.reason?' '+row.reason:''));await page.close();if(process.env.BASE_URL)await new Promise(r=>setTimeout(r,2000));
 }
 // Static guides remain readable without JavaScript.
-const nojs=await browser.newContext({...contextOptions,javaScriptEnabled:false,viewport:{width:360,height:800}});for(const t of topics){const p=await nojs.newPage();await p.goto(new URL(t.detailUrl,base).href);assert(await p.locator('h1').isVisible());assert(await p.locator(t.id==='ip-subnetting'?'#groupVisual':'.cg-figure').isVisible());await p.close();}await nojs.close();
+const nojs=await browser.newContext({...contextOptions,javaScriptEnabled:false,viewport:{width:360,height:800}});for(const t of topics){const p=await nojs.newPage();await p.goto(new URL(t.detailUrl,base).href);assert(await p.locator('h1').isVisible());assert(await p.locator(t.id==='ip-subnetting'?'#groupVisual':t.id==='physical-network'?'#cg-picture .cg-figure':'.cg-figure').isVisible());await p.close();}await nojs.close();
 await writeFile(output+'/results.json',JSON.stringify({base,results,failures,noJavaScript:'PASS'},null,2));console.log(JSON.stringify({pages:results.length,passed:results.filter(r=>r.result==='PASS').length,failures}));
 if(failures.length)process.exitCode=1;
 }finally{await browser.close();server?.close();}
