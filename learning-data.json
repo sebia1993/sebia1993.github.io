@@ -1,7 +1,7 @@
 {
   "updated": "2026-10-07",
   "summary": {
-    "completedTopics": 25,
+    "completedTopics": 26,
     "labs": 24,
     "faultScenarios": 46,
     "packetCaptures": 75,
@@ -13,8 +13,8 @@
     {
       "id": "stage0",
       "title": "0단계 · 네트워크 기초",
-      "goal": "호스트가 패킷을 보내기 전에 어떤 판단을 하는지 이해합니다.",
-      "exitCriteria": "IP/Mask로 같은 네트워크 여부를 판단하고, Ethernet·ARP·Gateway·ICMP 흐름을 패킷 기준으로 설명합니다."
+      "goal": "물리 연결부터 호스트의 기본 L2/L3 판단까지 네트워크 통신의 기초 흐름을 이해합니다.",
+      "exitCriteria": "UTP·광케이블·SFP의 기본 역할과 장비 간 물리 연결을 설명하고, IP/Mask를 이용한 동일 네트워크 판단과 Ethernet·ARP·Gateway·ICMP의 기본 흐름을 연결해 설명할 수 있습니다."
     },
     {
       "id": "stage1",
@@ -66,6 +66,33 @@
     }
   ],
   "topics": [
+    {
+      "id": "physical-network",
+      "category": "0단계 · 네트워크 기초",
+      "title": "물리 네트워크 / UTP · Fiber · SFP",
+      "status": "completed",
+      "statusLabel": "공식 근거·2단계 학습 완료",
+      "summary": "AP에서 상위 스위치까지 UTP·광케이블·SFP로 이어지는 물리 연결과 영향 범위를 이해합니다.",
+      "why": "무선 접속 뒤의 유선 연결을 먼저 이해하면 장비와 케이블의 역할을 구분할 수 있습니다.",
+      "completeWhen": "AP와 네트워크 장비가 UTP·광케이블·SFP를 통해 어떻게 연결되는지 설명할 수 있다.",
+      "coreQuestion": "AP에서 상위 네트워크 장비까지 실제로 무엇을 거쳐 연결되는가?",
+      "labs": 0,
+      "faultScenarios": 0,
+      "packetCaptures": 0,
+      "recoveryValidations": 0,
+      "explainNotes": 0,
+      "automations": 0,
+      "detailUrl": "./labs/physical-network.html",
+      "contentStatus": "completed",
+      "labStatus": "educational-model",
+      "validationMode": "official-source+teaching-simulation",
+      "liveValidationStatus": "not-run",
+      "scope": {
+        "coreConcept": "UTP / Fiber / SFP physical connectivity",
+        "standardOrProtocol": "IEEE 802.3 and official cabling / transceiver documentation",
+        "vendorImplementation": "Official documents only; hardware validation NOT_RUN"
+      }
+    },
     {
       "id": "ip-subnetting",
       "category": "0단계 · 네트워크 기초",

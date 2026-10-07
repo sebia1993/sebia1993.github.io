@@ -137,6 +137,7 @@
 function esc(v){return String(v??'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 const interactiveUrls={
+  'physical-network':'./labs/physical-network-simulator.html',
   'ip-subnetting':'./labs/ip-subnetting-simulator.html',
   'ethernet-mac-table':'./labs/ethernet-mac-table-simulator.html',
   'arp-default-gateway':'./labs/arp-default-gateway-simulator.html',

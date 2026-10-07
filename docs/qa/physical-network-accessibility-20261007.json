@@ -1,0 +1,12 @@
+{
+  "shellParity": "PASS",
+  "referenceElapsedMs": 10005,
+  "referenceEvent": "↩\nPC3 → PC1 · ICMP Echo Reply\n\nNeighbor cache를 사용해 같은 LAN A에서 직접 Reply합니다.\n\n응답",
+  "physicalElapsedMs": 9948,
+  "realTimePlayback": "PASS",
+  "wallClockReplay": "PASS",
+  "reducedMotion": "PASS",
+  "zoom200": "PASS",
+  "keyboard": "PASS",
+  "forcedColors": "CAPTURED"
+}

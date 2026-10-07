@@ -1,0 +1,130 @@
+/* Reuse ARP shell and Concept Guide structure. Only physical topology geometry,
+   accessibility and the explicitly requested light Concept palette live here. */
+[hidden]{display:none!important}
+#physicalLab button{min-height:44px;touch-action:manipulation}
+#physicalLab :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+#physicalLab .observation-layout{display:flex;flex-direction:column}
+#physicalLab .observation{order:0;min-width:0}
+#physicalLab .controls{order:1}
+.physical-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:18px 22px;color:var(--muted);font-size:12px}
+#uplinkStatus{padding:7px 11px;border-radius:8px;background:var(--green-soft);color:var(--green);font-weight:800}
+#uplinkStatus.down{background:var(--red-soft);color:var(--red)}
+.physical-map{display:grid;grid-template-columns:1.15fr 1fr 1.5fr .7fr .85fr .8fr .85fr .7fr 1.5fr;grid-template-rows:150px 150px;align-items:center;gap:0;position:relative;padding:8px 20px 20px;isolation:isolate}
+.phy-element{position:relative;text-align:center;min-width:0;color:var(--ink);font:inherit;background:transparent;border:2px solid transparent;border-radius:13px;padding:9px 3px;z-index:1;line-height:1.45;transition:background .18s,border-color .18s;overflow-wrap:anywhere}
+button.phy-element:hover{background:#fff;border-color:#bdd0df}
+.phy-element strong,.phy-element small,.phy-status{display:block}
+.phy-element strong{font-size:13px}
+.phy-element small{font-size:11px;color:#50687e;margin-top:4px}
+.phy-status{font-size:10px;color:var(--green);font-weight:800;margin-top:7px;min-height:16px}
+.phy-element svg{width:90px!important;height:65px!important;margin:auto;max-width:100%;overflow:visible}
+.phy-ap1{grid-area:1/1}.phy-ap2{grid-area:2/1}.phy-utp1{grid-area:1/2}.phy-utp2{grid-area:2/2}
+.phy-access{grid-area:1/3/3/4}.phy-sfpa{grid-area:1/4/3/5}.phy-fibera{grid-area:1/5/3/6}.phy-fdf{grid-area:1/6/3/7}.phy-fiberb{grid-area:1/7/3/8}.phy-sfpb{grid-area:1/8/3/9}.phy-distribution{grid-area:1/9/3/10}
+.phy-cable::before{content:"";display:block;height:5px;background:var(--blue2);margin:4px -5px 12px;border-radius:4px}
+.phy-cable.optical::before{background:var(--green2)}
+.phy-cable strong{font-size:12px}
+.phy-module{background:#dfeaf3;border-color:#819bb0;border-radius:6px;margin:0 3px}
+.phy-module::before{content:"";display:block;width:27px;height:13px;background:linear-gradient(90deg,#254b68 44%,#bcd3df 44%,#bcd3df 56%,#254b68 56%);border:2px solid #8aa0b1;margin:0 auto 6px}
+.phy-fdf{background:#fff;border-color:#b8cbd9;border-radius:6px}
+.phy-fdf::before{content:"";display:block;width:38px;height:18px;margin:0 auto 6px;background:repeating-linear-gradient(90deg,#4a89a5 0 5px,#e0eef5 5px 9px);border:3px solid #b2c8d7}
+.phy-element.active{border-color:var(--green2);background:var(--green-soft);box-shadow:0 0 0 3px rgba(14,167,125,.13)}
+.phy-element.disconnected{border-color:var(--red);background:var(--red-soft)}
+.phy-element.disconnected .phy-status{color:var(--red)}
+.phy-cable.disconnected::before{background:repeating-linear-gradient(90deg,var(--red) 0 8px,transparent 8px 15px)}
+.phy-element.affected{border-color:var(--orange);background:var(--orange-soft)}
+.phy-element.affected .phy-status{color:#915100}
+.phy-element[aria-pressed="true"]{outline:2px solid var(--blue);outline-offset:2px}
+.map-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:10px 20px;font-size:11px;color:#50687e;padding:8px 18px}
+.map-legend span:first-child{color:var(--blue)}.map-legend span:nth-child(2){color:var(--green)}
+.map-note{margin:4px 20px 12px;font-size:11px;line-height:1.6;color:#50687e;text-align:center}
+.role-detail{margin:0 18px 16px;padding:12px 15px;min-height:48px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);font-size:12px;line-height:1.7}
+.physical-playback{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0;color:var(--muted);font-size:12px}
+#resultArea .prediction-feedback{display:block}
+#resultArea .prediction-feedback span{display:block;margin-top:8px}
+#verdictTitle{display:block;font-size:17px;margin:8px 0}
+#reasonText{line-height:1.8}
+#physicalLab .prediction-options button.correct{border-color:#add8c8;background:#eef9f4;color:#356556}
+#physicalLab .prediction-options button.incorrect{border-color:#efd1a7;background:#fff8ed;color:#76572d}
+#physicalLab .course-complete:not([hidden]){display:block}
+.physical-summary{padding:16px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;background:#fff;line-height:1.7;font-size:13px}
+.physical-summary.incorrect{border-left-color:var(--orange)}
+.physical-summary b,.physical-summary span{display:block;margin-bottom:8px}
+.physical-summary .answer-badge{color:var(--green);font-weight:800}.physical-summary.incorrect .answer-badge{color:var(--orange)}
+.physical-notes{margin-top:16px}.physical-notes p{font-size:13px;line-height:1.8}
+/* Light palette uses ARP tokens; spacing and components remain concept-guide.css. */
+body.physical-concept{--cg-text:var(--ink);--cg-muted:#50687e;--cg-surface:#fff;--cg-raised:#edf4fa;--cg-line:#c6d7e5}
+.physical-concept .cg-header,.physical-concept .cg-evidence{background:#fff}
+.physical-concept .cg-header a,.physical-concept .cg-terms dt{color:var(--blue)}
+.physical-concept .cg-hero h1,.physical-concept .cg-section h2,.physical-concept .cg-node{color:var(--ink)}
+.physical-concept .cg-kicker,.physical-concept .cg-arrow{color:var(--muted)}
+.physical-concept .cg-lane-label,.physical-concept .cg-lane:nth-child(2) .cg-lane-label{color:var(--green)}
+.physical-concept .cg-node{border-color:var(--line)}
+.physical-concept .cg-table thead th{color:var(--ink)}
+.physical-concept .cg-question{background:var(--orange-soft);border-color:#dfbc8c}
+.physical-concept .cg-question h3{color:#8c4d00}
+.physical-concept .cg-next{background:var(--green-soft);border-color:#a7cdba}
+.physical-concept .cg-primary{background:var(--green);color:white;flex-shrink:1}
+.physical-concept .cg-skip:focus{color:white}
+.physical-concept .cg-section h3{font-size:1.12rem;margin-top:28px}
+.physical-concept .physical-map{grid-template-rows:180px;grid-template-columns:1.1fr .95fr 1.4fr .65fr .75fr .7fr .75fr .65fr 1.4fr;padding:10px 0}
+.physical-concept .phy-element{grid-row:1!important}
+.physical-concept .phy-status{display:none}
+.physical-concept .phy-element small{font-size:11px}
+.physical-concept .physical-figure{padding:20px 16px;background:#f4f7fb}
+.connector-figure{display:grid;grid-template-columns:180px minmax(0,1fr);gap:14px;align-items:center}
+.connector-figure svg{width:100%;max-width:180px}.connector-figure p{margin:6px 0 0}.connector-figure figcaption{grid-column:1/-1;margin-top:0!important}
+.field-point{border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:0 14px 14px 0;padding:18px 22px;margin:22px 0}
+.field-point>b{color:#844700}.field-point p{margin:10px 0 0}
+.check-flow{display:flex;flex-wrap:wrap;gap:9px 22px;padding:0;list-style:none;margin:18px 0}
+.check-flow li{position:relative;font-size:13px;font-weight:750}.check-flow li:not(:last-child)::after{content:'→';position:absolute;right:-17px;top:0}.check-flow small{display:block;font-size:11px;font-weight:400}
+.physical-memory{padding-left:22px}.physical-memory li+li{margin-top:10px}
+.source-body{padding:0 20px 20px;font-size:13px;line-height:1.8}.source-body a,.physical-notes a{color:var(--blue);overflow-wrap:anywhere}.source-body li{margin-bottom:9px}
+@media(max-width:900px){
+ .physical-map,.physical-concept .physical-map{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:0 16px;padding:14px 18px;max-width:540px;margin:auto}
+ .phy-ap1{grid-area:1/1!important}.phy-ap2{grid-area:1/2!important}.phy-utp1{grid-area:2/1!important}.phy-utp2{grid-area:2/2!important}
+ .phy-access{grid-area:3/1/4/3!important}.phy-sfpa{grid-area:4/1/5/3!important}.phy-fibera{grid-area:5/1/6/3!important}.phy-fdf{grid-area:6/1/7/3!important}.phy-fiberb{grid-area:7/1/8/3!important}.phy-sfpb{grid-area:8/1/9/3!important}.phy-distribution{grid-area:9/1/10/3!important}
+ .phy-element{justify-self:stretch;padding:6px 4px}.phy-element strong{font-size:14px}.phy-element small{font-size:11px}
+ .phy-element svg{height:46px!important;width:74px!important}
+ .phy-status{font-size:11px;margin-top:3px}
+ .phy-cable{padding-left:15px;min-height:64px}
+ .phy-cable::before{position:absolute;left:5px;top:8px;bottom:8px;width:4px;height:auto;margin:0}
+ .phy-cable.disconnected::before{background:repeating-linear-gradient(180deg,var(--red) 0 8px,transparent 8px 15px)}
+ .phy-utp1,.phy-utp2{width:100%;border-bottom:2px solid #2f7fd0;border-radius:0 0 10px 10px}
+ .phy-utp1.disconnected{border-bottom-style:dashed;border-bottom-color:var(--red)}
+ .phy-access,.phy-distribution{display:grid;grid-template-columns:80px minmax(0,1fr);width:min(100%,330px);align-items:center;justify-self:center;padding:8px}
+ .phy-access svg,.phy-distribution svg{grid-row:1/4}.phy-access small,.phy-distribution small{margin-top:1px}
+ .phy-module{display:flex;justify-content:center;align-items:center;gap:9px;padding:7px 12px;justify-self:center;width:min(100%,270px);margin:3px 0}
+ .phy-module::before{margin:0;flex-shrink:0}.phy-module small,.phy-module .phy-status{margin:0}
+ .phy-fdf{display:flex;align-items:center;justify-content:center;gap:10px;width:min(100%,260px);justify-self:center}.phy-fdf::before{margin:0}.phy-fdf small{margin:0}
+ .phy-fibera,.phy-fiberb{width:min(100%,260px);justify-self:center;min-height:54px}
+ .physical-concept .phy-ap1{grid-column:1/3!important}.physical-concept .phy-utp1{grid-column:1/3!important;width:230px;justify-self:center;border-bottom:0}
+ .physical-concept .physical-map .phy-access{grid-row:3!important}.physical-concept .physical-map .phy-sfpa{grid-row:4!important}.physical-concept .physical-map .phy-fibera{grid-row:5!important}.physical-concept .physical-map .phy-fdf{grid-row:6!important}.physical-concept .physical-map .phy-fiberb{grid-row:7!important}.physical-concept .physical-map .phy-sfpb{grid-row:8!important}.physical-concept .physical-map .phy-distribution{grid-row:9!important}
+ .physical-concept .cg-next{display:grid}
+}
+@media(max-width:600px){
+ .physical-heading{padding:14px;font-size:11px}.physical-map{padding:8px 10px;gap:0 10px}
+ .connector-figure{grid-template-columns:1fr}.connector-figure svg{margin:auto}
+ .physical-concept .cg-topbar nav{gap:4px 14px}.physical-concept .cg-topbar nav a{font-size:13px}
+ .physical-concept .cg-hero h1{font-size:30px}.physical-concept .cg-figure{padding:16px 12px}
+ #physicalLab .beginner-key{font-size:11px}#physicalLab .next-row{align-items:stretch}#physicalLab .next-row button{white-space:normal}
+ #physicalLab .physical-playback{font-size:11px}.physical-map .phy-element{min-height:44px}
+ #physicalLab{padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){.phy-element{transition:none}html{scroll-behavior:auto}}
+@media(forced-colors:active){.phy-element.active{outline:3px solid Highlight}.phy-element.disconnected{border:3px dashed CanvasText}.phy-element.affected{border:3px double CanvasText}.phy-cable::before{background:CanvasText!important}}
+@media(max-width:900px){.physical-concept .physical-map .phy-utp1{grid-row:2!important}}
+/* Unlike ARP's historical hide-before-selection rule, keep the disabled action discoverable. */
+body[data-sim-mode="basic"] #physicalLab .controls{display:flex!important}
+@media(max-width:720px){
+ #physicalLab .controls{order:0;position:static;margin:0 0 12px}
+ #physicalLab .observation{order:1}
+ #physicalLab .topology-shell{scroll-margin-top:65px}
+ #physicalLab #predictionTitle{scroll-margin-top:70px}
+}
+.physical-map>.physical-links{position:absolute;inset:0;width:100%!important;height:100%!important;pointer-events:none;z-index:0;overflow:visible}
+.physical-link{fill:none;stroke:var(--blue2);stroke-width:3;stroke-linejoin:round}
+.physical-link.optical{stroke:var(--green2)}.physical-link.module{stroke:#8ba7ba;stroke-width:2}
+.physical-link.broken{stroke:var(--red);stroke-dasharray:7 6}
+@media(forced-colors:active){.physical-link{stroke:CanvasText}.physical-link.broken{stroke:CanvasText;stroke-dasharray:7 6}}
+#physicalLab .physical-playback .soft-btn{font-size:16px}
+#physicalLab .beginner-key{min-width:0;flex-wrap:wrap}
+#physicalLab .beginner-key b,#physicalLab .beginner-key span{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
