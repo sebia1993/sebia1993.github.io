@@ -185,7 +185,7 @@ async function verifySurface(url, name) {
       }
       assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
       assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
-      assert.ok((await page.locator('#storageNote').innerText()).includes('다시 시작'));
+      assert.ok((await page.locator('#storageNote').innerText()).includes('다시 들어오면 1번 문제부터 미응답 상태로 시작'));
       await page.locator('#choices .choice').first().click(); await page.locator('#runBtn').click();
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
       results.push({surface:name,case:`fresh-start-${kind}`,status:'PASS'});
