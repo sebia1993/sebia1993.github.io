@@ -6,7 +6,7 @@
 #simVisual .wireless-actor b{font-size:14px;color:var(--ink)}
 #simVisual .wireless-actor small{font-size:12px;color:var(--muted)}
 #simVisual .wireless-actor.current{border-color:var(--blue);box-shadow:0 0 0 2px #dceeff}
-#simVisual .wireless-wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+#simVisual .wireless-wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
 #simVisual .wireless-wire line{stroke:#a8bed3;stroke-width:2;stroke-dasharray:5 5}
 #simVisual .wireless-wire circle{fill:var(--green,#12a57e);stroke:#fff;stroke-width:3}
 #simVisual .wireless-flow-label{position:absolute;bottom:7px;left:6px;right:6px;text-align:center;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
@@ -26,6 +26,9 @@
 #simVisual .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 #simVisual .meta strong{overflow-wrap:anywhere}
 #simVisual .dot-event code{white-space:normal;overflow-wrap:anywhere;color:var(--ink)}
+#simVisual .dot-event{grid-template-columns:28px minmax(0,1fr);align-items:start;text-align:left}
+#simVisual .dot-event>div{min-width:0;overflow-wrap:anywhere}
+#simVisual .dot-event p{margin:5px 0 0}
 #simVisual .wlan-sequence-list{max-height:310px;overflow:auto;padding:0;scrollbar-gutter:stable}
 #simVisual .wlan-lane-head,#simVisual .dot-lanes{display:none}
 #simVisual .roam-stage{min-height:280px}
@@ -34,6 +37,7 @@
 #simVisual .gate span{overflow-wrap:anywhere}
 #simVisual .roam-review{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #simVisual .roam-review .wireless-fact:last-child:nth-child(odd){grid-column:1/-1}
+@media(max-width:900px){#simVisual .dot-lab-grid{grid-template-columns:1fr}}
 @media(max-width:600px){
  #simVisual .wireless-flow{grid-template-columns:1fr;gap:38px;padding:10px 10px 34px}
  #simVisual .wireless-actor{display:grid;grid-template-columns:64px 1fr;text-align:left;padding:8px;align-items:center}

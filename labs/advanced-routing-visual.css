@@ -8,11 +8,10 @@
 #simVisual [data-route-device] small{font-size:.8rem;line-height:1.45;color:var(--muted);text-align:center;overflow-wrap:anywhere}
 #simVisual .route-device{width:70px!important;height:55px!important;display:block;flex:none;min-width:0!important}
 #simVisual .route-peers{display:grid;gap:18px}
-#simVisual .route-peer{display:grid;grid-template-columns:minmax(80px,1fr) minmax(126px,1.05fr);align-items:center}
+#simVisual .route-peer{display:grid;grid-template-columns:minmax(80px,1fr) minmax(126px,1.05fr);align-items:center;position:relative}
 #simVisual .route-peer>.link{position:relative;height:3px;background:#b5c7d7;color:var(--muted);min-width:0;margin:0;transition:background 180ms}
-#simVisual .route-peer>.link:before{content:'';position:absolute;left:0;top:calc(-68px);height:139px;width:3px;background:#b5c7d7}
-#simVisual .route-peer:first-child>.link:before{top:0;height:68px}
-#simVisual .route-peer:last-child>.link:before{top:-68px;height:68px}
+#simVisual .route-peer:not(:last-child):before{content:'';position:absolute;left:0;top:50%;height:calc(100% + 18px);width:3px;background:#b5c7d7}
+#simVisual .route-peer>.link:before{display:none}
 #simVisual .route-peer>.link>span{position:absolute;left:5px;right:5px;bottom:9px;font-size:.8rem;font-weight:750;text-align:center;line-height:1.5;overflow-wrap:anywhere}
 #simVisual .route-peer>.link.active{background:var(--blue);color:var(--blue)}
 #simVisual .route-peer>.link.best{background:var(--mint);color:var(--mint)}

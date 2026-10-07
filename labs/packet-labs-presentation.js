@@ -2,14 +2,17 @@
 window.PacketLabPresentation = {attach(adapter, config) {
   const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
   const svgEl=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
-  const word=(s)=>{let t=String(s??'');for(const [a,b] of Object.entries({...adapter.presentation?.names,...adapter.presentation?.labels}).sort((a,b)=>b[0].length-a[0].length))t=t.replace(new RegExp('(?<![A-Za-z0-9])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z0-9])','g'),b);return t;};
+  const words={...adapter.presentation?.names,...adapter.presentation?.labels};
+  const wordKeys=Object.keys(words).sort((a,b)=>b.length-a.length).map(a=>a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  const wordPattern=wordKeys.length?new RegExp('(?<![A-Za-z0-9])(?:'+wordKeys.join('|')+')(?![A-Za-z0-9])','g'):null;
+  const word=s=>wordPattern?String(s??'').replace(wordPattern,k=>words[k]):String(s??'');
   let active=null;
   function setup(){
     const desktop=document.querySelector(config.desktop);if(!desktop)return;
     const host=desktop.parentElement;host.classList.add('packet-lab-host');desktop.classList.add('packet-desktop');
     if(host.querySelector('.packet-mobile'))return;
     const mobile=document.createElement('div');mobile.className='packet-mobile';
-    const note=document.createElement('p');note.className='packet-map-note';note.textContent=config.note||'같은 연결 관계를 작은 화면에 맞춰 배치했습니다.';mobile.append(note);
+    const note=document.createElement('p');note.className='packet-map-note';note.textContent=config.note||'연결선과 장비의 강조를 보며 현재 패킷이 어디까지 전달됐는지 확인하세요.';mobile.append(note);
     const svg=svgEl('svg',{viewBox:`0 0 320 ${config.height}`,role:'img','aria-label':'실습 장비와 연결 관계'});
     for(const edge of config.edges){const a=config.nodes.find(n=>n.id===edge[0]),b=config.nodes.find(n=>n.id===edge[1]);const route=mobileRoute(a,b);svg.append(svgEl('polyline',{points:route.map(p=>p.join(',')).join(' '),class:'packet-mobile-link','data-edge':edge.slice(0,2).join('-')}));}
     for(const n of config.nodes){
@@ -19,13 +22,13 @@ window.PacketLabPresentation = {attach(adapter, config) {
       const name=svgEl('text',{x:0,y:16,'text-anchor':'middle',class:'packet-device-name'});name.textContent=n.name;g.append(name);
       const sub=svgEl('text',{x:0,y:34,'text-anchor':'middle',class:'packet-device-detail'});sub.textContent=n.detail||'';g.append(sub);svg.append(g);
     }
-    const pulse=svgEl('circle',{r:7,class:'packet-mobile-marker',visibility:'hidden'});svg.append(pulse);mobile.append(svg);host.append(mobile);
+    const pulse=svgEl('circle',{r:7,class:'packet-mobile-marker',visibility:'hidden'});svg.append(pulse);mobile.append(svg);desktop.after(mobile);
     const overlay=svgEl('svg',{class:'packet-desktop-overlay','aria-hidden':'true'});overlay.append(svgEl('circle',{r:7,class:'packet-mobile-marker',visibility:'hidden'}));desktop.append(overlay);
-    const caption=document.createElement('p');caption.className='packet-motion-caption';caption.textContent='아직 실행하지 않았습니다.';host.append(caption);
+    const caption=document.createElement('p');caption.className='packet-motion-caption';caption.textContent='아직 실행하지 않았습니다.';mobile.after(caption);
   }
   function mobileRoute(a,b){
-    if(a.x===b.x||a.y===b.y)return [[a.x,a.y],[b.x,b.y]];
-    const mid=(a.y+b.y)/2;return [[a.x,a.y],[a.x,mid],[b.x,mid],[b.x,b.y]];
+    // Each endpoint has its own cable; avoid a shared bar suggesting an extra hub.
+    return [[a.x,a.y],[b.x,b.y]];
   }
   function points(ids,mobile){
     const out=[],desktop=document.querySelector(config.desktop),base=desktop?.getBoundingClientRect();

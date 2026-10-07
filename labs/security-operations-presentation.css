@@ -48,3 +48,13 @@
  #simVisual .so-stage[data-so-layout="nat"] .cp{margin-left:14px}#simVisual .so-stage[data-so-layout="chain5"] .cp{margin-left:0;margin-top:-19px}
  #simVisual:has(.so-stage) .topology{padding:10px}#simVisual:has(.so-stage) .observation-side{padding:12px}
 }
+/* Explicit areas keep the current-event strip beside its diagram, not as an empty column. */
+#simVisual:has(.so-stage) .observation{grid-template-areas:"topology side" "event side";align-items:start}
+#simVisual:has(.so-stage) .observation>.topology{grid-area:topology}
+#simVisual:has(.so-stage) .observation>#simEvent{grid-area:event;margin:0}
+#simVisual:has(.so-stage) .observation>.observation-side{grid-area:side}
+#simVisual .so-stage [id].stop-marker{top:auto;bottom:6px;height:auto;min-height:0;max-height:none;line-height:1.4;padding:6px 10px;white-space:normal}
+#simVisual .so-stage [data-so-link].cp{margin:0}
+@media(max-width:1000px){#simVisual:has(.so-stage) .observation{grid-template-areas:"topology" "event" "side"}}
+/* Labels remain legible where a vertical connection runs below a device. */
+#simVisual .so-stage .node b,#simVisual .so-stage .node small{position:relative;background:#f4f7fb;border-radius:4px}

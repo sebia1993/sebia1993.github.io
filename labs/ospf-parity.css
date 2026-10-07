@@ -21,3 +21,5 @@
  #simVisual .a13{left:6%;top:58%;max-width:85px}
  #simVisual .stop12{left:46%;top:29%;max-width:125px;white-space:normal;transform:none}
 }
+/* ARP uses .link-badge for hidden cable controls; OSPF badges are visible Cost conditions. */
+#simVisual .link-badge{display:block;cursor:default}

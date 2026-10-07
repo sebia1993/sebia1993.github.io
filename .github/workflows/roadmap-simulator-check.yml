@@ -38,6 +38,22 @@ permissions:
 
 jobs:
   acceptance:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: packet-switching
+            topics: icmp-troubleshooting,vlan-trunk,inter-vlan-routing,stp
+          - group: services-routing
+            topics: lacp,dhcp,dns,routing-table
+          - group: routing-security
+            topics: ospf,acl,nat-pat,firewall-vpn
+          - group: wireless
+            topics: wifi-rf,wlan-association,dot1x-radius,roaming-wlan-troubleshooting
+          - group: resilience
+            topics: fhrp,vrf,bgp
+          - group: operations
+            topics: redistribution,observability,network-automation
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -54,12 +70,13 @@ jobs:
       - run: node tests/roadmap-simulators.mjs
         env:
           BASE_URL: ${{ inputs.base_url }}
+          TOPICS: ${{ matrix.topics }}
           LAB_UI_VERSION: 20261007-guide-aligned-v2
           SCREENSHOTS: '1'
-          QA_RUN_TAG: guide-aligned-v2
+          QA_RUN_TAG: guide-aligned-v2-${{ matrix.group }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-simulator-acceptance
+          name: roadmap-simulator-acceptance-${{ matrix.group }}
           path: test-results/roadmap-simulators/
           retention-days: 7

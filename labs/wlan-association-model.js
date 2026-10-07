@@ -100,7 +100,7 @@ const lessons = [
 const $=id=>document.getElementById(id);
 const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
 
-const adapter={raw:lessons,kind:'sequence',reset(i){index=i;$('sequenceList').innerHTML='';},show(i){$('sequenceList').innerHTML=lessons[index].steps.slice(0,i+1).map((s,k)=>'<li class="sequence-event '+s.direction+(k===i?' current':'')+'"><b>'+s.label+'</b><span>'+s.title+'</span></li>').join('');}};
+const adapter={raw:lessons,kind:'sequence',reset(i){index=i;$('sequenceList').innerHTML='';},show(i){$('sequenceList').innerHTML=lessons[index].steps.slice(0,i+1).map((s,k)=>'<li class="sequence-event '+s.direction+(k===i?' current':'')+'"><b>'+s.label+'</b><span>'+s.title+'</span></li>').join('');$('sequenceList').scrollTop=$('sequenceList').scrollHeight;}};
 adapter.presentation={
  names:{'STA-A':'PC A','AP-A':'AP A'},
  labels:{'STA → AP':'PC A → AP A','AP → STA':'AP A → PC A','STA ↔ AP':'PC A ↔ AP A','AP → 주변 STA':'AP A → 주변 단말','STA 내부':'PC A 내부','AP 내부 로그':'AP A 내부 로그','Discovery':'AP 발견','Protected Data':'보호된 데이터','lab 암호':'실습 암호','lab 설정':'실습 설정','Traffic Key':'Traffic Key'},
@@ -119,7 +119,7 @@ const resetSequence=adapter.reset;
 adapter.reset=i=>{resetSequence(i);const list=$('sequenceList');let host=$('wlanFlow');if(!host){host=document.createElement('div');host.id='wlanFlow';list.before(host);}WirelessLab.flow('wlanFlow',[{name:'PC A',role:'STA · Supplicant',kind:'pc'},{name:'AP A',role:'Authenticator',kind:'ap'}],'예상을 선택한 뒤 메시지 흐름을 실행하세요.');};
 adapter.buildPlan=(i,mode='normal')=>mode!=='normal'?null:lessons[i].steps.map((s,k)=>{
  const moving=['to-ap','to-sta','both'].includes(s.direction),duration=moving?(s.direction==='both'?2070:1650):1470;
- return {title:s.title,detail:s.detail,kind:s.label,duration,modelStepIndex:k,action(){index=i;adapter.show(k);WirelessLab.flow('wlanFlow',[{name:'PC A',role:'STA · Supplicant',kind:'pc'},{name:'AP A',role:'Authenticator',kind:'ap'}],s.label.replace(/STA/g,'PC A').replace(/AP(?=\s|$)/g,'AP A'));$('simVisual').dataset.reveal='events';},animate(p){if(!moving)return;const movement=Math.min(1,p*duration/(s.direction==='both'?840:420));if(s.direction==='both'){const back=movement>.5;WirelessLab.motion('wlanFlow',back?1:0,back?0:1,back?(movement-.5)*2:movement*2);}else WirelessLab.motion('wlanFlow',s.direction==='to-ap'?0:1,s.direction==='to-ap'?1:0,movement);}};
+ return {title:s.title,detail:s.detail,kind:s.label,duration,modelStepIndex:k,action(){index=i;adapter.show(k);WirelessLab.flow('wlanFlow',[{name:'PC A',role:'STA · Supplicant',kind:'pc'},{name:'AP A',role:'Authenticator',kind:'ap'}],s.label.replace(/STA/g,'PC A').replace(/AP(?=\s|$)/g,'AP A'));$('simVisual').dataset.reveal='events';},animate(p){if(p===0||p===1)$('sequenceList').scrollTop=$('sequenceList').scrollHeight;if(!moving)return;const movement=Math.min(1,p*duration/(s.direction==='both'?840:420));if(s.direction==='both'){const back=movement>.5;WirelessLab.motion('wlanFlow',back?1:0,back?0:1,back?(movement-.5)*2:movement*2);}else WirelessLab.motion('wlanFlow',s.direction==='to-ap'?0:1,s.direction==='to-ap'?1:0,movement);}};
 });
 
 NetworkSimulator.mount(adapter);

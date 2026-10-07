@@ -321,10 +321,50 @@ adapter.presentation.guideDifferences = [
     "reason": "학습 페이지의 요청 관계 그림에서 생략한 실제 단말 접속 스위치 SW1을 Switch A로 표시합니다. Relay 구간과 IP 구성은 같습니다."
   }
 ];
+Object.assign(adapter.presentation.labels, {
+  "no lease": "Lease 없음",
+  "DHCP service = up": "DHCP 서비스 = 동작",
+  "first query": "첫 번째 Query",
+  "second query": "두 번째 Query",
+  "Target": "대상",
+  "Local/Remote": "같은 Subnet / 다른 Subnet",
+  "Local": "같은 Subnet",
+  "Remote": "다른 Subnet",
+  "After Resolution": "이름 해석 후",
+  "Client Broadcast": "단말 Broadcast",
+  "Server Reply / ACK": "서버 응답 / ACK",
+  "Client DNS Query": "단말 DNS Query",
+  "Client LAN": "단말 LAN",
+  "Client Side": "단말 구간",
+  "Server Side": "서버 구간",
+  "Edge": "접속 구간",
+  "Transaction": "메시지 대응",
+  "DNS Answer": "DNS 응답",
+  "Name Ping": "이름으로 Ping",
+  "Same-VLAN": "같은 VLAN",
+  "Different VLAN": "다른 VLAN",
+  "VLAN membership": "VLAN 소속",
+  "Server": "서버",
+  "Client": "단말",
+  "Echo Request": "Echo Request",
+  "Echo Reply": "Echo Reply",
+  "ARP Request": "ARP Request",
+  "ARP Reply": "ARP Reply",
+  "DHCP Request": "DHCP Request",
+  "DNS Query": "DNS Query",
+  "DNS Response": "DNS Response",
+  "Time Exceeded": "Time Exceeded",
+  "Destination Unreachable": "Destination Unreachable",
+  "Port Unreachable": "Port Unreachable",
+  "Host Unreachable": "Host Unreachable",
+  "Network Unreachable": "Network Unreachable",
+  "Broadcast Request": "Broadcast Request",
+  "Default Gateway": "Default Gateway"
+});
 PacketLabPresentation.attach(adapter, {
   "desktop": ".topology-stage",
   "height": 540,
-  "note": "학습 페이지의 PC A → Router A → Router B 관계에 실제 단말 접속 Switch A를 함께 표시했습니다.",
+  "note": "PC A는 DHCP 단말, Router A는 Relay, Router B는 DHCP 서버입니다. Switch A는 PC A와 Relay를 같은 단말망으로 연결합니다.",
   "nodes": [
     {
       "id": "pc1",

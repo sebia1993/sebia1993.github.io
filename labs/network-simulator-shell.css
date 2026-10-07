@@ -16,7 +16,7 @@ body{padding-bottom:104px}.hero .next-lab-actions{margin-top:16px}.hero .next-la
 #simVisual [id=eventText]{display:none}#simVisual .result-box{display:none}#simVisual p,#simVisual code,#simVisual strong,#simVisual small,#simVisual span{overflow-wrap:anywhere}
 #simVisual .state-row,#simVisual .tr-row,#simVisual .route-row,#simVisual .panel-box,#simVisual .obs-item,#simVisual .dot-state-row,#simVisual .dot-event{color:var(--ink);border-color:var(--line)}
 #simVisual .scope-note,#simVisual .standard-note{color:var(--ink);background:#fff4e5}#simVisual .scope-note b{color:var(--orange)}
-#simVisual[data-reveal=idle] :is(.observation-side,.side,.state-list,.stateList,.route-overlay,.dot-state-list,.dot-event-list,.route-table,.packet-view,.packet-card,.metric,.obs-grid){visibility:hidden}
+#simVisual[data-reveal=idle] :is(.observation-side,.side,.state-list,.stateList,.route-overlay,.dot-state-list,.dot-event-list,.route-table,.packet-view,.packet-card,.metric,.obs-grid){display:none}
 #simVisual[data-reveal=model] :is(.observation-side,.side,.state-list,.dot-state-list){visibility:hidden}
 #simVisual[data-reveal=events] .obs-grid{visibility:hidden}
 #simVisual[data-reveal=idle] :is(.token-text,.candidate-label){visibility:hidden}
@@ -62,6 +62,8 @@ body[data-topic="acl"] #simVisual .stop-marker{top:29%}
 #simResult .prediction-feedback{margin:0}
 #simResult #simChosen,#simResult #simCorrect{display:block;overflow-wrap:anywhere}
 #simTabs .lesson-tab{flex:0 0 auto;font:inherit;font-size:13px;font-weight:800;line-height:1.45}
+/* Long question titles stay in document flow so they cannot cover the observation. */
+#simTabs{position:static}
 #simVisual [data-preserve-original]{white-space:pre-wrap}
 #simPosition{font-variant-numeric:tabular-nums}
 .sim-guide-differences{margin:10px 0 0;font-size:12px;line-height:1.6;color:var(--muted)}
@@ -73,4 +75,4 @@ body[data-topic="acl"] #simVisual .stop-marker{top:29%}
   #simVisual .sim-svg-scroll:has(.compact-topology),#simVisual .sim-svg-scroll.compact{overflow:visible}
 }
 
-@media(max-width:760px){html{scroll-padding-top:100px;scroll-padding-bottom:110px}#simMain button,#simMain summary{scroll-margin-block:100px}}
+@media(max-width:760px){html{scroll-padding-top:16px;scroll-padding-bottom:110px}#simMain button,#simMain summary{scroll-margin-block:24px}}

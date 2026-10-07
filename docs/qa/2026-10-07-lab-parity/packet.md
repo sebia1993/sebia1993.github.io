@@ -53,3 +53,26 @@ NOT_RUN at this report checkpoint; deployment and public verification are owned 
 ## 8. Necessary differences
 
 Compact diagrams preserve network adjacency but arrange devices vertically instead of reproducing desktop coordinates. VLAN control hosts and DHCP/DNS transport devices are part of the previously validated lab, so they are retained with explicit naming correspondence instead of deleting them to match a simplified concept picture. Recovery-summary events show their verified state without inventing a single packet that represents an entire DORA or repair process.
+
+## CI capture visual review — guide-aligned-v2
+
+Actual, unmodified CI browser JPEGs were visually inspected under `/workspace/scratch/3ea555ad7246/qa/ci-final/guide-aligned-v2`:
+
+- All five topics × 360, 768, 1366, 1920: `*-visual.jpg` (20 topology/current-observation captures).
+- All five topics: `*-360-idle.jpg` and `*-360-completed.jpg` (10 full-page captures including titles, prediction, result and controls).
+- Additional full-page initial representatives: `icmp-troubleshooting-768-idle.jpg`, `dns-1366-idle.jpg`, `vlan-trunk-1920-idle.jpg`.
+- Total manually inspected: 33 native evidence images. This does not claim manual review of every scenario or every recorded state.
+
+Observed problems and fixes after those captures:
+
+1. **Shared overlay defect:** sticky question tabs covered the mobile diagrams. Reported to the shared-controller owner, who changed them to static positioning. Idle observation placeholders also left large empty areas; owner changed concealed panels to `display:none`.
+2. **Inter-VLAN mobile ordering:** the packet field card preceded the diagram. Geometry helper now inserts the compact diagram immediately after the desktop placeholder, then the current-caption, then the packet card.
+3. **DHCP/DNS desktop overlap:** capture-point labels overlapped router/switch symbols after display names grew. Topic-specific CSS moves DHCP labels above the equipment and DNS transport labels below it while keeping their link midpoints.
+4. **VLAN desktop overlap:** the side-zone caption ran behind the top PC icon. The caption now sits in the topology's existing top padding.
+5. **Mobile link semantics:** shared right-angle bars made independent switch links look like a common bus. Each mobile edge now connects its two devices directly, without introducing intermediate junctions.
+6. **Remaining English UI:** added presentation translations for general role/status text such as `Local/Remote`, `After Resolution`, `Target`, `no lease`, `Transaction`, `Client LAN`, and `Edge`. Protected full technical message names such as Echo Request / Echo Reply / ARP Reply remain English. DHCP and DNS hero copy is now natural Korean.
+7. **Implementation-oriented note:** generic mobile-rearrangement wording was replaced with device roles and what the learner should observe.
+
+No unexpected final answer, active final path or filled result was visible in the inspected initial captures. The completed captures showed prediction/result comparisons and device names consistently. Card text wrapped within the inspected layouts; the reported overlaps were concrete labels/overlays rather than invented general failures.
+
+**Status:** capture review performed; defects fixed in source. A fresh CI capture after these fixes is still required before marking the repaired visual cases PASS. The previous v2 captures are retained unchanged as evidence of the detected defects. Public click-path verification remains separate.

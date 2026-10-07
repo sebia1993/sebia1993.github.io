@@ -28,3 +28,17 @@
 - PASS: 5개 model JS 구문 검사.
 - PASS: `node --test tests/roadmap-models.test.mjs` 4개 검사. 전체 22개/120개 원본 scenario hash, 보호 페이지 hash, Concept Guide 연결, 각 문항의 제목·힌트·장비명 대응 검사가 통과했다.
 - NOT_RUN (이 하위 작업): 브라우저/4 viewport/공개 URL 검수. 통합 담당의 변경 후 실제 브라우저·CI 결과에서 별도로 판정한다. 본 기록은 새 PNETLab 검증이 아니다.
+
+## CI 캡처 육안 검수 후 수정
+
+2026-10-07 통합 CI가 생성한 `/workspace/scratch/3ea555ad7246/qa/ci-final/guide-aligned-v2`의 담당 5개 주제에 대해 360·768·1366·1920px `*-visual.jpg`와 `*-idle.jpg`, `*-completed.jpg`를 실제로 열어 비교했다. 원본을 보존하고 `../switching-review/`에 분석용 연락 시트를 생성했다. 제목·예상 선택지·장비 이름·연결·초기 역할 미공개·완료 결과·하단 버튼을 확인했다.
+
+- 확인: 5개 주제의 4개 폭에서 기본 명칭/연결과 한국어 안내가 유지된다. STP/LACP는 360·768px에서 compact 세로 구성, Routing/OSPF는 360px에서 세로 분기·삼각형, FHRP는 기존 세로 이중화 분기다.
+- 수정: `lacp-360-visual.jpg`에서 Po1 배지와 M1/M2 라벨이 겹쳤다. Member 라벨을 위로 32px, Po1 배지를 아래로 옮겨 별도 행으로 분리했다.
+- 수정: `ospf-*-completed.jpg`의 Neighbor 문제 마지막 비이동 단계에 직전 Hello 마커가 남아 `IPv4`로 표시됐다. 단계 진입 때 마커를 숨기고 해당 단계가 실제 이동할 때만 표시하도록 수정했다. FHRP에도 같은 마커 수명 규칙을 적용했다.
+- 수정: OSPF Cost 라벨이 ARP의 동일 클래스 `.link-badge{display:none}` 때문에 모든 폭에서 숨겨졌다. OSPF의 라벨은 관찰 조건이므로 주제 전용 CSS에서 명시적으로 표시한다.
+- 수정: FHRP의 실제 캡처 지점 `CP-R1-UP`, `CP-R2-UP`이 자동 명칭 변환으로 바뀌었다. 지점 식별자는 표시 문자열 치환의 보호 대상으로 지정하고 원문을 유지한다. 장비 이름 자체는 Router A/B/C를 유지한다.
+- 통합 담당에게 전달: 360px 캡처의 sticky 문제 탭이 관찰 중간에 겹치는 공통 현상은 공유 CSS 계층에서 확인/수정하도록 보고했다.
+- PASS: 수정 후 `node --test tests/roadmap-models.test.mjs` 5개 검사(원본 해시·보호 파일·명칭 대응·관찰 계획 순서/시간 포함).
+- NOT_RUN: 위 4개 화면 수정 이후 새 캡처 및 Public QA는 통합 담당의 다음 CI/공개 검수에서 판정한다. 기존 캡처를 수정 후 PASS 근거로 재사용하지 않는다.
+- 추가 한글화: 실제 화면에 남은 일반 설명 단어 Lab·State·Layer·Logical·Physical·Data를 presentation.labels에서 실습·상태·계층·논리·물리·데이터로 표시한다. 실제 CLI·evidence와 시나리오 원문은 보존한다.

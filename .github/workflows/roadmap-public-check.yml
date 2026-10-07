@@ -1,0 +1,95 @@
+name: Roadmap public acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'labs/*-simulator.html'
+      - 'labs/*-model.js'
+      - 'labs/network-simulator-*'
+      - 'labs/*-presentation.*'
+      - 'labs/*-parity.css'
+      - 'labs/wireless-simulator-*'
+      - 'labs/advanced-routing-*'
+      - 'tests/roadmap-*'
+      - 'tests/fixtures/roadmap-*'
+      - '.github/workflows/roadmap-public-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-public-acceptance
+  cancel-in-progress: true
+
+jobs:
+  public:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: packet-switching
+            topics: icmp-troubleshooting,vlan-trunk,inter-vlan-routing,stp
+          - group: services-routing
+            topics: lacp,dhcp,dns,routing-table
+          - group: routing-security
+            topics: ospf,acl,nat-pat,firewall-vpn
+          - group: wireless
+            topics: wifi-rf,wlan-association,dot1x-radius,roaming-wlan-troubleshooting
+          - group: resilience
+            topics: fhrp,vrf,bgp
+          - group: operations
+            topics: redistribution,observability,network-automation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Wait for the checked-out controller and new page version on Pages
+        env:
+          PUBLIC_ORIGIN: https://sebia1993.github.io
+        run: |
+          timeout 300s bash <<'WAIT_FOR_PAGES'
+          expected=$(sha256sum labs/network-simulator-session.js | cut -d ' ' -f 1)
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --location --connect-timeout 5 --max-time 10 \
+                -H 'Cache-Control: no-cache' \
+                "$PUBLIC_ORIGIN/labs/network-simulator-session.js?qa=$GITHUB_SHA-$attempt" \
+                --output /tmp/roadmap-public-session.js && \
+               curl --fail --silent --show-error --location --connect-timeout 5 --max-time 10 \
+                -H 'Cache-Control: no-cache' \
+                "$PUBLIC_ORIGIN/labs/icmp-troubleshooting-simulator.html?qa=$GITHUB_SHA-$attempt" \
+                --output /tmp/roadmap-public-page.html; then
+              actual=$(sha256sum /tmp/roadmap-public-session.js | cut -d ' ' -f 1)
+              if [ "$actual" = "$expected" ] && grep -q '20261007-guide-aligned-v2' /tmp/roadmap-public-page.html; then
+                echo 'Pages is serving the expected shared controller and page version.'
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo 'Pages did not serve the checked-out controller within the deployment wait window.' >&2
+          exit 1
+          WAIT_FOR_PAGES
+      - name: Verify all 22 published simulators and 120 scenarios
+        run: node tests/roadmap-simulators.mjs
+        env:
+          BASE_URL: https://sebia1993.github.io
+          TOPICS: ${{ matrix.topics }}
+          LAB_UI_VERSION: 20261007-guide-aligned-v2
+          SCREENSHOTS: '0'
+          QA_RUN_TAG: guide-aligned-v2-public-${{ matrix.group }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-public-acceptance-report-${{ matrix.group }}
+          path: test-results/roadmap-simulators/guide-aligned-v2-public-${{ matrix.group }}/report.json
+          retention-days: 7

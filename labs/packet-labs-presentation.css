@@ -19,6 +19,15 @@
 #simVisual .packet-mobile-marker.is-reply{fill:var(--mint,#1c9c88)}
 #simVisual .packet-mobile-marker.is-stop{fill:#c27827}
 #simVisual .packet-lab-host .packet-marker{display:none!important;animation:none!important}
+#simVisual .packet-desktop .zone-title{top:-24px;left:10px;padding:2px 6px;background:var(--panel3,#fff);border-radius:6px}
+body[data-topic="dhcp"] #simVisual :is(#label1,#label2,#label3){top:91px;transform:translateX(-50%)}
+body[data-topic="dhcp"] #simVisual #label1{left:160px}
+body[data-topic="dhcp"] #simVisual #label2{left:333px}
+body[data-topic="dhcp"] #simVisual #label3{left:551px}
+body[data-topic="dns"] #simVisual :is(#label3,#label4,#label5){top:285px;transform:translateX(-50%)}
+body[data-topic="dns"] #simVisual #label3{left:314px}
+body[data-topic="dns"] #simVisual #label4{left:492px}
+body[data-topic="dns"] #simVisual #label5{left:695px}
 @media(max-width:850px){
  #simVisual .packet-desktop{display:none!important}
  #simVisual .packet-mobile{display:block}
