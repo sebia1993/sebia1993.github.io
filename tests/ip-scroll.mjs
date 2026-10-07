@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261006-beginner-flow-v2';
+const version = '20261007-beginner-flow-v3';
 const key = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
@@ -85,17 +85,23 @@ async function verifySurface(url, name) {
         if ((width === 360 && height === 800 || width === 1366) && i === 2) {
           await page.screenshot({ path: resolve(output, `ip-answer-${name}-${width}.png`) });
         }
-        // The beginner result intentionally shows the calculation before the topology.
-        // The primary CTA may sit lower than in the old collapsed design,
-        // but it must remain reachable without using the top tabs.
-        const positions = await page.evaluate(() => ({ grade: document.querySelector('#verdictTitle').getBoundingClientRect().top + scrollY, next: document.querySelector('#nextBtn').getBoundingClientRect().bottom + scrollY }));
+        // The beginner result shows the validated topology before the primary Next action.
+        // Numeric calculation remains available below the action as optional deepening.
+        const positions = await page.evaluate(() => {
+          const grade=document.querySelector('#verdictTitle').getBoundingClientRect().top+scrollY;
+          const model=document.querySelector('#modelObservation').getBoundingClientRect().top+scrollY;
+          const next=document.querySelector('#nextBtn').getBoundingClientRect().bottom+scrollY;
+          const calc=document.querySelector('#calculationDetails').getBoundingClientRect().top+scrollY;
+          return {grade,model,next,calc};
+        });
+        assert.ok(positions.grade<positions.model&&positions.model<positions.next&&positions.next<positions.calc,'result flow order must be verdict → topology → next → numeric deepening');
         assert.ok(positions.next - positions.grade < 1400, 'result-to-next distance is excessive');
         assert.equal(await page.locator('#decisionOut').innerText(), decisions[i]);
         if (i === 2) {
           assert.equal(await page.locator('#srcIp').innerText(), '10.77.10.10/24');
           assert.equal(await page.locator('#dstIp').innerText(), '10.77.10.140/25');
           assert.ok((await page.locator('#dstNet').innerText()).includes('10.77.10.0/24'));
-          assert.ok((await page.locator('#calculationBasis').innerText()).includes('자신의 Mask /24'));
+          assert.ok((await page.locator('#calculationBasis').innerText()).includes('자신의 Prefix Length /24'));
           assert.equal(await page.locator('#maskTry').isVisible(), true);
           await press(page, '#maskTry25', touch);
           assert.ok((await page.locator('#maskTryResult').innerText()).includes('Gateway(.1)'));
