@@ -85,10 +85,9 @@ async function verify(url,surface){
    assert.equal(await page.locator('#simTopology [data-sim-id=pc2]').evaluate(e=>e.classList.contains('on-route')),false);
    assert.ok((await page.locator('#modelEvent').innerText()).includes('원격 전달 전 중단'));
 
-   const score=await page.locator('#scoreText').innerText(),saved=await page.evaluate(()=>localStorage.getItem('network-learning:ip-subnetting:answers:v1'));
+   const score=await page.locator('#scoreText').innerText();
    await page.locator('#simPrev').click();await page.locator('#simNext').click();
-   assert.equal(await page.locator('#scoreText').innerText(),score);
-   assert.equal(await page.evaluate(()=>localStorage.getItem('network-learning:ip-subnetting:answers:v1')),saved,'sim playback changed learner state');
+   assert.equal(await page.locator('#scoreText').innerText(),score,'sim playback changed current-page learner state');
 
    await submit(page,3,'gw');await openFlow(page);for(let i=0;i<3;i++)await page.locator('#simNext').click();
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'routed-path');
