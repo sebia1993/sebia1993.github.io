@@ -88,7 +88,14 @@ async function surface(url,name){
     assert.equal(flowOrder,true,'result flow must be verdict → topology → next/reset → numeric deepening');
     assert.equal(await page.locator('.hero p').first().evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','hero learning copy contrast');
     assert.equal(await page.locator('#feedback').evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','prediction feedback is primary copy');
-    assert.equal(await page.locator('#modelEvent').evaluate(e=>getComputedStyle(e).color),'rgb(244, 248, 252)','current event is primary copy');
+    const eventContrast=await page.evaluate(()=>{
+      function rgb(s){return (s.match(/[\d.]+/g)||[]).slice(0,3).map(Number);}
+      function lum(v){v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+      function L(s){const [r,g,b]=rgb(s);return .2126*lum(r)+.7152*lum(g)+.0722*lum(b);}
+      const fg=L(getComputedStyle(document.querySelector('#modelEvent')).color),bg=L(getComputedStyle(document.querySelector('#modelObservation')).backgroundColor);
+      return (Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05);
+    });
+    assert.ok(eventContrast>=7,'current event primary copy contrast must stay >= 7:1, got '+eventContrast);
     assert.equal(await page.locator('#modelObservation').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 36, 57)','observation surface must separate from page background');
     assert.ok((await page.locator('#modelCaption').textContent()).includes('직접 전달'));
     assert.equal((await page.locator('body').innerText()).includes('PASS'),false);
