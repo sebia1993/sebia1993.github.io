@@ -680,7 +680,8 @@ async function playObservation(replay){
   traceStep++;
  }
  autoPlaying=false;autoPaused=false;
- if(!a.observed)revealObservationResult();else updateAutoButton();
+ if(!a.observed)revealObservationResult();
+ else{$('modelObservation').dataset.flowState='complete';$('modelRunLabel').textContent='문제 '+(idx+1)+' · 흐름 확인 완료';updateAutoButton();}
 }
 function toggleAutoPlayback(){
  if(!observation)return;
