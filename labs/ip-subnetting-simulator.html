@@ -703,7 +703,11 @@ $('simPrev').addEventListener('click',function(){if(!answers[idx].observed)retur
 $('simNext').addEventListener('click',function(){if(!answers[idx].observed)return;stopAutoPlayback();if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
 $('maskTry25').addEventListener('click',function(){maskTryPrefix=25;renderMaskTry();});
 $('maskTry24').addEventListener('click',function(){maskTryPrefix=24;renderMaskTry();});
-window.addEventListener('resize',function(){if(observation)placeSimPacket(observation.events[traceStep]);});
+window.addEventListener('resize',function(){
+ if(!observation||autoPlaying)return;
+ var event=observation.events[traceStep],motion=event.motion||[],p=motion.length?simPoint(motion[motion.length-1]):null;
+ if(event.packetLabel&&p){$('simPacket').hidden=false;setPacketPoint(p);}else $('simPacket').hidden=true;
+});
 window.addEventListener('pagehide',stopAutoPlayback);
 window.addEventListener('pageshow',function(event){
  if(event.persisted)resetPracticeSession();
