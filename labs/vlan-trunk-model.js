@@ -227,5 +227,462 @@ function applyStep(){
     $('nextStepBtn').disabled=stepIndex===s.steps.length-1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;clearTopology();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+
+// Presentation follows the current Concept Guide; raw evidence above is unchanged.
+adapter.presentation = {
+  "names": {
+    "PC20A": "PC A",
+    "PC20B": "PC B",
+    "PC10A": "PC C",
+    "PC10B": "PC D",
+    "PC99A": "PC E",
+    "PC99B": "PC F",
+    "SW1": "Switch A",
+    "SW2": "Switch B"
+  },
+  "lessons": [
+    {
+      "title": "VLAN 20 프레임은 링크마다 어떻게 보일까요?",
+      "brief": "학습 페이지의 PC A → Switch A → Switch B → PC B 경로를 따라갑니다. Access와 Trunk의 Tag를 비교하세요.",
+      "hints": [
+        "Access 포트에서 단말이 보내는 일반 프레임을 떠올려 보세요.",
+        "이 조건의 VLAN 20은 Native VLAN이 아닙니다."
+      ]
+    },
+    {
+      "title": "VLAN 20 Broadcast는 어느 단말까지 갈까요?",
+      "brief": "같은 스위치에 연결됐어도 VLAN이 다르면 전달 영역이 다릅니다. PC B와 VLAN 10 대조 단말을 비교합니다.",
+      "hints": [
+        "Broadcast도 VLAN 경계를 가집니다.",
+        "대조 통신으로 물리 링크 자체의 정상 여부를 확인하세요."
+      ]
+    },
+    {
+      "title": "Native VLAN 99는 Trunk에서 어떻게 보일까요?",
+      "brief": "학습 페이지의 선택 자료와 같은 Cisco 기본 조건입니다. native tagging은 비활성입니다.",
+      "hints": [
+        "Non-native VLAN과 Native VLAN의 조건을 구분하세요.",
+        "이번 구성에서 실제 Tag 유무를 관찰합니다."
+      ]
+    },
+    {
+      "title": "링크는 정상인데 VLAN 20만 빠지면 어떻게 될까요?",
+      "brief": "Trunk의 Allowed 목록에서 VLAN 20만 제외했습니다. Access 유입과 Trunk 송출을 나누어 관찰합니다.",
+      "hints": [
+        "Link Up과 VLAN 통과 허용은 서로 다른 조건입니다.",
+        "통신이 계속되는 다른 VLAN과 비교하세요."
+      ]
+    },
+    {
+      "title": "도착 포트의 VLAN이 다르면 어디에서 멈출까요?",
+      "brief": "PC B의 Access 포트를 VLAN 10으로 바꾼 조건입니다. VLAN 20이 Trunk를 지나는지 먼저 확인합니다.",
+      "hints": [
+        "Trunk 통과와 단말 포트 송출을 구분하세요.",
+        "PC B의 포트가 현재 어느 VLAN에 속하는지 확인하세요."
+      ]
+    }
+  ],
+  "labels": {
+    "SUCCESS": "성공",
+    "BEFORE": "통과 전",
+    "AFTER": "통과 후",
+    "EXPIRE": "TTL 만료",
+    "REQUEST": "요청",
+    "FORWARD": "전달",
+    "REPLY": "응답",
+    "ROUTER": "Router 판단",
+    "PROBE": "Probe 전송",
+    "NO ROUTE": "Route 없음",
+    "DESTINATION": "목적지 응답",
+    "INTERPRET": "결과 해석",
+    "ACCESS IN": "Access 유입",
+    "ACCESS OUT": "Access 송출",
+    "BROADCAST": "Broadcast",
+    "SEPARATION": "VLAN 분리",
+    "POSITIVE CONTROL": "정상 대조 확인",
+    "COMPARE": "비교",
+    "FAILURE": "장애 조건",
+    "STOP": "전달 중단",
+    "CONTROL": "정상 대조",
+    "RECOVERY": "복구 확인",
+    "MISMATCH": "설정 불일치",
+    "RETURN DECISION": "응답 경로 판단",
+    "REPLY INGRESS": "응답 유입",
+    "ROUTE BACK": "응답 경로 조회",
+    "REPLY EGRESS": "응답 송출",
+    "REMOTE TRY": "다른 VLAN 통신 시도",
+    "ACTUAL ERROR": "관찰된 오류 응답",
+    "L2 CONTROL": "L2 정상 대조",
+    "LOCAL CONTROL": "동일 VLAN 정상 대조",
+    "REMOTE DECISION": "다른 Subnet 판단",
+    "ARP FAIL": "ARP 실패",
+    "NO ECHO": "Echo 미생성",
+    "CLIENT APPLY": "단말 설정 적용",
+    "BOUNDARY": "검증 범위",
+    "POOL SELECT": "Pool 선택",
+    "FINAL DELIVERY": "단말로 전달",
+    "SERVER DOWN": "서버 서비스 중지",
+    "NO OFFER": "Offer 없음",
+    "RELAY MISSING": "Relay 설정 없음",
+    "DORA SUCCESS": "DORA 완료",
+    "ARP STOP": "ARP 단계 중단",
+    "CLIENT QUERY": "단말 Query",
+    "IP TRAFFIC": "IP 통신",
+    "CLIENT LEG": "단말 조회 구간",
+    "UPSTREAM LEG": "Upstream 조회 구간",
+    "AUTHORITY ANSWER": "Authoritative 응답",
+    "CACHE FILL": "Cache 저장",
+    "NO UPSTREAM": "새 Upstream Query 없음",
+    "SERVICE DOWN": "서비스 중지",
+    "SERVICE RECOVERY": "서비스 복구",
+    "WRONG DNS": "잘못된 DNS 주소",
+    "CLIENT RECOVERY": "단말 설정 복구",
+    "NOT TIMEOUT": "응답 수신 확인",
+    "RECORD RECOVERY": "Record 복구",
+    "First Query": "첫 번째 Query",
+    "Second Query": "두 번째 Query",
+    "Failure": "장애 조건",
+    "Recovery": "복구 확인",
+    "Query sent": "Query 전송",
+    "Resolved": "이름 해석 완료",
+    "Resolution 완료": "이름 해석 완료",
+    "Client transaction": "단말 조회",
+    "Upstream transaction": "Upstream 조회",
+    "Scope boundary": "검증 범위",
+    "Cache populated": "Cache 저장 완료",
+    "Answered at R2": "R2에서 응답",
+    "Cannot resolve": "이름 해석 실패",
+    "Query never reaches R2": "R2까지 Query 도달 안 됨",
+    "Query reaches authority": "Authoritative DNS까지 Query 도달",
+    "Error response received": "오류 응답 수신",
+    "Address assigned": "주소 확정",
+    "Lease + Options": "Lease와 Option",
+    "Client configured": "단말 설정 적용",
+    "Local Discover": "단말망 Discover",
+    "Relayed Discover": "Relay가 전달한 Discover",
+    "Offer selected": "Offer 선택",
+    "Lease complete": "Lease 완료",
+    "Discover reaches server segment": "서버 구간까지 Discover 도달",
+    "Local Discover only": "단말망에만 Discover 존재",
+    "Server reply 없음": "서버 응답 없음",
+    "Reply to Relay": "Relay로 응답",
+    "Client Edge": "단말 접속 구간",
+    "Client VLAN": "단말 VLAN",
+    "Routed Transit": "Router 연결 구간",
+    "Learning Topology": "학습 토폴로지",
+    "Connectivity State": "통신 상태",
+    "DHCP State": "DHCP 상태",
+    "Name Resolution": "이름 해석",
+    "IP Reachability": "IP 도달 여부",
+    "Host A": "단말",
+    "Host B": "단말",
+    "SIDE": "측",
+    "ACCESS": "Access",
+    "UNTAGGED": "Untagged",
+    "TAG": "Tag",
+    "NATIVE": "Native",
+    "NOT ALLOWED": "허용 안 됨",
+    "PORT": "Port",
+    "Logical Stop": "논리적 전달 중단",
+    "Access / Idle": "Access / 대기",
+    "Packet Stop": "전달 중단",
+    "No Response / Stop": "응답 없음 / 중단",
+    "Resolved IP Traffic": "조회한 IP로 통신",
+    "QUERY TO AUTHORITY": "Authoritative DNS로 Query",
+    "NXDOMAIN RESPONSE": "NXDOMAIN 응답",
+    "DNS RESPONSE": "DNS 응답",
+    "ACK ADDRESS": "ACK 주소",
+    "ACK OPTIONS": "ACK Option",
+    "CLIENT BROADCAST": "단말 Broadcast",
+    "NO DNS ANSWER": "DNS 응답 없음",
+    "RECOVERED": "복구 완료",
+    "OPTIONS": "Option 확인",
+    "DNS .2 RESTORED": "DNS .2 복구",
+    "A .10 RESTORED": "A .10 복구",
+    "CURRENT": "현재",
+    "Baseline": "기준 상태",
+    "Actual": "실제 관찰",
+    "Expected": "예상 결과",
+    "Scenario": "문제 조건",
+    "Run": "검증 실행",
+    "Forwarding 판단": "Forwarding 판단"
+  }
+};
+adapter.presentation.guideDifferences = [
+  {
+    "name": "PC C",
+    "reason": "학습 페이지의 VLAN 20 PC A/B에 더해 VLAN 10 정상 대조를 위해 기존 PC10A를 PC C로 표시합니다."
+  },
+  {
+    "name": "PC D",
+    "reason": "기존 PC10B를 PC D로 표시해 VLAN 20 Broadcast가 VLAN 10으로 전달되지 않는지 비교합니다."
+  },
+  {
+    "name": "PC E",
+    "reason": "기존 PC99A를 PC E로 표시해 Native VLAN 99의 Untagged 전달을 비교합니다."
+  },
+  {
+    "name": "PC F",
+    "reason": "기존 PC99B를 PC F로 표시해 Native VLAN 99의 반대편 단말을 구분합니다."
+  }
+];
+PacketLabPresentation.attach(adapter, {
+  "desktop": "#networkTopology",
+  "height": 570,
+  "note": "PC A/B는 학습 페이지의 VLAN 20 단말입니다. PC C/D는 VLAN 10, PC E/F는 Native VLAN 99 대조 단말입니다.",
+  "nodes": [
+    {
+      "id": "pc20a",
+      "name": "PC A",
+      "type": "pc",
+      "x": 55,
+      "y": 65,
+      "detail": "VLAN 20",
+      "width": 88
+    },
+    {
+      "id": "pc10a",
+      "name": "PC C",
+      "type": "pc",
+      "x": 160,
+      "y": 65,
+      "detail": "VLAN 10",
+      "width": 88
+    },
+    {
+      "id": "pc99a",
+      "name": "PC E",
+      "type": "pc",
+      "x": 265,
+      "y": 65,
+      "detail": "VLAN 99",
+      "width": 88
+    },
+    {
+      "id": "sw1",
+      "name": "Switch A",
+      "type": "switch",
+      "x": 160,
+      "y": 225,
+      "detail": "Access → Trunk"
+    },
+    {
+      "id": "sw2",
+      "name": "Switch B",
+      "type": "switch",
+      "x": 160,
+      "y": 355,
+      "detail": "Trunk → Access"
+    },
+    {
+      "id": "pc20b",
+      "detailSource": "pc20bVlan",
+      "name": "PC B",
+      "type": "pc",
+      "x": 55,
+      "y": 510,
+      "detail": "VLAN 20",
+      "width": 88
+    },
+    {
+      "id": "pc10b",
+      "name": "PC D",
+      "type": "pc",
+      "x": 160,
+      "y": 510,
+      "detail": "VLAN 10",
+      "width": 88
+    },
+    {
+      "id": "pc99b",
+      "name": "PC F",
+      "type": "pc",
+      "x": 265,
+      "y": 510,
+      "detail": "VLAN 99",
+      "width": 88
+    }
+  ],
+  "edges": [
+    [
+      "pc20a",
+      "sw1",
+      "link20L"
+    ],
+    [
+      "pc10a",
+      "sw1",
+      "link10L"
+    ],
+    [
+      "pc99a",
+      "sw1",
+      "link99L"
+    ],
+    [
+      "sw1",
+      "sw2",
+      "trunkLink"
+    ],
+    [
+      "sw2",
+      "pc20b",
+      "link20R"
+    ],
+    [
+      "sw2",
+      "pc10b",
+      "link10R"
+    ],
+    [
+      "sw2",
+      "pc99b",
+      "link99R"
+    ]
+  ],
+  "steps": {
+    "path20": [
+      {
+        "path": [
+          "pc20a",
+          "sw1"
+        ],
+        "caption": "Access · Untagged"
+      },
+      {
+        "path": [
+          "sw1",
+          "sw2"
+        ],
+        "caption": "Trunk · 802.1Q VLAN 20"
+      },
+      {
+        "path": [
+          "sw2",
+          "pc20b"
+        ],
+        "caption": "Access · Untagged"
+      }
+    ],
+    "separation": [
+      {
+        "path": [
+          "pc20a",
+          "sw1"
+        ],
+        "caption": "VLAN 20 ARP Broadcast"
+      },
+      {
+        "path": [
+          "sw1",
+          "sw2"
+        ],
+        "caption": "Trunk · VLAN 20 Tag"
+      },
+      {
+        "path": [
+          "sw2",
+          "pc20b"
+        ],
+        "caption": "VLAN 20으로 전달 · VLAN 10으로 송출 안 됨"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "sw2",
+          "pc10b"
+        ],
+        "caption": "별도 VLAN 10 대조 통신 정상"
+      }
+    ],
+    "native": [
+      {
+        "path": [
+          "pc99a",
+          "sw1"
+        ],
+        "caption": "Access VLAN 99 · Untagged"
+      },
+      {
+        "path": [
+          "sw1",
+          "sw2"
+        ],
+        "caption": "Native VLAN 99 · Untagged"
+      },
+      {
+        "path": [
+          "sw1",
+          "sw2"
+        ],
+        "caption": "비교 · VLAN 20은 Tagged"
+      }
+    ],
+    "allowed": [
+      {
+        "path": [
+          "pc20a",
+          "sw1"
+        ],
+        "caption": "VLAN 20 ARP 유입"
+      },
+      {
+        "path": [],
+        "caption": "Switch A에서 중단 · VLAN 20 허용 안 됨",
+        "stop": true
+      },
+      {
+        "path": [
+          "sw1",
+          "sw2"
+        ],
+        "caption": "대조 VLAN 10 / 99 통과"
+      },
+      {
+        "path": [
+          "pc20a",
+          "sw1",
+          "sw2",
+          "pc20b"
+        ],
+        "caption": "Allowed 복구와 STP Forwarding 확인 후 전달"
+      }
+    ],
+    "mismatch": [
+      {
+        "path": [
+          "pc20a",
+          "sw1",
+          "sw2"
+        ],
+        "caption": "VLAN 20은 Trunk 정상 통과"
+      },
+      {
+        "path": [],
+        "caption": "PC B 포트는 VLAN 10 · VLAN 20 송출 안 됨",
+        "stop": true
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "sw2",
+          "pc20b"
+        ],
+        "caption": "VLAN 10 대조 통신 · PC B 링크 정상"
+      },
+      {
+        "path": [
+          "pc20a",
+          "sw1",
+          "sw2",
+          "pc20b"
+        ],
+        "caption": "PC B를 Access VLAN 20으로 복구"
+      }
+    ]
+  }
+});
 NetworkSimulator.mount(adapter);
 })();

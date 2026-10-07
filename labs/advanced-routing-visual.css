@@ -1,0 +1,73 @@
+/* Topic layout only; cards, typography, controls and feedback use the ARP shell. */
+#simVisual .route-map{display:grid;grid-template-columns:minmax(130px,.65fr) minmax(260px,1.8fr);gap:0;align-items:center;max-width:860px;margin:14px auto;border:1px solid var(--line);border-radius:18px;background:var(--panel3,#f4f7fb);padding:22px}
+#simVisual [data-route-device]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:112px;padding:10px 8px;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--text);box-shadow:0 5px 15px #173b5910}
+#simVisual [data-route-device].active{border-color:var(--blue)}
+#simVisual [data-route-device].best,#simVisual [data-route-device].boundary{border-color:var(--mint)}
+#simVisual [data-route-device].policy,#simVisual [data-route-device].warn{border-color:var(--amber)}
+#simVisual [data-route-device] strong{font-size:1rem;line-height:1.35;text-align:center}
+#simVisual [data-route-device] small{font-size:.8rem;line-height:1.45;color:var(--muted);text-align:center;overflow-wrap:anywhere}
+#simVisual .route-device{width:70px!important;height:55px!important;display:block;flex:none;min-width:0!important}
+#simVisual .route-peers{display:grid;gap:18px}
+#simVisual .route-peer{display:grid;grid-template-columns:minmax(80px,1fr) minmax(126px,1.05fr);align-items:center}
+#simVisual .route-peer>.link{position:relative;height:3px;background:#b5c7d7;color:var(--muted);min-width:0;margin:0;transition:background 180ms}
+#simVisual .route-peer>.link:before{content:'';position:absolute;left:0;top:calc(-68px);height:139px;width:3px;background:#b5c7d7}
+#simVisual .route-peer:first-child>.link:before{top:0;height:68px}
+#simVisual .route-peer:last-child>.link:before{top:-68px;height:68px}
+#simVisual .route-peer>.link>span{position:absolute;left:5px;right:5px;bottom:9px;font-size:.8rem;font-weight:750;text-align:center;line-height:1.5;overflow-wrap:anywhere}
+#simVisual .route-peer>.link.active{background:var(--blue);color:var(--blue)}
+#simVisual .route-peer>.link.best{background:var(--mint);color:var(--mint)}
+#simVisual .route-peer>.link.policy{background:var(--amber);color:var(--amber)}
+#simVisual .route-map-caption{color:var(--muted);font-size:.86rem;margin:10px 0;line-height:1.6}
+#simVisual .route-candidates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#simVisual .route-candidate{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;min-width:0}
+#simVisual .route-candidate.is-focus{border-color:var(--blue);box-shadow:0 0 0 2px #287cb515}
+#simVisual .route-candidate.is-selected{border-color:var(--mint);background:#f1fbf6}
+#simVisual .route-candidate h3{font-size:.94rem;margin:0 0 7px}
+#simVisual .route-candidate p{font-size:.83rem;margin:4px 0;line-height:1.6;overflow-wrap:anywhere}
+#simVisual .route-candidate .route-status{font-weight:800;color:var(--muted)}
+#simVisual .route-candidate.is-selected .route-status{color:var(--mint)}
+#simVisual .state-row{align-items:start;line-height:1.6;min-width:0}
+#simVisual .state-row>b,#simVisual .state-row>strong{overflow-wrap:anywhere}
+#simVisual .route-boundary-map{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.7fr) minmax(0,1fr) minmax(90px,.7fr) minmax(0,1fr);gap:0;align-items:center;padding:20px 10px;background:var(--panel3,#f4f7fb);border:1px solid var(--line);border-radius:18px}
+#simVisual .route-boundary-map>.link{height:3px;background:#b5c7d7;position:relative}
+#simVisual .route-boundary-map>.link>span{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:.78rem;color:var(--muted)}
+#simVisual .route-boundary-map>.link.ospf{background:var(--blue)}
+#simVisual .route-boundary-map>.link.bgp{background:var(--amber)}
+#simVisual .route-token-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+#simVisual .route-token-row p{font-size:.83rem;line-height:1.7;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px;margin:0;overflow-wrap:anywhere}
+#simVisual .route-token-row b{display:block;margin-bottom:4px}
+#simVisual .route-token-row .route-text{font-size:inherit}
+#simVisual .rib.is-focus{border-color:var(--blue);box-shadow:0 0 0 2px #287cb515}
+#simVisual .rib li.is-focus{font-weight:800;background:#eaf4ff;border-radius:5px}
+#simVisual .rib li.added{font-weight:800;background:#effbf5}
+#simVisual .route-policy-list{display:grid;gap:7px;margin:12px 0}
+#simVisual .route-policy-list p{margin:0;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:.84rem;line-height:1.6}
+#simVisual .route-policy-list p.is-focus{border-color:var(--blue);background:#eff7ff;font-weight:800}
+@media(max-width:620px){
+ #simVisual .route-map{grid-template-columns:minmax(88px,.7fr) minmax(148px,1.3fr);padding:12px 8px}
+ #simVisual [data-route-device]{min-height:108px;padding:8px 4px;border-radius:12px}
+ #simVisual [data-route-device] strong{font-size:.84rem}
+ #simVisual [data-route-device] small{font-size:.73rem}
+ #simVisual .route-device{width:58px!important;height:46px!important}
+ #simVisual .route-peer{grid-template-columns:minmax(44px,.55fr) minmax(97px,1fr)}
+ #simVisual .route-peer>.link>span{left:2px;right:2px;font-size:.69rem;bottom:7px;line-height:1.45}
+ #simVisual .route-candidates{grid-template-columns:1fr}
+ #simVisual .route-boundary-map{grid-template-columns:1fr;max-width:360px;margin:auto;padding:14px}
+ #simVisual .route-boundary-map>[data-route-device]{min-height:96px}
+ #simVisual .route-boundary-map>.link{height:49px;width:3px;margin:auto;background:#b5c7d7}
+ #simVisual .route-boundary-map>.link>span{bottom:auto;top:12px;left:13px;right:auto;width:100px;text-align:left}
+ #simVisual .route-token-row{grid-template-columns:1fr;gap:7px}
+ #simVisual .route-token-row p{padding:8px 10px}
+ #simVisual .state-row{flex-direction:column;gap:3px}
+ #simVisual .state-row>b,#simVisual .state-row>strong{text-align:left}
+}
+/* VRF reuses the same responsive physical links while keeping Context-specific states. */
+body[data-topic=vrf] #simVisual .route-peer>.link.path{background:var(--mint);color:var(--mint)}
+body[data-topic=vrf] #simVisual .route-peer>.link.reply{background:repeating-linear-gradient(90deg,#387eb8 0 9px,transparent 9px 14px);color:#276b9f}
+body[data-topic=vrf] #simVisual .route-peer>.link.stop{background:var(--amber);color:var(--amber)}
+body[data-topic=vrf] #simVisual .route-peer>.link.muted{opacity:.35}
+body[data-topic=vrf] #simVisual .route-peer>.link:after{display:none}
+body[data-topic=vrf] #simVisual .observation{grid-template-columns:minmax(0,1fr)}
+body[data-topic=vrf] #simVisual .rib li{font-size:.82rem;line-height:1.65}
+body[data-topic=vrf] #simVisual .table-panel{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){body[data-topic=vrf] #simVisual .table-panel{grid-template-columns:1fr}}

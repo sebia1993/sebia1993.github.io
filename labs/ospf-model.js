@@ -122,5 +122,49 @@ function showRecovery(kind,text){
   $("eventKind").textContent=kind;$("eventText").textContent=text;$("routePanel").innerHTML="<strong>Metric 21 · via 10.0.12.2</strong>R1 → R2 → R3 · Baseline restored";
 }
 const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;resetTopology();},show(){resetTopology();applyMode(lessons[index]);},recover:()=>{recovered=true;resetTopology();applyMode(lessons[index])},compare:null};
+adapter.presentation={names:{R1:'Router A',R2:'Router B',R3:'Router C'},labels:{'Source':'출발지','Preferred Transit':'선호 경유 장비','Destination':'목적지','ADJACENCY STOP':'Adjacency 중단','Baseline':'기준 상태','Backup path active':'대체 경로 사용','Baseline restored':'기준 경로 복구','Animation':'재생','CONVERGENCE':'재수렴','AREA MISMATCH':'Area 불일치','AREA RECOVERY':'Area 복구','MTU RECOVERY':'MTU 복구','LINK RECOVERY':'링크 복구','NO NEIGHBOR':'Neighbor 없음','Absent':'없음','Direct':'직접','identity set':'식별자 집합','Run':'실행','Scope':'학습 범위'},lessons:[
+ {title:'Hello 조건이 맞으면 Neighbor는 어디까지 진행할까요?',brief:'학습 페이지의 이웃 → 정보 공유 흐름입니다. Area·Hello/Dead 조건과 실제 FULL 상태를 구분해 확인합니다.',hints:['같은 링크 양쪽의 OSPF 조건을 비교하세요.','FULL은 연결 정보 동기화가 완료된 관계입니다.','FULL인 모든 링크가 데이터 경로로 선택되는 것은 아닙니다.']},
+ {title:'Router A의 LSDB에는 어떤 Router-LSA가 있을까요?',brief:'같은 Area 0의 Router A·B·C가 공유하는 연결 지도를 관찰합니다. Router-LSA 식별자를 하나씩 확인하세요.',hints:['LSDB는 현재 선택한 데이터 경로만 기록하는 표가 아닙니다.','같은 Area의 Router-LSA 정보를 공유합니다.','Router ID와 각 장비의 연결 정보가 대응합니다.']},
+ {title:'직접 연결 Cost 51과 경유 Cost 21 중 무엇을 고를까요?',brief:'학습 페이지의 21과 51을 같은 조건으로 비교합니다. 목적지 Loopback의 Cost 1도 포함하세요.',hints:['물리적으로 가까운 경로가 항상 낮은 Cost는 아닙니다.','경유 경로는 10 + 10 + 1입니다.','직접 경로는 50 + 1입니다.']},
+ {title:'한 링크의 Area가 다르면 어떤 관계가 끊길까요?',brief:'Router A–B 링크만 Area 1과 Area 0으로 다릅니다. 나머지 Area 0 연결과 대체 데이터 경로를 함께 관찰합니다.',hints:['모든 링크가 아니라 CP12만 변경했습니다.','양쪽 Hello의 Area ID를 비교하세요.','Neighbor 관계와 목적지까지 남은 경로를 나눠 확인하세요.']},
+ {title:'MTU가 다르면 DBD 교환은 어디서 멈출까요?',brief:'CP12의 IP MTU 1400과 1500을 비교합니다. 이번 Cisco IOL 검증에서 확인한 상태와 원인을 연결합니다.',hints:['이번 문제는 MTU-ignore를 사용하지 않습니다.','Hello 수신과 DBD 교환 성공은 다른 단계입니다.','EXSTART만으로 원인을 단정하지 않고 DBD의 MTU도 확인합니다.']},
+ {title:'선호 링크가 끊기면 어떤 지도로 다시 계산할까요?',brief:'Router A–B 장애 후 Neighbor, Router-LSA, SPF 결과가 바뀌는 순서를 따라갑니다.',hints:['직접 Router A–C 연결은 살아 있습니다.','LSA에 남은 연결을 기준으로 다시 계산합니다.','선호 경로가 사라진 뒤 사용 가능한 경로의 Cost를 확인하세요.']}
+]};
+const ospfStage=document.querySelector('#simVisual .topology-stage');
+const ospfMarker=document.createElement('span');ospfMarker.className='ospf-packet';ospfMarker.hidden=true;ospfStage.append(ospfMarker);
+function ospfCenter(id){const s=ospfStage.getBoundingClientRect(),r=$(id).getBoundingClientRect();return{x:r.left-s.left+r.width/2,y:r.top-s.top+r.height/2,w:r.width,h:r.height};}
+function ospfLayout(){if(!ospfStage.clientWidth)return;ospfStage.querySelector('svg').setAttribute('viewBox',`0 0 ${ospfStage.clientWidth} ${ospfStage.clientHeight}`);[['link12','r1','r2'],['link23','r2','r3'],['link13','r1','r3']].forEach(([id,a,b])=>{const p=ospfCenter(a),q=ospfCenter(b),dx=q.x-p.x,dy=q.y-p.y;const edge=(r,z)=>{const t=Math.min(r.w/2/(Math.abs(dx)||1),r.h/2/(Math.abs(dy)||1));return{x:r.x+z*dx*t,y:r.y+z*dy*t};};const f=edge(p,1),t=edge(q,-1);Object.entries({x1:f.x,y1:f.y,x2:t.x,y2:t.y}).forEach(([k,v])=>$(id).setAttribute(k,v));});}
+function ospfMove(route,p){ospfLayout();const pts=route.map(ospfCenter),t=Math.min(pts.length-1-.00001,Math.max(0,p)*(pts.length-1)),a=pts[Math.floor(t)],b=pts[Math.floor(t)+1];ospfMarker.hidden=false;ospfMarker.style.left=(a.x+(b.x-a.x)*(t%1))+'px';ospfMarker.style.top=(a.y+(b.y-a.y)*(t%1))+'px';}
+function ospfNeutral(){resetTopology();ospfMarker.hidden=true;['12','23','13'].forEach(n=>{$('link'+n).setAttribute('class','net-link');$('adj'+n).textContent='관찰 대기';});all('#neighborPanel strong').forEach(n=>n.textContent='대기');all('#lsdbPanel .lsa').forEach(n=>n.classList.add('ospf-pending'));$('routePanel').textContent='경로 계산 대기';ospfLayout();}
+const ospfReset=adapter.reset;adapter.reset=function(i){ospfReset(i);ospfNeutral();};
+function ospfDeferRoute(){ospfMarker.hidden=true;$('routePanel').textContent='경로 계산 대기';['link23','link13'].forEach(id=>$(id).setAttribute('class','net-link'));$('r3').classList.remove('active');all('#lsdbPanel .lsa').forEach(n=>n.classList.add('ospf-pending'));}
+adapter.buildPlan=function(i,mode='normal'){
+ const l=lessons[i],ev=(title,detail,duration,action,route,packet='IPv4')=>({title,detail,kind:route?'경로 관찰':'OSPF 판단',duration,action(){action();ospfMarker.textContent=packet;ospfLayout();},animate:route?p=>ospfMove(route,Math.min(1,Math.max(0,(p*duration-1050)/((route.length-1)*420)))):undefined});
+ if(mode==='recover')return[
+ ev('문제의 조건을 원래대로 복구합니다',l.mode==='area'?'CP12 양쪽을 Area 0으로 맞춥니다.':l.mode==='mtu'?'CP12 양쪽 IP MTU를 1500으로 맞춥니다.':'Router A–B 링크를 복구합니다.',1050,()=>{ospfMarker.hidden=true;$('link12').setAttribute('class','net-link control');$('adj12').textContent='재협상';$('routePanel').textContent='복구 후 경로 계산 대기';}),
+ ev('CP12 Neighbor가 FULL로 복구됩니다','Hello 조건과 정보 교환이 다시 맞아 FULL 관계가 복구됩니다. 기존 검증의 안정화 후 상태를 재현합니다.',1650,()=>{adapter.recover();ospfDeferRoute();$('link12').setAttribute('class','net-link control');},['r1','r2'],'OSPF'),
+ ev('누적 Cost 21 경로를 다시 선택합니다','Router A → Router B → Router C 경로와 Next Hop 10.0.12.2가 복구됩니다.',2070,()=>adapter.recover(),['r1','r2','r3'])];
+ if(mode!=='normal')return null;
+ if(l.mode==='neighbor')return[
+ ev('Hello 조건을 비교합니다','세 링크는 Area 0, point-to-point, Hello 10초·Dead 40초입니다. 조건 확인과 최종 Neighbor 상태를 나눠 관찰합니다.',1650,()=>{ospfNeutral();$('areaBadge').textContent='Area 0 · point-to-point';$('link12').setAttribute('class','net-link control');},['r1','r2'],'Hello'),
+ ev('정보 교환과 동기화 후 CP12는 FULL입니다','기존 검증에서 Router A–B 양쪽의 FULL 상태를 확인했습니다. Hello 한 번만으로 즉시 FULL이 된다는 표현은 아닙니다.',1470,()=>{$('adj12').textContent='FULL';$('neighborPanel').innerHTML='<span>CP12</span><strong>FULL</strong><span>Hello / Dead</span><strong>10 / 40s</strong>';}),
+ ev('다른 두 Neighbor도 각각 확인합니다',l.reason,1650,()=>adapter.show())];
+ if(l.mode==='lsdb')return[
+ ev('같은 Area의 FULL 관계를 확인합니다','LSDB의 Router-LSA 식별자를 장비별로 대조합니다. 현재 선택된 데이터 경로와 LSDB 전체를 구분하세요.',1050,()=>{ospfNeutral();['12','23','13'].forEach(n=>{$('adj'+n).textContent='FULL';$('link'+n).setAttribute('class','net-link control');});}),
+ ...['1.1.1.1','2.2.2.2','3.3.3.3'].map((id,n)=>ev('Router-LSA '+id+' 확인','Area 0의 Router-LSA 식별자를 순서대로 확인합니다. 기존 검증은 sequence·checksum·link count도 대조했습니다.',1230,()=>{const row=all('#lsdbPanel .lsa')[n];row.classList.remove('ospf-pending');row.classList.add('active');})),
+ ev('세 Router의 LSDB를 대조합니다',l.reason,1230,()=>adapter.show())];
+ if(l.mode==='cost')return[
+ ev('직접 경로 Cost를 계산합니다','Router A → Router C의 50에 목적지 Loopback Cost 1을 더하면 51입니다.',1470,()=>{ospfNeutral();$('link13').setAttribute('class','net-link control');$('routePanel').innerHTML='<strong>직접 후보: 50 + 1 = 51</strong>Router A → Router C';}),
+ ev('경유 경로 Cost를 계산합니다','Router A → Router B → Router C는 10 + 10 + 1 = 21입니다.',1470,()=>{$('link12').setAttribute('class','net-link control');$('link23').setAttribute('class','net-link control');$('routePanel').innerHTML='<strong>경유 후보: 10 + 10 + 1 = 21</strong>직접 후보 51과 비교';}),
+ ev('SPF 결과를 경로표에 반영합니다','낮은 누적 Cost 21을 선택합니다. 물리적인 직접 연결 여부가 선택 기준은 아닙니다.',1050,()=>{adapter.show();ospfMarker.hidden=true;}),
+ ev('선택한 경유 경로로 전달합니다','기존 검증에서 Echo Request/Reply는 CP12·CP23에 대응했고 CP13에는 해당 흐름이 없었습니다.',2070,()=>adapter.show(),['r1','r2','r3'])];
+ const condition=l.mode==='area'?'CP12의 Area 1과 Area 0을 비교합니다':l.mode==='mtu'?'DBD의 MTU 1400과 1500을 비교합니다':'Router A–B 링크가 내려갑니다';
+ const plan=[ev(condition,l.text,1470,()=>{ospfNeutral();if(l.mode==='area')$('areaBadge').textContent='CP12: Area 1 ↔ Area 0';if(l.mode==='mtu')$('badge12').textContent='CP12 · IP MTU 1400 ↔ 1500';$('link12').setAttribute('class','net-link warning');}),
+ ev(l.mode==='mtu'?'CP12는 EXSTART에 머뭅니다':'CP12 Neighbor 관계를 확인합니다',l.reason,1470,()=>{adapter.show();ospfDeferRoute();})];
+ if(l.mode==='link')plan.push(ev('Router-LSA의 연결 정보를 갱신합니다','기존 검증에서 Router A의 Router-LSA에 CP12 연결이 제거됐습니다. 남은 연결로 SPF를 다시 수행합니다.',1470,()=>{$('lsdbPanel').innerHTML='<div class="lsa active">1.1.1.1 · CP12 연결 제거 확인</div><div class="lsa">CP13·CP23 연결 유지</div>';}));
+ plan.push(ev('남은 CP13 경로를 선택합니다',l.mode==='link'?'Router A → Router C, Next Hop 10.0.13.2, Metric 51로 재수렴합니다.':'CP12의 문제와 별개로 CP13은 FULL을 유지하며 남은 직접 경로로 전달합니다.',1650,()=>adapter.show(),['r1','r3']));return plan;
+};
+new ResizeObserver(ospfLayout).observe(ospfStage);
+
 NetworkSimulator.mount(adapter);
 })();

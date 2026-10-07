@@ -173,5 +173,448 @@ function applyStep(){
     $('prevStepBtn').disabled=stepIndex===0; $('nextStepBtn').disabled=stepIndex===s.steps.length-1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;resetVisual();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+
+// Presentation follows the current Concept Guide; raw evidence above is unchanged.
+adapter.presentation = {
+  "names": {
+    "PC1": "PC A",
+    "PC2": "PC B",
+    "SW1": "Switch A",
+    "R1": "Router A",
+    "R2": "Router B",
+    "R3": "Router C"
+  },
+  "lessons": [
+    {
+      "title": "이름을 찾은 뒤 실제 통신은 어디로 갈까요?",
+      "brief": "학습 페이지처럼 DNS Query / Response와 반환된 IP로 하는 통신을 나누어 관찰합니다.",
+      "hints": [
+        "DNS 서버의 주소와 응답에 담긴 서비스 주소는 서로 다릅니다.",
+        "이름 조회 성공과 실제 IP 통신 성공을 각각 확인하세요."
+      ]
+    },
+    {
+      "title": "Resolver가 다시 물으면 DNS ID도 같을까요?",
+      "brief": "PC A → Router B와 Router B → Router C는 서로 다른 조회 구간입니다. 같은 이름의 두 Transaction을 비교합니다.",
+      "hints": [
+        "이름과 QTYPE, 시점을 함께 확인하세요.",
+        "단말 쪽 Query / Response는 같은 구간의 ID로 대응합니다."
+      ]
+    },
+    {
+      "title": "유효한 Cache가 있으면 어디까지 물어볼까요?",
+      "brief": "학습 페이지의 PC A 첫 조회와 PC B 두 번째 조회입니다. Cache TTL이 남은 조건에서 Upstream 사용을 비교합니다.",
+      "hints": [
+        "두 번째 단말도 자신의 DNS 서버에는 질문합니다.",
+        "생략될 수 있는 것은 Resolver 이후의 새 Query입니다."
+      ]
+    },
+    {
+      "title": "DNS 서비스 중지와 잘못된 DNS 주소는 어떻게 다를까요?",
+      "brief": "IP 통신이 정상인 상태에서 이름 조회만 실패합니다. Query가 Resolver까지 도달했는지 확인합니다.",
+      "hints": [
+        "단말이 설정한 DNS 주소부터 보세요.",
+        "ARP 단계 중단과 DNS 서버의 무응답은 위치가 다릅니다."
+      ]
+    },
+    {
+      "title": "NXDOMAIN은 응답이 없는 상태일까요?",
+      "brief": "학습 페이지에서 구분한 오류 응답과 무응답을 비교합니다. 없는 Record를 묻고 RCODE를 관찰합니다.",
+      "hints": [
+        "응답 패킷이 실제로 돌아왔는지 먼저 봅니다.",
+        "A Record가 없다는 것과 DNS Response가 없다는 것은 다릅니다."
+      ]
+    }
+  ],
+  "labels": {
+    "SUCCESS": "성공",
+    "BEFORE": "통과 전",
+    "AFTER": "통과 후",
+    "EXPIRE": "TTL 만료",
+    "REQUEST": "요청",
+    "FORWARD": "전달",
+    "REPLY": "응답",
+    "ROUTER": "Router 판단",
+    "PROBE": "Probe 전송",
+    "NO ROUTE": "Route 없음",
+    "DESTINATION": "목적지 응답",
+    "INTERPRET": "결과 해석",
+    "ACCESS IN": "Access 유입",
+    "ACCESS OUT": "Access 송출",
+    "BROADCAST": "Broadcast",
+    "SEPARATION": "VLAN 분리",
+    "POSITIVE CONTROL": "정상 대조 확인",
+    "COMPARE": "비교",
+    "FAILURE": "장애 조건",
+    "STOP": "전달 중단",
+    "CONTROL": "정상 대조",
+    "RECOVERY": "복구 확인",
+    "MISMATCH": "설정 불일치",
+    "RETURN DECISION": "응답 경로 판단",
+    "REPLY INGRESS": "응답 유입",
+    "ROUTE BACK": "응답 경로 조회",
+    "REPLY EGRESS": "응답 송출",
+    "REMOTE TRY": "다른 VLAN 통신 시도",
+    "ACTUAL ERROR": "관찰된 오류 응답",
+    "L2 CONTROL": "L2 정상 대조",
+    "LOCAL CONTROL": "동일 VLAN 정상 대조",
+    "REMOTE DECISION": "다른 Subnet 판단",
+    "ARP FAIL": "ARP 실패",
+    "NO ECHO": "Echo 미생성",
+    "CLIENT APPLY": "단말 설정 적용",
+    "BOUNDARY": "검증 범위",
+    "POOL SELECT": "Pool 선택",
+    "FINAL DELIVERY": "단말로 전달",
+    "SERVER DOWN": "서버 서비스 중지",
+    "NO OFFER": "Offer 없음",
+    "RELAY MISSING": "Relay 설정 없음",
+    "DORA SUCCESS": "DORA 완료",
+    "ARP STOP": "ARP 단계 중단",
+    "CLIENT QUERY": "단말 Query",
+    "IP TRAFFIC": "IP 통신",
+    "CLIENT LEG": "단말 조회 구간",
+    "UPSTREAM LEG": "Upstream 조회 구간",
+    "AUTHORITY ANSWER": "Authoritative 응답",
+    "CACHE FILL": "Cache 저장",
+    "NO UPSTREAM": "새 Upstream Query 없음",
+    "SERVICE DOWN": "서비스 중지",
+    "SERVICE RECOVERY": "서비스 복구",
+    "WRONG DNS": "잘못된 DNS 주소",
+    "CLIENT RECOVERY": "단말 설정 복구",
+    "NOT TIMEOUT": "응답 수신 확인",
+    "RECORD RECOVERY": "Record 복구",
+    "First Query": "첫 번째 Query",
+    "Second Query": "두 번째 Query",
+    "Failure": "장애 조건",
+    "Recovery": "복구 확인",
+    "Query sent": "Query 전송",
+    "Resolved": "이름 해석 완료",
+    "Resolution 완료": "이름 해석 완료",
+    "Client transaction": "단말 조회",
+    "Upstream transaction": "Upstream 조회",
+    "Scope boundary": "검증 범위",
+    "Cache populated": "Cache 저장 완료",
+    "Answered at R2": "R2에서 응답",
+    "Cannot resolve": "이름 해석 실패",
+    "Query never reaches R2": "R2까지 Query 도달 안 됨",
+    "Query reaches authority": "Authoritative DNS까지 Query 도달",
+    "Error response received": "오류 응답 수신",
+    "Address assigned": "주소 확정",
+    "Lease + Options": "Lease와 Option",
+    "Client configured": "단말 설정 적용",
+    "Local Discover": "단말망 Discover",
+    "Relayed Discover": "Relay가 전달한 Discover",
+    "Offer selected": "Offer 선택",
+    "Lease complete": "Lease 완료",
+    "Discover reaches server segment": "서버 구간까지 Discover 도달",
+    "Local Discover only": "단말망에만 Discover 존재",
+    "Server reply 없음": "서버 응답 없음",
+    "Reply to Relay": "Relay로 응답",
+    "Client Edge": "단말 접속 구간",
+    "Client VLAN": "단말 VLAN",
+    "Routed Transit": "Router 연결 구간",
+    "Learning Topology": "학습 토폴로지",
+    "Connectivity State": "통신 상태",
+    "DHCP State": "DHCP 상태",
+    "Name Resolution": "이름 해석",
+    "IP Reachability": "IP 도달 여부",
+    "Host A": "단말",
+    "Host B": "단말",
+    "SIDE": "측",
+    "ACCESS": "Access",
+    "UNTAGGED": "Untagged",
+    "TAG": "Tag",
+    "NATIVE": "Native",
+    "NOT ALLOWED": "허용 안 됨",
+    "PORT": "Port",
+    "Logical Stop": "논리적 전달 중단",
+    "Access / Idle": "Access / 대기",
+    "Packet Stop": "전달 중단",
+    "No Response / Stop": "응답 없음 / 중단",
+    "Resolved IP Traffic": "조회한 IP로 통신",
+    "QUERY TO AUTHORITY": "Authoritative DNS로 Query",
+    "NXDOMAIN RESPONSE": "NXDOMAIN 응답",
+    "DNS RESPONSE": "DNS 응답",
+    "ACK ADDRESS": "ACK 주소",
+    "ACK OPTIONS": "ACK Option",
+    "CLIENT BROADCAST": "단말 Broadcast",
+    "NO DNS ANSWER": "DNS 응답 없음",
+    "RECOVERED": "복구 완료",
+    "OPTIONS": "Option 확인",
+    "DNS .2 RESTORED": "DNS .2 복구",
+    "A .10 RESTORED": "A .10 복구",
+    "CURRENT": "현재",
+    "Baseline": "기준 상태",
+    "Actual": "실제 관찰",
+    "Expected": "예상 결과",
+    "Scenario": "문제 조건",
+    "Run": "검증 실행",
+    "Forwarding 판단": "Forwarding 판단"
+  }
+};
+adapter.presentation.guideDifferences = [
+  {
+    "name": "Switch A",
+    "reason": "학습 페이지의 조회 관계에서 생략한 실제 접속 스위치 SW1을 Switch A로 표시합니다."
+  },
+  {
+    "name": "Router A",
+    "reason": "학습 페이지의 조회 관계에서 생략한 Gateway R1을 Router A로 표시해 단말망과 Resolver 사이 실제 전달 구간을 함께 관찰합니다."
+  }
+];
+PacketLabPresentation.attach(adapter, {
+  "desktop": ".topology-stage",
+  "height": 720,
+  "note": "학습 페이지의 조회 관계에 Switch A와 Gateway인 Router A를 포함했습니다. Router B는 Resolver, Router C는 설정된 Upstream입니다.",
+  "nodes": [
+    {
+      "id": "pc1",
+      "name": "PC A",
+      "type": "pc",
+      "x": 80,
+      "y": 65,
+      "detail": "192.0.2.10"
+    },
+    {
+      "id": "pc2",
+      "name": "PC B",
+      "type": "pc",
+      "x": 240,
+      "y": 65,
+      "detail": "192.0.2.11"
+    },
+    {
+      "id": "sw1",
+      "name": "Switch A",
+      "type": "switch",
+      "x": 160,
+      "y": 215,
+      "detail": "단말 LAN"
+    },
+    {
+      "id": "r1",
+      "name": "Router A",
+      "type": "router",
+      "x": 160,
+      "y": 355,
+      "detail": "Gateway · .1"
+    },
+    {
+      "id": "r2",
+      "name": "Router B",
+      "type": "router",
+      "x": 160,
+      "y": 495,
+      "detail": "Resolver · .2"
+    },
+    {
+      "id": "r3",
+      "name": "Router C",
+      "type": "router",
+      "x": 160,
+      "y": 645,
+      "detail": "lab.test DNS"
+    }
+  ],
+  "edges": [
+    [
+      "pc1",
+      "sw1",
+      "l1Svg"
+    ],
+    [
+      "pc2",
+      "sw1",
+      "l2Svg"
+    ],
+    [
+      "sw1",
+      "r1",
+      "l3Svg"
+    ],
+    [
+      "r1",
+      "r2",
+      "l4Svg"
+    ],
+    [
+      "r2",
+      "r3",
+      "l5Svg"
+    ]
+  ],
+  "steps": {
+    "query": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "app.lab.test · A Query"
+      },
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "DNS 응답 · A 203.0.113.10",
+        "reply": true
+      },
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2",
+          "r3",
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "조회한 IP로 별도 ICMP 왕복"
+      }
+    ],
+    "recursive": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "단말 구간 · DNS ID 21456"
+      },
+      {
+        "path": [
+          "r2",
+          "r3"
+        ],
+        "caption": "Upstream 구간 · DNS ID 31909"
+      },
+      {
+        "path": [
+          "r3",
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "Authoritative 응답을 단말로 전달",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "설정된 Upstream 조회 검증 · Root / TLD 전체 재현 아님"
+      }
+    ],
+    "cache": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "caption": "첫 조회 · Cache Miss"
+      },
+      {
+        "path": [
+          "r3",
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "A 응답 저장 · 최초 TTL 10",
+        "reply": true
+      },
+      {
+        "path": [
+          "pc2",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "두 번째 조회 · 남은 TTL 6"
+      },
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc2"
+        ],
+        "caption": "Cache 응답 · 새 Upstream Query 없음",
+        "reply": true
+      }
+    ],
+    "faults": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "Resolver까지 Query 도달 · DNS 응답 없음",
+        "stop": true
+      },
+      {
+        "path": [],
+        "caption": "DNS 서비스 복구 후 같은 단말에서 이름 Ping 정상"
+      },
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1"
+        ],
+        "caption": "잘못된 DNS .254 · 단말망 ARP에서 중단",
+        "stop": true
+      },
+      {
+        "path": [],
+        "caption": "단말 DNS .2 복구 후 이름 Ping 정상"
+      }
+    ],
+    "nxdomain": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "caption": "recover.lab.test Query"
+      },
+      {
+        "path": [
+          "r3",
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "NXDOMAIN · RCODE 3 응답 수신",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "A Record 없음 · DNS 응답은 있음"
+      },
+      {
+        "path": [],
+        "caption": "Record 복구와 Cache 초기화 후 PC B에서 정상 확인"
+      }
+    ]
+  }
+});
 NetworkSimulator.mount(adapter);
 })();

@@ -1,0 +1,51 @@
+/* Wireless teaching surfaces reuse the ARP palette; geometry follows mobile layout. */
+#simVisual .wireless-flow{position:relative;display:grid;grid-template-columns:repeat(var(--actors,2),minmax(0,1fr));gap:58px;padding:18px 8px 34px;background:var(--panel3,#f4f7fb);border:1px solid var(--line);border-radius:16px;margin-bottom:16px;isolation:isolate}
+#simVisual .wireless-actor{min-width:0;text-align:center;padding:10px 5px;border:1px solid var(--line);border-radius:12px;background:#fff;z-index:1}
+#simVisual .wireless-actor svg{display:block;width:66px;height:54px;margin:0 auto 6px}
+#simVisual .wireless-actor b,#simVisual .wireless-actor small{display:block;overflow-wrap:anywhere}
+#simVisual .wireless-actor b{font-size:14px;color:var(--ink)}
+#simVisual .wireless-actor small{font-size:12px;color:var(--muted)}
+#simVisual .wireless-actor.current{border-color:var(--blue);box-shadow:0 0 0 2px #dceeff}
+#simVisual .wireless-wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+#simVisual .wireless-wire line{stroke:#a8bed3;stroke-width:2;stroke-dasharray:5 5}
+#simVisual .wireless-wire circle{fill:var(--green,#12a57e);stroke:#fff;stroke-width:3}
+#simVisual .wireless-flow-label{position:absolute;bottom:7px;left:6px;right:6px;text-align:center;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+#simVisual .wireless-cards{display:grid;gap:10px}
+#simVisual .wireless-fact{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;min-width:0;overflow-wrap:anywhere}
+#simVisual .wireless-fact.current{border-color:var(--blue);background:#edf6ff}
+#simVisual .wireless-fact strong,#simVisual .wireless-fact span{display:block}
+#simVisual .wireless-fact strong{color:var(--ink);margin-bottom:4px}
+#simVisual .wireless-fact span{color:var(--muted);font-size:13px}
+#simVisual .rf-blocks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:10px 0 4px}
+#simVisual .rf-blocks i{height:24px;background:#e5eef8;border:1px solid #c8d9e9;border-radius:5px}
+#simVisual .rf-blocks i.used{background:#d4eee7;border-color:#71b6a5}
+#simVisual .rf-reading{font-size:20px;font-weight:800;line-height:1.5;color:var(--ink);overflow-wrap:anywhere}
+#simVisual .rf-formula{padding:14px;background:#edf6ff;border:1px solid #b7d4ed;border-radius:12px;font-size:18px;font-weight:750;overflow-wrap:anywhere}
+#simVisual .observer{grid-template-columns:minmax(0,1fr)}
+#simVisual .observer>.device{display:none}
+#simVisual .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#simVisual .meta strong{overflow-wrap:anywhere}
+#simVisual .dot-event code{white-space:normal;overflow-wrap:anywhere;color:var(--ink)}
+#simVisual .wlan-sequence-list{max-height:310px;overflow:auto;padding:0;scrollbar-gutter:stable}
+#simVisual .wlan-lane-head,#simVisual .dot-lanes{display:none}
+#simVisual .roam-stage{min-height:280px}
+#simVisual .roam-stage .event-label{overflow-wrap:anywhere;white-space:normal}
+#simVisual .gate{min-width:0}
+#simVisual .gate span{overflow-wrap:anywhere}
+#simVisual .roam-review{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#simVisual .roam-review .wireless-fact:last-child:nth-child(odd){grid-column:1/-1}
+@media(max-width:600px){
+ #simVisual .wireless-flow{grid-template-columns:1fr;gap:38px;padding:10px 10px 34px}
+ #simVisual .wireless-actor{display:grid;grid-template-columns:64px 1fr;text-align:left;padding:8px;align-items:center}
+ #simVisual .wireless-actor svg{grid-row:1/3;margin:0;width:54px;height:45px}
+ #simVisual .wireless-actor small{grid-column:2}
+ #simVisual .wlan-lane-head{display:none}
+ #simVisual .wlan-sequence{padding:10px}
+ #simVisual .dot-lanes{display:none}
+ #simVisual .dot-lab-grid{display:flex;flex-direction:column}
+ #simVisual .dot-lab-grid>.dot-panel:last-of-type{order:-1}
+ #simVisual .roam-review{grid-template-columns:1fr}
+ #simVisual .roam-review .wireless-fact:last-child:nth-child(odd){grid-column:auto}
+ #simVisual .rf-reading{font-size:18px}
+ #simVisual .lane-head{flex-wrap:wrap}
+}

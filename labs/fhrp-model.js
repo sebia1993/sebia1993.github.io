@@ -73,5 +73,43 @@ if(s==='vrrp'){
 }
 }
 const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;clearTopo();},show(){applyState(lessons[index].state);},recover:null,compare:null};
+adapter.presentation={guideDifferences:[{name:'Switch A',reason:'가상 Gateway와 단말을 연결하는 기존 실습의 L2 장비 SW1입니다.'},{name:'Router C',reason:'상위 경로 관찰을 위한 기존 실습의 원격 목적지 R3입니다. 학습 페이지의 Router A·B 역할 전환과 연결해 표시합니다.'}],names:{PC1:'PC A',SW1:'Switch A',R1:'Router A',R2:'Router B',R3:'Router C',Remote:'Router C'},labels:{'Host Gateway':'단말 Gateway','Forwarding Owner':'전달 담당 Router','Control':'제어 정보','client LAN':'단말 LAN','upstream':'상위 연결','effective priority':'실효 Priority','Virtual Gateway':'가상 Gateway','Active Failure':'Active 장애','Preemption Recovery':'Preemption 복구','Upstream Tracking':'상위 연결 추적','VRRPv2 Failover':'VRRPv2 역할 전환','Request Path':'Request 경로','same VRRP VIP/MAC':'동일한 VRRP VIP/MAC','Host':'단말','baseline':'기준 상태','Lab 설계 주의':'관찰 범위','return route':'돌아오는 경로','priority':'Priority','preempt both':'양쪽 Preemption 활성화','preempt enabled':'Preemption 활성화','physical IP':'물리 IP','physical MAC':'물리 MAC','failure':'장애','stable':'안정화 후'},lessons:[
+ {title:'PC A의 Gateway와 실제 전달 담당은 같을까요?',brief:'학습 페이지의 가상 Gateway 모델입니다. PC A의 Gateway IP, ARP의 Virtual MAC, 실제 전달 Router를 차례로 확인합니다.',hints:['PC A는 가상 IP를 Gateway로 설정합니다.','가상 MAC과 Router의 물리 MAC을 구분하세요.','현재 Active Router가 실제로 전달합니다.']},
+ {title:'어떤 조건으로 Active를 확인할까요?',brief:'Router A의 Priority 110과 Router B의 100을 비교합니다. 이번 HSRPv2의 Hello 관측과 안정화 후 역할을 확인하세요.',hints:['단말이 두 Router 중 하나를 직접 고르는 모델이 아닙니다.','이번 실습은 양쪽 Preemption이 활성화돼 있습니다.','Priority와 Hello 관측을 역할 상태와 함께 봅니다.']},
+ {title:'Active 장애 때 단말의 Gateway도 바뀔까요?',brief:'Router A의 LAN/FHRP 참여만 중단합니다. 같은 VIP·Virtual MAC과 바뀌는 전달 담당을 구분하세요.',hints:['가상 Gateway와 물리 Router는 다른 개념입니다.','Router B는 같은 HSRP 그룹에 참여합니다.','Echo Request가 나가는 상위 링크를 확인하세요.']},
+ {title:'Router A가 돌아오면 역할을 되찾을까요?',brief:'Router B가 Active인 장애 후 상태에서 시작합니다. Router A의 Priority와 Preemption 조건을 보고 복구를 관찰합니다.',hints:['복구됐다는 사실만으로 역할 복귀를 단정하지 않습니다.','이번 조건은 Router A의 더 높은 Priority와 Preemption 활성화입니다.','PC A의 Gateway를 수동 변경하는 과정은 없습니다.']},
+ {title:'LAN은 Up인데 상위 링크만 끊기면?',brief:'Router A의 단말 LAN은 유지하고 상위 링크만 끊습니다. Track 상태 → Priority 변화 → 역할 전환 순서로 확인합니다.',hints:['단말 쪽 Interface는 계속 Up입니다.','Track에 연결된 감소값은 20입니다.','110에서 20을 뺀 값과 Router B의 100을 비교하세요.']},
+ {title:'VRRPv2에서도 가상 Gateway는 유지될까요?',brief:'기존 HSRP를 제거하고 VRRPv2로 따로 검증한 조건입니다. VRRP의 VIP·MAC과 Master 전환을 확인합니다.',hints:['이번 실제 검증은 VRRPv2입니다.','HSRP와 VRRP의 Virtual MAC을 서로 같다고 가정하지 마세요.','학습 페이지의 현행 VRRPv3 설명과 기존 VRRPv2 실측을 구분합니다.']}
+]};
+const fhrpTopology=document.querySelector('#simVisual .topology');
+const fhrpMarker=document.createElement('span');fhrpMarker.className='fhrp-packet';fhrpMarker.hidden=true;fhrpTopology.append(fhrpMarker);
+function fhrpCenter(id){const n=all('[data-node="'+id+'"]').find(n=>n.getBoundingClientRect().width>0),r=n.getBoundingClientRect(),s=fhrpTopology.getBoundingClientRect();return{x:r.left-s.left+r.width/2,y:r.top-s.top+r.height/2};}
+function fhrpMove(route,p){const pts=route.map(fhrpCenter),t=Math.min(pts.length-1-.00001,Math.max(0,p)*(pts.length-1)),a=pts[Math.floor(t)],b=pts[Math.floor(t)+1];fhrpMarker.hidden=false;fhrpMarker.style.left=(a.x+(b.x-a.x)*(t%1))+'px';fhrpMarker.style.top=(a.y+(b.y-a.y)*(t%1))+'px';}
+function fhrpStart(protocol='HSRP'){clearTopo();fhrpMarker.hidden=true;setRoles('Priority 110','Priority 100');$('states').innerHTML=stateRow('단말 Gateway','10.10.10.1','')+stateRow('관찰 대상',protocol,'');}
+function fhrpBaseline(vrrp=false){applyState('normal');fhrpMarker.hidden=true;if(vrrp){setRoles('Master · Priority 110','Backup · Priority 100');$('states').innerHTML=stateRow('단말 Gateway','10.10.10.1','ok')+stateRow('VRRP Virtual MAC','00:00:5e:00:01:0a','ok')+stateRow('전달 담당 Router','Router A Master','ok');}}
+const fhrpReset=adapter.reset;adapter.reset=function(i){fhrpReset(i);fhrpStart(lessons[i].state==='vrrp'?'VRRPv2':'HSRPv2');};
+adapter.buildPlan=function(i,mode='normal'){
+ if(mode!=='normal')return null;const l=lessons[i],ev=(title,detail,duration,action,route,packet='IPv4')=>({title,detail,kind:route?'경로 관찰':'역할 확인',duration,action(){action();fhrpMarker.textContent=packet;},animate:route?p=>fhrpMove(route,Math.min(1,Math.max(0,(p*duration-1050)/((route.length-1)*420)))):undefined});
+ const forward=(owner)=>ev('현재 전달 담당의 경로를 따라갑니다',i===4?'전환 후 안정화된 Echo Request는 Router B 방향입니다. 전환 중 손실과 ICMP 오류가 있었으므로 무손실로 표현하지 않습니다.':'Echo Request가 선택된 상위 링크로 전달됩니다. 돌아오는 경로는 기존 실험에서 Router B로 고정되어 담당 판정에 사용하지 않습니다.',2490,()=>adapter.show(),['pc1','sw1',owner,'r3']);
+ if(l.state==='normal')return[
+ ev('PC A의 Gateway 설정을 읽습니다','PC A는 Router의 물리 주소 대신 VIP 10.10.10.1을 사용합니다.',1050,()=>fhrpStart()),
+ ev('ARP에서 Virtual MAC을 확인합니다','기존 HSRPv2 검증의 VIP는 00:00:0c:9f:f0:0a로 해석됐습니다.',1470,()=>{$('states').innerHTML+=stateRow('Virtual MAC','00:00:0c:9f:f0:0a','ok');markNode('pc1','active');}),
+ ev('현재 Active Router를 확인합니다','이번 기준 상태는 Router A Active / Router B Standby입니다.',1230,()=>adapter.show()),forward('r1')];
+ if(l.state==='priority')return[
+ ev('두 Router의 Priority를 비교합니다','Router A는 110, Router B는 100이고 양쪽 Preemption이 활성화돼 있습니다.',1050,()=>fhrpStart()),
+ ev('HSRPv2 Hello로 상태를 확인합니다','CP-LAN에서 HSRPv2 Hello를 관찰했습니다. 기존 관측 주기는 Hello 3초·Hold 10초이며 재생 속도와는 다릅니다.',2070,()=>{fhrpStart();$('states').innerHTML+=stateRow('제어 정보','HSRPv2 Hello','');},['r1','sw1','r2'],'HSRP'),
+ ev('안정화 후 역할을 대조합니다',l.reason,1470,()=>adapter.show()),forward('r1')];
+ if(l.state==='recovery')return[
+ ev('장애 후 Router B가 전달하고 있습니다','같은 VIP·Virtual MAC을 유지하며 Router B가 Active인 상태에서 복구를 시작합니다.',1230,()=>{applyState('failover');fhrpMarker.hidden=true;}),
+ ev('Router A 복구와 Preemption 조건을 확인합니다','Router A가 Priority 110으로 복구됩니다. 이번 실습은 Preemption이 활성화돼 있습니다.',1470,()=>{clearTopo();setRoles('복구 · Priority 110 · Preemption','Active · Priority 100');fhrpMarker.hidden=true;$('states').innerHTML=stateRow('단말 Gateway','10.10.10.1','ok')+stateRow('복구 조건','Router A · Preemption 활성화','');}),
+ ev('Router A가 다시 Active가 됩니다',l.reason,1470,()=>adapter.show()),forward('r1')];
+ const vrrp=l.state==='vrrp';const plan=[ev(vrrp?'VRRPv2 기준 상태를 확인합니다':'장애 전 전달 담당을 확인합니다',vrrp?'HSRP를 제거한 별도 VRRPv2 검증입니다. VRRP VIP·MAC과 Router A Master / Router B Backup 상태로 시작합니다.':'Router A가 전달하고 Router B가 대기합니다. PC A의 Gateway는 VIP 10.10.10.1입니다.',1230,()=>fhrpBaseline(vrrp))];
+ if(l.state==='tracking'){
+ plan.push(ev('단말 LAN은 유지하고 상위 링크만 끊습니다','Router A의 e0/0은 Up입니다. e0/1 장애를 Track 1에서 확인합니다.',1470,()=>{clearTopo();markNode('r1','track-low');markLink('r1-r3','failed');setRoles('LAN Up · 상위 링크 Down','Priority 100');$('states').innerHTML=stateRow('Router A 단말 LAN','Up','ok')+stateRow('상위 링크','Down','bad')+stateRow('Track 1','Down','bad');fhrpMarker.hidden=true;}));
+ plan.push(ev('Track 감소값을 Priority에 반영합니다','110 − 20 = 90입니다. Router B의 Priority 100보다 낮아집니다.',1470,()=>{$('states').innerHTML+=stateRow('Router A 실효 Priority','110 → 90','warn');setRoles('LAN Up · Track Down · 90','Priority 100');}));
+ }else plan.push(ev('Router A의 LAN/FHRP 참여를 중단합니다','Router A의 LAN Interface를 shutdown합니다. PC A의 Gateway 설정은 바꾸지 않습니다.',1470,()=>{clearTopo();markNode('r1','failed');markLink('sw-r1','failed');setRoles('Init · LAN Down',vrrp?'Backup · Priority 100':'Standby · Priority 100');$('states').innerHTML=stateRow('단말 Gateway','10.10.10.1','ok')+stateRow(vrrp?'VRRP Virtual MAC':'HSRP Virtual MAC',vrrp?'00:00:5e:00:01:0a':'00:00:0c:9f:f0:0a','ok')+stateRow('Router A','LAN/FHRP Down','bad');fhrpMarker.hidden=true;}));
+ plan.push(ev(vrrp?'Router B가 Master가 됩니다':'Router B가 Active가 됩니다',l.reason,1470,()=>adapter.show()),forward('r2'));return plan;
+};
+
 NetworkSimulator.mount(adapter);
 })();

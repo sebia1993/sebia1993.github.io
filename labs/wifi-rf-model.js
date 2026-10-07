@@ -25,5 +25,52 @@ function apply(mode){
  $("eventKind").textContent=lessons[index].claim;$("eventText").textContent=lessons[index].reason;$("resultBox").innerHTML="<strong>"+lessons[index].actual+"</strong>"+lessons[index].reason;
 }
 const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;resetView();},show(){apply(lessons[index].mode);},recover:null,compare:null};
+adapter.presentation={
+ names:{'AP-A':'AP A'},
+ labels:{'Evidence Boundary':'검증 범위','Snapshot':'관측 기록','Regulatory Context':'지역 규제 조건','Regulatory Domain':'지역 규제 기준','Regulatory':'규제','Context':'조건','Domain':'지역','Current':'현재','Noise':'Noise','Tool-SNR NOT_EXPOSED':'도구의 SNR 필드 미제공','Radar NOT_OBSERVED':'Radar 미관측','same-channel condition':'같은 Channel을 공유하는 조건','distinct BSSID group':'서로 다른 BSSID 집합','distinct BSSIDs':'서로 다른 BSSID','read-only':'읽기 전용','Allocation':'할당','Nominal overlap':'명목상 겹침','Deterministic block calculation':'일정한 기준의 블록 계산','No throughput measurement':'처리량 미측정','No throughput/interference severity claim':'처리량·간섭 심각도는 확인하지 않음','not observed':'미관측','not reproduced':'미재현','blocks':'블록','block':'블록','Reuse':'재사용','Spectrum':'주파수 공간'},
+ lessons:[
+  {title:'Channel 숫자를 읽기 전에 무엇을 확인할까요?',brief:'학습 페이지의 Band → Channel → Width 순서로 AP A의 관측값을 확인합니다.',hints:['같은 숫자라도 Band와 지역 조건을 함께 봅니다.','6 GHz는 이번 관측에 포함됐는지 확인하세요.']},
+  {title:'Channel Width가 넓어지면 공간을 얼마나 쓸까요?',brief:'같은 전체 주파수 공간에서 20·40·80 MHz 묶음을 비교합니다. 속도 측정 실습은 아닙니다.',hints:['20 MHz 한 칸을 기준으로 묶인 칸 수를 세어 보세요.','독립적으로 다시 사용할 수 있는 묶음이 얼마나 남는지 생각하세요.']},
+  {title:'RSSI와 Noise로 SNR을 어떻게 구할까요?',brief:'학습 페이지와 같은 RSSI -22 dBm, Noise -97 dBm을 사용합니다. 두 값의 차이와 단위를 확인하세요.',hints:['SNR은 수신 신호와 잡음의 차이입니다.','음수를 빼는 계산과 dBm·dB 단위를 구분하세요.']},
+  {title:'BSSID 네 개가 같은 Channel이면 무엇을 알 수 있을까요?',brief:'보존된 MAC-AUTH-01 관측 기록을 확인합니다. BSSID 별칭은 물리 AP 수를 뜻하지 않습니다.',hints:['같은 Channel을 사용한다는 조건과 실제 동시 송신은 다릅니다.','관측 기록만으로 처리량 감소까지 확인했는지 구분하세요.']},
+  {title:'ch1과 ch3의 20 MHz 구간은 겹칠까요?',brief:'학습 페이지의 2412·2422 MHz 중심 주파수와 20 MHz 폭을 비교합니다.',hints:['두 중심 주파수 사이의 차이를 먼저 계산하세요.','할당 구간의 겹침과 실제 간섭 피해는 다른 관측입니다.']},
+  {title:'관측 Channel 분류와 Radar 재현은 같을까요?',brief:'KR 조건에서 관측한 ch36/80·ch149/80의 분류와 검증 범위를 나눠 봅니다.',hints:['지역 규제 조건을 먼저 확인하세요.','Channel 분류를 확인한 것과 Radar Event를 재현한 것은 다릅니다.']}
+ ]
+};
+const rfFrames=[
+ [
+  ['Band와 지역 조건','AP A에서 관측한 5 GHz와 국가 코드 KR을 먼저 확인합니다.',()=>WirelessLab.fact('AP A · 5 GHz','국가 코드 KR · 이번 관측의 시작 조건',true)],
+  ['Channel과 Width','이 Band에서 primary Channel은 149, Width는 80 MHz입니다.',()=>WirelessLab.fact('5 GHz · KR','Band와 지역 조건')+WirelessLab.fact('ch149 · 80 MHz','주파수 대역 안에서 Channel과 폭을 해석합니다.',true)],
+  ['관측하지 않은 범위','주변 2.4·5 GHz 기록이 있었지만 6 GHz는 관측되지 않았습니다.',()=>WirelessLab.fact('2.4 GHz · 5 GHz','주변 관측 기록 있음')+WirelessLab.fact('6 GHz','이번 관측에서 확인되지 않음',true)]
+ ],
+ [
+  ['20 MHz 기준 한 칸','20 MHz를 한 칸으로 보고 같은 전체 공간을 비교합니다.',()=>rfWidth(1,'20 MHz','한 칸을 사용합니다.')],
+  ['40 MHz 묶음','40 MHz는 20 MHz 기준 두 칸을 묶습니다.',()=>rfWidth(1,'20 MHz','한 칸')+rfWidth(2,'40 MHz','같은 공간에서 독립적인 묶음 수가 줄어듭니다.')],
+  ['80 MHz 묶음','80 MHz는 네 칸을 묶습니다. 이 비교만으로 실제 속도가 더 빠르다고 판단하지 않습니다.',()=>rfWidth(1,'20 MHz','한 칸')+rfWidth(2,'40 MHz','두 칸을 함께 사용')+rfWidth(4,'80 MHz','네 칸을 함께 사용 · 실제 처리량은 별도 측정 필요')]
+ ],
+ [
+  ['신호 세기 읽기','실제 관측 RSSI는 -22 dBm입니다. 아직 잡음과의 차이는 계산하지 않았습니다.',()=>WirelessLab.fact('RSSI -22 dBm','수신 신호의 절대 레벨',true)],
+  ['잡음 레벨 함께 읽기','같은 관측의 Noise는 -97 dBm입니다. 신호와 잡음을 함께 비교합니다.',()=>WirelessLab.fact('RSSI -22 dBm','수신 신호')+WirelessLab.fact('Noise -97 dBm','관측된 잡음 레벨',true)],
+  ['SNR 계산','-22 - (-97) = 75 dB입니다. 입력은 실측값, 결과는 두 입력의 계산값입니다.',()=>'<div class="rf-formula">SNR = -22 − (−97)<br>= 75 dB</div>'+WirelessLab.fact('단위 확인','RSSI·Noise는 dBm, 두 값의 차이인 SNR은 dB입니다.',true)]
+ ],
+ [
+  ['같은 기록 안에서 비교','MAC-AUTH-01의 한 보존 기록에서 BSSID를 비교합니다.',()=>WirelessLab.fact('MAC-AUTH-01','보존된 단일 관측 기록 · 물리 AP 수를 세는 단계가 아닙니다.',true)],
+  ['중복을 제외하고 묶기','AP A, AP-06, AP-12, AP-13은 서로 다른 BSSID 네 개의 익명 별칭입니다.',()=>WirelessLab.fact('5 GHz · primary ch149','AP A / AP-06 / AP-12 / AP-13',true)+WirelessLab.fact('BSSID 네 개','중복된 원시 행은 중복 집계하지 않았습니다.')],
+  ['확인한 조건과 미측정 결과','같은 Channel을 공유하는 조건은 확인했습니다. 동시 송신·처리량 감소는 측정하지 않았습니다.',()=>WirelessLab.fact('확인','서로 다른 BSSID 네 개가 같은 primary ch149에 기록됨',true)+WirelessLab.fact('미측정','개별 기록의 경과 시간 · 실제 동시 송신 · 처리량 감소')]
+ ],
+ [
+  ['중심 주파수 비교','ch1과 ch3의 중심은 각각 2412 MHz와 2422 MHz입니다.',()=>WirelessLab.fact('ch1 · 2412 MHz','20 MHz 폭')+WirelessLab.fact('ch3 · 2422 MHz','20 MHz 폭',true)],
+  ['명목 점유 구간 비교','중심 간격은 10 MHz입니다. 20 MHz 할당 구간의 관계를 비교합니다.',()=>WirelessLab.fact('중심 차이 10 MHz','두 Channel의 폭은 각각 20 MHz입니다.',true)],
+  ['겹침의 의미 확인','명목상 약 10 MHz가 겹칩니다. 이는 Channel 할당 분류이며 실제 간섭 피해량이 아닙니다.',()=>'<div class="rf-formula">20 MHz − 10 MHz<br>≈ 10 MHz 겹침</div>'+WirelessLab.fact('판정 범위','실제 ACI 심각도·처리량 저하는 미측정',true)]
+ ],
+ [
+  ['지역 조건 확인','허용 Channel과 DFS 분류는 지역 규제 조건과 함께 해석합니다.',()=>WirelessLab.fact('KR','이번 관측의 국가 코드',true)],
+  ['실제 관측 Channel 분류','관측된 ch36/80·ch149/80 그룹을 기존 근거와 대조해 non-DFS로 분류했습니다.',()=>WirelessLab.fact('ch36/80 · ch149/80','KR 조건의 기존 근거에서 non-DFS로 분류',true)],
+  ['Radar 재현 여부 구분','Radar Event와 Channel Vacate는 이번에 관측·재현하지 않았습니다.',()=>WirelessLab.fact('Channel 분류','기존 관측과 근거 대조')+WirelessLab.fact('Radar / Channel Vacate','미관측 · 미재현',true)]
+ ]
+];
+function rfWidth(n,title,detail){return `<div class="wireless-fact current"><strong>${title}</strong><div class="rf-blocks">${Array.from({length:4},(_,i)=>`<i class="${i<n?'used':''}"></i>`).join('')}</div><span>${detail}</span></div>`;}
+adapter.buildPlan=(i,mode="normal")=>mode!=="normal"?null:rfFrames[i].map(([title,detail,draw],k)=>({title,detail,kind:k===2?'판단':'관찰',duration:k===2?1800:1470,action(){index=i;resetView();$('lanes').innerHTML='<div class="wireless-cards">'+draw()+'</div>';$('metaPanel').innerHTML='<span>현재 관찰</span><strong>'+title+'</strong>';$('stateList').innerHTML=row(detail,'active');$('resultBox').hidden=true;$('scopeNote').innerHTML=i===3?'<b>익명화:</b> AP A는 기존 AP-A와 같은 별칭입니다. AP-06·AP-12·AP-13은 BSSID 별칭이며 물리 AP 대수를 뜻하지 않습니다.':'<b>학습 기준:</b> Wi-Fi / RF 학습 페이지의 기존 관측·계산 범위를 그대로 사용합니다.';$('simVisual').dataset.reveal='all';}}));
+
 NetworkSimulator.mount(adapter);
 })();

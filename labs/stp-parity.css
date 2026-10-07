@@ -1,0 +1,25 @@
+/* Same verified triangle, compact reflow instead of a panned desktop canvas. */
+#simVisual .topology-scroll{overflow:visible;min-width:0}
+#simVisual .topology-stage{max-width:100%}
+#simVisual .stp-link{stroke:#b4c5d7}
+#simVisual .stp-link.forwarding{stroke:#82ab9e}
+#simVisual .stp-link.active-data{stroke:#287bca}
+#simVisual .stp-link.alternate{stroke:#b88335;stroke-dasharray:7 5}
+#simVisual .stp-link.bpdu{stroke:#8368b8}
+#simVisual .stp-link.down{stroke:#c65151;stroke-dasharray:4 5}
+#simVisual .packet-marker{z-index:12}
+@media(max-width:900px){
+ #simVisual .topology-stage{width:100%;height:710px;min-width:0}
+ #simVisual .stp-node{width:102px!important;padding:6px 3px;transform:translateX(-50%)}
+ #simVisual .stp-node b{font-size:13px}
+ #simVisual .stp-node span{font-size:11px;white-space:normal}
+ #simVisual #pc1{left:27%;top:18px}
+ #simVisual #sw1{left:27%;top:158px}
+ #simVisual #sw2{left:76%;top:308px}
+ #simVisual #sw3{left:27%;top:458px}
+ #simVisual #pc3{left:27%;top:606px}
+ #simVisual .link-label{font-size:10px;max-width:110px;white-space:normal;text-align:center;padding:3px 5px}
+ #simVisual #label31{left:14%!important;top:365px!important}
+ #simVisual .root-badge{font-size:10px;margin-top:1px}
+ #simVisual .stp-port-readouts{grid-template-columns:1fr}
+}

@@ -1,0 +1,23 @@
+#simVisual .topology-scroll{overflow:visible;min-width:0}
+#simVisual .topology-stage{max-width:100%}
+#simVisual .ospf-packet{position:absolute;z-index:12;transform:translate(-50%,-50%);padding:5px 9px;border-radius:99px;background:#287bca;color:#fff;font-size:12px;font-weight:800;box-shadow:0 0 0 5px #287bca20}
+#simVisual .lsa.ospf-pending{visibility:hidden}
+#simVisual .adj-badge.bad,#simVisual .adj-badge.warn{background:#fff4ed}
+@media(max-width:700px){
+ #simVisual .topology-stage{width:100%;height:640px;min-width:0}
+ #simVisual .node{width:122px}
+ #simVisual .node b{font-size:13px}
+ #simVisual .node small{font-size:11px}
+ #simVisual .node.r1{left:26%;top:20%}
+ #simVisual .node.r2{left:75%;top:51%}
+ #simVisual .node.r3{left:26%;top:83%}
+ #simVisual .area-badge{left:8px;top:12px;max-width:calc(100% - 16px);font-size:11px;white-space:normal}
+ #simVisual .link-badge,#simVisual .adj-badge{font-size:10px;padding:4px 6px;max-width:130px;white-space:normal;text-align:center}
+ #simVisual .b12{left:50%;top:31%;transform:translateX(-50%)}
+ #simVisual .a12{left:64%;top:38%;transform:translateX(-50%)}
+ #simVisual .b23{left:60%;top:64%;transform:translateX(-50%)}
+ #simVisual .a23{left:53%;top:71%;transform:translateX(-50%)}
+ #simVisual .b13{left:2%;top:43%;max-width:80px}
+ #simVisual .a13{left:6%;top:58%;max-width:85px}
+ #simVisual .stop12{left:46%;top:29%;max-width:125px;white-space:normal;transform:none}
+}

@@ -49,5 +49,29 @@ function apply(mode){
  }
 }
 const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;resetVisual();},show(){apply(lessons[index].mode);},recover:()=>apply('recover'),compare:null};
+const S=SecurityLab;
+adapter.presentation={names:S.names,labels:{...S.labels,'PAT OVERLOAD':'PAT 주소 공유','RETURN TRANSLATION':'응답 역변환','STATIC PAT':'Static PAT','UNTRANSLATED':'미변환 전달','INSIDE ROLE MISSING':'NAT inside 역할 누락','2 sessions PASS':'두 Session 성공','Other Inside link matching reply = 0':'다른 내부 링크의 대응 응답 0개','Handshake PASS':'Handshake 성공','Forwarded untranslated · Return fails':'미변환 전달 · 응답 경로 실패','Routing alive, NAT role missing':'Routing 유지 · NAT inside 역할 누락','Baseline restored':'정상 기준 복구','No translation entry':'변환 기록 없음','no translation entry':'변환 기록 없음','role missing':'역할 누락','control normal':'대조 통신 정상','Routing unchanged':'Routing 유지','not selected':'대상 제외','번역 없이':'주소 변환 없이'},lessons:[
+{title:'NAT 바깥에서 출발지 주소는 무엇일까요?',brief:'학습 페이지의 Router A·D는 내부, Router B는 NAT 경계, Router C는 외부입니다. CP11과 CP23에서 같은 요청의 값을 비교합니다.',hints:['Inside Local과 Inside Global은 관찰 위치가 다릅니다.','목적지 주소와 출발지 주소를 분리해서 읽으세요.','Translation Table의 대응 기록을 확인하세요.']},
+{title:'같은 외부 IP에서 두 통신을 어떻게 구분할까요?',brief:'Router A와 Router D가 같은 TCP/23 서비스에 연결합니다. 외부 IP와 Port의 대응 관계를 함께 봅니다.',hints:['IP 하나만으로 두 Flow를 구분할 수 있을까요?','두 TCP 출발지 Port를 비교하세요.','PAT라고 Port 번호가 반드시 바뀌는 것은 아닙니다.']},
+{title:'응답은 어느 내부 장비로 돌아갈까요?',brief:'두 PAT Session이 이미 있는 조건입니다. 외부 응답의 Port와 Translation Table을 대조합니다.',hints:['두 내부 장비는 같은 Global IP를 공유합니다.','응답이 향하는 Global Port는 46258입니다.','그 Port와 연결된 Inside Local 기록을 찾으세요.']},
+{title:'외부 서비스 Port는 어디로 연결될까요?',brief:'외부의 198.51.100.5:2323을 내부 서비스에 연결하는 고정 기록을 관찰합니다.',hints:['이번에는 외부에서 연결을 시작합니다.','Source 변환과 Destination 변환을 구분하세요.','Global :2323에 연결된 Local endpoint를 확인하세요.']},
+{title:'NAT 대상에서 빠지면 바로 차단될까요?',brief:'Router D만 NAT 대상에서 빠졌습니다. 요청의 전달 여부와 주소 변환 여부를 각각 확인합니다.',hints:['NAT 선택 목록을 보안 ACL과 같은 뜻으로 읽지 않습니다.','CP23에서 요청 자체가 보이는지 먼저 확인하세요.','외부 장비가 미변환 주소로 응답할 경로도 필요합니다.']},
+{title:'NAT inside 역할이 없으면 어떻게 될까요?',brief:'Router A 쪽 인터페이스의 NAT inside 역할만 제거했습니다. Router D는 같은 시점의 대조 통신입니다.',hints:['Routing과 NAT 역할은 별도로 확인합니다.','Router A와 Router D의 Translation 기록을 비교하세요.','완료 후 역할 복구 장면을 확인할 수 있습니다.']}
+]};
+const originalReset=adapter.reset;adapter.reset=i=>{originalReset(i);S.clear();};
+function mapping(items){S.rows('translationList',items);}
+adapter.buildPlan=(i,mode='normal')=>{
+ const s=lessons[i],m=s.mode,E=S.event,M=S.move;
+ if(mode==='recover')return[E('NAT 조건 원복','기존 검증에서 NAT 선택 조건 또는 inside 역할을 복구합니다.',()=>S.clear()),M('내부 요청 다시 전달','두 내부 장비가 다시 정상 변환되는지 확인합니다.',['r1','r2','r3'],'ICMP'),E('변환 기록 복구','Router A와 Router D에 각각 변환 기록이 있습니다.',()=>mapping([['Router A','변환됨'],['Router D','변환됨']])),M('응답 경로 확인','응답이 원래 내부 장비로 돌아갑니다.',['r3','r2','r4'],'Echo Reply',()=>{},'return'),E('복구 결과 확인','두 내부 장비의 Ping은 각각 3/3으로 복구됐습니다.',()=>apply('recover'))];
+ if(mode!=='normal')return null;
+ const start=E('관찰 위치 확인','CP11은 Router A, CP14는 Router D의 내부 링크입니다. CP23은 NAT 바깥쪽입니다.',()=>S.clear()),done=()=>S.finish(s,()=>apply(m));
+ if(m==='basic')return[start,M('내부 요청 전달','CP11에서 출발지는 10.0.11.2입니다.',['r1','r2'],'ICMP'),E('주소 대응 기록','Inside Local 10.0.11.2와 Inside Global 198.51.100.5를 연결합니다.',()=>mapping([['Inside Local','10.0.11.2'],['Inside Global','198.51.100.5']])),M('외부에서 같은 요청 관찰','CP23에서는 출발지가 198.51.100.5로 보이고 목적지는 유지됩니다.',['r2','r3'],'ICMP .5'),M('응답 역변환','Translation Table을 이용해 원래 내부 장비로 돌아갑니다.',['r3','r2','r1'],'Echo Reply',()=>{},'return'),done()];
+ if(m==='pat')return[start,M('첫 번째 TCP Flow','Router A의 출발지 Port는 25473입니다.',['r1','r2'],'TCP :25473'),E('첫 변환 기록','외부 IP .5에 첫 Flow의 Port를 연결합니다.',()=>mapping([['Router A','10.0.11.2:25473 ↔ .5:25473']])),M('두 번째 TCP Flow','Router D의 출발지 Port는 46258입니다.',['r4','r2'],'TCP :46258'),E('두 기록 비교','두 Flow는 외부 IP를 공유하며 서로 다른 endpoint로 구분됩니다. 이번 관측에서는 원래 Port가 보존됐습니다.',()=>mapping([['Router A','10.0.11.2:25473 ↔ .5:25473'],['Router D','10.0.14.2:46258 ↔ .5:46258']])),M('외부 전달 확인','두 TCP Session은 같은 Global IP를 통해 외부 서비스에 연결됐습니다.',['r2','r3'],'TCP'),done()];
+ if(m==='return')return[start,E('기존 변환 기록 확인','이 문제는 앞선 PAT의 두 Session이 살아 있는 조건입니다.',()=>mapping([['Router A','10.0.11.2:25473 ↔ .5:25473'],['Router D','10.0.14.2:46258 ↔ .5:46258']])),M('외부 응답 도착','응답의 목적지 Global endpoint는 .5:46258입니다.',['r3','r2'],'TCP :46258'),E('일치하는 기록 조회','46258 기록은 Router D의 10.0.14.2:46258과 연결됩니다.',()=>{$('translationList').children[1].classList.add('so-current');}),M('원래 내부 Flow로 전달','CP14로 전달하고 Router A 쪽 CP11에는 이 응답을 보내지 않습니다.',['r2','r4'],'TCP Reply',()=>{},'return'),done()];
+ if(m==='static')return[start,M('외부 연결 요청','Router C는 Global 198.51.100.5:2323으로 SYN을 보냅니다.',['r3','r2'],'TCP :2323'),E('고정 변환 기록 조회','Global :2323은 Router A의 Local 10.0.11.2:23과 연결돼 있습니다.',()=>mapping([['Global','.5:2323'],['Local','10.0.11.2:23']])),M('내부 서비스로 전달','CP11에서 목적지는 10.0.11.2:23으로 바뀝니다.',['r2','r1'],'TCP :23'),M('응답의 역변환','응답은 다시 Global endpoint로 대응돼 외부로 전달됩니다.',['r1','r2','r3'],'SYN-ACK',()=>{},'return'),done()];
+ const source=m==='selectionFail'?'r4':'r1',name=m==='selectionFail'?'Router D':'Router A',address=m==='selectionFail'?'10.0.14.2':'10.0.11.2';
+ return[start,M('내부 요청 도착',name+'의 요청이 NAT 경계까지 전달됩니다.',[source,'r2'],'ICMP'),E('NAT 조건 확인',m==='selectionFail'?'Router D는 NAT 선택 대상에 포함되지 않습니다.':'Router A 쪽 인터페이스에 NAT inside 역할이 없습니다.',()=>mapping([[name,'변환 기록 없음'],['다른 내부 장비','정상 대조 통신']])),M('미변환 상태로 외부 전달','보안 차단이 아닙니다. CP23에서 출발지 '+address+'가 그대로 보입니다.',['r2','r3'],'ICMP 원주소'),E('응답 경로 확인','Router C에는 이 내부 주소로 돌아갈 Route가 없어 응답이 돌아오지 않습니다.',()=>{$('r3').classList.add('failure');$('resultBox').textContent='요청 전달됨 · 변환 없음 · 응답 경로 실패';}),done()];
+};
+
 NetworkSimulator.mount(adapter);
 })();

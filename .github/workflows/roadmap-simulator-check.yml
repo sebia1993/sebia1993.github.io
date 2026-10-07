@@ -1,0 +1,65 @@
+name: Roadmap simulator acceptance
+
+on:
+  push:
+    branches: [main, 'codex/lab-parity-*']
+    paths:
+      - 'labs/*-simulator.html'
+      - 'labs/*-model.js'
+      - 'labs/network-simulator-*'
+      - 'labs/*-presentation.*'
+      - 'labs/*-parity.css'
+      - 'labs/wireless-simulator-*'
+      - 'labs/advanced-routing-*'
+      - 'tests/roadmap-*'
+      - 'tests/fixtures/roadmap-*'
+      - '.github/workflows/roadmap-simulator-check.yml'
+  pull_request:
+    paths:
+      - 'labs/*-simulator.html'
+      - 'labs/*-model.js'
+      - 'labs/network-simulator-*'
+      - 'labs/*-presentation.*'
+      - 'labs/*-parity.css'
+      - 'labs/wireless-simulator-*'
+      - 'labs/advanced-routing-*'
+      - 'tests/roadmap-*'
+      - 'tests/fixtures/roadmap-*'
+      - '.github/workflows/roadmap-simulator-check.yml'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Public site origin; leave empty to serve the checked-out revision'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: node --test tests/roadmap-models.test.mjs
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node tests/roadmap-simulators.mjs
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          LAB_UI_VERSION: 20261007-guide-aligned-v2
+          SCREENSHOTS: '1'
+          QA_RUN_TAG: guide-aligned-v2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-simulator-acceptance
+          path: test-results/roadmap-simulators/
+          retention-days: 7

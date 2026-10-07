@@ -1,0 +1,28 @@
+/* Compact packet topology uses the existing ARP palette and device symbols. */
+#simVisual .packet-lab-host{min-width:0}
+#simVisual .packet-desktop{position:relative}
+#simVisual .packet-desktop-overlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:20}
+#simVisual .packet-mobile{display:none}
+#simVisual .packet-mobile svg{display:block;width:100%;height:auto;max-width:420px;margin:auto;overflow:visible}
+#simVisual .packet-mobile svg svg{width:54px;height:43px}
+#simVisual .packet-map-note,#simVisual .packet-motion-caption{margin:10px 0;color:var(--muted);font-size:.83rem;line-height:1.55;overflow-wrap:anywhere}
+#simVisual .packet-motion-caption{background:var(--blue-50,#edf5ff);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:750;color:var(--text)}
+#simVisual .packet-device-frame{fill:var(--panel3,#fff);stroke:var(--line,#cedbe8);stroke-width:1.6}
+#simVisual .packet-device-name{font-family:inherit;font-size:13px;font-weight:850;fill:var(--text,#263b50)}
+#simVisual .packet-device-detail{font-family:inherit;font-size:10.5px;fill:var(--muted,#5d7084)}
+#simVisual .packet-mobile-link{fill:none;stroke:#afc4d7;stroke-width:3}
+#simVisual .packet-mobile-device.is-active .packet-device-frame,#simVisual .packet-mobile-link.is-active{stroke:var(--blue,#2589dc)}
+#simVisual .packet-mobile-device.is-reply .packet-device-frame,#simVisual .packet-mobile-link.is-reply{stroke:var(--mint,#1c9c88)}
+#simVisual .packet-mobile-device.is-stop .packet-device-frame,#simVisual .packet-mobile-link.is-stop{stroke:#c27827}
+#simVisual .packet-mobile-link.is-stop{stroke-dasharray:5 5}
+#simVisual .packet-mobile-marker{fill:var(--blue,#2589dc);stroke:#fff;stroke-width:3;filter:drop-shadow(0 1px 4px #21436340)}
+#simVisual .packet-mobile-marker.is-reply{fill:var(--mint,#1c9c88)}
+#simVisual .packet-mobile-marker.is-stop{fill:#c27827}
+#simVisual .packet-lab-host .packet-marker{display:none!important;animation:none!important}
+@media(max-width:850px){
+ #simVisual .packet-desktop{display:none!important}
+ #simVisual .packet-mobile{display:block}
+ #simVisual .packet-lab-host{overflow:visible!important;min-width:0!important;width:100%!important}
+ #simVisual .sim-pan-note:has(+.packet-lab-host){display:none}
+ #simVisual .packet-lab-host .packet-mobile .packet-mobile-device{opacity:1}
+}

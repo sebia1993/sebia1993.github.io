@@ -1,0 +1,50 @@
+/* ARP device surface; only the five policy/operations lessons consume this file. */
+#simVisual .so-stage{width:100%;min-width:0;height:350px;position:relative;margin:0;background:#f4f7fb;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+#simVisual .so-stage .node{position:absolute;width:132px;transform:translate(-50%,-50%);text-align:center;z-index:2}
+#simVisual .so-stage .node-icon{display:grid;place-items:center;width:78px;height:66px;margin:auto;background:#fff;border:2px solid var(--line);border-radius:15px}
+#simVisual .so-stage .node-icon svg{width:70px;height:56px;fill:initial;stroke:initial}
+#simVisual .so-stage .node b{display:block;margin-top:7px;font-size:.92rem;line-height:1.25}
+#simVisual .so-stage .node small{display:block;font-size:.74rem;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+#simVisual .so-stage .node.active .node-icon{border-color:var(--green,#15956b);box-shadow:0 0 0 4px #15956b14}
+#simVisual .so-stage .node.policy .node-icon,#simVisual .so-stage .node.warning .node-icon,#simVisual .so-stage .node.mismatch .node-icon{border-color:#b87819;background:#fff9ea}
+#simVisual .so-stage .node.failure .node-icon,#simVisual .so-stage .node.fail .node-icon,#simVisual .so-stage .node.error .node-icon,#simVisual .so-stage .node.stop .node-icon{border-color:#c25449;background:#fff5f3}
+#simVisual .so-stage .topology-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;border:0;padding:0;background:none;min-width:0;z-index:0}
+#simVisual .so-stage .net-link,#simVisual .so-stage .link{stroke:#a3b7c9;stroke-width:5;stroke-linecap:round;animation:none!important;stroke-dasharray:none}
+#simVisual .so-stage .pass,#simVisual .so-stage .clear,#simVisual .so-stage .link.active,#simVisual .so-stage .data-on,#simVisual .so-stage .mgmt-on{stroke:#199b77}
+#simVisual .so-stage .return,#simVisual .so-stage .esp{stroke:#278ac0}
+#simVisual .so-stage .stop,#simVisual .so-stage .data-off,#simVisual .so-stage .link.error{stroke:#c25449;stroke-dasharray:7 6}
+#simVisual .so-stage .untranslated,#simVisual .so-stage .ike{stroke:#c39136;stroke-dasharray:7 5}
+#simVisual .so-stage .cp{position:absolute;top:auto;left:auto;transform:translate(-50%,-50%);margin-top:-15px;z-index:1;padding:3px 6px;font-size:.67rem;white-space:nowrap;background:#fff;color:var(--muted);border:1px solid var(--line)}
+#simVisual .so-stage .policy-badge,#simVisual .so-stage .nat-badge,#simVisual .so-stage .mode-badge{top:10px;left:50%;transform:translateX(-50%);max-width:94%;white-space:normal;text-align:center;background:#fff6de;color:#765215;border-color:#dfc797;z-index:3}
+#simVisual .so-stage .zone{display:none}
+#simVisual .so-stage .stop-marker{left:50%;top:auto;bottom:6px;transform:translateX(-50%);max-width:95%;background:#fff1ef;color:#a23c34;z-index:4}
+#simVisual .so-stage .token-text{display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 4px;margin-top:6px;font-size:.7rem;line-height:1.35;overflow-wrap:anywhere;color:var(--muted)}
+#simVisual .so-stage .token-text.ok{color:#167851}#simVisual .so-stage .token-text.warn{color:#906719}#simVisual .so-stage .token-text.fail{color:#a23c34}
+#simVisual .so-packet{position:absolute;display:none;width:17px;height:17px;border:3px solid #fff;border-radius:50%;background:#197fd0;box-shadow:0 0 0 4px #197fd028;z-index:5;transform:translate(-50%,-50%);pointer-events:none}
+#simVisual .so-packet[data-tone="stop"]{background:#b74940;box-shadow:0 0 0 4px #b7494028}
+#simVisual .so-packet[data-tone="return"]{background:#199b77;box-shadow:0 0 0 4px #199b7728}
+#simVisual .so-packet-label{position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:#24506e;font-size:11px;white-space:nowrap;font-weight:700}
+#simVisual .so-stage[data-so-layout="chain3"] #r1{left:15%;top:56%}#simVisual .so-stage[data-so-layout="chain3"] #r2{left:50%;top:56%}#simVisual .so-stage[data-so-layout="chain3"] #r3{left:85%;top:56%}
+#simVisual .so-stage[data-so-layout="nat"]{height:420px}#simVisual .so-stage[data-so-layout="nat"] #r1{left:17%;top:30%}#simVisual .so-stage[data-so-layout="nat"] #r4{left:17%;top:77%}#simVisual .so-stage[data-so-layout="nat"] #r2{left:50%;top:54%}#simVisual .so-stage[data-so-layout="nat"] #r3{left:83%;top:54%}
+#simVisual .so-stage[data-so-layout="chain5"]{height:420px}#simVisual .so-stage[data-so-layout="chain5"] .node{width:105px}#simVisual .so-stage[data-so-layout="chain5"] #r1{left:10%;top:55%}#simVisual .so-stage[data-so-layout="chain5"] #r2{left:30%;top:55%}#simVisual .so-stage[data-so-layout="chain5"] #r3{left:50%;top:55%}#simVisual .so-stage[data-so-layout="chain5"] #r4{left:70%;top:55%}#simVisual .so-stage[data-so-layout="chain5"] #r5{left:90%;top:55%}
+#simVisual .so-stage[data-so-layout="observe"]{height:360px}#simVisual .so-stage[data-so-layout="observe"] #nodeR2{left:17%;top:51%}#simVisual .so-stage[data-so-layout="observe"] #nodeR1{left:50%;top:51%}#simVisual .so-stage[data-so-layout="observe"] #nodeNMS{left:83%;top:51%}
+#simVisual .so-stage[data-so-layout="automation"]{height:450px}#simVisual .so-stage[data-so-layout="automation"] #nodeNMS{left:50%;top:20%}#simVisual .so-stage[data-so-layout="automation"] #nodeR1{left:17%;top:72%}#simVisual .so-stage[data-so-layout="automation"] #nodeR2{left:50%;top:72%}#simVisual .so-stage[data-so-layout="automation"] #nodeR3{left:83%;top:72%}
+#simVisual .topology-scroll:has(.so-stage){overflow:visible;padding:0}#simVisual:has(.so-stage) .sim-pan-note{display:none}
+#simVisual:has(.so-stage) .observation{grid-template-columns:minmax(0,1.35fr) minmax(250px,.85fr)}
+#simVisual:has(.so-stage) .state-row,#simVisual:has(.so-stage) .tr-row{overflow-wrap:anywhere;min-width:0}
+#simVisual:has(.so-stage) .state-row{display:flex;gap:10px;justify-content:space-between}
+#simVisual:has(.so-stage) .state-row b{min-width:0;text-align:right}
+#simVisual:has(.so-stage) .ace code{white-space:normal;overflow-wrap:anywhere}
+#simVisual:has(.so-stage) .so-current{outline:2px solid #e7b75d;outline-offset:1px;background:#fff8e8}
+@media(max-width:1000px){#simVisual:has(.so-stage) .observation{grid-template-columns:1fr}}
+@media(max-width:600px){
+ #simVisual .so-stage .node{width:116px}#simVisual .so-stage .node-icon{width:68px;height:57px}#simVisual .so-stage .node-icon svg{width:62px;height:50px}
+ #simVisual .so-stage[data-so-layout="chain3"]{height:530px}#simVisual .so-stage[data-so-layout="chain3"] #r1{left:50%;top:21%}#simVisual .so-stage[data-so-layout="chain3"] #r2{left:50%;top:52%}#simVisual .so-stage[data-so-layout="chain3"] #r3{left:50%;top:83%}
+ #simVisual .so-stage[data-so-layout="nat"]{height:550px}#simVisual .so-stage[data-so-layout="nat"] #r1{left:25%;top:21%}#simVisual .so-stage[data-so-layout="nat"] #r4{left:75%;top:21%}#simVisual .so-stage[data-so-layout="nat"] #r2{left:50%;top:52%}#simVisual .so-stage[data-so-layout="nat"] #r3{left:50%;top:83%}
+ #simVisual .so-stage[data-so-layout="chain5"]{height:570px}#simVisual .so-stage[data-so-layout="chain5"] #r1{left:25%;top:20%}#simVisual .so-stage[data-so-layout="chain5"] #r2{left:75%;top:20%}#simVisual .so-stage[data-so-layout="chain5"] #r3{left:75%;top:50%}#simVisual .so-stage[data-so-layout="chain5"] #r4{left:25%;top:50%}#simVisual .so-stage[data-so-layout="chain5"] #r5{left:25%;top:81%}
+ #simVisual .so-stage[data-so-layout="observe"]{height:465px}#simVisual .so-stage[data-so-layout="observe"] #nodeR1{left:50%;top:23%}#simVisual .so-stage[data-so-layout="observe"] #nodeR2{left:25%;top:73%}#simVisual .so-stage[data-so-layout="observe"] #nodeNMS{left:75%;top:73%}
+ #simVisual .so-stage[data-so-layout="automation"]{height:610px}#simVisual .so-stage[data-so-layout="automation"] .node{width:104px}#simVisual .so-stage[data-so-layout="automation"] #nodeNMS{left:23%;top:50%}#simVisual .so-stage[data-so-layout="automation"] #nodeR1{left:76%;top:19%}#simVisual .so-stage[data-so-layout="automation"] #nodeR2{left:76%;top:50%}#simVisual .so-stage[data-so-layout="automation"] #nodeR3{left:76%;top:81%}
+ #simVisual .so-stage .cp{margin-top:0;margin-left:28px;font-size:.62rem}
+ #simVisual .so-stage[data-so-layout="nat"] .cp{margin-left:14px}#simVisual .so-stage[data-so-layout="chain5"] .cp{margin-left:0;margin-top:-19px}
+ #simVisual:has(.so-stage) .topology{padding:10px}#simVisual:has(.so-stage) .observation-side{padding:12px}
+}

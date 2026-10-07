@@ -35,6 +35,57 @@ function applyState(s){
   el('states').innerHTML=stateRow('Baseline Filter','TARGET only','')+stateRow('필터 제거','EXTRA 등장','warn')+stateRow('필터 재적용','EXTRA Withdrawal','ok')+stateRow('TARGET','계속 유지','ok');return;
  }
 }
-const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;clearTopo();},show(){applyState(lessons[index].state);},recover:null,compare:null};
+// Display names follow the current Concept Guide; immutable lesson/evidence data remains above.
+const presentation={
+ names:{R1:'Router A',R2:'Router B',R3:'Router C',R4:'Router D'},
+ labels:{'Baseline':'기본 상태','Recovery':'복구','Candidate':'후보 경로','Control Plane':'제어 영역','TARGET only':'TARGET만 허용','TARGET-only outbound filter':'TARGET만 허용하는 outbound filter','TARGET 동일':'목적지 Prefix 동일','explicit next-hop-self':'명시적 next-hop-self'},
+ lessons:[
+  {title:'같은 AS의 두 Router는 어떤 관계일까요?',brief:'학습 페이지의 AS 구분을 적용합니다. Router A·D와 Router B·C의 AS 번호를 비교하세요.',hints:['케이블 모양이 아니라 양 끝 장비의 AS 번호를 보세요.','eBGP와 iBGP는 서로 다른 AS인지, 같은 AS인지로 구분합니다.','Router A와 Router D는 모두 AS 65001에 속합니다.']},
+  {title:'선호도가 같다면 어떤 후보를 선택할까요?',brief:'같은 목적지 Prefix의 두 후보를 비교합니다. 이번 검증에서는 Weight와 LOCAL_PREF 등 선행 조건을 같게 통제했습니다.',hints:['두 후보는 같은 203.0.113.1/32에 대한 경로입니다.','LOCAL_PREF는 모두 100입니다. AS_PATH를 비교하세요.','AS_PATH의 반복된 AS 번호는 실제 Router 대수를 뜻하지 않습니다.']},
+  {title:'선호 정책을 바꾸면 더 긴 경로도 선택될까요?',brief:'학습 페이지의 Router B → Router C 전환을 관찰합니다. LOCAL_PREF 변경, RIB 반영, 정책 제거 후 복구를 구분하세요.',hints:['Router C의 AS_PATH는 정책을 바꿔도 그대로입니다.','바뀌는 값은 Router C 후보의 LOCAL_PREF 100 → 200입니다.','이번 Cisco 비교에서는 LOCAL_PREF가 AS_PATH보다 먼저 고려됐습니다.']},
+  {title:'같은 AS 내부에는 어떤 속성이 전달될까요?',brief:'선택한 경로를 Router D에 광고합니다. AS_PATH와 LOCAL_PREF 전달, 명시적 next-hop-self 설정을 따로 확인하세요.',hints:['Router A와 Router D는 같은 AS입니다.','iBGP 광고 자체가 자신의 AS를 AS_PATH에 추가하는지 생각해 보세요.','NEXT_HOP은 이번 실습에 명시한 next-hop-self 설정과 연결해 보세요.']},
+  {title:'광고 필터를 제거하면 어떤 경로가 보일까요?',brief:'경로 선택과 경로 광고는 다른 판단입니다. Router B가 보유한 두 Prefix 중 Router A에 보이는 범위의 변화를 관찰하세요.',hints:['Router B 자체에는 TARGET과 EXTRA가 모두 있습니다.','Prefix Filter는 데이터 Packet이 아니라 광고할 Route를 고릅니다.','필터를 제거한 장면과 다시 적용한 장면을 비교하세요.']}
+ ]
+};
+function bgpRows(rows){el('states').innerHTML=rows.map(r=>stateRow(...r)).join('');}
+function bgpClear(){clearTopo();el('labelR2').textContent='관찰 대기';el('labelR3').textContent='관찰 대기';el('labelR4').textContent='관찰 대기';el('routeCandidates').replaceChildren();el('states').replaceChildren();}
+function bgpMark(ids,cls='active'){ids.forEach(id=>el(id).classList.add(cls));}
+function candidateHtml(name,path,lp,status,cls=''){return '<article class="route-candidate '+cls+'"><h3>'+name+' 후보</h3><p>Prefix · 203.0.113.1/32</p><p>AS_PATH · '+path+'</p><p>LOCAL_PREF · '+lp+'</p><p class="route-status">'+status+'</p></article>';}
+function candidates(lp=100,selected=''){el('routeCandidates').innerHTML=candidateHtml('Router B','65002',100,selected==='B'?'Best Path로 선택':'후보 경로',selected==='B'?'is-selected':'')+candidateHtml('Router C','65003 65003 65003',lp,selected==='C'?'Best Path로 선택':'후보 경로',selected==='C'?'is-selected':lp===200?'is-focus':'');el('labelR2').textContent='eBGP';el('labelR3').textContent='eBGP';}
+function bgpScene(rows,ids=[],cls='active',lp=null,chosen=''){bgpClear();if(lp!==null)candidates(lp,chosen);bgpMark(ids,cls);bgpRows(rows);}
+function bgpEvent(title,detail,kind,duration,action){return {title,detail,kind,duration,action:()=>{action();el('simVisual').dataset.reveal='events';}};}
+function bgpPlan(i){const state=lessons[i].state;
+ if(state==='session')return [
+  bgpEvent('AS 번호 비교','Router A·D는 AS 65001, Router B는 AS 65002, Router C는 AS 65003입니다.','조건',1800,()=>bgpScene([['Router A · Router D','AS 65001'],['Router B · Router C','AS 65002 · AS 65003']],['nodeR1','nodeR4'])),
+  bgpEvent('외부 AS와의 관계','Router A–B와 Router A–C는 서로 다른 AS를 연결하는 eBGP 관계입니다.','AS 비교',1800,()=>{bgpScene([['Router A ↔ Router B','eBGP','ok'],['Router A ↔ Router C','eBGP','ok']],['nodeR1','nodeR2','nodeR3','linkR2','linkR3']);el('labelR2').textContent='eBGP';el('labelR3').textContent='eBGP';}),
+  bgpEvent('같은 AS 내부의 관계','Router A와 Router D는 같은 AS 65001의 iBGP 관계입니다. 케이블 종류로 구분하지 않습니다.','AS 비교',1800,()=>{bgpScene([['Router A ↔ Router D','같은 AS 65001 → iBGP','ok']],['nodeR1','nodeR4','linkR4']);el('labelR4').textContent='iBGP';}),
+  bgpEvent('기존 검증 결과 대조','세 BGP Session은 Established였고 내부 링크에서 TCP/179 BGP 메시지가 확인됐습니다.','관찰 결과',1650,()=>{applyState('session');el('labelR2').textContent='eBGP';el('labelR3').textContent='eBGP';el('labelR4').textContent='iBGP';})
+ ];
+ if(state==='baseline')return [
+  bgpEvent('같은 Prefix의 두 후보','Router B와 Router C가 알린 203.0.113.1/32 후보를 함께 비교합니다.','후보',1800,()=>bgpScene([['목적지 Prefix','203.0.113.1/32'],['후보 수','Router B · Router C']],['nodeR2','nodeR3'],'active',100)),
+  bgpEvent('선행 조건과 AS_PATH 비교','이번 검증은 Weight 0, LOCAL_PREF 100 등 선행 조건이 같습니다. Router B의 AS_PATH는 65002 한 항목입니다.','판단',2100,()=>bgpScene([['Weight','0 / 0'],['LOCAL_PREF','100 / 100'],['AS_PATH','65002 / 65003 65003 65003']],['nodeR1'],'active',100)),
+  bgpEvent('Best Path와 RIB 반영','통제된 비교 결과 Router B가 선택됐고 RIB Next Hop은 10.0.12.2입니다.','선택',1650,()=>bgpScene([['Best Path','Router B','ok'],['RIB Next Hop','10.0.12.2','ok']],['nodeR1','nodeR2','linkR2'],'best',100,'B')),
+  bgpEvent('실제 전달 근거 확인','기존 marker 411 Ping은 Router A–B 링크에서만 Request/Reply 각각 3개가 관측됐습니다. 전체 BGP 선택 순서의 검증은 아닙니다.','관찰 결과',2100,()=>bgpScene([['관측 링크','Router A ↔ Router B','ok'],['기존 Ping','3/3','ok'],['반대 후보 링크','같은 marker 0']],['nodeR1','nodeR2','linkR2'],'best',100,'B'))
+ ];
+ if(state==='policy')return [
+  bgpEvent('변경 전 후보 확인','두 LOCAL_PREF가 모두 100인 기본 상태에서는 Router B를 선택했습니다.','변경 전',1650,()=>bgpScene([['기본 LOCAL_PREF','100 / 100'],['기본 Best Path','Router B']],['nodeR1','nodeR2','linkR2'],'best',100,'B')),
+  bgpEvent('Router C의 LOCAL_PREF 변경','inbound route-map으로 TARGET 후보의 LOCAL_PREF만 200으로 올립니다. AS_PATH는 바뀌지 않습니다.','정책',2100,()=>bgpScene([['Router B LOCAL_PREF','100 유지'],['Router C LOCAL_PREF','100 → 200','warn'],['Router C AS_PATH','65003 65003 65003 유지']],['nodeR3'],'policy',200)),
+  bgpEvent('선택과 전달 경로 전환','Router C가 Best Path가 되며 RIB Next Hop은 10.0.13.2입니다. 기존 marker 421 Ping은 해당 링크에서 3/3이었습니다.','선택',2100,()=>bgpScene([['Best Path','Router C','ok'],['RIB Next Hop','10.0.13.2','ok'],['기존 Ping','Router A–C에서 3/3','ok']],['nodeR1','nodeR3','linkR3'],'policy',200,'C')),
+  bgpEvent('정책 제거 후 복구','기존 검증에서 정책 제거 후 LOCAL_PREF 100과 Router B Best로 돌아왔습니다. marker 431/441도 Router A–B에서 관측됐습니다.','복구',2100,()=>bgpScene([['LOCAL_PREF','100 / 100 복구'],['Best Path','Router B 복구','ok'],['RIB Next Hop','10.0.12.2','ok']],['nodeR1','nodeR2','linkR2'],'best',100,'B'))
+ ];
+ if(state==='ibgp')return [
+  bgpEvent('광고할 선택 경로 확인','Router A가 선택한 Router C 경로의 AS_PATH와 LOCAL_PREF를 확인합니다.','조건',1800,()=>bgpScene([['선택 경로','Router C'],['AS_PATH','65003 65003 65003'],['LOCAL_PREF','200']],['nodeR1','nodeR3','linkR3'],'policy',200,'C')),
+  bgpEvent('같은 AS로 속성 전달','Router D의 AS_PATH에는 AS 65001이 새로 추가되지 않았고 LOCAL_PREF 200이 전달됐습니다.','iBGP 광고',2100,()=>{bgpScene([['Router D AS_PATH','65003 65003 65003','ok'],['Router D LOCAL_PREF','200','ok']],['nodeR1','nodeR4','linkR4']);el('labelR4').textContent='iBGP';}),
+  bgpEvent('명시적 next-hop-self 적용 결과','Router A→D에 설정한 next-hop-self 때문에 Router D의 NEXT_HOP은 Router A 주소 10.0.14.1입니다.','속성 확인',2100,()=>{bgpScene([['Router D NEXT_HOP','10.0.14.1','ok'],['설정 근거','Router A → D next-hop-self'],['주의','iBGP의 자동 공통 동작으로 일반화하지 않음']],['nodeR1','nodeR4','linkR4']);el('labelR4').textContent='iBGP';}),
+  bgpEvent('수신한 속성 조합 확인','기존 UPDATE에서 긴 AS_PATH, LOCAL_PREF 200, NEXT_HOP 10.0.14.1의 조합을 함께 확인했습니다.','관찰 결과',1800,()=>{applyState('ibgp');el('labelR2').textContent='eBGP';el('labelR3').textContent='eBGP';el('labelR4').textContent='iBGP';})
+ ];
+ return [
+  bgpEvent('보유 경로와 광고 경로 구분','Router B는 TARGET과 EXTRA를 모두 보유하지만 기본 필터는 TARGET만 광고합니다.','변경 전',2100,()=>{bgpScene([['Router B 보유','TARGET · EXTRA'],['Router A 수신','TARGET만'],['광고 정책','TARGET만 허용']],['nodeR2','nodeR1']);el('labelR2').textContent='eBGP';}),
+  bgpEvent('outbound Prefix Filter 제거','광고 허용 범위를 바꾸고 outbound Update를 다시 보냅니다. 데이터 Packet ACL 변경과는 다릅니다.','정책',1800,()=>bgpScene([['변경 지점','Router B outbound Prefix Filter'],['처리 대상','BGP Route Advertisement']],['nodeR2'],'policy')),
+  bgpEvent('EXTRA 경로 광고와 수신','EXTRA 198.51.100.2/32가 Router A와 Router D에 나타났습니다. TARGET도 유지됩니다.','광고',2100,()=>{bgpScene([['EXTRA 198.51.100.2/32','Router A · Router D에 등장','ok'],['TARGET 203.0.113.1/32','유지','ok']],['nodeR1','nodeR2','nodeR4','linkR2','linkR4']);el('labelR2').textContent='eBGP';el('labelR4').textContent='iBGP';}),
+  bgpEvent('필터 재적용 후 철회','필터를 다시 적용하자 EXTRA Withdrawal이 확인됐습니다. TARGET과 Router B Best는 유지됐습니다.','복구',2100,()=>{bgpScene([['EXTRA','Withdrawal → 경로에서 제거','ok'],['TARGET','유지','ok'],['Best Path','Router B 유지','ok']],['nodeR1','nodeR2','linkR2'],'best');el('labelR2').textContent='eBGP';})
+ ];
+}
+const adapter={raw:lessons,kind:'state',presentation,buildPlan:bgpPlan,reset(i){index=i;recovered=false;bgpClear();},show(){applyState(lessons[index].state);},recover:null,compare:null};
 NetworkSimulator.mount(adapter);
 })();

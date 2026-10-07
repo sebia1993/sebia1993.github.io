@@ -167,5 +167,404 @@ function applyStep(){
     $('nextStepBtn').disabled=stepIndex===s.steps.length-1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;clearTopology();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+
+// Presentation follows the current Concept Guide; raw evidence above is unchanged.
+adapter.presentation = {
+  "names": {
+    "PC10A": "PC A",
+    "PC10B": "PC B",
+    "PC20A": "PC C",
+    "PC20B": "PC D",
+    "SW1": "Switch A"
+  },
+  "lessons": [
+    {
+      "title": "같은 VLAN의 PC B에는 누구의 MAC으로 보낼까요?",
+      "brief": "학습 페이지의 같은 VLAN 10 경로입니다. 목적지 10.10.10.20이 같은 /24에 속하는지 판단합니다.",
+      "hints": [
+        "단말은 먼저 목적지가 같은 Subnet인지 판단합니다.",
+        "IP 목적지와 첫 Ethernet Destination을 구분하세요."
+      ]
+    },
+    {
+      "title": "다른 VLAN의 PC C에는 어떤 프레임으로 보낼까요?",
+      "brief": "학습 페이지의 VLAN 10 → VLAN 20 경로입니다. 첫 MAC 목적지와 최종 IP 목적지, Routing 전후 TTL을 비교합니다.",
+      "hints": [
+        "Gateway가 다음 전달 대상이라고 최종 IP 목적지가 바뀌는 것은 아닙니다.",
+        "Routing 뒤 다음 구간에 맞게 Ethernet Header가 다시 만들어집니다."
+      ]
+    },
+    {
+      "title": "PC C의 응답은 어느 Gateway로 갈까요?",
+      "brief": "응답 단말도 자신의 /24와 Gateway를 기준으로 독립적으로 판단합니다.",
+      "hints": [
+        "요청 단말의 Gateway 설정을 응답 단말에 그대로 적용하지 않습니다.",
+        "PC C의 현재 VLAN과 Gateway 주소를 확인하세요."
+      ]
+    },
+    {
+      "title": "SVI가 내려가면 같은 VLAN 통신도 끊길까요?",
+      "brief": "Vlan20 SVI만 shutdown한 조건입니다. VLAN 20 내부 L2 전달과 VLAN 사이 L3 전달을 구분합니다.",
+      "hints": [
+        "단말의 L2 포트가 내려간 상황은 아닙니다.",
+        "SVI 상태와 Connected Route의 관계를 보세요."
+      ]
+    },
+    {
+      "title": "Gateway가 틀리면 어떤 통신이 실패할까요?",
+      "brief": "PC A의 Gateway만 존재하지 않는 10.10.10.254로 변경했습니다. 같은 VLAN과 다른 VLAN을 비교합니다.",
+      "hints": [
+        "같은 Subnet의 단말에는 Gateway를 사용하지 않습니다.",
+        "다른 Subnet의 Echo를 만들기 전 어느 MAC을 알아야 할까요?"
+      ]
+    }
+  ],
+  "labels": {
+    "SUCCESS": "성공",
+    "BEFORE": "통과 전",
+    "AFTER": "통과 후",
+    "EXPIRE": "TTL 만료",
+    "REQUEST": "요청",
+    "FORWARD": "전달",
+    "REPLY": "응답",
+    "ROUTER": "Router 판단",
+    "PROBE": "Probe 전송",
+    "NO ROUTE": "Route 없음",
+    "DESTINATION": "목적지 응답",
+    "INTERPRET": "결과 해석",
+    "ACCESS IN": "Access 유입",
+    "ACCESS OUT": "Access 송출",
+    "BROADCAST": "Broadcast",
+    "SEPARATION": "VLAN 분리",
+    "POSITIVE CONTROL": "정상 대조 확인",
+    "COMPARE": "비교",
+    "FAILURE": "장애 조건",
+    "STOP": "전달 중단",
+    "CONTROL": "정상 대조",
+    "RECOVERY": "복구 확인",
+    "MISMATCH": "설정 불일치",
+    "RETURN DECISION": "응답 경로 판단",
+    "REPLY INGRESS": "응답 유입",
+    "ROUTE BACK": "응답 경로 조회",
+    "REPLY EGRESS": "응답 송출",
+    "REMOTE TRY": "다른 VLAN 통신 시도",
+    "ACTUAL ERROR": "관찰된 오류 응답",
+    "L2 CONTROL": "L2 정상 대조",
+    "LOCAL CONTROL": "동일 VLAN 정상 대조",
+    "REMOTE DECISION": "다른 Subnet 판단",
+    "ARP FAIL": "ARP 실패",
+    "NO ECHO": "Echo 미생성",
+    "CLIENT APPLY": "단말 설정 적용",
+    "BOUNDARY": "검증 범위",
+    "POOL SELECT": "Pool 선택",
+    "FINAL DELIVERY": "단말로 전달",
+    "SERVER DOWN": "서버 서비스 중지",
+    "NO OFFER": "Offer 없음",
+    "RELAY MISSING": "Relay 설정 없음",
+    "DORA SUCCESS": "DORA 완료",
+    "ARP STOP": "ARP 단계 중단",
+    "CLIENT QUERY": "단말 Query",
+    "IP TRAFFIC": "IP 통신",
+    "CLIENT LEG": "단말 조회 구간",
+    "UPSTREAM LEG": "Upstream 조회 구간",
+    "AUTHORITY ANSWER": "Authoritative 응답",
+    "CACHE FILL": "Cache 저장",
+    "NO UPSTREAM": "새 Upstream Query 없음",
+    "SERVICE DOWN": "서비스 중지",
+    "SERVICE RECOVERY": "서비스 복구",
+    "WRONG DNS": "잘못된 DNS 주소",
+    "CLIENT RECOVERY": "단말 설정 복구",
+    "NOT TIMEOUT": "응답 수신 확인",
+    "RECORD RECOVERY": "Record 복구",
+    "First Query": "첫 번째 Query",
+    "Second Query": "두 번째 Query",
+    "Failure": "장애 조건",
+    "Recovery": "복구 확인",
+    "Query sent": "Query 전송",
+    "Resolved": "이름 해석 완료",
+    "Resolution 완료": "이름 해석 완료",
+    "Client transaction": "단말 조회",
+    "Upstream transaction": "Upstream 조회",
+    "Scope boundary": "검증 범위",
+    "Cache populated": "Cache 저장 완료",
+    "Answered at R2": "R2에서 응답",
+    "Cannot resolve": "이름 해석 실패",
+    "Query never reaches R2": "R2까지 Query 도달 안 됨",
+    "Query reaches authority": "Authoritative DNS까지 Query 도달",
+    "Error response received": "오류 응답 수신",
+    "Address assigned": "주소 확정",
+    "Lease + Options": "Lease와 Option",
+    "Client configured": "단말 설정 적용",
+    "Local Discover": "단말망 Discover",
+    "Relayed Discover": "Relay가 전달한 Discover",
+    "Offer selected": "Offer 선택",
+    "Lease complete": "Lease 완료",
+    "Discover reaches server segment": "서버 구간까지 Discover 도달",
+    "Local Discover only": "단말망에만 Discover 존재",
+    "Server reply 없음": "서버 응답 없음",
+    "Reply to Relay": "Relay로 응답",
+    "Client Edge": "단말 접속 구간",
+    "Client VLAN": "단말 VLAN",
+    "Routed Transit": "Router 연결 구간",
+    "Learning Topology": "학습 토폴로지",
+    "Connectivity State": "통신 상태",
+    "DHCP State": "DHCP 상태",
+    "Name Resolution": "이름 해석",
+    "IP Reachability": "IP 도달 여부",
+    "Host A": "단말",
+    "Host B": "단말",
+    "SIDE": "측",
+    "ACCESS": "Access",
+    "UNTAGGED": "Untagged",
+    "TAG": "Tag",
+    "NATIVE": "Native",
+    "NOT ALLOWED": "허용 안 됨",
+    "PORT": "Port",
+    "Logical Stop": "논리적 전달 중단",
+    "Access / Idle": "Access / 대기",
+    "Packet Stop": "전달 중단",
+    "No Response / Stop": "응답 없음 / 중단",
+    "Resolved IP Traffic": "조회한 IP로 통신",
+    "QUERY TO AUTHORITY": "Authoritative DNS로 Query",
+    "NXDOMAIN RESPONSE": "NXDOMAIN 응답",
+    "DNS RESPONSE": "DNS 응답",
+    "ACK ADDRESS": "ACK 주소",
+    "ACK OPTIONS": "ACK Option",
+    "CLIENT BROADCAST": "단말 Broadcast",
+    "NO DNS ANSWER": "DNS 응답 없음",
+    "RECOVERED": "복구 완료",
+    "OPTIONS": "Option 확인",
+    "DNS .2 RESTORED": "DNS .2 복구",
+    "A .10 RESTORED": "A .10 복구",
+    "CURRENT": "현재",
+    "Baseline": "기준 상태",
+    "Actual": "실제 관찰",
+    "Expected": "예상 결과",
+    "Scenario": "문제 조건",
+    "Run": "검증 실행",
+    "Forwarding 판단": "Forwarding 판단"
+  }
+};
+PacketLabPresentation.attach(adapter, {
+  "desktop": ".ivr-topology",
+  "height": 510,
+  "note": "VLAN 10 단말은 위쪽, VLAN 20 단말은 아래쪽입니다. Switch A의 SVI는 Vlan10 10.10.10.1, Vlan20 10.10.20.1입니다. L2 전달과 SVI Routing을 구분합니다.",
+  "nodes": [
+    {
+      "id": "pc10a",
+      "name": "PC A",
+      "type": "pc",
+      "x": 80,
+      "y": 65,
+      "detail": "10.10.10.10"
+    },
+    {
+      "id": "pc10b",
+      "name": "PC B",
+      "type": "pc",
+      "x": 240,
+      "y": 65,
+      "detail": "10.10.10.20"
+    },
+    {
+      "id": "sw1",
+      "name": "Switch A",
+      "type": "switch",
+      "x": 160,
+      "y": 255,
+      "detail": "SVI · L2 / L3"
+    },
+    {
+      "id": "pc20a",
+      "name": "PC C",
+      "type": "pc",
+      "x": 80,
+      "y": 435,
+      "detail": "10.10.20.10"
+    },
+    {
+      "id": "pc20b",
+      "name": "PC D",
+      "type": "pc",
+      "x": 240,
+      "y": 435,
+      "detail": "10.10.20.20"
+    }
+  ],
+  "edges": [
+    [
+      "pc10a",
+      "sw1",
+      "link10"
+    ],
+    [
+      "pc10b",
+      "sw1",
+      "link10"
+    ],
+    [
+      "sw1",
+      "pc20a",
+      "link20"
+    ],
+    [
+      "sw1",
+      "pc20b",
+      "link20"
+    ]
+  ],
+  "steps": {
+    "same-vlan": [
+      {
+        "path": [],
+        "caption": "같은 /24 · PC B를 Next-Hop으로 선택"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "pc10b"
+        ],
+        "caption": "VLAN 10에서 PC B의 MAC 확인"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "pc10b"
+        ],
+        "caption": "L2 전달 · TTL 64 유지"
+      }
+    ],
+    "remote-forward": [
+      {
+        "path": [],
+        "caption": "다른 /24 · Gateway 10.10.10.1 선택"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1"
+        ],
+        "caption": "Gateway MAC 확인"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1"
+        ],
+        "caption": "IP 목적지 PC C · MAC 목적지 Gateway · TTL 64"
+      },
+      {
+        "path": [],
+        "caption": "Connected Route 선택 · TTL 64 → 63"
+      },
+      {
+        "path": [
+          "sw1",
+          "pc20a"
+        ],
+        "caption": "새 Ethernet Header · MAC 목적지 PC C · TTL 63"
+      }
+    ],
+    "reply": [
+      {
+        "path": [],
+        "caption": "PC C가 자신의 Gateway 10.10.20.1 선택"
+      },
+      {
+        "path": [
+          "pc20a",
+          "sw1"
+        ],
+        "caption": "Reply 유입 · TTL 64",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "VLAN 10 경로 조회 · TTL 64 → 63"
+      },
+      {
+        "path": [
+          "sw1",
+          "pc10a"
+        ],
+        "caption": "Reply 송출 · MAC 목적지 PC A",
+        "reply": true
+      }
+    ],
+    "svi-down": [
+      {
+        "path": [],
+        "caption": "Vlan20 SVI Down · Connected Route 제거",
+        "stop": true
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1"
+        ],
+        "caption": "Gateway까지 도달 · VLAN 20 전달 중단",
+        "stop": true
+      },
+      {
+        "path": [
+          "sw1",
+          "pc10a"
+        ],
+        "caption": "이번 IOL 관찰 · ICMP Type 3 Code 1",
+        "reply": true
+      },
+      {
+        "path": [
+          "pc20a",
+          "sw1",
+          "pc20b"
+        ],
+        "caption": "VLAN 20 L2 통신은 유지 · TTL 64"
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "pc20a"
+        ],
+        "caption": "SVI 복구 후 안정화 확인 · Inter-VLAN 정상"
+      }
+    ],
+    "wrong-gateway": [
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "pc10b"
+        ],
+        "caption": "같은 VLAN 통신 · Gateway 미사용"
+      },
+      {
+        "path": [],
+        "caption": "다른 Subnet · 잘못된 Gateway .254 선택"
+      },
+      {
+        "path": [],
+        "caption": "ARP .254 무응답 · MAC 확인 실패",
+        "stop": true
+      },
+      {
+        "path": [],
+        "caption": "Remote Echo 프레임 미생성",
+        "stop": true
+      },
+      {
+        "path": [
+          "pc10a",
+          "sw1",
+          "pc20a"
+        ],
+        "caption": "Gateway .1 복구 후 Inter-VLAN 정상"
+      }
+    ]
+  }
+});
 NetworkSimulator.mount(adapter);
 })();

@@ -138,5 +138,401 @@ function applyStep(){
     $('stepCount').textContent=(stepIndex+1)+' / '+s.steps.length;$('prevStepBtn').disabled=stepIndex===0;$('nextStepBtn').disabled=stepIndex===s.steps.length-1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;resetVisual();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+
+// Presentation follows the current Concept Guide; raw evidence above is unchanged.
+adapter.presentation = {
+  "names": {
+    "PC1": "PC A",
+    "SW1": "Switch A",
+    "R1": "Router A",
+    "R2": "Router B"
+  },
+  "lessons": [
+    {
+      "title": "주소는 어떤 순서로 확정될까요?",
+      "brief": "학습 페이지의 DORA 흐름입니다. PC A가 찾고, 서버가 제안하고, 요청과 확정이 이어지는 방향을 관찰합니다.",
+      "hints": [
+        "제안을 받은 단계와 최종 확정 단계를 구분하세요.",
+        "각 메시지의 송신자가 단말인지 서버인지 보세요."
+      ]
+    },
+    {
+      "title": "ACK에는 IP 주소 외에 무엇이 들어갈까요?",
+      "brief": "학습 페이지에서 받은 설정 묶음을 필드별로 확인합니다. 주소 할당과 실제 서비스 동작은 별도로 판단합니다.",
+      "hints": [
+        "Mask·Gateway·DNS·Lease 값을 각각 확인하세요.",
+        "DNS 주소를 받았다는 것만으로 DNS 서버가 응답한다고 단정할 수는 없습니다."
+      ]
+    },
+    {
+      "title": "Relay는 서버에 단말망을 어떻게 알릴까요?",
+      "brief": "학습 페이지의 선택 자료에 있는 giaddr를 비교합니다. 단말 구간과 Router A → Router B 구간을 나눠 봅니다.",
+      "hints": [
+        "서버는 원격 단말이 어느 Subnet에 있는지 알아야 합니다.",
+        "giaddr와 단말에 알려주는 Option 3은 목적이 다릅니다."
+      ]
+    },
+    {
+      "title": "주소를 못 받으면 Discover가 어디까지 갔을까요?",
+      "brief": "서버 서비스 중지와 Relay 설정 누락을 비교합니다. CP1·CP2·CP3은 기존 검증의 관찰 위치입니다.",
+      "hints": [
+        "Offer가 없더라도 Discover의 마지막 위치는 다를 수 있습니다.",
+        "Router A가 단말 Broadcast를 서버로 전달했는지 확인하세요."
+      ]
+    },
+    {
+      "title": "주소는 받았는데 다른 네트워크에 못 가는 이유는?",
+      "brief": "Option 3만 실제로 없는 192.0.2.254로 설정했습니다. DHCP 완료와 이후 Gateway 사용을 따로 관찰합니다.",
+      "hints": [
+        "DORA가 성공했는지 먼저 확인하세요.",
+        "다른 네트워크로 보낼 때 단말이 어떤 주소를 ARP하는지 보세요."
+      ]
+    }
+  ],
+  "labels": {
+    "SUCCESS": "성공",
+    "BEFORE": "통과 전",
+    "AFTER": "통과 후",
+    "EXPIRE": "TTL 만료",
+    "REQUEST": "요청",
+    "FORWARD": "전달",
+    "REPLY": "응답",
+    "ROUTER": "Router 판단",
+    "PROBE": "Probe 전송",
+    "NO ROUTE": "Route 없음",
+    "DESTINATION": "목적지 응답",
+    "INTERPRET": "결과 해석",
+    "ACCESS IN": "Access 유입",
+    "ACCESS OUT": "Access 송출",
+    "BROADCAST": "Broadcast",
+    "SEPARATION": "VLAN 분리",
+    "POSITIVE CONTROL": "정상 대조 확인",
+    "COMPARE": "비교",
+    "FAILURE": "장애 조건",
+    "STOP": "전달 중단",
+    "CONTROL": "정상 대조",
+    "RECOVERY": "복구 확인",
+    "MISMATCH": "설정 불일치",
+    "RETURN DECISION": "응답 경로 판단",
+    "REPLY INGRESS": "응답 유입",
+    "ROUTE BACK": "응답 경로 조회",
+    "REPLY EGRESS": "응답 송출",
+    "REMOTE TRY": "다른 VLAN 통신 시도",
+    "ACTUAL ERROR": "관찰된 오류 응답",
+    "L2 CONTROL": "L2 정상 대조",
+    "LOCAL CONTROL": "동일 VLAN 정상 대조",
+    "REMOTE DECISION": "다른 Subnet 판단",
+    "ARP FAIL": "ARP 실패",
+    "NO ECHO": "Echo 미생성",
+    "CLIENT APPLY": "단말 설정 적용",
+    "BOUNDARY": "검증 범위",
+    "POOL SELECT": "Pool 선택",
+    "FINAL DELIVERY": "단말로 전달",
+    "SERVER DOWN": "서버 서비스 중지",
+    "NO OFFER": "Offer 없음",
+    "RELAY MISSING": "Relay 설정 없음",
+    "DORA SUCCESS": "DORA 완료",
+    "ARP STOP": "ARP 단계 중단",
+    "CLIENT QUERY": "단말 Query",
+    "IP TRAFFIC": "IP 통신",
+    "CLIENT LEG": "단말 조회 구간",
+    "UPSTREAM LEG": "Upstream 조회 구간",
+    "AUTHORITY ANSWER": "Authoritative 응답",
+    "CACHE FILL": "Cache 저장",
+    "NO UPSTREAM": "새 Upstream Query 없음",
+    "SERVICE DOWN": "서비스 중지",
+    "SERVICE RECOVERY": "서비스 복구",
+    "WRONG DNS": "잘못된 DNS 주소",
+    "CLIENT RECOVERY": "단말 설정 복구",
+    "NOT TIMEOUT": "응답 수신 확인",
+    "RECORD RECOVERY": "Record 복구",
+    "First Query": "첫 번째 Query",
+    "Second Query": "두 번째 Query",
+    "Failure": "장애 조건",
+    "Recovery": "복구 확인",
+    "Query sent": "Query 전송",
+    "Resolved": "이름 해석 완료",
+    "Resolution 완료": "이름 해석 완료",
+    "Client transaction": "단말 조회",
+    "Upstream transaction": "Upstream 조회",
+    "Scope boundary": "검증 범위",
+    "Cache populated": "Cache 저장 완료",
+    "Answered at R2": "R2에서 응답",
+    "Cannot resolve": "이름 해석 실패",
+    "Query never reaches R2": "R2까지 Query 도달 안 됨",
+    "Query reaches authority": "Authoritative DNS까지 Query 도달",
+    "Error response received": "오류 응답 수신",
+    "Address assigned": "주소 확정",
+    "Lease + Options": "Lease와 Option",
+    "Client configured": "단말 설정 적용",
+    "Local Discover": "단말망 Discover",
+    "Relayed Discover": "Relay가 전달한 Discover",
+    "Offer selected": "Offer 선택",
+    "Lease complete": "Lease 완료",
+    "Discover reaches server segment": "서버 구간까지 Discover 도달",
+    "Local Discover only": "단말망에만 Discover 존재",
+    "Server reply 없음": "서버 응답 없음",
+    "Reply to Relay": "Relay로 응답",
+    "Client Edge": "단말 접속 구간",
+    "Client VLAN": "단말 VLAN",
+    "Routed Transit": "Router 연결 구간",
+    "Learning Topology": "학습 토폴로지",
+    "Connectivity State": "통신 상태",
+    "DHCP State": "DHCP 상태",
+    "Name Resolution": "이름 해석",
+    "IP Reachability": "IP 도달 여부",
+    "Host A": "단말",
+    "Host B": "단말",
+    "SIDE": "측",
+    "ACCESS": "Access",
+    "UNTAGGED": "Untagged",
+    "TAG": "Tag",
+    "NATIVE": "Native",
+    "NOT ALLOWED": "허용 안 됨",
+    "PORT": "Port",
+    "Logical Stop": "논리적 전달 중단",
+    "Access / Idle": "Access / 대기",
+    "Packet Stop": "전달 중단",
+    "No Response / Stop": "응답 없음 / 중단",
+    "Resolved IP Traffic": "조회한 IP로 통신",
+    "QUERY TO AUTHORITY": "Authoritative DNS로 Query",
+    "NXDOMAIN RESPONSE": "NXDOMAIN 응답",
+    "DNS RESPONSE": "DNS 응답",
+    "ACK ADDRESS": "ACK 주소",
+    "ACK OPTIONS": "ACK Option",
+    "CLIENT BROADCAST": "단말 Broadcast",
+    "NO DNS ANSWER": "DNS 응답 없음",
+    "RECOVERED": "복구 완료",
+    "OPTIONS": "Option 확인",
+    "DNS .2 RESTORED": "DNS .2 복구",
+    "A .10 RESTORED": "A .10 복구",
+    "CURRENT": "현재",
+    "Baseline": "기준 상태",
+    "Actual": "실제 관찰",
+    "Expected": "예상 결과",
+    "Scenario": "문제 조건",
+    "Run": "검증 실행",
+    "Forwarding 판단": "Forwarding 판단"
+  }
+};
+adapter.presentation.guideDifferences = [
+  {
+    "name": "Switch A",
+    "reason": "학습 페이지의 요청 관계 그림에서 생략한 실제 단말 접속 스위치 SW1을 Switch A로 표시합니다. Relay 구간과 IP 구성은 같습니다."
+  }
+];
+PacketLabPresentation.attach(adapter, {
+  "desktop": ".topology-stage",
+  "height": 540,
+  "note": "학습 페이지의 PC A → Router A → Router B 관계에 실제 단말 접속 Switch A를 함께 표시했습니다.",
+  "nodes": [
+    {
+      "id": "pc1",
+      "name": "PC A",
+      "type": "pc",
+      "x": 160,
+      "y": 65,
+      "detail": "DHCP Client"
+    },
+    {
+      "id": "sw1",
+      "name": "Switch A",
+      "type": "switch",
+      "x": 160,
+      "y": 190,
+      "detail": "단말 VLAN 10"
+    },
+    {
+      "id": "r1",
+      "name": "Router A",
+      "type": "router",
+      "x": 160,
+      "y": 315,
+      "detail": "Relay · 192.0.2.1"
+    },
+    {
+      "id": "r2",
+      "name": "Router B",
+      "type": "router",
+      "x": 160,
+      "y": 460,
+      "detail": "DHCP Server · .2"
+    }
+  ],
+  "edges": [
+    [
+      "pc1",
+      "sw1",
+      "l1Svg"
+    ],
+    [
+      "sw1",
+      "r1",
+      "l2Svg"
+    ],
+    [
+      "r1",
+      "r2",
+      "l3Svg"
+    ]
+  ],
+  "steps": {
+    "dora": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1"
+        ],
+        "caption": "Discover · 단말 Broadcast"
+      },
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "Offer · 192.0.2.100 제안",
+        "reply": true
+      },
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "Request · 사용할 제안 요청"
+      },
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "ACK · Lease 확정",
+        "reply": true
+      }
+    ],
+    "options": [
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "ACK · yiaddr 192.0.2.100",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "Option 1 / 3 / 6 / 51 확인"
+      },
+      {
+        "path": [],
+        "caption": "PC A가 Address / Mask / Gateway 적용"
+      },
+      {
+        "path": [],
+        "caption": "DNS Option 전달만 검증 · 실제 DNS 응답은 범위 밖"
+      }
+    ],
+    "relay": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1"
+        ],
+        "caption": "단말 구간 · giaddr 0.0.0.0"
+      },
+      {
+        "path": [
+          "r1",
+          "r2"
+        ],
+        "caption": "Relay 구간 · giaddr 192.0.2.1"
+      },
+      {
+        "path": [
+          "r2",
+          "r1"
+        ],
+        "caption": "단말 Subnet의 Pool에서 .100 제안",
+        "reply": true
+      },
+      {
+        "path": [
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "단말로 Offer / ACK 전달",
+        "reply": true
+      }
+    ],
+    "no-lease": [
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1",
+          "r2"
+        ],
+        "caption": "서버 중지 · Discover는 CP3까지 도달"
+      },
+      {
+        "path": [],
+        "caption": "서버에서 Offer / ACK 없음",
+        "stop": true
+      },
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1"
+        ],
+        "caption": "Relay 누락 · 단말망에서 중단",
+        "stop": true
+      },
+      {
+        "path": [],
+        "caption": "각 설정 복구 후 신규 DORA와 Ping 확인"
+      }
+    ],
+    "wrong-router": [
+      {
+        "path": [
+          "r2",
+          "r1",
+          "sw1",
+          "pc1"
+        ],
+        "caption": "DORA 완료 · Option 3은 잘못된 .254",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "PC A가 Gateway .254 적용"
+      },
+      {
+        "path": [
+          "pc1",
+          "sw1",
+          "r1"
+        ],
+        "caption": "단말망 ARP .254 · Reply 없음",
+        "stop": true
+      },
+      {
+        "path": [],
+        "caption": "Option 3 복구 · 신규 DORA 후 Remote Ping 정상"
+      }
+    ]
+  }
+});
 NetworkSimulator.mount(adapter);
 })();

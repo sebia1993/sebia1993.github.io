@@ -1,0 +1,9 @@
+#simVisual .topology{position:relative}
+#simVisual .link{background:#aebfd1}
+#simVisual .link.path{background:#248466}
+#simVisual .node.failed .device-icon{background:#fff0ef}
+#simVisual .fhrp-packet{position:absolute;z-index:12;transform:translate(-50%,-50%);padding:5px 9px;border-radius:99px;background:#287bca;color:#fff;font-size:12px;font-weight:800;box-shadow:0 0 0 5px #287bca20}
+#simVisual .mobile-branch{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:44px}
+#simVisual .mobile-branch .link,#simVisual .mobile-up .link{width:3px;height:36px;margin:0 auto}
+#simVisual .mobile-branch .link:after,#simVisual .mobile-up .link:after{content:'↓';right:-6px;top:24px}
+#simVisual .mobile-branch .link.failed:after,#simVisual .mobile-up .link.failed:after{content:'×'}

@@ -154,5 +154,359 @@ function applyStep() {
     $('nextStepBtn').disabled = stepIndex === s.steps.length - 1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;clearTopology();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+
+// Presentation follows the current Concept Guide; raw evidence above is unchanged.
+adapter.presentation = {
+  "names": {
+    "R1": "Router A",
+    "R2": "Router B",
+    "R3": "Router C"
+  },
+  "lessons": [
+    {
+      "title": "Ping 성공은 어떤 응답으로 확인할까요?",
+      "brief": "학습 페이지의 왕복 확인을 따라갑니다. Echo Request가 목적지에 도달한 뒤 어떤 메시지가 돌아오는지 살펴보세요.",
+      "hints": [
+        "요청이 목적지에 도착한 것과 송신자가 응답을 받은 것을 구분하세요.",
+        "Echo Request와 대응하는 응답의 이름과 Type을 비교하세요."
+      ]
+    },
+    {
+      "title": "Router를 지나면 TTL은 어떻게 바뀔까요?",
+      "brief": "같은 Echo Request를 Router B에 들어가기 전과 나온 뒤에 비교합니다.",
+      "hints": [
+        "서로 다른 패킷의 TTL을 비교하지 않습니다.",
+        "중간 Router가 전달하는 횟수를 세어보세요."
+      ]
+    },
+    {
+      "title": "TTL이 1인 Probe는 어디에서 멈출까요?",
+      "brief": "학습 페이지의 TTL 만료 그림과 같은 조건입니다. Router B 이후의 전달과 되돌아오는 알림을 구분하세요.",
+      "hints": [
+        "TTL이 0이 된 원래 패킷은 다음 Hop으로 갈 수 있을까요?",
+        "원래 Probe와 이를 알리는 ICMP 메시지는 서로 다른 패킷입니다."
+      ]
+    },
+    {
+      "title": "Traceroute는 첫 번째 Hop을 어떻게 알까요?",
+      "brief": "TTL 1과 TTL 2의 UDP Probe를 차례로 관찰합니다. 이번 Cisco 구현의 목적지 응답도 확인하세요.",
+      "hints": [
+        "응답을 보낸 장비의 주소가 경로 단서입니다.",
+        "중간 Hop의 응답과 최종 목적지의 응답을 구분하세요."
+      ]
+    },
+    {
+      "title": "Route가 없을 때 어떤 오류가 돌아올까요?",
+      "brief": "학습 페이지의 선택 자료에 있는 Cisco 관찰 사례입니다. ICMP Code와 Router B의 Route 유무를 함께 봅니다.",
+      "hints": [
+        "링크가 연결돼 있어도 목적지 Route가 없을 수 있습니다.",
+        "이번 장비의 관찰 결과를 모든 제조사의 고정 규칙으로 확대하지 않습니다."
+      ]
+    }
+  ],
+  "labels": {
+    "SUCCESS": "성공",
+    "BEFORE": "통과 전",
+    "AFTER": "통과 후",
+    "EXPIRE": "TTL 만료",
+    "REQUEST": "요청",
+    "FORWARD": "전달",
+    "REPLY": "응답",
+    "ROUTER": "Router 판단",
+    "PROBE": "Probe 전송",
+    "NO ROUTE": "Route 없음",
+    "DESTINATION": "목적지 응답",
+    "INTERPRET": "결과 해석",
+    "ACCESS IN": "Access 유입",
+    "ACCESS OUT": "Access 송출",
+    "BROADCAST": "Broadcast",
+    "SEPARATION": "VLAN 분리",
+    "POSITIVE CONTROL": "정상 대조 확인",
+    "COMPARE": "비교",
+    "FAILURE": "장애 조건",
+    "STOP": "전달 중단",
+    "CONTROL": "정상 대조",
+    "RECOVERY": "복구 확인",
+    "MISMATCH": "설정 불일치",
+    "RETURN DECISION": "응답 경로 판단",
+    "REPLY INGRESS": "응답 유입",
+    "ROUTE BACK": "응답 경로 조회",
+    "REPLY EGRESS": "응답 송출",
+    "REMOTE TRY": "다른 VLAN 통신 시도",
+    "ACTUAL ERROR": "관찰된 오류 응답",
+    "L2 CONTROL": "L2 정상 대조",
+    "LOCAL CONTROL": "동일 VLAN 정상 대조",
+    "REMOTE DECISION": "다른 Subnet 판단",
+    "ARP FAIL": "ARP 실패",
+    "NO ECHO": "Echo 미생성",
+    "CLIENT APPLY": "단말 설정 적용",
+    "BOUNDARY": "검증 범위",
+    "POOL SELECT": "Pool 선택",
+    "FINAL DELIVERY": "단말로 전달",
+    "SERVER DOWN": "서버 서비스 중지",
+    "NO OFFER": "Offer 없음",
+    "RELAY MISSING": "Relay 설정 없음",
+    "DORA SUCCESS": "DORA 완료",
+    "ARP STOP": "ARP 단계 중단",
+    "CLIENT QUERY": "단말 Query",
+    "IP TRAFFIC": "IP 통신",
+    "CLIENT LEG": "단말 조회 구간",
+    "UPSTREAM LEG": "Upstream 조회 구간",
+    "AUTHORITY ANSWER": "Authoritative 응답",
+    "CACHE FILL": "Cache 저장",
+    "NO UPSTREAM": "새 Upstream Query 없음",
+    "SERVICE DOWN": "서비스 중지",
+    "SERVICE RECOVERY": "서비스 복구",
+    "WRONG DNS": "잘못된 DNS 주소",
+    "CLIENT RECOVERY": "단말 설정 복구",
+    "NOT TIMEOUT": "응답 수신 확인",
+    "RECORD RECOVERY": "Record 복구",
+    "First Query": "첫 번째 Query",
+    "Second Query": "두 번째 Query",
+    "Failure": "장애 조건",
+    "Recovery": "복구 확인",
+    "Query sent": "Query 전송",
+    "Resolved": "이름 해석 완료",
+    "Resolution 완료": "이름 해석 완료",
+    "Client transaction": "단말 조회",
+    "Upstream transaction": "Upstream 조회",
+    "Scope boundary": "검증 범위",
+    "Cache populated": "Cache 저장 완료",
+    "Answered at R2": "R2에서 응답",
+    "Cannot resolve": "이름 해석 실패",
+    "Query never reaches R2": "R2까지 Query 도달 안 됨",
+    "Query reaches authority": "Authoritative DNS까지 Query 도달",
+    "Error response received": "오류 응답 수신",
+    "Address assigned": "주소 확정",
+    "Lease + Options": "Lease와 Option",
+    "Client configured": "단말 설정 적용",
+    "Local Discover": "단말망 Discover",
+    "Relayed Discover": "Relay가 전달한 Discover",
+    "Offer selected": "Offer 선택",
+    "Lease complete": "Lease 완료",
+    "Discover reaches server segment": "서버 구간까지 Discover 도달",
+    "Local Discover only": "단말망에만 Discover 존재",
+    "Server reply 없음": "서버 응답 없음",
+    "Reply to Relay": "Relay로 응답",
+    "Client Edge": "단말 접속 구간",
+    "Client VLAN": "단말 VLAN",
+    "Routed Transit": "Router 연결 구간",
+    "Learning Topology": "학습 토폴로지",
+    "Connectivity State": "통신 상태",
+    "DHCP State": "DHCP 상태",
+    "Name Resolution": "이름 해석",
+    "IP Reachability": "IP 도달 여부",
+    "Host A": "단말",
+    "Host B": "단말",
+    "SIDE": "측",
+    "ACCESS": "Access",
+    "UNTAGGED": "Untagged",
+    "TAG": "Tag",
+    "NATIVE": "Native",
+    "NOT ALLOWED": "허용 안 됨",
+    "PORT": "Port",
+    "Logical Stop": "논리적 전달 중단",
+    "Access / Idle": "Access / 대기",
+    "Packet Stop": "전달 중단",
+    "No Response / Stop": "응답 없음 / 중단",
+    "Resolved IP Traffic": "조회한 IP로 통신",
+    "QUERY TO AUTHORITY": "Authoritative DNS로 Query",
+    "NXDOMAIN RESPONSE": "NXDOMAIN 응답",
+    "DNS RESPONSE": "DNS 응답",
+    "ACK ADDRESS": "ACK 주소",
+    "ACK OPTIONS": "ACK Option",
+    "CLIENT BROADCAST": "단말 Broadcast",
+    "NO DNS ANSWER": "DNS 응답 없음",
+    "RECOVERED": "복구 완료",
+    "OPTIONS": "Option 확인",
+    "DNS .2 RESTORED": "DNS .2 복구",
+    "A .10 RESTORED": "A .10 복구",
+    "CURRENT": "현재",
+    "Baseline": "기준 상태",
+    "Actual": "실제 관찰",
+    "Expected": "예상 결과",
+    "Scenario": "문제 조건",
+    "Run": "검증 실행",
+    "Forwarding 판단": "Forwarding 판단"
+  }
+};
+PacketLabPresentation.attach(adapter, {
+  "desktop": ".topo-flow",
+  "height": 430,
+  "nodes": [
+    {
+      "id": "nodeR1",
+      "name": "Router A",
+      "type": "router",
+      "x": 160,
+      "y": 65,
+      "detail": "10.10.12.1"
+    },
+    {
+      "id": "nodeR2",
+      "name": "Router B",
+      "type": "router",
+      "x": 160,
+      "y": 205,
+      "detail": "중간 Router"
+    },
+    {
+      "id": "nodeR3",
+      "name": "Router C",
+      "type": "router",
+      "x": 160,
+      "y": 345,
+      "detail": "198.51.100.3"
+    }
+  ],
+  "edges": [
+    [
+      "nodeR1",
+      "nodeR2",
+      "link12"
+    ],
+    [
+      "nodeR2",
+      "nodeR3",
+      "link23"
+    ]
+  ],
+  "steps": {
+    "echo": [
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2"
+        ],
+        "caption": "Echo Request · Type 8"
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR3"
+        ],
+        "caption": "목적지 Route로 Echo Request 전달"
+      },
+      {
+        "path": [
+          "nodeR3",
+          "nodeR2"
+        ],
+        "caption": "Echo Reply · Type 0",
+        "reply": true
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR1"
+        ],
+        "caption": "대응 Echo Reply 도착",
+        "reply": true
+      }
+    ],
+    "ttl": [
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2"
+        ],
+        "caption": "CP1 · TTL 255"
+      },
+      {
+        "path": [],
+        "caption": "Router B · Route 조회와 TTL 감소"
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR3"
+        ],
+        "caption": "CP2 · TTL 254"
+      }
+    ],
+    "expiry": [
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2"
+        ],
+        "caption": "UDP Probe · TTL 1"
+      },
+      {
+        "path": [],
+        "caption": "Router B에서 TTL 만료 · 원래 Probe 폐기",
+        "stop": true
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR1"
+        ],
+        "caption": "Time Exceeded · Type 11 Code 0",
+        "reply": true
+      }
+    ],
+    "trace": [
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2"
+        ],
+        "caption": "첫 Probe · TTL 1 · UDP 33434"
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR1"
+        ],
+        "caption": "첫 Hop 응답 · 10.10.12.2",
+        "reply": true
+      },
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2",
+          "nodeR3"
+        ],
+        "caption": "다음 Probe · TTL 2 · UDP 33435"
+      },
+      {
+        "path": [
+          "nodeR3",
+          "nodeR2",
+          "nodeR1"
+        ],
+        "caption": "Port Unreachable · Type 3 Code 3",
+        "reply": true
+      }
+    ],
+    "unreachable": [
+      {
+        "path": [
+          "nodeR1",
+          "nodeR2"
+        ],
+        "caption": "Echo Request 도착"
+      },
+      {
+        "path": [],
+        "caption": "목적지 /32 Route와 Default Route 없음",
+        "stop": true
+      },
+      {
+        "path": [
+          "nodeR2",
+          "nodeR1"
+        ],
+        "caption": "이번 Cisco 관찰 · Type 3 Code 1",
+        "reply": true
+      },
+      {
+        "path": [],
+        "caption": "RFC 예상과 Cisco 관찰을 구분해 해석"
+      }
+    ]
+  }
+});
 NetworkSimulator.mount(adapter);
 })();

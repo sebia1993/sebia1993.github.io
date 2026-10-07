@@ -184,5 +184,33 @@ function applyStep(){
     $('nextStepBtn').disabled=stepIndex===s.steps.length-1;
   }
 const adapter={raw:scenarios,kind:'steps',reset(i){lesson=i;stepIndex=0;resetVisual();},show(i){stepIndex=i;applyStep();},finish(){const s=scenarios[lesson];for(const n of [1,2]){$('metric'+n+'Label').textContent=s['metric'+n][0];$('metric'+n+'Value').textContent=s['metric'+n][1];}$('observationConclusion').textContent=s.conclusion;}};
+// View adaptation only; original observations and failed/revalidated evidence stay intact.
+adapter.presentation={guideDifferences:[{name:'PC D',reason:'기존 실습의 추가 단말 PC2B입니다. 학습 페이지의 PC A·PC B → PC C 핵심 흐름을 유지하며, 원래 검증 토폴로지의 연결을 보존합니다.'}],names:{PC1A:'PC A',PC1B:'PC B',PC2A:'PC C',PC2B:'PC D',SW1:'Switch A',SW2:'Switch B'},labels:{'Learning Topology':'학습 토폴로지','Physical Topology':'물리 연결','Logical State':'논리 상태','Logical Link':'논리 링크','Physical Member':'물리 Member','Physical Cable':'물리 케이블','Control Plane':'제어 정보','User Data':'사용자 데이터','Baseline':'기준 상태','Clean Rebuild':'초기화 후 재구성','Core Flow':'기준 Flow','Core Run':'기준 실행','Observed Path':'관찰한 경로','Upper Layer':'상위 계층','Recovery':'복구','Failure':'장애','Not Bundled':'묶이지 않음','NOT BUNDLED':'묶이지 않음','LACP CONTROL':'LACP 교환','PARTNER MATCH':'협상 조건 확인','BUNDLED':'묶음 형성','LOGICAL LINK':'논리 링크','CLEAN STATE':'기존 상태 제거','NO BUNDLE':'묶음 미형성','RECOVERY':'복구','HASH METHOD':'Hash 방식','FLOW A':'Flow A','FLOW B':'Flow B','NO STRIPING':'Flow 유지 확인','BASELINE':'기준 상태','M1 UNAVAILABLE':'M1 사용 불가','REMAINING MEMBER':'남은 Member','ALL MEMBERS DOWN':'모든 Member 장애','PACKET STOP':'전달 중단','FULL RECOVERY':'전체 복구','STOP':'전달 중단','Idle':'대기','unavailable':'사용 불가','Source MAC':'출발지 MAC','Request':'Request','Remote':'원격','End-to-End':'종단 간'},lessons:[
+ {title:'케이블 두 개는 언제 하나의 LAG가 될까요?',brief:'Switch A의 active와 Switch B의 passive가 정보를 교환한 뒤 M1·M2가 Po1으로 묶이는 순서를 관찰합니다.',hints:['LACP는 양쪽의 정보를 교환합니다.','Member의 조건이 맞아야 묶음에 참여합니다.','물리 케이블 수와 상위 계층에 보이는 논리 링크 수를 구분하세요.']},
+ {title:'양쪽이 passive면 누가 협상을 시작할까요?',brief:'기존 묶음 상태를 지우고 양쪽을 passive로 설정합니다. 이후 한쪽을 active로 바꿨을 때도 비교합니다.',hints:['passive는 상대의 LACP에 응답하는 모드입니다.','먼저 LACP를 보내는 쪽이 있는지 확인하세요.','케이블 연결과 LACP 묶음 형성은 같은 상태가 아닙니다.']},
+ {title:'서로 다른 Flow는 어느 Member를 쓸까요?',brief:'학습 페이지의 PC A·PC B에서 PC C로 향하는 두 Flow입니다. 기존 src-mac 검증에서 각 Flow가 선택한 M1·M2를 따라가 보세요.',hints:['한 Flow와 여러 Flow를 구분하세요.','Hash의 입력은 이번 실습에서 출발지 MAC입니다.','패킷마다 교대로 보내는지, Flow별로 같은 Member를 쓰는지 확인하세요.']},
+ {title:'M1을 쓸 수 없어도 Po1은 유지될까요?',brief:'M1 양단을 함께 내려 Member 전체를 사용할 수 없게 합니다. 남은 M2와 Po1 상태를 각각 확인합니다.',hints:['M1 장애가 M2 장애까지 뜻하지는 않습니다.','남은 Member가 묶음에 참여하는지 확인하세요.','원래 한쪽 shutdown 실패와 이번 양단 장애 재검증을 구분하세요.']},
+ {title:'모든 Member가 사라지면 어떻게 될까요?',brief:'M1·M2를 모두 사용할 수 없게 한 뒤 Po1과 PC A–PC C 통신을 관찰합니다.',hints:['Po1이 전달할 때 실제로 사용하는 물리 Member를 생각하세요.','사용 가능한 Member가 하나라도 남아 있는지 확인하세요.','복구에서는 Member 상태와 Po1 상태를 함께 확인하세요.']}
+]};
+const lacpStage=document.querySelector('#simVisual .topology-stage');
+function lacpCenter(id){const st=lacpStage.getBoundingClientRect(),r=$(id).getBoundingClientRect();return{x:r.left-st.left+r.width/2,y:r.top-st.top+r.height/2,w:r.width,h:r.height};}
+function lacpLayout(){if(!lacpStage.clientWidth)return;lacpStage.querySelector('.topology-svg').setAttribute('viewBox',`0 0 ${lacpStage.clientWidth} ${lacpStage.clientHeight}`);const mobile=matchMedia('(max-width:900px)').matches;
+ const defs=[['edge1a','pc1a','sw1'],['edge1b','pc1b','sw1'],['edge2a','sw2','pc2a'],['edge2b','sw2','pc2b'],['m1Svg','sw1','sw2'],['m2Svg','sw1','sw2']];
+ defs.forEach(([id,a,b])=>{let p=lacpCenter(a),q=lacpCenter(b),dx=q.x-p.x,dy=q.y-p.y;
+ const edge=(r,sign)=>{const t=Math.min(r.w/2/(Math.abs(dx)||1),r.h/2/(Math.abs(dy)||1));return{x:r.x+sign*dx*t,y:r.y+sign*dy*t};};let from=edge(p,1),to=edge(q,-1);
+ if(id.startsWith('m')){const off=id==='m1Svg'?-32:32;if(mobile){from.x+=off;to.x+=off;}else{from.y+=off;to.y+=off;}}
+ Object.entries({x1:from.x,y1:from.y,x2:to.x,y2:to.y}).forEach(([k,v])=>$(id).setAttribute(k,v));
+ if(id.startsWith('m')){const label=$(id==='m1Svg'?'labelM1':'labelM2');label.style.left=((from.x+to.x)/2+(mobile?(id==='m1Svg'?-24:24):0))+'px';label.style.top=((from.y+to.y)/2+(mobile?0:-20))+'px';label.style.transform='translate(-50%,-50%)';}
+ });
+}
+function lacpPoints(source,member,control){const l=$(member+'Svg'),a={x:+l.getAttribute('x1'),y:+l.getAttribute('y1')},b={x:+l.getAttribute('x2'),y:+l.getAttribute('y2')};return control?[a,b]:[lacpCenter(source),lacpCenter('sw1'),a,b,lacpCenter('sw2'),lacpCenter('pc2a')];}
+function lacpMotion(source,member,control,p){lacpLayout();const pts=lacpPoints(source,member,control),t=Math.min(pts.length-1-.00001,Math.max(0,p)*(pts.length-1)),a=pts[Math.floor(t)],b=pts[Math.floor(t)+1],m=$('packetMarker');m.style.left=(a.x+(b.x-a.x)*(t%1))+'px';m.style.top=(a.y+(b.y-a.y)*(t%1))+'px';m.style.transform='translate(-50%,-50%)';}
+const lacpReset=adapter.reset;adapter.reset=function(i){lacpReset(i);setPo('wait');setMember('m1','idle');setMember('m2','idle');lacpLayout();};
+adapter.buildPlan=function(i,mode='normal'){if(mode!=='normal')return null;const plan=[];scenarios[i].steps.forEach((s,n)=>{const moving=s.marker&&s.marker.type!=='stop',control=s.marker?.type==='control',member=s.m2==='active-data'?'m2':s.kind==='PARTNER MATCH'?'m2':'m1',source=s.nodes?.includes('pc1b')?'pc1b':'pc1a';const travel=control?420:2100,duration=moving?1050+travel+180:1230;
+ plan.push({modelStepIndex:n,title:s.title,detail:s.detail,kind:s.kind,duration,action(){adapter.show(n);if(i===0&&n<2)setPo('wait');if(i===1&&s.kind==='RECOVERY')setPo('wait');lacpLayout();},animate:moving?p=>lacpMotion(source,member,control,Math.max(0,Math.min(1,(p*duration-1050)/travel))):undefined});
+ if(i===1&&s.kind==='RECOVERY')plan.push({title:'M1·M2가 다시 묶이고 Po1이 Up됩니다',detail:'LACP 조건을 확인한 뒤 두 Member가 Bundled 상태가 됩니다. 기존 복구 검증에서 PC A–PC C Ping은 3/3이었습니다.',kind:'묶음 복구',duration:1650,action(){setMember('m1','bundled');setMember('m2','bundled');setPo('up');showMarker(null);}});
+ });return plan;};
+new ResizeObserver(lacpLayout).observe(lacpStage);
+
 NetworkSimulator.mount(adapter);
 })();
