@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261003-topology-sim-v1';
+const file='labs/ip-subnetting-simulator.html',version='20261007-topology-sim-v2';
 const normalize=s=>s.replace(/\r\n/g,'\n').trim(),checks=[];
 let server,base=process.env.BASE_URL;
 if(!base){
@@ -42,6 +42,8 @@ async function verify(url,surface){
    assert.equal(await page.locator('#simTopology [data-sim-id=r1]').count(),1);
    assert.equal(await page.locator('#simTopology [data-sim-id=lana]').count(),1);
    assert.equal(await page.locator('#simTopology [data-sim-id=lanb]').count(),1);
+   assert.equal(await page.locator('#simTopology [data-device-shape=host]').count(),3);
+   assert.equal(await page.locator('#simTopology [data-device-shape=router]').count(),1);
 
    await submit(page,0,'gw'); // deliberately wrong; model must still show validated behavior.
    assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
