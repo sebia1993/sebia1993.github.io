@@ -1,4 +1,4 @@
-// Summary badges must reflect saved grades without changing the answer flow.
+// Summary badges must reflect the current practice run without persisting answers across page loads.
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
@@ -7,8 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)), out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html', version='20261003-summary-status-v1';
-const key='network-learning:ip-subnetting:answers:v1';
+const file='labs/ip-subnetting-simulator.html', version='20261007-summary-status-v2';
 const matrix=[[320,640,true],[360,800,true],[390,844,true],[412,915,true],[800,360,true],[768,1024,true],[980,720,false],[1366,768,false],[1920,1080,false]];
 const checks=[];
 let server,base=process.env.BASE_URL;
@@ -56,9 +55,12 @@ async function summaryCheck(page,expected){
  if(c>0&&c<4)assert.notEqual(bars.find(x=>x.grade==='correct').color,bars.find(x=>x.grade==='incorrect').color);
  return Math.min(...palette.map(x=>x.ratio));
 }
-async function seeded(page,choices){
- await page.evaluate(({key,choices})=>localStorage.setItem(key,JSON.stringify({schema:1,index:3,answers:choices.map(choice=>({choice,submitted:true}))})),{key,choices});
- await page.reload({waitUntil:'networkidle'});await page.locator('#nextBtn').click();
+async function solve(page,choices){
+ for(const choice of choices){
+  await page.locator(`#choices [data-value="${choice}"]`).click();
+  await page.locator('#runBtn').click();
+  await page.locator('#nextBtn').click();
+ }
 }
 async function checkSurface(url,name){
  for(const [width,height,touch] of matrix){
@@ -79,20 +81,28 @@ async function checkSurface(url,name){
    if(touch)await page.touchscreen.tap(pt.x,pt.y);else await page.mouse.click(pt.x,pt.y);
    assert.equal(await page.locator('#lessonNo').innerText(),'문제 3 / 4');assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
    assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
-   await page.reload({waitUntil:'networkidle'});assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
-   await page.locator('#resetBtn').click();await page.locator('#choices [data-value="on"]').click();await page.locator('#runBtn').click();await page.locator('#nextBtn').click();await page.locator('#nextBtn').click();
+   await page.reload({waitUntil:'networkidle'});
+   assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
+   assert.equal(await page.locator('#resultArea').isVisible(),false);
+   assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
+   assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+
+   await solve(page,['on','gw','on','gw']);
    await summaryCheck(page,['correct','correct','correct','correct']);
-   // Correct-answer review still works from keyboard, without resetting it.
+   // Correct-answer review still works from keyboard inside the current practice run.
    await page.getByRole('button',{name:'문제 1 답안 보기',exact:true}).focus();await page.keyboard.press('Enter');
    assert.equal(await page.locator('#verdictTitle').innerText(),'✓ 정답입니다');
-   await seeded(page,['drop','on','drop','on']);await summaryCheck(page,['incorrect','incorrect','incorrect','incorrect']);
+
+   await page.reload({waitUntil:'networkidle'});
+   await solve(page,['drop','on','drop','on']);
+   await summaryCheck(page,['incorrect','incorrect','incorrect','incorrect']);
    // Enlarged text and monochrome high-contrast mode must not lose meaning.
    await page.addStyleTag({content:'html{font-size:200%}'});await summaryCheck(page,['incorrect','incorrect','incorrect','incorrect']);
    await page.emulateMedia({forcedColors:'active'});
    assert.deepEqual(await page.locator('.summary-status-text').allInnerTexts(),['오답','오답','오답','오답']);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    assert.deepEqual(errors,[]);
-   checks.push({surface:name,width,height,touch,status:'PASS',minTextContrast:minContrast,states:['3-correct-1-incorrect','all-correct-after-retry','all-incorrect','200%-text','forced-colors'],preserved:['saved-answer','reload','sequential-next','keyboard-and-touch-review']});
+   checks.push({surface:name,width,height,touch,status:'PASS',minTextContrast:minContrast,states:['3-correct-1-incorrect','all-correct-after-retry','all-incorrect','200%-text','forced-colors'],preserved:['same-run-review','fresh-start-reload','sequential-next','keyboard-and-touch-review']});
    console.log(`PASS summary ${name} ${width}x${height}`);
   }catch(e){await page.screenshot({path:resolve(out,`summary-failure-${name}-${width}.png`),fullPage:true});throw e;}finally{await context.close();}
  }
