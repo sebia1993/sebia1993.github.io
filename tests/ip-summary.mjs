@@ -85,7 +85,7 @@ async function checkSurface(url,name){
    assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
    assert.equal(await page.locator('#resultArea').isVisible(),false);
    assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
-   assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+   assert.ok((await page.locator('#storageNote').innerText()).includes('다시 들어오면 1번 문제부터 미응답 상태로 시작'));
 
    await solve(page,['on','gw','on','gw']);
    await summaryCheck(page,['correct','correct','correct','correct']);
