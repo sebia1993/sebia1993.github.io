@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261007-observation-review-v3';
+const file='labs/ip-subnetting-simulator.html',version='20261007-observation-review-v4';
 const legacyKey='network-learning:ip-subnetting:answers:v1';
 const source=await readFile(resolve(root,file),'utf8');
 assert.equal(source.includes('>\\n<meta name="network-sim-version"'),false,'head must not expose a literal \\n text node');
@@ -78,6 +78,9 @@ async function surface(url,name){
     assert.equal(await page.locator('#modelObservation').getAttribute('data-scenario'),fixtures[i].scenarioId);
     assert.ok((await page.locator('#modelEvent').innerText()).includes(fixtures[i].target));
     assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
+    assert.equal(await page.locator('#simAutoBtn').isVisible(),true,'one-click flow playback must be visible without opening details');
+    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
+    assert.ok((await page.locator('#simAutoEvent').innerText()).startsWith('흐름 1 / '));
     assert.equal(await page.locator('#modelObservation').getAttribute('data-outcome'),i===2?'unresolved':'resolved');
     assert.equal(await page.locator('#simTopology [data-device-shape="host"]').count(),3,'three host-shaped device icons');
     assert.equal(await page.locator('#simTopology [data-device-shape="router"]').count(),1,'one router-shaped device icon');
@@ -154,7 +157,7 @@ async function surface(url,name){
     assert.ok(forcedColorMeaning.includes('다른 네트워크 동네')&&forcedColorMeaning.includes('Gateway'),'forced-colors must preserve the route decision in text');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    assert.deepEqual(errors,[]);
-   checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','same-run-details','replay-keeps-grade','sequential-next','fresh-start-reload','legacy-storage-clear','actual-prefix','source-links','200%-text','forced-colors']});
+   checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','one-click-auto-flow','manual-flow-fallback','same-run-details','replay-keeps-grade','sequential-next','fresh-start-reload','legacy-storage-clear','actual-prefix','source-links','200%-text','forced-colors']});
    console.log(`PASS latest-skill review ${name} ${width}x${height}`);
   }catch(e){await page.screenshot({path:resolve(out,`skill-review-failure-${name}-${width}.png`),fullPage:true});throw e;}finally{await context.close();}
  }
