@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261007-auto-flow-v6';
+const version = '20261007-ethernet-style-flow-v7';
 const legacyKey = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
@@ -47,6 +47,9 @@ async function press(page, selector, touch, move = true) {
   const p = await atTop(page, selector, move);
   if (touch) await page.touchscreen.tap(p.x, p.y); else await page.mouse.click(p.x, p.y);
 }
+async function waitComplete(page){
+  await page.waitForFunction(()=>document.querySelector('#modelObservation')?.dataset.flowState==='complete',undefined,{timeout:5000});
+}
 async function verifySurface(url, name) {
   for (const [width, height, touch] of viewports) {
     const context = await browser.newContext({ viewport: { width, height }, isMobile: touch, hasTouch: touch });
@@ -56,6 +59,7 @@ async function verifySurface(url, name) {
     page.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
     try {
       assert.equal((await page.goto(`${url}/${pagePath}`, { waitUntil: 'networkidle' })).status(), 200);
+      await page.emulateMedia({reducedMotion:'reduce'});
       assert.equal(await page.locator('meta[name="lab-ui-version"]').getAttribute('content'), version);
       assert.equal(await page.locator('header.hero').evaluate(e => getComputedStyle(e).position), 'static');
       await page.evaluate(() => { window.__tabClicks = 0; document.querySelector('#tabs').addEventListener('click', () => window.__tabClicks++); });
@@ -71,12 +75,18 @@ async function verifySurface(url, name) {
         assert.equal(await page.locator('#runBtn').isEnabled(), true);
         assert.equal(await page.locator(`#choices [data-value="${selections[i]}"]`).getAttribute('aria-pressed'), 'true');
         await press(page, '#runBtn', touch);
+        assert.equal(await page.locator('#modelObservation').isVisible(), true);
+        assert.equal(await page.locator('#verdict').isVisible(), false, 'grade must stay hidden while observation is playing');
+        assert.equal(await page.locator('#calculationDetails').isVisible(), false);
+        assert.equal(await page.locator('#resultActions').isVisible(), false);
+        assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
+        await waitComplete(page);
         assert.equal(await page.locator('#verdictTitle').innerText(), i < 2 ? '✓ 정답입니다' : '✕ 오답입니다');
         assert.equal(await page.locator('#choices button:disabled').count(), 3, 'submitted answers must be locked');
         assert.equal(await page.locator('#submitRow').isVisible(), false, 'primary action must change after submit');
         assert.equal(await page.locator('#calculationDetails').isVisible(), true);
         assert.equal(await page.locator('#simAutoBtn').isVisible(), true);
-        assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
+        assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'complete');
         assert.equal(await page.locator('#evidenceDetails').getAttribute('open'), null);
         assert.equal((await page.locator('body').innerText()).includes('PASS'), false, 'grade must not be confused with lab PASS');
         await atTop(page, '#verdictTitle', false);
@@ -90,14 +100,14 @@ async function verifySurface(url, name) {
         // The beginner result shows the validated topology before the primary Next action.
         // Numeric calculation remains available below the action as optional deepening.
         const positions = await page.evaluate(() => {
-          const grade=document.querySelector('#verdictTitle').getBoundingClientRect().top+scrollY;
           const model=document.querySelector('#modelObservation').getBoundingClientRect().top+scrollY;
+          const grade=document.querySelector('#verdictTitle').getBoundingClientRect().top+scrollY;
           const next=document.querySelector('#nextBtn').getBoundingClientRect().bottom+scrollY;
           const calc=document.querySelector('#calculationDetails').getBoundingClientRect().top+scrollY;
           return {grade,model,next,calc};
         });
-        assert.ok(positions.grade<positions.model&&positions.model<positions.next&&positions.next<positions.calc,'result flow order must be verdict → topology → next → numeric deepening');
-        assert.ok(positions.next - positions.grade < 1400, 'result-to-next distance is excessive');
+        assert.ok(positions.model<positions.grade&&positions.grade<positions.next&&positions.next<positions.calc,'result flow order must be topology → grade → next → numeric deepening');
+        assert.ok(positions.next - positions.model < 1700, 'observation-to-next distance is excessive');
         assert.equal(await page.locator('#decisionOut').innerText(), decisions[i]);
         if (i === 2) {
           assert.equal(await page.locator('#srcIp').innerText(), '10.77.10.10/24');
@@ -152,26 +162,26 @@ async function verifySurface(url, name) {
 
       // Within the current run, revisit and retry still work and keyboard input remains usable.
       await press(page, '#choices [data-value="on"]', touch);
-      await press(page, '#runBtn', touch);
+      await press(page, '#runBtn', touch);await waitComplete(page);
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
       await page.locator('.tab').nth(0).click();
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
       await page.locator('#resetBtn').focus(); await page.keyboard.press('Enter');
       await page.locator('#choices [data-value="on"]').focus(); await page.keyboard.press('Space');
       assert.equal(await page.evaluate(() => document.activeElement.dataset.value), 'on');
-      await page.locator('#runBtn').focus(); await page.keyboard.press('Enter');
+      await page.locator('#runBtn').focus(); await page.keyboard.press('Enter');await waitComplete(page);
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
 
       // Last question reached out of order routes to unanswered work, not a false completion.
       await page.reload({ waitUntil: 'networkidle' });
       await page.locator('.tab').nth(3).click();
-      await press(page, '#choices [data-value="gw"]', touch); await press(page, '#runBtn', touch);
+      await press(page, '#choices [data-value="gw"]', touch); await press(page, '#runBtn', touch);await waitComplete(page);
       assert.ok((await page.locator('#nextBtn').innerText()).includes('미응답 문제 1'));
       await press(page, '#nextBtn', touch);
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#complete').isVisible(), false);
       assert.deepEqual(errors, []);
-      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','auto-flow-visible','same-run-review','fresh-start-reload','reentry-reset','retry','keyboard','skip','occlusion'] });
+      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['single-run-observation','grade-after-flow','next','prefix','progressive-result-order','same-run-review','fresh-start-reload','reentry-reset','retry','keyboard','skip','occlusion'] });
       console.log(`PASS learner flow + scrolled targets ${name} ${width}x${height}`);
     } finally { await context.close(); }
   }
@@ -188,7 +198,7 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
       assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
       assert.ok((await page.locator('#storageNote').innerText()).includes('다시 들어오면 1번 문제부터 미응답 상태로 시작'));
-      await page.locator('#choices .choice').first().click(); await page.locator('#runBtn').click();
+      await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#choices .choice').first().click(); await page.locator('#runBtn').click();await waitComplete(page);
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
       results.push({surface:name,case:`fresh-start-${kind}`,status:'PASS'});
     } finally {await context.close();}
