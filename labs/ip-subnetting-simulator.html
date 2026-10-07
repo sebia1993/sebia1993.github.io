@@ -627,7 +627,7 @@ function renderTrace(){
 }
 function showSummary(){
  if(counts().pending){goTo(answers.findIndex(function(a){return !a.submitted;}),true);return;}
- summaryOpen=true;persist();renderSummary();focusSection('completionTitle',true);
+ stopAutoPlayback();summaryOpen=true;persist();renderSummary();focusSection('completionTitle',true);
 }
 
 $('runBtn').addEventListener('click',function(){var a=answers[idx];if(a.choice===null||a.submitted)return;a.submitted=true;persist();renderProgress();renderTabs();renderChoices();renderResult();focusSection('verdictTitle',true);});
@@ -641,6 +641,7 @@ $('simNext').addEventListener('click',function(){stopAutoPlayback();if(observati
 $('maskTry25').addEventListener('click',function(){maskTryPrefix=25;renderMaskTry();});
 $('maskTry24').addEventListener('click',function(){maskTryPrefix=24;renderMaskTry();});
 window.addEventListener('resize',function(){if(observation)placeSimPacket(observation.events[traceStep]);});
+window.addEventListener('pagehide',stopAutoPlayback);
 window.addEventListener('pageshow',function(event){
  if(event.persisted)resetPracticeSession();
 });
