@@ -8,8 +8,8 @@ import vm from 'node:vm';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261007-observation-review-v2';
-const key='network-learning:ip-subnetting:answers:v1';
+const file='labs/ip-subnetting-simulator.html',version='20261007-observation-review-v3';
+const legacyKey='network-learning:ip-subnetting:answers:v1';
 const source=await readFile(resolve(root,file),'utf8');
 assert.equal(source.includes('>\\n<meta name="network-sim-version"'),false,'head must not expose a literal \\n text node');
 const normalize=s=>s.replace(/\r\n/g,'\n').trim();
@@ -106,7 +106,7 @@ async function surface(url,name){
     const distance=await page.evaluate(()=>document.querySelector('#nextBtn').getBoundingClientRect().bottom-document.querySelector('#verdictTitle').getBoundingClientRect().top);
     assert.ok(distance<1800,'beginner result displaced primary Next too far: '+distance+'px');
     if(i===2&&[360,1366].includes(width))await page.screenshot({path:resolve(out,`skill-review-${name}-${width}.png`)});
-    const saved=await page.evaluate(k=>localStorage.getItem(k),key),score=await page.locator('#scoreText').innerText();
+    const score=await page.locator('#scoreText').innerText();
     await input(page,'#simFlowDetails summary',touch);
     assert.equal(await page.locator('#simPrev').isDisabled(),true);
     await input(page,'#simNext',touch);assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'arp-request');
@@ -114,7 +114,7 @@ async function surface(url,name){
     while(!(await page.locator('#simNext').isDisabled())) await input(page,'#simNext',touch);
     assert.equal(await page.locator('#simNext').isDisabled(),true);
     await input(page,'#simPrev',touch);
-    assert.equal(await page.evaluate(k=>localStorage.getItem(k),key),saved,'observation replay changed saved answer');
+    
     assert.equal(await page.locator('#scoreText').innerText(),score);
     await input(page,'#simFlowDetails summary',touch);
     assert.equal(await page.locator('#calculationDetails').isVisible(),true);
@@ -128,7 +128,7 @@ async function surface(url,name){
       assert.equal(await page.locator('#maskTry').isVisible(),true);
       await input(page,'#maskTry25',touch);assert.ok((await page.locator('#maskTryResult').innerText()).includes('Gateway(.1)'));
       await input(page,'#maskTry24',touch);assert.ok((await page.locator('#maskTryResult').innerText()).includes('직접 찾으려'));
-      assert.equal(await page.evaluate(k=>localStorage.getItem(k),key),saved,'mask playground changed saved answer');
+      
     }
     await input(page,'#nextBtn',touch);
    }
@@ -136,16 +136,14 @@ async function surface(url,name){
    assert.equal(await page.locator('#lessonCard').isVisible(),false,'summary must not expose the previous question as another active surface');
    assert.equal(await page.locator('#completionScore').innerText(),'완료 4 / 4 · 정답 2 · 다시 볼 문제 2');
    await page.reload({waitUntil:'networkidle'});
-   assert.equal(await page.locator('#complete').isVisible(),true,'summary view was not restored');
-   assert.equal(await page.locator('#lessonCard').isVisible(),false);
-   await input(page,'#reviewWrongBtn',touch);
-   assert.equal(await page.locator('#summaryReturnBtn').isVisible(),true);
-   await input(page,'#resetBtn',touch);assert.equal(await page.locator('#modelObservation').isVisible(),false);
-   assert.equal(await page.locator('#scoreText').innerText(),'정답 2 · 다시 볼 문제 1 · 남은 문제 1');
-   await input(page,'#choices [data-value="on"]',touch);await input(page,'#runBtn',touch);
-   await input(page,'#summaryReturnBtn',touch);
-   assert.equal(await page.locator('#completionScore').innerText(),'완료 4 / 4 · 정답 3 · 다시 볼 문제 1');
-   await input(page,'#reviewWrongBtn',touch);
+   assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4','reload must start fresh at problem 1');
+   assert.equal(await page.locator('#resultArea').isVisible(),false,'reload must clear prior result');
+   assert.equal(await page.locator('#complete').isVisible(),false,'reload must not restore summary');
+   assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
+   assert.equal(await page.evaluate(k=>localStorage.getItem(k),legacyKey),null,'legacy saved answers must be cleared');
+   assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+   await page.locator('.tab').nth(1).click();
+   await input(page,'#choices [data-value="gw"]',touch);await input(page,'#runBtn',touch);
    await input(page,'#evidenceDetails summary',touch);
    assert.ok((await page.locator('#evidenceScope').innerText()).includes('기존 Cisco/VPCS'));
    for(const href of await page.locator('.source-links a').evaluateAll(es=>es.map(e=>e.href))){const r=await context.request.get(href);assert.ok(r.ok(),`missing evidence link ${href}`);}
@@ -156,21 +154,21 @@ async function surface(url,name){
     assert.ok(forcedColorMeaning.includes('다른 네트워크 동네')&&forcedColorMeaning.includes('Gateway'),'forced-colors must preserve the route decision in text');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    assert.deepEqual(errors,[]);
-   checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','same-run-details','replay-keeps-grade','sequential-next','summary-return','summary-reload','actual-prefix','source-links','200%-text','forced-colors']});
+   checks.push({surface:name,width,height,touch,status:'PASS',checks:['visible-disabled-submit','stable-tab-focus','visible-model','same-run-details','replay-keeps-grade','sequential-next','fresh-start-reload','legacy-storage-clear','actual-prefix','source-links','200%-text','forced-colors']});
    console.log(`PASS latest-skill review ${name} ${width}x${height}`);
   }catch(e){await page.screenshot({path:resolve(out,`skill-review-failure-${name}-${width}.png`),fullPage:true});throw e;}finally{await context.close();}
  }
- // Old storage format must stay usable; only the new view property is optional.
+ // Legacy saved progress must be discarded so every new entry is a fresh practice run.
  const context=await browser.newContext(),page=await context.newPage();
  try{
   await page.goto(`${url}/${file}`);
-  await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({schema:1,index:2,answers:[{choice:'on',submitted:true},{choice:'gw',submitted:true},{choice:'drop',submitted:true},{choice:'gw',submitted:true}]})),key);
+  await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({schema:1,index:2,answers:[{choice:'on',submitted:true},{choice:'gw',submitted:true},{choice:'drop',submitted:true},{choice:'gw',submitted:true}]})),legacyKey);
   await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
-  assert.equal(await page.locator('#scoreText').innerText(),'정답 3 · 다시 볼 문제 1 · 남은 문제 0');
-  assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.140'));
-  await page.locator('#summaryReturnBtn').click();assert.equal(await page.locator('#complete').isVisible(),true);
-  checks.push({surface:name,case:'previous-schema-compatible',status:'PASS'});
+  assert.equal(await page.evaluate(k=>localStorage.getItem(k),legacyKey),null);
+  assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
+  assert.equal(await page.locator('#resultArea').isVisible(),false);
+  assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
+  checks.push({surface:name,case:'legacy-storage-cleared-fresh-start',status:'PASS'});
  }finally{await context.close();}
 }
 try{
