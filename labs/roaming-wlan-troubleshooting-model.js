@@ -39,7 +39,7 @@ adapter.presentation={
  ]
 };
 const roamActors=[{name:'AP A',role:'기존 접속 AP',kind:'ap'},{name:'PC A',role:'무선 단말 · STA',kind:'pc'},{name:'AP B',role:'전환 후보 AP',kind:'ap'}];
-function roamScene(title,detail,selected=null){WirelessLab.flow('roamFlow',roamActors,'AP 전환의 확인 관계 · 이동 거리·시간을 표현한 그림이 아닙니다.');const actors=document.querySelectorAll('#roamFlow .wireless-actor');if(selected!==null){actors[1].classList.add('current');actors[selected].classList.add('current');}$('visual').innerHTML='<div class="wireless-cards">'+WirelessLab.fact(title,detail,true)+'</div>';}
+function roamScene(title,detail,selected=null){WirelessLab.flow('roamFlow',roamActors,'AP 전환 관계 · 교육 모델');const actors=document.querySelectorAll('#roamFlow .wireless-actor');if(selected!==null){actors[1].classList.add('current');actors[selected].classList.add('current');}$('visual').innerHTML='<div class="wireless-cards">'+WirelessLab.fact(title,detail,true)+'</div>';}
 const roamReset=adapter.reset;
 adapter.reset=i=>{roamReset(i);$('visual').innerHTML=WirelessLab.fact('PC A의 접속 대상과 서비스 상태','예상한 뒤 실행하면 확인한 근거가 단계별로 표시됩니다.');WirelessLab.flow('roamFlow',roamActors,'접속 전환과 이후 통신을 따로 확인합니다.');$('resultBox').hidden=true;};
 function roamRoles(n){$('visual').innerHTML='<div class="wireless-cards">'+[['802.11k','어느 후보를 살펴볼지 알려 주는 정보'],['802.11v','후보 AP로 전환하라는 제안 · 완료 보장 아님'],['802.11r / FT','보안 전환의 부담을 줄여 빠른 전환 지원']].slice(0,n).map(([title,detail],i)=>WirelessLab.fact(title,detail,i===n-1)).join('')+'</div>';}

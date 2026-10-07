@@ -58,3 +58,9 @@
 @media(max-width:1000px){#simVisual:has(.so-stage) .observation{grid-template-areas:"topology" "event" "side"}}
 /* Labels remain legible where a vertical connection runs below a device. */
 #simVisual .so-stage .node b,#simVisual .so-stage .node small{position:relative;background:#f4f7fb;border-radius:4px}
+@media(max-width:600px){
+ /* Keep evidence-point names clear of the mode badge and of one another. */
+ #simVisual .so-stage[data-so-layout="chain5"] [data-so-link="link12"].cp{left:50%!important;top:56px!important}
+ #simVisual .so-stage[data-so-layout="observe"] [data-so-link="linkData"].cp{left:20%!important;top:50%!important}
+ #simVisual .so-stage[data-so-layout="observe"] [data-so-link="linkMgmt"].cp{left:80%!important;top:50%!important}
+}
