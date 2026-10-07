@@ -141,7 +141,7 @@ async function surface(url,name){
    assert.equal(await page.locator('#complete').isVisible(),false,'reload must not restore summary');
    assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
    assert.equal(await page.evaluate(k=>localStorage.getItem(k),legacyKey),null,'legacy saved answers must be cleared');
-   assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+   assert.ok((await page.locator('#storageNote').innerText()).includes('다시 들어오면 1번 문제부터 미응답 상태로 시작'));
    await page.locator('.tab').nth(1).click();
    await input(page,'#choices [data-value="gw"]',touch);await input(page,'#runBtn',touch);
    await input(page,'#evidenceDetails summary',touch);
