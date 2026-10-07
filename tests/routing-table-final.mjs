@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -41,11 +42,11 @@ try{
       try{
         const response=await page.goto(base+'/labs/routing-table.html',{waitUntil:'networkidle'});
         assert.equal(response.status(),200);
-        const body=await page.locator('body').innerText();
+        const body=await readLearningText(page);
         assert.ok(body.includes('Longest Prefix Match'));
         assert.ok(body.includes('Type 3 · Code 0'));
         assert.ok(body.includes('Type 3 · Code 1'));
-        assert.equal(await page.locator('a[href="routing-table-simulator.html"]').count(),1);
+        assert.equal(await page.locator('.cg-primary[href="routing-table-simulator.html"]').count(),1);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'guide horizontal document overflow');
         assert.deepEqual(errors,[]);
       }finally{await page.close();}

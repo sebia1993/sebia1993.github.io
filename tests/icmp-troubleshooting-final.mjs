@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -39,7 +40,7 @@ async function gotoPublished(page,path,marker){
       const response=await page.goto(published+path+'?qa=icmp-final',{waitUntil:'networkidle',timeout:30000});
       last='status '+response.status();
       if(response.status()===200){
-        const body=await page.locator('body').innerText();
+        const body=await readLearningText(page);
         if(body.includes(marker)) return response;
         last='marker missing';
       }
@@ -64,14 +65,14 @@ try{
         try{
           const response=await page.goto(base+path,{waitUntil:'networkidle'});
           assert.equal(response.status(),200);
-          assert.ok((await page.locator('body').innerText()).length>250);
+          assert.ok((await readLearningText(page)).length>250);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'horizontal document overflow');
           if(name==='guide'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('Ping은 “응답이 돌아오는가”'));
             assert.ok(body.includes('Code 0 · Network Unreachable'));
             assert.ok(body.includes('Code 1 · Host Unreachable'));
-            assert.equal(await page.locator('a[href="icmp-troubleshooting-simulator.html"]').count(),1);
+            assert.equal(await page.locator('.cg-primary[href="icmp-troubleshooting-simulator.html"]').count(),1);
           }
           if(name==='simulator'){
             assert.equal(await page.locator('.lesson-tab').count(),5);
@@ -80,7 +81,7 @@ try{
             assert.equal(await page.locator('#summaryPanel').isVisible(),false);
           }
           if(name==='validation'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('4 PASS / 1 FAIL'));
             assert.ok(body.includes('ORIGINAL FAIL'));
             assert.ok(body.includes('RESOLVED IMPLEMENTATION DIFFERENCE'));
@@ -167,7 +168,7 @@ try{
         assert.equal(await page.locator('.lesson-tab').count(),5);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
         await gotoPublished(page,'/learning/foundations/icmp-troubleshooting/cisco-validation-2026-10-03.html','4 PASS / 1 FAIL');
-        assert.ok((await page.locator('body').innerText()).includes('RESOLVED IMPLEMENTATION DIFFERENCE'));
+        assert.ok((await readLearningText(page)).includes('RESOLVED IMPLEMENTATION DIFFERENCE'));
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
         assert.deepEqual(errors,[]);
       }finally{await page.close();}

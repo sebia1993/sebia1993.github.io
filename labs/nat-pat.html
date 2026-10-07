@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NAT / PAT — 개념서</title>
-<meta name="description" content="Address/Port Translation과 Return Translation State의 공통 원리를 먼저 이해하고, Cisco IOS NAT 용어와 역할을 구현 사례로 구분하는 1단계 개념서입니다.">
+<meta name="description" content="주소 변환과 변환 기록을 통한 응답의 원래 통신 연결을 설명합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -23,15 +23,28 @@
 @media(max-width:1000px){.flow-grid{grid-template-columns:1fr 1fr}.translation-grid,.failure-grid,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}}
 @media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid{grid-template-columns:1fr}.map-row{grid-template-columns:1fr}.map-row span{transform:rotate(90deg)}.topology-stage{width:760px;height:360px}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
 </style>
-</head>
-<body>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 요약</a><a href="#basic">Basic NAT</a><a href="#pat">PAT</a><a href="#static">Static PAT</a><a href="#failure">장애</a></nav></div></header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">14 · 1단계 CONCEPT GUIDE</p><h1>NAT / PAT</h1><p class="cg-goal">주소 변환과 변환 기록을 통한 응답의 원래 통신 연결을 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="acl.html">Packet Filtering / ACL</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>여러 내부 컴퓨터가 같은 외부 주소를 쓰는데 응답은 어떻게 제자리로 돌아올까요?</h2><p class="cg-summary"><b>30초 핵심</b> · NAT는 내부와 외부에서 보이는 주소를 연결합니다. PAT는 통신 식별값도 함께 사용해 여러 흐름이 하나의 외부 IP를 공유할 수 있게 합니다.</p><figure class="cg-figure" aria-label="NAT / PAT 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">내부 통신 A</strong><div class="cg-route"><span class="cg-node">10.0.11.2:25473</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">외부 198.51.100.5:25473</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">응답 → 원래 A</span></div></div><div class="cg-lane"><strong class="cg-lane-label">내부 통신 B</strong><div class="cg-route"><span class="cg-node">10.0.14.2:46258</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">외부 198.51.100.5:46258</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">응답 → 원래 B</span></div></div><figcaption>기존 TCP 예제의 IP:포트 대응입니다. 두 통신은 같은 외부 IP를 쓰지만 구분 가능한 기록이 있습니다. 이 예제의 포트 번호는 변환 전후 동일했습니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>NAT / PAT</dt><dd>주소 변환과, 포트 같은 식별값까지 이용하는 변환 방식입니다.</dd></div><div><dt>Mapping / Translation Table</dt><dd>원래 주소·통신과 외부 표현을 짝지은 기록 및 그 표입니다.</dd></div><div><dt>Inside / Outside</dt><dd>변환 장치에서 구분한 내부·외부 방향입니다. 내부 주소와 외부에서 보이는 주소를 구분해 읽습니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>패킷이 변환 대상으로 선택되는지 봅니다.</li><li>내부 값을 외부 표현에 대응시키고 기록합니다.</li><li>상대에게 전달하고 응답을 받습니다.</li><li>응답에 맞는 기록을 찾아 원래 내부 통신으로 되돌립니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">주소·포트 변환</th><td>내부와 외부 표현을 연결합니다. 포트가 항상 바뀌어야 하는 것은 아닙니다.</td></tr><tr><th scope="row">보안 정책 차단</th><td>패킷 전달을 허용하거나 막습니다. NAT 대상에서 빠졌다고 항상 즉시 차단되는 것은 아닙니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>NAT 전후의 값과 대응 기록을 함께 봅니다.</li><li>PAT의 핵심은 공유 주소에서 통신을 구분하는 것입니다.</li><li>응답의 경로와 역변환도 성립해야 합니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>외부 주소가 같아도 A의 응답과 B의 응답이 섞이지 않는 이유는 무엇일까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="nat-pat-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 기존 예제의 Basic NAT·PAT 기록을 단순화했습니다. 미변환과 Drop은 구분하며 Static PAT와 실패 사례는 선택 자료에 보존합니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>NAT / PAT</h1>
+    <h2>NAT / PAT</h2>
     <p>목표는 하나입니다. <b>내부 Endpoint가 외부에 어떤 Mapping으로 보이고, Translation State가 Return Traffic을 원래 Endpoint로 어떻게 되돌리는지</b> 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>NAT는 “주소를 바꾸는 기능”만이 아닙니다.</strong><span>Outside에서 돌아오는 Packet을 원래 Inside Flow와 다시 연결하는 Translation State까지 함께 봐야 합니다.</span></div>
@@ -154,7 +167,8 @@
 <section><div class="shell"><div class="next-stage"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>NAT 전후 Packet 값과 Translation Table을 직접 예상해 보세요.</h2><p>Basic NAT → PAT → Return Translation → Static PAT → Selection 실패 → Inside Role 복구 순서로 같은 토폴로지에서 확인합니다.</p></div><div class="actions"><a class="btn primary" href="nat-pat-simulator.html">Interactive Lab 시작 →</a></div></div></div></section>
 
 <section id="basis"><div class="shell"><div class="note"><b>검증 기준:</b> Run 2026-10-04-nat-pat-01, Cisco IOL L3 4대 / IOS 15.4(2)T4. NAT-01~06 모두 PASS했고 CP11/CP14/CP23 원본 PCAP, Translation Table, NAT role/state를 교차 검증했습니다. 최종 Baseline 복구와 임시 TCP 서비스 종료도 확인했습니다.</div></div></section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">NAT / PAT · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">NAT / PAT · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

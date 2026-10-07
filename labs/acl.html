@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Packet Filtering / ACL — 개념서</title>
-<meta name="description" content="Packet Filtering의 Match→Action 공통 모델을 먼저 이해하고, Cisco IOS Extended ACL의 First Match, Implicit Deny, Interface Direction을 구현 규칙으로 구분하는 1단계 개념서입니다.">
+<meta name="description" content="정책이 적용되는 위치·방향과 패킷 조건을 연결해 허용 또는 차단을 설명합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -24,26 +24,28 @@
 @media(max-width:1000px){.flow-grid{grid-template-columns:1fr 1fr}.match-grid{grid-template-columns:1fr 1fr}.compare-grid,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}}
 @media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}.flow-grid,.match-grid{grid-template-columns:1fr}.rule-line{grid-template-columns:46px 1fr}.rule-line .result{grid-column:2}.topology-stage{width:700px;height:280px}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
 </style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a>
-      <a href="#match">Match 조건</a>
-      <a href="#order">순서</a>
-      <a href="#direction">Direction</a>
-      <a href="#oneway">단방향</a>
-    </nav>
-  </div>
-</header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">13 · 1단계 CONCEPT GUIDE</p><h1>Packet Filtering / ACL</h1><p class="cg-goal">정책이 적용되는 위치·방향과 패킷 조건을 연결해 허용 또는 차단을 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="ospf.html">OSPF</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>길은 연결돼 있는데 특정 통신만 막히는 이유는 무엇일까요?</h2><p class="cg-summary"><b>30초 핵심</b> · ACL은 패킷의 주소와 통신 종류 등을 조건과 비교해 허용·차단하는 규칙 목록입니다. 이번 Cisco ACL은 위에서부터 검사하며 처음 맞는 규칙으로 결정합니다.</p><figure class="cg-figure" aria-label="Packet Filtering / ACL 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">같은 R1 → R3 경로</strong><div class="cg-route"><span class="cg-node">R1 · ICMP 요청</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R2 · ICMP 차단 조건</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">중단</span></div></div><div class="cg-lane"><strong class="cg-lane-label">다른 통신 종류</strong><div class="cg-route"><span class="cg-node">R1 · TCP/23 요청</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R2 · TCP/23 허용 조건</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R3에 전달</span></div></div><figcaption>기존 예제에서 경로는 유지하고 R2 정책만 달리한 비교입니다. TCP는 통신 방식, 23은 서비스 구분에 사용하는 포트 번호입니다. 스위치 물리 포트와 다릅니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>ACL / ACE</dt><dd>ACL은 접근 규칙 목록, ACE는 목록의 개별 규칙입니다.</dd></div><div><dt>Match / Permit / Deny</dt><dd>조건 일치, 허용, 차단이라는 뜻입니다. 패킷의 출발지·목적지·프로토콜·서비스 포트 등을 비교합니다.</dd></div><div><dt>in / out</dt><dd>규칙을 적용한 장비 인터페이스로 들어오거나 나가는 방향입니다. 사용자가 시작한 통신 방향과 혼동하지 않습니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>패킷이 어느 인터페이스의 어느 방향을 지나는지 확인합니다.</li><li>적용된 ACL의 규칙을 위에서부터 비교합니다.</li><li>처음 맞는 규칙의 허용 또는 차단을 적용합니다.</li><li>이번 Cisco ACL에서는 끝까지 맞는 규칙이 없으면 암묵적으로 차단합니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">요청 패킷</th><td>출발지와 목적지를 기준으로 독립 평가합니다.</td></tr><tr><th scope="row">응답 패킷</th><td>요청과 방향이 바뀐 별도 패킷입니다. 요청을 허용했다고 응답까지 자동 허용되는 ACL은 아닙니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>조건뿐 아니라 적용 위치·방향을 봅니다.</li><li>규칙 순서를 바꾸면 결과가 바뀔 수 있습니다.</li><li>이 Stateless ACL은 요청과 응답을 각각 평가합니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>넓은 차단 규칙이 위에 있다면 그 아래의 구체적인 허용 규칙이 왜 효과가 없을까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="acl-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · First Match·Implicit Deny·in/out 세부는 기존 Cisco IOS Extended ACL 구현 기준입니다. 모든 제품의 정책 처리 순서로 확대하지 않습니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>Packet Filtering / <em>ACL</em></h1>
+    <h2>Packet Filtering / <em>ACL</em></h2>
     <p>목표는 하나입니다. <b>Packet Header의 조건을 Match하고 Policy Action이 어디에서 적용되는지</b> 설명할 수 있으면 됩니다. 이번 Lab의 First Match·Implicit Deny·Interface Direction은 Cisco IOS Extended ACL 구현으로 확인합니다.</p>
     <div class="concept-stage">
       <div><strong>Route가 정상이라고 Packet이 반드시 통과하는 것은 아닙니다.</strong><span>R2에서 ACL이 Match하면 Routing은 그대로여도 특정 Packet만 멈출 수 있습니다.</span></div>
@@ -206,7 +208,8 @@
     <div class="note"><b>검증 기준:</b> Run 2026-10-04-acl-01, Cisco IOL L3 3대 / IOS 15.4(2)T4. ACL-01~05는 원래 Expected 기준 PASS, ACL-06 원래 Expected는 FAIL 이력을 보존했습니다. Echo Request만 차단하도록 수정한 SUPP06A/B는 One-way / Bidirectional / Recovery가 모두 PASS했고 최종 Baseline도 복구됐습니다.</div>
   </div>
 </section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">Packet Filtering / ACL · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">Packet Filtering / ACL · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

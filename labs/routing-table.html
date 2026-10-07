@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Routing Table / Static / Default Route — 개념서</title>
-<meta name="description" content="Connected, Static, Default Route와 Longest Prefix Match를 실제 Cisco 검증 결과에 연결해 이해하는 1단계 개념서입니다.">
+<meta name="description" content="목적지에 맞는 경로 중 가장 구체적인 주소 범위를 고르는 원리를 설명합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -23,26 +23,28 @@
 @media(max-width:900px){.route-grid{grid-template-columns:1fr}.decision-grid,.failure-grid,.std-impl,.memory-grid{grid-template-columns:1fr}.concept-stage,.next-stage{display:grid;grid-template-columns:1fr}.match-row{grid-template-columns:1fr}.match-row span{color:var(--muted)}}
 @media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.preview-hero{padding-top:38px}}
 </style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a>
-      <a href="#routes">Route 종류</a>
-      <a href="#lpm">LPM</a>
-      <a href="#failure">장애/복구</a>
-      <a href="#difference">표준·구현 차이</a>
-    </nav>
-  </div>
-</header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">11 · 1단계 CONCEPT GUIDE</p><h1>Routing Table / Static / Default Route</h1><p class="cg-goal">목적지에 맞는 경로 중 가장 구체적인 주소 범위를 고르는 원리를 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="dns.html">DNS</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>목적지로 갈 수 있는 길이 여러 개 적혀 있으면 어느 길을 고를까요?</h2><p class="cg-summary"><b>30초 핵심</b> · 라우터는 목적지 IP를 경로표와 비교합니다. 맞는 경로가 여러 개면 더 구체적인 범위, 즉 Prefix Length가 긴 경로를 선택합니다.</p><figure class="cg-figure" aria-label="Routing Table / Static / Default Route 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">목적지 203.0.113.10</strong><div class="cg-route"><span class="cg-node">R1 경로표</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">203.0.113.0/24 일치</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R2 방향 선택</span></div></div><div class="cg-lane"><strong class="cg-lane-label">같이 일치하지만 덜 구체적</strong><div class="cg-route"><span class="cg-node">같은 목적지</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">0.0.0.0/0 일치</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R3 방향은 미선택</span></div></div><figcaption>두 행은 같은 목적지에 일치하는 경로 후보입니다. /24가 /0보다 구체적이므로 R2 방향을 선택합니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>Routing Table / Route</dt><dd>경로 정보가 모인 표와 그 개별 항목입니다. 항목은 목적지 범위와 전달 방향을 알려줍니다.</dd></div><div><dt>Connected / Static</dt><dd>직접 연결된 네트워크의 경로가 Connected, 관리자가 지정한 경로가 Static입니다.</dd></div><div><dt>Default / LPM</dt><dd>Default Route인 0.0.0.0/0은 더 구체적인 경로가 없을 때 사용합니다. 가장 긴 Prefix Length를 고르는 규칙은 LPM입니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>목적지 IP를 확인합니다.</li><li>경로표에서 목적지에 일치하는 주소 범위를 찾습니다.</li><li>여러 범위가 맞으면 Prefix Length가 가장 긴 경로를 고릅니다.</li><li>선택한 경로의 다음 라우터나 출력 인터페이스로 보냅니다. 사용 가능한 경로가 없으면 전달할 수 없습니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">203.0.113.0/24</th><td>해당 /24 범위의 목적지를 구체적으로 지정합니다.</td></tr><tr><th scope="row">0.0.0.0/0</th><td>모든 IPv4 목적지에 맞지만 더 구체적인 경로가 있으면 밀립니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>경로 선택의 기준은 목적지 IP입니다.</li><li>길이가 다른 일치 범위 중 가장 구체적인 경로를 고릅니다.</li><li>기본 경로도 설정·사용 가능한 경로가 있어야 쓸 수 있습니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>/24와 /0이 동시에 일치할 때 기본 경로를 먼저 쓰지 않는 이유는 무엇일까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="routing-table-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 서로 다른 길이의 범위를 비교하는 학습입니다. 같은 범위의 경로끼리 우선순위를 비교하는 문제와 구분합니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>Routing Table / Static / Default Route</h1>
+    <h2>Routing Table / Static / Default Route</h2>
     <p>목표는 하나입니다. <b>목적지 IP를 보고 어떤 Route가 선택되며, 그 결과 패킷이 어느 Next Hop으로 전달되는지</b> 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>라우터는 “가장 가까워 보이는 길”이 아니라 Routing Table에서 가장 구체적으로 일치하는 Prefix를 선택합니다.</strong><span>선택된 Route가 Next Hop / Output Interface를 결정합니다.</span></div>
@@ -185,7 +187,8 @@
     <div class="note"><b>검증 기준:</b> 2026-10-04 Cisco IOL IOS 15.4(2)T4 3대 + VPCS 1대로 ROUTE-01~06을 검증했습니다. 원래 결과는 5 PASS / 1 FAIL이며, ROUTE-05의 RFC Code 0 vs Cisco Actual Code 1 차이는 원본 FAIL을 보존한 상태에서 구현 차이로 Resolution했습니다. 두 차례 추가 재검증에서도 동일 결과가 재현됐고 Final Baseline은 복원됐습니다.</div>
   </div>
 </section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">Routing Table · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">Routing Table / Static / Default Route · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

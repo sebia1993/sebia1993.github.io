@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Inter-VLAN Routing — 개념서</title>
-<meta name="description" content="같은 VLAN과 다른 VLAN 통신에서 Default Gateway, L3 Gateway, TTL, Ethernet 재캡슐화가 어떻게 달라지는지 이해하고 Cisco SVI를 구현 사례로 구분하는 1단계 개념서입니다.">
+<meta name="description" content="다른 네트워크로 갈 때 Gateway가 IP 패킷을 전달하고 프레임을 새로 만드는 이유를 설명합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -22,26 +22,28 @@
 @media(max-width:900px){.flow-cards{grid-template-columns:1fr 1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.compare-grid,.failure-grid,.header-swap{grid-template-columns:1fr}}
 @media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.flow{grid-template-columns:1fr 28px 1fr 28px 1fr}.flow-node{padding:11px 3px}.flow-node b{font-size:.78rem}.flow-node span{font-size:.62rem}.flow-link strong{font-size:.65rem}.flow-link span{display:none}.flow-cards{grid-template-columns:1fr}.preview-hero{padding-top:38px}}
 </style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a>
-      <a href="#same-remote">같은/다른 VLAN</a>
-      <a href="#routing">Routing</a>
-      <a href="#reply">Reply</a>
-      <a href="#failure">장애</a>
-    </nav>
-  </div>
-</header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">06 · 1단계 CONCEPT GUIDE</p><h1>Inter-VLAN Routing</h1><p class="cg-goal">다른 네트워크로 갈 때 Gateway가 IP 패킷을 전달하고 프레임을 새로 만드는 이유를 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="vlan-trunk.html">VLAN / 802.1Q</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>서로 다른 VLAN의 컴퓨터는 어떻게 경계를 넘어 통신할까요?</h2><p class="cg-summary"><b>30초 핵심</b> · VLAN을 나누는 것과 VLAN 사이로 전달하는 것은 다릅니다. 다른 네트워크로 가는 패킷은 Gateway가 경로를 판단해 다음 구간에 맞는 프레임으로 보냅니다.</p><figure class="cg-figure" aria-label="Inter-VLAN Routing 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">같은 VLAN 10 · 같은 /24</strong><div class="cg-route"><span class="cg-node">PC10A · 10.10.10.10</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC10B의 MAC 사용</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC10B · 10.10.10.20</span></div></div><div class="cg-lane"><strong class="cg-lane-label">VLAN 10 → VLAN 20</strong><div class="cg-route"><span class="cg-node">PC10A</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">Gateway MAC → 라우팅</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC20A · 10.10.20.10</span></div></div><figcaption>스위치 배선을 생략한 전달 대상 그림입니다. 두 번째 줄의 최종 IP 목적지는 PC20A지만 첫 프레임의 목적지 MAC은 Gateway입니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>L2 / L3</dt><dd>여기서 L2는 MAC 프레임 전달, L3는 IP 주소에 따른 네트워크 사이 전달을 가리킵니다.</dd></div><div><dt>Routing · 라우팅</dt><dd>IP 목적지로 가는 경로를 고르고 다음 구간으로 보내는 일입니다.</dd></div><div><dt>Gateway Interface / SVI</dt><dd>VLAN의 출구 역할을 하는 접속점입니다. 이번 Cisco 스위치의 논리적인 VLAN 인터페이스는 SVI라고 부릅니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>PC10A가 목적지와 같은 네트워크인지 판단합니다.</li><li>다르면 Gateway의 MAC으로 프레임을 보냅니다.</li><li>Gateway는 경로를 확인하고 TTL을 감소시킵니다.</li><li>다음 구간의 MAC 주소로 새 프레임을 만들어 전달합니다. 응답도 반대편에서 독립적으로 판단합니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">IP 목적지</th><td>이 NAT 없는 예제에서는 최종 PC20A 주소를 유지합니다.</td></tr><tr><th scope="row">프레임의 MAC 주소</th><td>각 구간의 송신자와 다음 전달 대상에 맞게 구성됩니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>단말은 목적지와 같은 네트워크인지 먼저 판단합니다.</li><li>다른 네트워크에는 Gateway를 통해 전달합니다.</li><li>라우팅 후 IP 목적지와 MAC 목적지의 역할을 혼동하지 않습니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>PC20A로 보내는 첫 프레임에 PC20A가 아니라 Gateway의 MAC이 들어가는 이유는 무엇일까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="inter-vlan-routing-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 기존 예제는 VLAN별로 서로 다른 /24 네트워크를 사용합니다. VLAN 번호만 보고 단말의 IP 판단이 자동 결정된다고 해석하지 않습니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1><em>Inter-VLAN</em> Routing</h1>
+    <h2><em>Inter-VLAN</em> Routing</h2>
     <p>목표는 하나입니다. <b>같은 VLAN은 직접 L2로 보내고, 다른 VLAN은 Default Gateway를 거쳐 Routing된다는 차이</b>를 Ethernet과 IP Header까지 연결해 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>이 페이지에서는 L2/L3 경계만 정확히 봅니다.</strong><span>Routing Table이나 CLI를 외우기보다 “Host가 누구의 MAC을 쓰는가 → L3 Gateway가 무엇을 바꾸는가”에 집중합니다.</span></div>
@@ -183,7 +185,8 @@
     <div class="note"><b>검증 기준:</b> 2026-10-04 PNETLab의 Cisco IOL SVI L3 Switch + VPCS 4대로 IVR-01~06을 모두 PASS했습니다. <a href="../learning/campus/inter-vlan-routing/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
   </div>
 </section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">Inter-VLAN Routing · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">Inter-VLAN Routing · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

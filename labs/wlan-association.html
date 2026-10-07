@@ -3,19 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>802.11 접속 · WPA2 / WPA3 — 개념서</title>
-  <meta name="description" content="Discovery, Authentication, Association, WPA2 4-Way와 WPA3 SAE를 순서로 이해하는 개념서. 공식 문서·공개 PCAP과 교육 모델을 구분합니다.">
+  <title>802.11 접속 / WPA2·WPA3 — 개념서</title>
+  <meta name="description" content="AP 발견, 연결 협상, 보안 키 준비를 서로 다른 단계로 설명합니다.">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="../lab-ui.css">
   <link rel="stylesheet" href="wlan-association.css">
+
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
 </head>
-<body class="wlan-page">
-<a class="wlan-skip" href="#main">본문으로 건너뛰기</a>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav" aria-label="개념서 목차"><a href="#order">접속 순서</a><a href="#wpa2">WPA2 / WPA3</a><a href="#diagnosis">실패 구분</a><a href="#evidence">근거</a></nav></div></header>
-<main id="main">
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">17 · 1단계 CONCEPT GUIDE</p><h1>802.11 접속 / WPA2·WPA3</h1><p class="cg-goal">AP 발견, 연결 협상, 보안 키 준비를 서로 다른 단계로 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="wifi-rf.html">Wi-Fi / RF 기초</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>Wi-Fi 이름이 보이는 것과 안전하게 데이터를 보내는 것은 같은 상태일까요?</h2><p class="cg-summary"><b>30초 핵심</b> · AP를 발견했다고 데이터 통신이 준비된 것은 아닙니다. 접속 방식에 맞는 인증과 연결 협상, 보안 키 준비를 거쳐 보호된 데이터를 주고받습니다.</p><figure class="cg-figure" aria-label="802.11 접속 / WPA2·WPA3 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">WPA2-Personal · 기본 최초 접속</strong><div class="cg-route"><span class="cg-node">Open System 인증</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">Association · 연결 협상</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">4-Way → 보호된 데이터</span></div></div><div class="cg-lane"><strong class="cg-lane-label">WPA3-Personal · 새 SAE 접속</strong><div class="cg-route"><span class="cg-node">SAE · 키 자료 준비</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">Association · 연결 협상</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">4-Way → 보호된 데이터</span></div></div><figcaption>접속 순서의 교육 모델입니다. AP 발견은 두 흐름보다 앞에 있습니다. 캐시를 이용한 재접속 등 예외는 아래 선택 자료에서 구분합니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>Authentication / Association</dt><dd>인증 단계와 AP와의 연결 조건 협상입니다. WPA2 Open System 성공은 Wi-Fi 암호 검증 성공이 아닙니다.</dd></div><div><dt>SAE / PMK</dt><dd>SAE는 WPA3-Personal의 키 자료 준비에 쓰이는 인증 방식입니다. 양측이 준비한 기초 키 자료를 PMK라고 합니다.</dd></div><div><dt>4-Way Handshake</dt><dd>PMK를 바탕으로 실제 통신에 쓸 키를 준비하고 확인하는 교환입니다. PMK 자체를 첫 메시지로 전송한다는 뜻은 아닙니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>단말이 AP의 광고나 탐색 응답을 통해 AP를 찾습니다.</li><li>접속 방식에 맞게 인증하고 연결 조건을 협상합니다.</li><li>4-Way 교환으로 데이터 보호용 키를 준비합니다.</li><li>보호된 데이터가 실제로 전달되는지 확인합니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">연결 협상 성공</th><td>AP와 접속 조건을 합의한 상태입니다.</td></tr><tr><th scope="row">보안 교환·데이터 성공</th><td>키 준비와 실제 통신까지 확인한 상태입니다. 앞 단계의 성공만으로 자동 확정하지 않습니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>발견, 연결 협상, 키 준비는 다른 단계입니다.</li><li>WPA2의 Open System 성공이 올바른 암호를 뜻하지는 않습니다.</li><li>WPA3의 SAE와 이후 4-Way 역할을 구분합니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>AP가 보이고 Association도 성공했는데 데이터가 안 된다면 아직 어떤 단계가 남아 있을까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="wlan-association-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 공식 문서와 공개 PCAP 기반 설명입니다. 사용자 AP·태블릿의 직접 실측 완료나 WPA3 요구사항 전체 검증을 의미하지 않습니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
   <section class="wlan-hero"><div class="shell">
     <div class="wlan-kicker"><span class="eyebrow">1단계 · CONCEPT GUIDE</span><span class="wlan-badge">공식 문서 + 공개 PCAP 기반 학습</span></div>
-    <h1>802.11 접속<br><em>WPA2 · WPA3</em></h1>
+    <h2>802.11 접속<br><em>WPA2 · WPA3</em></h2>
     <p>Wi-Fi 이름을 찾은 뒤, 언제 연결하고 언제 암호를 확인할까요?<br><b>Authentication·Association·보안 Handshake를 구분</b>하는 것이 오늘의 목표입니다.</p>
     <nav class="wlan-stage-nav" aria-label="학습 단계"><span aria-current="step">1 · 개념서</span><a href="wlan-association-simulator.html">2 · Interactive Lab →</a></nav>
     <div class="wlan-keyline"><strong>AP 발견 → 인증 → 연결 협상 → Traffic Key 준비 → 보호된 데이터</strong><p>WPA2와 WPA3는 PMK를 준비하는 방식이 다르고, 이후 4-Way Handshake를 사용합니다.</p></div>
@@ -80,7 +93,8 @@
 
   <section><div class="shell"><div class="wlan-next"><div><div class="eyebrow">2단계 · INTERACTIVE LAB</div><h2>접속 단계가 보이면 실패 위치도 보입니다.</h2><p>6문제에서 예상하고, 메시지 순서를 관찰하고, 오답을 다시 풀어 보세요.</p></div><a class="btn primary" href="wlan-association-simulator.html">Interactive Lab 시작 →</a></div></div></section>
   <section id="evidence"><div class="shell"><div class="wlan-reference"><div class="eyebrow">REFERENCE & SCOPE</div><h2>공개 패킷 근거와 직접 실측의 범위</h2><p>공식 문서는 동작 원리를, 공개 PCAP은 해당 샘플에서 관측된 프레임을 뒷받침합니다. <b>공개 표본은 WPA3 인증·규격 준수 전체의 증거가 아닙니다.</b> 우리 AP·태블릿의 동작을 검증한 것도 아닙니다.</p><div class="wlan-reference-links"><a href="../learning/wireless/wlan-association/reference-validation-2026-10-05.html">공개 PCAP 분석과 관측 범위 →</a><a href="../learning/wireless/wlan-association/reference-evidence.json">패킷 근거 JSON</a></div><ul class="wlan-source-list"><li><a href="https://www.cisco.com/c/en/us/support/docs/wireless-mobility/80211/200527-Fundamentals-of-802-11-Wireless-Sniffing.html">Cisco · Authentication, Association, 4-Way</a></li><li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-sae-authentication">Microsoft · SAE와 PMKID 캐시 접속</a></li><li><a href="https://www.cisco.com/c/en/us/support/docs/wireless-mobility/wireless-lan-wlan/212576-configure-802-11w-management-frame-prote.html">Cisco · PMF와 관리 프레임 보호</a></li><li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/netcx/wificx-wpa3-softap">Microsoft · WPA3·Transition과 PMF 조건</a></li><li><a href="https://wiki.wireshark.org/HowToDecrypt802.11">Wireshark · WPA3 복호화 조건</a></li></ul></div></div></section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">802.11 접속 · WPA2 / WPA3 · Concept Guide → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">802.11 접속 / WPA2·WPA3 · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

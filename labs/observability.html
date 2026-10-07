@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Packet / Log / SNMP 관측 — 개념서</title>
-<meta name="description" content="하나의 네트워크 장애를 Packet Capture, Syslog, SNMP 상태와 알림으로 함께 확인하고 사건 타임라인으로 연결하는 원리를 배우는 개념서입니다.">
+<meta name="description" content="패킷·사건 기록·상태 조회를 같은 장비와 시간 흐름으로 연결합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -24,14 +24,28 @@
 @media(max-width:760px){.first-q,.grid2,.review{grid-template-columns:1fr}.question-mark{margin:auto}.evidence-grid,.flow,.phase-events{grid-template-columns:1fr}.phase{grid-template-columns:1fr}.cta{display:grid}}
 @media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.obs-hero{padding-top:42px}.compare{min-width:0;table-layout:fixed}.compare th,.compare td{padding:8px 5px;font-size:.72rem}}
 </style>
+
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
 </head>
-<body>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#summary">30초 핵심</a><a href="#evidence">증거 종류</a><a href="#timeline">사건 연결</a><a href="#recovery">복구 확인</a></nav></div></header>
-<main>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">24 · 1단계 CONCEPT GUIDE</p><h1>Packet / Log / SNMP 관측</h1><p class="cg-goal">패킷·사건 기록·상태 조회를 같은 장비와 시간 흐름으로 연결합니다.</p><p class="cg-prior">앞선 학습 · <a href="redistribution.html">Redistribution / Route Control</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>통신이 끊겼다는 결과만으로 원인과 복구를 설명할 수 있을까요?</h2><p class="cg-summary"><b>30초 핵심</b> · 서로 다른 관측 자료는 서로 다른 질문에 답합니다. 한 자료로 원인을 확정하기보다 같은 장비와 인터페이스의 변화인지 연결하고 복구 결과도 확인합니다.</p><figure class="cg-figure" aria-label="Packet / Log / SNMP 관측 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">데이터 경로</strong><div class="cg-route"><span class="cg-node">R1의 데이터 인터페이스</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">패킷 관측</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R2와 실제 왕복 확인</span></div></div><div class="cg-lane"><strong class="cg-lane-label">별도 관리 경로</strong><div class="cg-route"><span class="cg-node">R1의 관리 인터페이스</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">기록·상태·알림</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">NMS1에서 확인</span></div></div><figcaption>기존 실험에서는 데이터 링크를 내려도 관리 링크는 유지했습니다. NMS1은 트래픽 전달 라우터가 아니라 관측용 단말입니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>Packet Capture / Syslog</dt><dd>링크에서 보인 패킷의 기록과, 장비가 남기거나 보내는 사건 로그입니다.</dd></div><div><dt>SNMP GET / Trap</dt><dd>GET은 현재 상태를 묻는 요청, Trap은 장비가 보내는 비동기 알림입니다.</dd></div><div><dt>Correlation · 연관 확인</dt><dd>시간·장비·인터페이스를 맞춰 서로 다른 자료가 같은 사건을 가리키는지 확인하는 일입니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>정상 통신과 상태를 먼저 기록합니다.</li><li>문제 구간의 패킷·로그·현재 상태를 확인합니다.</li><li>자료들이 같은 장비와 상태 전환을 가리키는지 연결합니다.</li><li>복구 뒤 실제 통신과 상태가 다시 정상인지 함께 봅니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">설정 상태 · Admin</th><td>관리자가 인터페이스를 어떻게 설정했는지입니다.</td></tr><tr><th scope="row">동작 상태 · Oper</th><td>인터페이스가 실제로 동작하는 상태입니다. 설정 의도와 구분해서 확인합니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>Ping 실패 하나로 원인을 확정하지 않습니다.</li><li>상태 조회와 변화 알림은 다른 자료입니다.</li><li>자료의 도착 시각이 정확히 같지 않아도 같은 사건일 수 있습니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>복구 명령은 실행했지만 Ping이 여전히 실패한다면 복구 완료라고 할 수 있을까요? 무엇을 더 확인할까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="observability-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 기존 격리 Lab의 관측 범위입니다. Trap에 없는 상태값을 추정해 넣거나 비동기 자료의 시각을 임의로 맞추지 않습니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="obs-hero"><div class="shell">
 <span class="scope-badge">RFC 5424 · RFC 3416 · RFC 2863 · RFC 3418 + 실제 Cisco/Net-SNMP 검증 · OBS-01~06 PASS</span>
 <div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
-<h1>Packet / Log / SNMP 관측</h1>
+<h2>Packet / Log / SNMP 관측</h2>
 <p><b>Ping이 끊겼다는 사실만 알면 장애 원인까지 알 수 있을까요?</b> 아닙니다. “통신이 안 됐다”와 “장비에서 어떤 일이 일어났는가”는 다른 질문입니다. 여러 종류의 증거를 같은 사건으로 연결해야 원인과 복구를 더 정확하게 설명할 수 있습니다.</p>
 <div class="core"><strong>사건 하나 → Packet · Log · 상태 조회 · 알림 → 시간과 대상 장비로 묶기 → 복구까지 확인</strong><p>한 증거가 모든 것을 말해 주지는 않습니다. 서로 다른 증거가 <b>같은 인터페이스의 같은 상태 변화</b>를 가리키는지 확인하는 것이 핵심입니다.</p></div>
 </div></section>
@@ -132,7 +146,8 @@
 </div>
 <div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL 15.4(2)T4 R1/R2 + PNETLab 내부 Debian 12/Net-SNMP 5.9.3 NMS1에서 OBS-01~06을 실제 검증했습니다. CP-DATA 85 frames, CP-MGMT 86 frames, kernel drop 0이며 원본 hash를 보존했습니다. SNMPv2c community가 들어 있는 private evidence 원본은 공개하지 않습니다.</div>
 </div></section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">Packet / Log / SNMP 관측 · Event → Evidence → Correlation → Recovery</div></footer>
+<footer class="cg-footer"><div class="cg-shell">Packet / Log / SNMP 관측 · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

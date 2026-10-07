@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -40,11 +41,11 @@ try{
       try{
         const response=await page.goto(base+'/labs/ospf.html',{waitUntil:'networkidle'});
         assert.equal(response.status(),200);
-        const body=await page.locator('body').innerText();
+        const body=await readLearningText(page);
         assert.ok(body.includes('Hello → Neighbor → LSA / LSDB → SPF'));
         assert.ok(body.includes('R1 → R2 → R3 = Cost 21'));
         assert.ok(body.includes('EXSTART'));
-        assert.equal(await page.locator('a[href="ospf-simulator.html"]').count(),1);
+        assert.equal(await page.locator('.cg-primary[href="ospf-simulator.html"]').count(),1);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'guide horizontal document overflow');
         assert.deepEqual(errors,[]);
       }finally{await page.close();}

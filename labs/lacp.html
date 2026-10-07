@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LACP / Link Aggregation — 개념서</title>
-<meta name="description" content="LACP 협상, Port-Channel, Flow Hash, Member 장애와 전체 Bundle 장애를 짧게 이해하는 1단계 개념서입니다.">
+<meta name="description" content="여러 물리 링크의 묶음과 개별 통신에 선택되는 링크를 구분합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -21,26 +21,28 @@
 @media(max-width:900px){.flow-cards{grid-template-columns:1fr 1fr}.compare-grid{grid-template-columns:1fr}.concept-stage,.next-stage{grid-template-columns:1fr;display:grid}.memory-grid,.failure-grid{grid-template-columns:1fr}}
 @media(max-width:680px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;white-space:nowrap;margin-bottom:8px}header .nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;padding-bottom:3px;scrollbar-width:none}header .nav::-webkit-scrollbar{display:none}header .nav a{flex:0 0 auto;white-space:nowrap;font-size:.82rem}section{scroll-margin-top:108px}.flow-cards{grid-template-columns:1fr}.hash-map{grid-template-columns:1fr}.preview-hero{padding-top:38px}}
 </style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a>
-      <a href="#bundle">Bundle</a>
-      <a href="#hash">Hash</a>
-      <a href="#failure">장애</a>
-      <a href="#review">복습</a>
-    </nav>
-  </div>
-</header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">08 · 1단계 CONCEPT GUIDE</p><h1>LACP / Link Aggregation</h1><p class="cg-goal">여러 물리 링크의 묶음과 개별 통신에 선택되는 링크를 구분합니다.</p><p class="cg-prior">앞선 학습 · <a href="stp.html">STP / RSTP</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>케이블 두 개를 하나처럼 쓰면 한 통신도 무조건 두 배 빨라질까요?</h2><p class="cg-summary"><b>30초 핵심</b> · 여러 케이블을 하나의 논리 링크로 묶을 수 있습니다. 하지만 한 통신 흐름은 선택 기준에 따라 그중 한 링크를 사용할 수 있어, 케이블 수가 곧 한 통신의 배속은 아닙니다.</p><figure class="cg-figure" aria-label="LACP / Link Aggregation 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">통신 A</strong><div class="cg-route"><span class="cg-node">PC1A</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">묶음의 M2 선택</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC2A</span></div></div><div class="cg-lane"><strong class="cg-lane-label">통신 B</strong><div class="cg-route"><span class="cg-node">PC1B</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">같은 묶음의 M1 선택</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC2A</span></div></div><figcaption>M1과 M2는 SW1–SW2 사이의 물리 링크입니다. 기존 src-mac 방식 검증의 두 흐름을 그렸으며 모든 흐름이 반반 나뉜다는 뜻은 아닙니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>LAG / Member</dt><dd>여러 물리 링크의 논리 묶음이 LAG이고, 그 묶음의 개별 링크가 Member입니다. Cisco에서는 Port-Channel이라고도 합니다.</dd></div><div><dt>LACP</dt><dd>양쪽 장비가 묶음에 사용할 링크 정보를 주고받는 절차입니다.</dd></div><div><dt>Flow / Hash</dt><dd>Flow는 같은 통신으로 묶어 보는 흐름입니다. Hash는 주소 등의 입력으로 사용할 멤버를 고르는 방식입니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>양쪽 장비가 LACP 정보를 교환합니다.</li><li>조건이 맞는 링크들을 하나의 LAG로 묶습니다.</li><li>각 통신 흐름에 사용할 멤버를 선택합니다.</li><li>멤버 상태와 묶음 상태를 나눠 확인합니다. 남은 멤버가 있으면 묶음이 유지될 수 있습니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">멤버 하나 사용 불가</th><td>남은 멤버로 묶음을 유지할 수 있습니다. 무손실을 보장하는 말은 아닙니다.</td></tr><tr><th scope="row">모든 멤버 사용 불가</th><td>이 예제에서는 묶음도 내려가고 반대편 통신이 끊깁니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>LAG 하나와 물리 링크 하나는 다릅니다.</li><li>한 Flow가 모든 링크를 번갈아 쓰는 것은 아닙니다.</li><li>묶음과 각 멤버의 상태를 함께 봅니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>M1이 내려갔는데도 묶음이 Up으로 보일 수 있는 이유를 M2와 연결해서 설명해 보세요.</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="lacp-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 기존 한쪽 shutdown 실패와 양단 사용 불가 재검증은 서로 다른 조건입니다. 원본 FAIL과 재검증 범위를 상세 기록에 그대로 보존합니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>LACP / <em>Link Aggregation</em></h1>
+    <h2>LACP / <em>Link Aggregation</em></h2>
     <p>목표는 하나입니다. <b>여러 Physical Member가 하나의 Logical LAG을 만들고, Flow별 Member 선택과 Member 장애가 어떻게 다르게 나타나는지</b> 설명할 수 있으면 됩니다.</p>
     <div class="concept-stage">
       <div><strong>“Cable 두 개 = 모든 Packet이 절반씩”이라고 생각하지 않습니다.</strong><span>협상, Logical Bundle, Flow Hash, Member Failure를 순서대로 연결합니다.</span></div>
@@ -59,7 +61,7 @@
     <div class="section-head"><div><div class="eyebrow">00 · 30초 핵심</div><h2>Physical Member와 Logical LAG을 따로 봅니다.</h2></div></div>
     <div class="test-guide">
       <p><b>① 협상:</b> <strong>active</strong>는 LACP 협상을 시작하고 <strong>passive</strong>는 수신 LACP에 응답합니다.</p>
-      <p><b>② Bundle:</b> 호환되는 M1/M2가 묶이면 상위 기능에는 <strong>하나의 Logical LAG</strong>로 보이며, 이번 Cisco 구현에서는 <b>Po1</b>으로 표시됩니다.로 보입니다.</p>
+      <p><b>② Bundle:</b> 호환되는 M1/M2가 묶이면 상위 기능에는 <strong>하나의 Logical LAG</strong>로 보이며, 이번 Cisco 구현에서는 <b>Po1</b>으로 표시됩니다.</p>
       <p><b>③ Hash:</b> 한 Flow는 Hash 결과에 따라 <strong>한 Member에 일관되게</strong> 매핑될 수 있고, 다른 Flow는 다른 Member를 사용할 수 있습니다.</p>
       <p><b>④ 장애:</b> Member 하나가 unavailable이어도 남은 Member가 있으면 Po1은 유지될 수 있지만, <strong>모든 Member가 사라지면 Po1도 Down</strong>됩니다.</p>
     </div>
@@ -167,7 +169,8 @@
     <div class="note"><b>검증 기준:</b> 원본 Run에서 LACP-01/02/03/06 PASS, LACP-04 INCONCLUSIVE, LACP-05 FAIL을 기록했고, 2026-10-04 Revalidation에서 LACP-04/05를 추가 PASS해 차단을 해소했습니다. <a href="../learning/campus/lacp/cisco-validation-2026-10-04.html">검증 요약 보기 →</a></div>
   </div>
 </section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">LACP / Link Aggregation · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">LACP / Link Aggregation · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

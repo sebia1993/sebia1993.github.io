@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -21,8 +22,8 @@ const browser=await chromium.launch();
 const page=await browser.newPage({viewport:{width:1366,height:768}});
 try{
   await page.goto(base+'/labs/nat-pat.html',{waitUntil:'networkidle'});
-  assert.ok((await page.locator('body').innerText()).includes('198.51.100.5:25473'));
-  assert.ok((await page.locator('body').innerText()).includes('미변환'));
+  assert.ok((await readLearningText(page)).includes('198.51.100.5:25473'));
+  assert.ok((await readLearningText(page)).includes('미변환'));
 
   await page.goto(base+'/labs/nat-pat-simulator.html',{waitUntil:'networkidle'});
   assert.equal(await page.locator('.lesson-tab').count(),6);

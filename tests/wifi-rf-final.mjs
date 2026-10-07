@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -32,7 +33,7 @@ try{
 
   const page=await browser.newPage({viewport:{width:1366,height:768}});
   await page.goto(base+'/labs/wifi-rf.html',{waitUntil:'networkidle'});
-  const body=await page.locator('body').innerText();
+  const body=await readLearningText(page);
   assert.ok(body.includes('5 GHz · Channel 149 · 80 MHz'));
   assert.ok(body.includes('OBSERVED · 3차 보완 PASS'));
   assert.ok(body.includes('Radar Event는 관측하지 않았고'));

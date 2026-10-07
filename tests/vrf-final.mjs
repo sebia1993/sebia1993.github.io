@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -24,7 +25,7 @@ try{
     }
   }
   const page=await browser.newPage({viewport:{width:1366,height:768}});
-  await page.goto(base+'/labs/vrf.html',{waitUntil:'networkidle'});const concept=await page.locator('body').innerText();
+  await page.goto(base+'/labs/vrf.html',{waitUntil:'networkidle'});const concept=await readLearningText(page);
   assert.ok(concept.includes('VRF Context → 그 VRF의 Routing Table → 출력 경로'));
   assert.ok(concept.includes('같은 IP라도 VRF가 다르면'));
   assert.ok(concept.includes('원래 BLUE Ping은 0/3'));

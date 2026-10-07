@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -31,7 +32,7 @@ try{
 
   const page=await browser.newPage({viewport:{width:1366,height:768}});
   await page.goto(base+'/labs/observability.html',{waitUntil:'networkidle'});
-  const concept=await page.locator('body').innerText();
+  const concept=await readLearningText(page);
   assert.ok(concept.includes('사건 하나 → Packet · Log · 상태 조회 · 알림 → 시간과 대상 장비로 묶기 → 복구까지 확인'));
   assert.ok(concept.includes('Ping 실패만으로 장애 원인을 확정하지 않습니다'));
   assert.ok(concept.includes('Trap이 항상 가장 먼저 오는 것은 아닙니다'));

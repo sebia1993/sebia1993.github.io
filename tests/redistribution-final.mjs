@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -25,7 +26,7 @@ try{
     }
   }
   const page=await browser.newPage({viewport:{width:1366,height:768}});
-  await page.goto(base+'/labs/redistribution.html',{waitUntil:'networkidle'});const concept=await page.locator('body').innerText();
+  await page.goto(base+'/labs/redistribution.html',{waitUntil:'networkidle'});const concept=await readLearningText(page);
   assert.ok(concept.includes('원래 Route → 재분배 경계 → Policy → 다른 Protocol의 Route → 최종 Routing Table(RIB) 선택'));
   assert.ok(concept.includes('Route-map Filter ≠ Packet ACL'));
   assert.ok(concept.includes('Metric, Tag, AD는 서로 다른 질문에 답합니다'));

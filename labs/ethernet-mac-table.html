@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — 개념서</title>
-<meta name="description" content="Ethernet MAC Table의 핵심 원리를 짧게 이해하는 1단계 개념서. Source MAC Learning, Destination MAC Forwarding, Known/Unknown Unicast, Broadcast와 ARP Cache 차이를 다룹니다.">
+<meta name="description" content="스위치가 출발지 주소를 배우고 목적지 주소로 전달할 포트를 고르는 과정을 설명합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <link rel="stylesheet" href="../ethernet-guide.css">
@@ -51,27 +51,28 @@
   section{scroll-margin-top:108px}
 }
 </style>
-</head>
-<body>
-<header>
-  <div class="shell topbar">
-    <a class="brand" href="../roadmap.html">← 학습 로드맵</a>
-    <nav class="nav">
-      <a href="#summary">30초 요약</a>
-      <a href="#frame">Frame</a>
-      <a href="#process">Switch 동작</a>
-      <a href="#compare">3가지 전달</a>
-      <a href="#first-ping">첫 Ping</a>
-      <a href="#arp-fdb">ARP vs FDB</a>
-    </nav>
-  </div>
-</header>
 
-<main>
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
+</head>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">02 · 1단계 CONCEPT GUIDE</p><h1>Ethernet / MAC Table</h1><p class="cg-goal">스위치가 출발지 주소를 배우고 목적지 주소로 전달할 포트를 고르는 과정을 설명합니다.</p><p class="cg-prior">앞선 학습 · <a href="ip-subnetting.html">IP 주소 / Subnetting</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>스위치는 상대 컴퓨터가 어느 선에 연결됐는지 어떻게 알까요?</h2><p class="cg-summary"><b>30초 핵심</b> · 스위치는 들어온 데이터의 출발지를 보고 위치를 기억합니다. 보낼 때는 목적지가 연결된 위치를 그 기록에서 찾습니다.</p><figure class="cg-figure" aria-label="Ethernet / MAC Table 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">배울 때</strong><div class="cg-route"><span class="cg-node">PC1이 보냄</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">SW1의 수신 포트</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC1 주소 → 포트 기록</span></div></div><div class="cg-lane"><strong class="cg-lane-label">전달할 때</strong><div class="cg-route"><span class="cg-node">PC2 앞으로 보냄</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">SW1의 기록 조회</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">PC2 포트 선택</span></div></div><figcaption>화살표는 판단 순서입니다. SW1은 스위치, 포트는 케이블이 연결되는 통로입니다. 목적지 위치를 이미 아는 경우를 그렸습니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>MAC 주소</dt><dd>같은 네트워크 구간에서 데이터의 출발지와 목적지를 구분하는 주소입니다. IP 주소와 역할이 다릅니다.</dd></div><div><dt>Ethernet 프레임</dt><dd>MAC 주소 등 전달 정보를 붙인 데이터 단위입니다. 출발지 MAC은 Source MAC, 목적지 MAC은 Destination MAC이라고 합니다.</dd></div><div><dt>MAC Table</dt><dd>MAC 주소와 포트의 관계를 기억하는 표입니다. FDB라는 이름도 사용합니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>프레임이 들어온 포트를 확인합니다.</li><li>출발지 MAC과 수신 포트를 짝지어 기록하거나 갱신합니다.</li><li>목적지 MAC을 표에서 찾습니다.</li><li>위치를 알면 해당 포트로, 모르면 수신 포트를 제외한 전달 가능한 포트들로 보냅니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">목적지 위치를 앎 · Known Unicast</th><td>기록된 목적지 포트로 전달합니다.</td></tr><tr><th scope="row">목적지 위치를 모름 · Unknown Unicast</th><td>여러 포트로 보내는 Flooding을 합니다. 모두에게 보내는 주소인 Broadcast와는 구분합니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>출발지를 보고 배우고, 목적지를 보고 전달합니다.</li><li>MAC Table은 MAC과 포트의 관계입니다.</li><li>표에 목적지가 없다고 해서 프레임을 항상 버리는 것은 아닙니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>PC1이 먼저 데이터를 보냈다면 SW1은 PC1과 PC2 중 누구의 위치를 배웠을까요? 이유도 말해 보세요.</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="ethernet-mac-table-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · ARP와 Ping의 상세 흐름은 뒤의 학습에서 배웁니다. 여기서는 스위치의 학습과 전달 판단에 집중합니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>
-    <h1>Ethernet / <em>MAC Table</em></h1>
+    <h2>Ethernet / <em>MAC Table</em></h2>
     <p>목표는 하나입니다. <b>스위치가 MAC 주소를 어떻게 배우고, 프레임을 어느 포트로 전달할지 어떻게 결정하는지</b> 설명할 수 있으면 됩니다.</p>
 
     <div class="concept-stage">
@@ -302,8 +303,8 @@
     </div>
   </div>
 </section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-
-<footer class="footer"><div class="shell">Ethernet / MAC Table · Concept → Interactive Lab</div></footer>
+<footer class="cg-footer"><div class="cg-shell">Ethernet / MAC Table · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

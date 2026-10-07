@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -28,7 +29,7 @@ try{
 
   const page=await browser.newPage({viewport:{width:1366,height:768}});
   await page.goto(base+'/labs/network-automation.html',{waitUntil:'networkidle'});
-  const body=await page.locator('body').innerText();
+  const body=await readLearningText(page);
   assert.ok(body.includes('확인할 장비와 정상 기준 → 자동 수집 → 같은 형태로 정리 → 비교 → 결과 기록 → 다시 실행'));
   assert.ok(body.includes('PASS, MISMATCH, ERROR는 서로 다릅니다'));
   assert.ok(body.includes('원격 장비에 안전하게 접속'));

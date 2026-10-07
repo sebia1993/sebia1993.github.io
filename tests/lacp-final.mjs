@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -47,16 +48,16 @@ try{
         try{
           const response=await page.goto(base+path,{waitUntil:'networkidle'});
           assert.equal(response.status(),200);
-          assert.ok((await page.locator('body').innerText()).length>250);
+          assert.ok((await readLearningText(page)).length>250);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'horizontal document overflow');
 
           if(name==='guide'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('LACP는 Member를 묶고'));
             assert.ok(body.includes('PC1A → PC2A'));
             assert.ok(body.includes('100 Request / 100 Reply'));
             assert.ok(body.includes('원래 LACP-05 FAIL도 보존'));
-            assert.equal(await page.locator('a[href="lacp-simulator.html"]').count(),1);
+            assert.equal(await page.locator('.cg-primary[href="lacp-simulator.html"]').count(),1);
           }
 
           if(name==='simulator'){
@@ -72,7 +73,7 @@ try{
           }
 
           if(name==='validation'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('Original run01'));
             assert.ok(body.includes('PASS after revalidation'));
             assert.ok(body.includes('RESOLVED'));

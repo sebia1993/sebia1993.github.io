@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -47,15 +48,15 @@ try{
         try{
           const response=await page.goto(base+path,{waitUntil:'networkidle'});
           assert.equal(response.status(),200);
-          assert.ok((await page.locator('body').innerText()).length>250);
+          assert.ok((await readLearningText(page)).length>250);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'horizontal document overflow');
 
           if(name==='guide'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('Resolver가 Cache 또는 Upstream'));
             assert.ok(body.includes('NXDOMAIN은 Response'));
             assert.ok(body.includes('192.0.2.254'));
-            assert.equal(await page.locator('a[href="dns-simulator.html"]').count(),1);
+            assert.equal(await page.locator('.cg-primary[href="dns-simulator.html"]').count(),1);
           }
 
           if(name==='simulator'){
@@ -68,7 +69,7 @@ try{
           }
 
           if(name==='validation'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('6 PASS / 0 unresolved'));
             assert.ok(body.includes('2026-10-04-dns-02'));
             assert.ok(body.includes('첫 Run의 DNS-04/05 INCONCLUSIVE'));

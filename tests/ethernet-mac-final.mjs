@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -57,11 +58,11 @@ try{
         try{
           const response=await page.goto(base+path,{waitUntil:'networkidle'});
           assert.equal(response.status(),200);
-          assert.ok((await page.locator('body').innerText()).length>200);
+          assert.ok((await readLearningText(page)).length>200);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'unexpected horizontal document overflow');
           if(name==='guide'){
             assert.equal(await page.locator('a[href*="cisco-validation-2026-10-03.html"]').count(),1);
-            assert.ok((await page.locator('body').innerText()).includes('핵심 동작 6개'));
+            assert.ok((await readLearningText(page)).includes('핵심 동작 6개'));
           }
           if(name==='simulator'){
             assert.equal(await page.locator('#runBtn').isDisabled(),true,'run must be gated by prediction');
@@ -70,12 +71,12 @@ try{
             assert.ok(domText.includes('Same-port Filtering'));
           }
           if(name==='validation'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('6/6 PASS'));
             for(let i=1;i<=6;i++) assert.equal(await page.locator(`#ethmac-0${i}`).count(),1);
           }
           if(name==='roadmap'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('Ethernet / MAC Table'),'Ethernet topic must remain in the roadmap');
             assert.ok(await page.locator('a[href="./labs/ethernet-mac-table.html"]').count()>=1,'Ethernet concept link must remain available');
           }

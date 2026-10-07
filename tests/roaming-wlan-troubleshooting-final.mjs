@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -42,7 +43,7 @@ try{
 
   const page=await browser.newPage({viewport:{width:1366,height:768}});
   await page.goto(base+'/labs/roaming-wlan-troubleshooting.html',{waitUntil:'networkidle'});
-  const concept=await page.locator('body').innerText();
+  const concept=await readLearningText(page);
   assert.ok(concept.includes('공식 사례 + 기존 검증 Evidence 기반'));
   assert.ok(concept.includes('FT 성공과 Data Resume는 같은 증거가 아닙니다.'));
   assert.ok(concept.includes('약한 RSSI만으로 Sticky Client라고 부르지 않습니다.'));

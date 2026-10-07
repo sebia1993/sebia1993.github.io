@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>First-Hop Redundancy / FHRP — 개념서</title>
-<meta name="description" content="First-Hop Redundancy의 Virtual Router/Virtual Gateway와 Failover 공통 원리를 먼저 배우고, VRRP 표준과 HSRP Cisco 구현을 구분하는 개념서입니다.">
+<meta name="description" content="단말이 사용하는 가상 출구와 실제 전달을 맡은 라우터를 구분합니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
@@ -24,14 +24,28 @@
 @media(max-width:900px){.problem-grid,.control-grid,.compare-grid,.review{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.gateway-model{grid-template-columns:1fr}.gateway-model>.arrow{transform:rotate(90deg);text-align:center}.routers{grid-template-columns:1fr 1fr}.before-after{grid-template-columns:1fr}.switch-arrow{transform:rotate(90deg)}.cta{display:grid}}
 @media(max-width:620px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.flow{grid-template-columns:1fr}.routers{grid-template-columns:1fr}.fhrp-hero{padding-top:42px}}
 </style>
+
+
+
+<link rel="stylesheet" href="concept-guide.css?v=20261007">
+<script src="concept-guide.js?v=20261007" defer></script>
 </head>
-<body>
-<header><div class="shell topbar"><a class="brand" href="../roadmap.html">← 학습 로드맵</a><nav class="nav"><a href="#model">핵심 구조</a><a href="#controls">Priority</a><a href="#failover">Failover</a><a href="#compare">VRRP / HSRP</a></nav></div></header>
-<main>
+<body class="concept-page" data-concept-audit="20261007">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar"><a href="../roadmap.html">← 학습 로드맵</a><nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">동작 순서</a><a href="#cg-review">복습</a></nav></div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell"><p class="cg-kicker">20 · 1단계 CONCEPT GUIDE</p><h1>First-Hop Redundancy / FHRP</h1><p class="cg-goal">단말이 사용하는 가상 출구와 실제 전달을 맡은 라우터를 구분합니다.</p><p class="cg-prior">앞선 학습 · <a href="roaming-wlan-troubleshooting.html">Roaming / WLAN Troubleshooting</a>까지의 개념을 연결합니다.</p></div></section>
+<section class="cg-section" id="cg-picture"><div class="cg-shell"><p class="cg-kicker">01 · 질문과 그림으로 시작</p><h2>출구 장비가 고장 나도 PC의 Gateway 주소를 바꾸지 않을 수 있을까요?</h2><p class="cg-summary"><b>30초 핵심</b> · 여러 라우터가 하나의 가상 Gateway를 제공할 수 있습니다. PC는 같은 주소를 쓰고, 현재 전달을 맡은 라우터가 장애 조건에 따라 바뀝니다.</p><figure class="cg-figure" aria-label="First-Hop Redundancy / FHRP 핵심 비교 그림"><div class="cg-lane"><strong class="cg-lane-label">정상 상태</strong><div class="cg-route"><span class="cg-node">PC1 · GW 10.10.10.1</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">같은 가상 IP·MAC</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R1이 전달</span></div></div><div class="cg-lane"><strong class="cg-lane-label">R1 장애 후</strong><div class="cg-route"><span class="cg-node">PC1 · GW 10.10.10.1</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">같은 가상 IP·MAC</span><span class="cg-arrow" aria-hidden="true">→</span><span class="cg-node">R2가 전달</span></div></div><figcaption>기존 같은 프로토콜 안에서의 역할 전환입니다. HSRP에서 VRRP로 프로토콜을 바꿔도 같은 MAC을 쓴다는 의미는 아닙니다.</figcaption></figure></div></section>
+<section class="cg-section" id="cg-terms"><div class="cg-shell"><p class="cg-kicker">02 · 방금 본 그림에 이름 붙이기</p><h2>이름보다 역할을 먼저 기억하세요.</h2><dl class="cg-terms"><div><dt>FHRP / Virtual Gateway</dt><dd>기본 출구 이중화의 공통 개념과 단말이 사용하는 가상 출구입니다. 가상 IP는 VIP라고도 합니다.</dd></div><div><dt>Forwarding Owner</dt><dd>현재 실제 패킷 전달을 담당하는 라우터입니다. 프로토콜별로 Active 등 역할 이름이 다릅니다.</dd></div><div><dt>Priority / Preemption</dt><dd>역할 선호도와, 더 선호되는 라우터가 돌아왔을 때 역할을 되찾는 동작입니다.</dd></div></dl></div></section>
+<section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>PC는 가상 IP를 기본 Gateway로 사용합니다.</li><li>ARP로 가상 MAC을 확인해 프레임을 보냅니다.</li><li>현재 담당 라우터가 외부로 전달합니다.</li><li>장애 시 다른 라우터가 역할을 맡을 수 있습니다. 복구 후 역할은 설정에 따라 다시 결정됩니다.</li></ol></div></section>
+<section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">VRRP</th><td>표준 프로토콜입니다. 현행 VRRPv3 기준은 RFC 9568의 Active/Backup입니다.</td></tr><tr><th scope="row">HSRP</th><td>Cisco 구현입니다. Active/Standby 역할을 사용합니다. 공통 가상 Gateway 모델과 구분해 읽습니다.</td></tr></tbody></table></div></section>
+<section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>PC가 라우터 두 대 중 하나를 직접 고르는 모델이 아닙니다.</li><li>가상 출구는 유지되고 전달 담당이 바뀔 수 있습니다.</li><li>이중화가 전환 중 무손실을 보장하지는 않습니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>R1이 고장 났는데 PC의 Gateway 주소를 그대로 둘 수 있는 이유는 무엇일까요?</p></article></div></div></section>
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="fhrp-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · 현재 표준 설명과 기존 HSRPv2·VRRPv2 실측을 구분합니다. VRRPv3를 직접 새로 검증했다고 표시하지 않습니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="fhrp-hero"><div class="shell">
 <span class="scope-badge">표준 기준 · VRRPv3 RFC 9568 | 검증 구현 · Cisco IOL HSRPv2 + VRRPv2</span>
 <div class="eyebrow" style="margin-top:12px">1단계 · CONCEPT GUIDE</div>
-<h1>First-Hop Redundancy <em>/ FHRP</em></h1>
+<h2>First-Hop Redundancy <em>/ FHRP</em></h2>
 <p><b>Host는 같은 Virtual Gateway를 계속 사용하고, 실제 Forwarding 책임을 가진 Router만 바뀔 수 있습니다.</b> 먼저 Virtual Router / VIP / Virtual MAC / Forwarding Owner라는 공통 Mental Model을 만든 뒤, VRRP의 Active/Backup과 HSRP의 Active/Standby 용어를 구현별로 구분합니다.</p>
 <div class="core"><strong>같은 Virtual Gateway, 바뀌는 Forwarding Owner</strong><p>Host → Virtual Router(IP/MAC) → 현재 Forwarding Owner → Upstream</p></div>
 </div></section>
@@ -124,7 +138,8 @@
 </div>
 <div class="note" style="margin-top:14px"><b>검증 범위:</b> Cisco IOL IOS 15.4(2)T4 기반 격리 Lab에서 FHRP-01~06을 CLI와 PCAP으로 PASS했습니다. 실측된 전환 손실과 타이머는 이 Run의 Actual이며, 모든 환경의 성능 보장값으로 일반화하지 않습니다.</div>
 </div></section>
+<!-- ORIGINAL-CONCEPT-END --></div></details>
 </main>
-<footer class="footer"><div class="shell">First-Hop Redundancy · Virtual Gateway → Owner Failover</div></footer>
+<footer class="cg-footer"><div class="cg-shell">First-Hop Redundancy / FHRP · 개념 이해 → 실습 확인</div></footer>
 </body>
 </html>

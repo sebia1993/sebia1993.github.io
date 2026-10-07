@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -64,7 +65,7 @@ try{
 
   const page=await browser.newPage({viewport:{width:1366,height:768}});
   await page.goto(base+'/labs/fhrp.html',{waitUntil:'networkidle'});
-  const concept=await page.locator('body').innerText();
+  const concept=await readLearningText(page);
   assert.ok(concept.includes('같은 Virtual Gateway, 바뀌는 Forwarding Owner'));
   assert.ok(concept.includes('110→90'));
   assert.ok(concept.includes('VRRPv2'));

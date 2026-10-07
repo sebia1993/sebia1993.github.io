@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -45,14 +46,14 @@ try{
         try{
           const response=await page.goto(base+path,{waitUntil:'networkidle'});
           assert.equal(response.status(),200);
-          assert.ok((await page.locator('body').innerText()).length>250);
+          assert.ok((await readLearningText(page)).length>250);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'horizontal document overflow');
           if(name==='guide'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('Root를 정하고'));
             assert.ok(body.includes('Alternate / Discarding'));
             assert.ok(body.includes('0.202초'));
-            assert.equal(await page.locator('a[href="stp-simulator.html"]').count(),1);
+            assert.equal(await page.locator('.cg-primary[href="stp-simulator.html"]').count(),1);
           }
           if(name==='simulator'){
             assert.equal(await page.locator('.lesson-tab').count(),5);
@@ -67,7 +68,7 @@ try{
             }
           }
           if(name==='validation'){
-            const body=await page.locator('body').innerText();
+            const body=await readLearningText(page);
             assert.ok(body.includes('6 PASS / 0 FAIL'));
             assert.ok(body.includes('0.201710초'));
             for(let i=1;i<=6;i++)assert.equal(await page.locator(`#stp-0${i}`).count(),1);

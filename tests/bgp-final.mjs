@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -58,7 +59,7 @@ try{
   page.on('pageerror',e=>errors.push(String(e)));
 
   await page.goto(base+'/labs/bgp.html',{waitUntil:'networkidle'});
-  const concept=await page.locator('body').innerText();
+  const concept=await readLearningText(page);
   assert.ok(concept.includes('BGP(Border Gateway Protocol)'));
   assert.ok(concept.includes('경로에 딸린 정보'));
   assert.ok(concept.includes('AS(Autonomous System)'));

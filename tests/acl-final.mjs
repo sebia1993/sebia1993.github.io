@@ -1,3 +1,4 @@
+import {readLearningText} from './concept-evidence-helper.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -40,12 +41,12 @@ try{
       try{
         const response=await page.goto(base+'/labs/acl.html',{waitUntil:'networkidle'});
         assert.equal(response.status(),200);
-        const body=await page.locator('body').innerText();
+        const body=await readLearningText(page);
         assert.ok(body.includes('First Match'));
         assert.ok(body.includes('Implicit Deny'));
         assert.ok(body.includes('ORIGINAL EXPECTED · FAIL PRESERVED'));
         assert.ok(body.includes('Echo Request만 Deny'));
-        assert.equal(await page.locator('a[href="acl-simulator.html"]').count(),1);
+        assert.equal(await page.locator('.cg-primary[href="acl-simulator.html"]').count(),1);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'guide horizontal document overflow');
         assert.deepEqual(errors,[]);
       }finally{await page.close();}
