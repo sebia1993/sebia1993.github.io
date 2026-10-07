@@ -33,7 +33,15 @@ Found and fixed before publication: mobile concept UTP inherited desktop grid ro
 
 ## Public QA
 
-PENDING until the deployed public URLs and their assets are checked. Local QA is not public QA.
+PASS on the deployed GitHub Pages content commit `c8ac216e53031e92be7a6777b233bb19773a69a5`, 2026-10-07 UTC. Pages build/deployment run `37598567906` completed successfully.
+
+The same browser test ran against `https://sebia1993.github.io` at all four required viewports. Every row passed layout, all four scenarios, prediction, replay/reset, navigation and console/assets. See [public browser results](physical-network-public-20261007.json). Public mobile/desktop screenshots were also visually reviewed. These are browser tests of a Teaching Simulation, not physical hardware evidence.
+
+The two new pages, roadmap, JSON, topic JS/CSS and seven shared assets (15 files total) returned HTTP 200 and matched the local committed files byte for byte: [asset hashes](physical-network-public-assets-20261007.json). No console error, failed asset request or HTTP 4xx/5xx was observed in the chapter browser run. An additional 360/1366-width check clicked Roadmap → Interactive Lab → Roadmap: [navigation results](physical-network-public-navigation-20261007.json).
+
+## Repository-wide CI observation
+
+The chapter checks above and the Pages deployment pass. This does **not** mean every pre-existing repository workflow is green. Existing BGP, Redistribution, Observability and Network Automation public tests failed while waiting for exact legacy concept text in rendered `body.innerText`, despite HTTP 200. Job logs: [BGP](https://github.com/sebia1993/sebia1993.github.io/actions/runs/37598568619), [Redistribution](https://github.com/sebia1993/sebia1993.github.io/actions/runs/37598568622), [Observability](https://github.com/sebia1993/sebia1993.github.io/actions/runs/37598568614), [Network Automation](https://github.com/sebia1993/sebia1993.github.io/actions/runs/37598568653). Their lesson and test files are unchanged from parent `7fe3852411d1f8883b7b01bff9a4f7d7909f141e`; these failures occur before their roadmap checks. The legacy phrases remain in source but are not found by those rendered-body checks. Repair of those other-topic tests is outside this chapter change.
 
 ## Known limits
 

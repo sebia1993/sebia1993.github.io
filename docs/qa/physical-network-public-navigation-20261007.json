@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-07T09:15:00.851Z",
+  "rows": [
+    {
+      "width": 360,
+      "roadmapToSimulator": "PASS",
+      "simulatorToRoadmap": "PASS"
+    },
+    {
+      "width": 1366,
+      "roadmapToSimulator": "PASS",
+      "simulatorToRoadmap": "PASS"
+    }
+  ]
+}

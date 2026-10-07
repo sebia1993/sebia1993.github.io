@@ -1,0 +1,96 @@
+{
+  "checkedAt": "2026-10-07T09:12:56.739264+00:00",
+  "contentCommit": "c8ac216e53031e92be7a6777b233bb19773a69a5",
+  "checks": [
+    {
+      "path": "learning-data.json",
+      "result": "PASS",
+      "sha256": "443f0a4b13b41c98f9a94a561abef1d84518d368743b7823d0f21315dc212e89",
+      "bytes": 39676
+    },
+    {
+      "path": "roadmap.html",
+      "result": "PASS",
+      "sha256": "7c7aa34497e408a3ba8e02999fd324c10af518fdd93383c4dc62342e56c28011",
+      "bytes": 16551
+    },
+    {
+      "path": "labs/physical-network-topology.js",
+      "result": "PASS",
+      "sha256": "68ef5b2299ae3c5bdb565f395a729de2418ce9bd09b56266748422b9324a94e2",
+      "bytes": 2063
+    },
+    {
+      "path": "labs/physical-network-simulator.js",
+      "result": "PASS",
+      "sha256": "db7914777c262af29a52efb47ff0db7df9a191122e1c47241ffc55c076901293",
+      "bytes": 8863
+    },
+    {
+      "path": "labs/physical-network-simulator.html",
+      "result": "PASS",
+      "sha256": "0d65ea51b810b2e644f8e6c13de45acfca1d2f29ff669e499f0a5e0cc37e150e",
+      "bytes": 10726
+    },
+    {
+      "path": "labs/physical-network-model.js",
+      "result": "PASS",
+      "sha256": "61744f5e98dd8f3b248cc68b04178ec24d701134c820bebf0ab0c561ab4263b7",
+      "bytes": 6236
+    },
+    {
+      "path": "labs/physical-network.css",
+      "result": "PASS",
+      "sha256": "7ab562353bb81b58c407203de3ae8165bb7d3bd95040773bc0fa01b1ad4c1676",
+      "bytes": 12475
+    },
+    {
+      "path": "labs/physical-network.html",
+      "result": "PASS",
+      "sha256": "37935a148c304b6a2b80864418553decb1008a6dd149fad929d7e6c1217fbea9",
+      "bytes": 17701
+    },
+    {
+      "path": "labs/concept-guide.css",
+      "result": "PASS",
+      "sha256": "d4c677c5cced8516c0835f67826db3a7d3a54704bca99825279136e3a1b03728",
+      "bytes": 7214
+    },
+    {
+      "path": "labs/arp-simulator-1.css",
+      "result": "PASS",
+      "sha256": "3487125205b6e17786c81e2428439f7a3c554ba2f2b2fdfd721cb32a5e4d197d",
+      "bytes": 10424
+    },
+    {
+      "path": "labs/arp-simulator-2.css",
+      "result": "PASS",
+      "sha256": "e62b2271e78c3d498dff6ad773514341732345dbb2415f906579f6dcbaa4d8cf",
+      "bytes": 10458
+    },
+    {
+      "path": "labs/arp-simulator-3.css",
+      "result": "PASS",
+      "sha256": "81e9ae6dec5c40400a8c214d2ec9e846b42ad2821ad4b376f044a42900ef8132",
+      "bytes": 15494
+    },
+    {
+      "path": "labs/arp-simulator-mobile.css",
+      "result": "PASS",
+      "sha256": "c5b6d62e0dc8fd4c2164a7f01e1144b7e4c4521c9458a512cc5ffccce5cf389a",
+      "bytes": 10811
+    },
+    {
+      "path": "labs/arp-simulator-mobile-follow.css",
+      "result": "PASS",
+      "sha256": "58d7dd5cfe2cdca2127b10fa81e0239373010844c5782aa73d951125c26473df",
+      "bytes": 1624
+    },
+    {
+      "path": "labs/ip-subnetting-devices.svg",
+      "result": "PASS",
+      "sha256": "44fb1c13bb79b3dc04e9fefd87ddcf09b4668faebd313117798f1a10f6f44cfb",
+      "bytes": 2374
+    }
+  ]
+}
