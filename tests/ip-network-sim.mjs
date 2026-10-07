@@ -56,14 +56,14 @@ async function verify(url,surface){
     const autoScore=await page.locator('#scoreText').innerText(),autoAnswer=await page.locator('#chosenAnswer').innerText();
     await page.locator('#simAutoBtn').click();
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
-    await page.waitForFunction(()=>document.querySelector('#simStepLabel')?.textContent==='흐름 2 / 4',{timeout:5000});
+    await page.waitForFunction(()=>document.querySelector('#simStepLabel')?.textContent==='흐름 2 / 4',undefined,{timeout:5000});
     await page.locator('#simAutoBtn').click();
     const pausedStep=await page.locator('#simStepLabel').innerText();
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'paused');
     await page.waitForTimeout(1250);
     assert.equal(await page.locator('#simStepLabel').innerText(),pausedStep,'paused autoplay advanced unexpectedly');
     await page.locator('#simAutoBtn').click();
-    await page.waitForFunction(()=>document.querySelector('#simAutoBtn')?.dataset.state==='complete',{timeout:6000});
+    await page.waitForFunction(()=>document.querySelector('#simAutoBtn')?.dataset.state==='complete',undefined,{timeout:6000});
     assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'direct-path');
     assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
     assert.equal(await page.locator('#scoreText').innerText(),autoScore,'autoplay changed score');
@@ -84,7 +84,17 @@ async function verify(url,surface){
    assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'direct-path');
    assert.equal(await page.locator('#simPacket').innerText(),'IPv4');
 
-   await submit(page,1,'gw');
+   if([360,1366].includes(width)){
+    // Starting replay and immediately changing scenario must cancel the old pending timer.
+    await page.locator('#simAutoBtn').click();
+    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
+    await submit(page,1,'gw');
+    await page.waitForTimeout(1250);
+    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4','previous scenario autoplay leaked into the new scenario');
+    assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
+   }else{
+    await submit(page,1,'gw');
+   }
    assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.1'));
    await openFlow(page);
    assert.equal(await page.locator('#modelTarget').innerText(),'10.77.10.1');
@@ -130,7 +140,7 @@ async function verify(url,surface){
    assert.ok((await page.locator('#modelCaption').innerText()).includes('SW1/SW2 내부 동작은 생략'));
    if([360,1366].includes(width)){await page.locator('#modelObservation').screenshot({path:resolve(out,'network-sim-'+surface+'-'+width+'.png')});}
    assert.deepEqual(errors,[]);
-   checks.push({surface,width,height,touch,status:'PASS',scenarios:['same-subnet','different-subnet','wrong-mask','mask-recovery'],checks:['topology','auto-playback','pause-resume-replay','manual-step-fallback','answer-independent-model','wrong-mask-stop','responsive-reflow','reduced-motion','forced-colors']});
+   checks.push({surface,width,height,touch,status:'PASS',scenarios:['same-subnet','different-subnet','wrong-mask','mask-recovery'],checks:['topology','auto-playback','pause-resume-replay','manual-step-fallback','timer-cancel-on-scenario-change','answer-independent-model','wrong-mask-stop','responsive-reflow','reduced-motion','forced-colors']});
    console.log('PASS network sim '+surface+' '+width+'x'+height);
   }finally{await context.close();}
  }
