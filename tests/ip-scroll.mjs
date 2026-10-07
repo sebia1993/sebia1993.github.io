@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261007-beginner-flow-v4';
+const version = '20261007-repeat-learning-v5';
 const legacyKey = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
@@ -137,7 +137,16 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#complete').isVisible(), false);
       assert.equal(await page.locator('#scoreText').innerText(), '정답 0 · 다시 볼 문제 0 · 남은 문제 4');
       assert.equal(await page.evaluate(k => localStorage.getItem(k), legacyKey), null);
-      assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+      assert.ok((await page.locator('#storageNote').innerText()).includes('다시 들어오면 1번 문제부터 미응답 상태로 시작'));
+
+      // Leaving the lab and coming back through browser history is also a new practice run.
+      await press(page, '#choices [data-value="on"]', touch);
+      await press(page, '#runBtn', touch);
+      await page.goto(`${url}/roadmap.html`, {waitUntil:'networkidle'});
+      await page.goBack({waitUntil:'networkidle'});
+      assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
+      assert.equal(await page.locator('#resultArea').isVisible(), false);
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 0 · 다시 볼 문제 0 · 남은 문제 4');
 
       // Within the current run, revisit and retry still work and keyboard input remains usable.
       await press(page, '#choices [data-value="on"]', touch);
@@ -160,7 +169,7 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#complete').isVisible(), false);
       assert.deepEqual(errors, []);
-      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','same-run-review','fresh-start-reload','retry','keyboard','skip','occlusion'] });
+      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','same-run-review','fresh-start-reload','reentry-reset','retry','keyboard','skip','occlusion'] });
       console.log(`PASS learner flow + scrolled targets ${name} ${width}x${height}`);
     } finally { await context.close(); }
   }
