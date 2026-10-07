@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261007-repeat-learning-v5">
-<meta name="skill-review-version" content="20261007-observation-review-v3">
-<meta name="network-sim-version" content="20261007-topology-sim-v2">
+<meta name="lab-ui-version" content="20261007-auto-flow-v6">
+<meta name="skill-review-version" content="20261007-observation-review-v4">
+<meta name="network-sim-version" content="20261007-topology-sim-v3">
 <meta name="summary-ui-version" content="20261007-summary-status-v2"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
 <meta name="description" content="정오답과 이유를 확인하고 다음 문제로 이어가는 IP/Subnetting 실습. 모바일과 데스크톱에서 동일한 학습 흐름을 제공합니다.">
 <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../lab-ui.css"><style>
@@ -233,6 +233,11 @@
 #ipLab .sim-readout strong{font-size:.88rem;color:#e9f5ff;margin-top:2px}
 #ipLab .sim-primary-actions{margin-top:8px;padding-top:8px;border-top:1px solid #36546d}
 #ipLab .sim-flow-details{margin-top:9px}
+#ipLab .sim-auto{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;margin:10px 0 8px}
+#ipLab #simAutoBtn{min-width:170px}
+#ipLab .sim-auto-event{margin:0;padding:9px 11px;border-left:3px solid #65aee0;border-radius:0 9px 9px 0;background:#0d2030;color:#edf6ff;font-size:.82rem;line-height:1.5}
+#ipLab .network-simulator[data-outcome=unresolved] .sim-auto-event{border-left-color:#ffbf69}
+
 #ipLab .sim-flow-details summary{min-height:42px;padding:8px 10px}
 #ipLab .sim-flow-details .optional-body{padding:0 10px 10px}
 #ipLab .sim-caption{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
@@ -271,6 +276,9 @@
  #ipLab .sim-readout small{font-size:.64rem}
  #ipLab .sim-readout strong{font-size:.78rem}
  #ipLab #modelEvent{font-size:.76rem;line-height:1.35;margin:5px 0 0}
+ #ipLab .sim-auto{grid-template-columns:1fr;gap:5px;margin:7px 0 6px}
+ #ipLab #simAutoBtn{width:100%;min-width:0}
+ #ipLab .sim-auto-event{font-size:.75rem;padding:7px 8px;line-height:1.45}
  #ipLab .sim-playback{grid-template-columns:auto minmax(0,1fr) auto;gap:4px;margin-top:6px}
  #ipLab #simStepLabel{grid-column:auto;grid-row:auto;font-size:.7rem}
  #ipLab #simPrev,#ipLab #simNext{grid-column:auto;grid-row:auto;min-height:38px;padding:6px 8px;font-size:.72rem}
@@ -316,6 +324,10 @@
    <span class="sim-packet" id="simPacket" hidden aria-hidden="true"></span>
   </div>
   <p id="modelEvent"></p>
+  <div class="sim-auto" aria-label="네트워크 흐름 자동 재생">
+   <button class="primary" id="simAutoBtn" type="button" data-state="ready">▶ 흐름 자동으로 보기</button>
+   <p class="sim-auto-event" id="simAutoEvent" role="status" aria-live="polite" aria-atomic="true"></p>
+  </div>
   <details class="optional sim-flow-details" id="simFlowDetails"><summary>더 궁금한 사람만 · 실제 전달 전에 상대를 찾는 과정(ARP) 보기</summary><div class="optional-body">
    <div class="sim-readout"><span><small id="modelTargetLabel">PC1의 ARP 대상</small><strong id="modelTarget"></strong></span><span><small>PC1의 판단</small><strong id="simDecision"></strong></span></div>
    <div class="sim-playback" aria-label="네트워크 흐름 단계 제어">
@@ -364,11 +376,12 @@ lessons.forEach(function(l,i){
 });
 var LEGACY_KEY='network-learning:ip-subnetting:answers:v1';
 var $=function(id){return document.getElementById(id);};
-var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, observation=null, traceStep=0, maskTryPrefix=25;
+var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, observation=null, traceStep=0, maskTryPrefix=25, autoTimer=null, autoPlaying=false;
 /* Repetition-first lab: never auto-restore prior answers. Clear the legacy key once per load. */
 try{localStorage.removeItem(LEGACY_KEY);}catch(e){}
 function persist(){/* Current-page state stays in memory only. */}
 function resetPracticeSession(){
+ stopAutoPlayback();
  idx=0;
  answers=lessons.map(function(){return {choice:null,submitted:false};});
  summaryOpen=false;observation=null;traceStep=0;maskTryPrefix=25;
@@ -482,7 +495,7 @@ function render(){
  $('mapTitle').textContent=l.prefix===25?'현재 경계 규칙 /25 · 주소가 두 그룹으로 나뉩니다.':'현재 경계 규칙 /24 · PC1 눈에는 하나의 큰 주소 그룹입니다.';
  $('mapNote').textContent=l.prefix===25?(l.dst.endsWith('.20')?'.10과 .20은 왼쪽 첫 번째 그룹에 함께 있습니다.':'.10은 첫 번째 그룹, .140은 두 번째 그룹에 있습니다.'):'/24에서는 PC1이 .10과 .140을 같은 큰 범위 안에 있다고 계산합니다.';
  $('initialConditions').textContent='각 문제는 서로 독립적입니다. PC1의 Gateway는 '+l.gateway+'입니다. PC3(.20)은 PC1과 같은 네트워크 동네 A에 있고, PC2(.140)는 Router 건너편 네트워크 동네 B에 있습니다. 아래 상세 설명에서는 제작 검증 조건을 확인할 수 있습니다.';
- $('evidenceDetails').open=false;$('startConditions').open=false;$('simFlowDetails').open=false;traceStep=0;
+ stopAutoPlayback();$('evidenceDetails').open=false;$('startConditions').open=false;$('simFlowDetails').open=false;traceStep=0;
  renderTabs();renderProgress();renderChoices();renderResult();renderSummary();
 }
 function goTo(i,align){
@@ -561,6 +574,39 @@ function placeSimPacket(event){
   packet.style.transform='translate('+Math.round(x)+'px,'+Math.round(y)+'px)';
  });
 }
+function autoDelay(){
+ return matchMedia('(prefers-reduced-motion: reduce)').matches?650:1050;
+}
+function updateAutoButton(){
+ var btn=$('simAutoBtn');if(!btn)return;
+ if(!observation){btn.disabled=true;btn.dataset.state='unavailable';btn.textContent='▶ 흐름 자동으로 보기';return;}
+ btn.disabled=false;
+ if(autoPlaying){btn.dataset.state='playing';btn.textContent='⏸ 일시정지';return;}
+ if(traceStep>=observation.events.length-1){btn.dataset.state='complete';btn.textContent='↻ 흐름 다시 보기';return;}
+ if(traceStep>0){btn.dataset.state='paused';btn.textContent='▶ 이어서 보기';return;}
+ btn.dataset.state='ready';btn.textContent='▶ 흐름 자동으로 보기';
+}
+function stopAutoPlayback(){
+ if(autoTimer!==null){clearTimeout(autoTimer);autoTimer=null;}
+ autoPlaying=false;updateAutoButton();
+}
+function scheduleAutoStep(){
+ if(!autoPlaying||!observation)return;
+ if(traceStep>=observation.events.length-1){stopAutoPlayback();return;}
+ autoTimer=setTimeout(function(){
+  autoTimer=null;
+  if(!autoPlaying||!observation)return;
+  traceStep++;renderTrace();
+  if(traceStep>=observation.events.length-1){stopAutoPlayback();return;}
+  scheduleAutoStep();
+ },autoDelay());
+}
+function toggleAutoPlayback(){
+ if(!observation)return;
+ if(autoPlaying){stopAutoPlayback();return;}
+ if(traceStep>=observation.events.length-1){traceStep=0;renderTrace();}
+ autoPlaying=true;updateAutoButton();scheduleAutoStep();
+}
 function renderSimulationStep(){
  if(!observation)return;
  var topology=$('simTopology'),event=observation.events[traceStep];
@@ -571,8 +617,9 @@ function renderSimulationStep(){
  if(event.stopAt){var stop=simElement(event.stopAt);if(stop)stop.classList.add('is-stop');}
  $('simStepLabel').textContent='흐름 '+(traceStep+1)+' / '+observation.events.length;
  $('simStepText').textContent=event.text;$('simStepText').dataset.kind=event.kind;
+ $('simAutoEvent').textContent='흐름 '+(traceStep+1)+' / '+observation.events.length+' · '+event.text;
  $('simPrev').disabled=traceStep===0;$('simNext').disabled=traceStep===observation.events.length-1;
- placeSimPacket(event);
+ placeSimPacket(event);updateAutoButton();
 }
 function renderTrace(){
  if(!observation)return;
@@ -585,18 +632,19 @@ function showSummary(){
 
 $('runBtn').addEventListener('click',function(){var a=answers[idx];if(a.choice===null||a.submitted)return;a.submitted=true;persist();renderProgress();renderTabs();renderChoices();renderResult();focusSection('verdictTitle',true);});
 $('nextBtn').addEventListener('click',function(){if(!answers[idx].submitted)return;var ni=nextIndex();if(ni>=0){goTo(ni,true);}else{showSummary();}});
-$('resetBtn').addEventListener('click',function(){answers[idx]={choice:null,submitted:false};summaryOpen=false;persist();render();focusSection('question',true);});
+$('resetBtn').addEventListener('click',function(){stopAutoPlayback();answers[idx]={choice:null,submitted:false};summaryOpen=false;persist();render();focusSection('question',true);});
 $('reviewWrongBtn').addEventListener('click',function(){var i=lessons.findIndex(function(_,i){return grade(i)==='incorrect';});if(i>=0)goTo(i,true);});
 $('summaryReturnBtn').addEventListener('click',showSummary);
-$('simPrev').addEventListener('click',function(){if(traceStep>0){traceStep--;renderTrace();}});
-$('simNext').addEventListener('click',function(){if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
+$('simAutoBtn').addEventListener('click',toggleAutoPlayback);
+$('simPrev').addEventListener('click',function(){stopAutoPlayback();if(traceStep>0){traceStep--;renderTrace();}});
+$('simNext').addEventListener('click',function(){stopAutoPlayback();if(observation&&traceStep<observation.events.length-1){traceStep++;renderTrace();}});
 $('maskTry25').addEventListener('click',function(){maskTryPrefix=25;renderMaskTry();});
 $('maskTry24').addEventListener('click',function(){maskTryPrefix=24;renderMaskTry();});
 window.addEventListener('resize',function(){if(observation)placeSimPacket(observation.events[traceStep]);});
 window.addEventListener('pageshow',function(event){
  if(event.persisted)resetPracticeSession();
 });
-window.addEventListener('pageshow',function(event){if(event.persisted)location.reload();});
+
 render();persist();
 })();
 </script></body></html>
