@@ -1,0 +1,138 @@
+name: Split roadmap acceptance evidence
+
+on:
+  push:
+    branches: ['codex/lab-parity-*']
+    paths: ['.github/workflows/roadmap-evidence-split.yml']
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Successful Roadmap simulator acceptance run whose evidence will be copied'
+        required: true
+        default: '37637573283'
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SOURCE_RUN_ID: ${{ inputs.run_id || '37637573283' }}
+    steps:
+      - name: Verify source run belongs to this repository and succeeded
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = Number(process.env.SOURCE_RUN_ID);
+            if (!Number.isSafeInteger(runId) || runId <= 0) {
+              throw new Error('run_id must be a positive integer');
+            }
+            const {data: run} = await github.rest.actions.getWorkflowRun({
+              ...context.repo, run_id: runId
+            });
+            if (run.conclusion !== 'success' || run.path !== '.github/workflows/roadmap-simulator-check.yml') {
+              throw new Error('Only successful roadmap acceptance evidence may be split');
+            }
+            core.info(`Copying evidence from ${run.html_url} at ${run.head_sha}`);
+      - name: Download original evidence without rerunning the browser
+        uses: actions/download-artifact@v4
+        with:
+          name: roadmap-simulator-acceptance
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: original-evidence
+      - name: Balance complete topic captures across six small artifacts
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          import shutil
+          from collections import defaultdict
+          from pathlib import Path
+
+          source = Path('original-evidence')
+          destination = Path('split-evidence')
+          topics = defaultdict(list)
+          metadata = []
+          capture_name = re.compile(r'^(.+)-(360|768|1366|1920)-(idle|selected|paused|completed|reset|visual|failure)\.(?:jpg|jpeg|png)$')
+          for file in source.rglob('*'):
+              if not file.is_file():
+                  continue
+              match = capture_name.fullmatch(file.name)
+              (topics[match.group(1)] if match else metadata).append(file)
+          if not topics or not any(file.name == 'report.json' for file in metadata):
+              raise SystemExit('Missing captures or report.json in source artifact')
+
+          groups = [{'topics': [], 'files': [], 'bytes': 0} for _ in range(6)]
+          for topic, files in sorted(topics.items(), key=lambda item: sum(file.stat().st_size for file in item[1]), reverse=True):
+              group = min(groups, key=lambda item: item['bytes'])
+              group['topics'].append(topic)
+              group['files'].extend(files)
+              group['bytes'] += sum(file.stat().st_size for file in files)
+
+          original_captures = sum(len(files) for files in topics.values())
+          assert sum(len(group['files']) for group in groups) == original_captures
+          for index, group in enumerate(groups, 1):
+              target = destination / f'part-{index}'
+              target.mkdir(parents=True, exist_ok=True)
+              manifest = {
+                  'source_run_id': os.environ['SOURCE_RUN_ID'],
+                  'part': index,
+                  'topics': sorted(group['topics']),
+                  'capture_count': len(group['files']),
+                  'source_capture_count': original_captures,
+                  'files': []
+              }
+              for file in group['files'] + metadata:
+                  relative = file.relative_to(source)
+                  output = target / relative
+                  output.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(file, output)
+                  manifest['files'].append({
+                      'path': str(relative),
+                      'bytes': file.stat().st_size,
+                      'sha256': hashlib.sha256(file.read_bytes()).hexdigest()
+                  })
+              total_bytes = sum(item['bytes'] for item in manifest['files'])
+              manifest['bytes'] = total_bytes
+              (target / 'evidence-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+              if total_bytes >= 30 * 1024 * 1024:
+                  raise SystemExit(f'Part {index} exceeds the safe download size')
+              print(f'Part {index}: {len(group["files"])} captures, {total_bytes:,} bytes, {", ".join(sorted(group["topics"]))}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-1
+          path: split-evidence/part-1/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-2
+          path: split-evidence/part-2/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-3
+          path: split-evidence/part-3/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-4
+          path: split-evidence/part-4/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-5
+          path: split-evidence/part-5/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-evidence-${{ env.SOURCE_RUN_ID }}-part-6
+          path: split-evidence/part-6/
+          retention-days: 7
