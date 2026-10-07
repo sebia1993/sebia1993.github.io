@@ -89,7 +89,8 @@ async function verifySurface(url, name) {
         assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'complete');
         assert.equal(await page.locator('#evidenceDetails').getAttribute('open'), null);
         assert.equal((await page.locator('body').innerText()).includes('PASS'), false, 'grade must not be confused with lab PASS');
-        await atTop(page, '#verdictTitle', false);
+        // Playback keeps the topology viewport stable; after it completes the learner scrolls down to the grade.
+        await atTop(page, '#verdictTitle', true);
         assert.equal(await page.evaluate(() => document.activeElement.id), 'verdictTitle');
         const snapshot = await page.locator('#chosenAnswer').innerText();
         await page.locator('#choices button').last().evaluate(b => b.click());
