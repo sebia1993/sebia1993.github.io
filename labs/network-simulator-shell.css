@@ -61,7 +61,7 @@ body[data-topic="acl"] #simVisual .stop-marker{top:29%}
 #simResult{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
 #simResult .prediction-feedback{margin:0}
 #simResult #simChosen,#simResult #simCorrect{display:block;overflow-wrap:anywhere}
-#simTabs .lesson-tab{font:inherit;font-size:13px;font-weight:800;line-height:1.45}
+#simTabs .lesson-tab{flex:0 0 auto;font:inherit;font-size:13px;font-weight:800;line-height:1.45}
 #simVisual [data-preserve-original]{white-space:pre-wrap}
 #simPosition{font-variant-numeric:tabular-nums}
 .sim-guide-differences{margin:10px 0 0;font-size:12px;line-height:1.6;color:var(--muted)}
@@ -72,3 +72,5 @@ body[data-topic="acl"] #simVisual .stop-marker{top:29%}
   #simResult .prediction-feedback{font-size:14px}
   #simVisual .sim-svg-scroll:has(.compact-topology),#simVisual .sim-svg-scroll.compact{overflow:visible}
 }
+
+@media(max-width:760px){html{scroll-padding-top:100px;scroll-padding-bottom:110px}#simMain button,#simMain summary{scroll-margin-block:100px}}

@@ -57,7 +57,7 @@ window.NetworkSimulator = {mount(adapter) {
   hintBox.id='simHintText'; hintBox.className='sim-hint'; hintBox.hidden=true; hintBox.setAttribute('role','status');
   coach.after(hintBox);
   if (presentation.guideDifferences?.length) {
-    const note=document.createElement('p'); note.className='sim-guide-differences'; note.dataset.preserveOriginal='';
+    const note=document.createElement('p'); note.id='simGuideDifferences'; note.className='sim-guide-differences'; note.dataset.preserveOriginal='';
     note.textContent=presentation.guideDifferences.map(x=>`${x.name}: ${x.reason}`).join(' ');
     $('simConditions').after(note);
   }
