@@ -10,8 +10,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261007-beginner-flow-v3';
-const key = 'network-learning:ip-subnetting:answers:v1';
+const version = '20261007-beginner-flow-v4';
+const legacyKey = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
 let server, base = process.env.BASE_URL;
@@ -124,22 +124,25 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#complete').isVisible(), true);
       assert.equal(await page.locator('#completionScore').innerText(), '완료 4 / 4 · 정답 2 · 다시 볼 문제 2');
       assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 2 · 남은 문제 0');
-      // Returning to an answered question restores its exact submitted choice.
+      // Returning to an answered question in the same run preserves its submitted choice.
       await press(page, '#reviewWrongBtn', touch);
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 3 / 4');
       assert.equal(await page.locator('#chosenAnswer').innerText(), '그래도 Gateway(.1)에 먼저 보낸다');
       assert.equal(await page.locator('#verdictTitle').innerText(), '✕ 오답입니다');
+
+      // A reload is a new practice run: always return to the initial unanswered state.
       await page.reload({ waitUntil: 'networkidle' });
-      assert.equal(await page.locator('#verdictTitle').innerText(), '✕ 오답입니다');
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 2 · 남은 문제 0');
-      await press(page, '#resetBtn', touch);
+      assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#resultArea').isVisible(), false);
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 2 · 다시 볼 문제 1 · 남은 문제 1');
+      assert.equal(await page.locator('#complete').isVisible(), false);
+      assert.equal(await page.locator('#scoreText').innerText(), '정답 0 · 다시 볼 문제 0 · 남은 문제 4');
+      assert.equal(await page.evaluate(k => localStorage.getItem(k), legacyKey), null);
+      assert.ok((await page.locator('#storageNote').innerText()).includes('새로고침하면 1번 문제부터 다시 시작'));
+
+      // Within the current run, revisit and retry still work and keyboard input remains usable.
       await press(page, '#choices [data-value="on"]', touch);
       await press(page, '#runBtn', touch);
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
-      assert.equal(await page.locator('#scoreText').innerText(), '정답 3 · 다시 볼 문제 1 · 남은 문제 0');
-      // Revisit preserves; retry resets only its own answer. Keyboard path too.
       await page.locator('.tab').nth(0).click();
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
       await page.locator('#resetBtn').focus(); await page.keyboard.press('Enter');
@@ -147,8 +150,9 @@ async function verifySurface(url, name) {
       assert.equal(await page.evaluate(() => document.activeElement.dataset.value), 'on');
       await page.locator('#runBtn').focus(); await page.keyboard.press('Enter');
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
+
       // Last question reached out of order routes to unanswered work, not a false completion.
-      await page.evaluate(k => localStorage.removeItem(k), key); await page.reload({ waitUntil: 'networkidle' });
+      await page.reload({ waitUntil: 'networkidle' });
       await page.locator('.tab').nth(3).click();
       await press(page, '#choices [data-value="gw"]', touch); await press(page, '#runBtn', touch);
       assert.ok((await page.locator('#nextBtn').innerText()).includes('미응답 문제 1'));
@@ -156,20 +160,26 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#complete').isVisible(), false);
       assert.deepEqual(errors, []);
-      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','restore','reload','retry','keyboard','skip','occlusion'] });
+      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','same-run-review','fresh-start-reload','retry','keyboard','skip','occlusion'] });
       console.log(`PASS learner flow + scrolled targets ${name} ${width}x${height}`);
     } finally { await context.close(); }
   }
-  for (const kind of ['blocked','malformed']) {
+  for (const kind of ['blocked','legacy-malformed']) {
     const context = await browser.newContext(); const page = await context.newPage();
     try {
       if (kind === 'blocked') await context.addInitScript(() => { Object.defineProperty(window, 'localStorage', { get(){ throw new DOMException('blocked','SecurityError'); } }); });
       await page.goto(`${url}/${pagePath}`, { waitUntil:'networkidle' });
-      if (kind === 'malformed') { await page.evaluate(k => localStorage.setItem(k,'{broken'),key); await page.reload({ waitUntil:'networkidle' }); }
+      if (kind === 'legacy-malformed') {
+        await page.evaluate(k => localStorage.setItem(k,'{broken'),legacyKey);
+        await page.reload({ waitUntil:'networkidle' });
+        assert.equal(await page.evaluate(k => localStorage.getItem(k),legacyKey),null);
+      }
+      assert.equal(await page.locator('#lessonNo').innerText(),'문제 1 / 4');
+      assert.equal(await page.locator('#scoreText').innerText(),'정답 0 · 다시 볼 문제 0 · 남은 문제 4');
+      assert.ok((await page.locator('#storageNote').innerText()).includes('다시 시작'));
       await page.locator('#choices .choice').first().click(); await page.locator('#runBtn').click();
       assert.equal(await page.locator('#verdictTitle').innerText(), '✓ 정답입니다');
-      if (kind==='blocked') assert.ok((await page.locator('#storageNote').innerText()).includes('현재 화면에서만'));
-      results.push({surface:name,case:`storage-${kind}`,status:'PASS'});
+      results.push({surface:name,case:`fresh-start-${kind}`,status:'PASS'});
     } finally {await context.close();}
   }
 }
