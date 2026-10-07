@@ -58,10 +58,10 @@ async function verify(url,surface){
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
     await page.waitForFunction(()=>document.querySelector('#simStepLabel')?.textContent==='흐름 2 / 4',undefined,{timeout:5000});
     await page.locator('#simAutoBtn').click();
-    const pausedStep=await page.locator('#simStepLabel').innerText();
+    const pausedStep=await page.locator('#simStepLabel').textContent();
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'paused');
     await page.waitForTimeout(1250);
-    assert.equal(await page.locator('#simStepLabel').innerText(),pausedStep,'paused autoplay advanced unexpectedly');
+    assert.equal(await page.locator('#simStepLabel').textContent(),pausedStep,'paused autoplay advanced unexpectedly');
     await page.locator('#simAutoBtn').click();
     await page.waitForFunction(()=>document.querySelector('#simAutoBtn')?.dataset.state==='complete',undefined,{timeout:6000});
     assert.equal(await page.locator('#simStepText').getAttribute('data-kind'),'direct-path');
@@ -69,7 +69,7 @@ async function verify(url,surface){
     assert.equal(await page.locator('#scoreText').innerText(),autoScore,'autoplay changed score');
     assert.equal(await page.locator('#chosenAnswer').innerText(),autoAnswer,'autoplay changed answer');
     await page.locator('#simAutoBtn').click();
-    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4','replay must restart at first event');
+    assert.equal(await page.locator('#simStepLabel').textContent(),'흐름 1 / 4','replay must restart at first event');
     await page.locator('#simAutoBtn').click();
    }
    await openFlow(page);
@@ -90,7 +90,7 @@ async function verify(url,surface){
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'playing');
     await submit(page,1,'gw');
     await page.waitForTimeout(1250);
-    assert.equal(await page.locator('#simStepLabel').innerText(),'흐름 1 / 4','previous scenario autoplay leaked into the new scenario');
+    assert.equal(await page.locator('#simStepLabel').textContent(),'흐름 1 / 4','previous scenario autoplay leaked into the new scenario');
     assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
    }else{
     await submit(page,1,'gw');
