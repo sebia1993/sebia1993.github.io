@@ -17,24 +17,24 @@ function watch(p){p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>
 try{
  for(const [width,height] of [[360,800],[768,1024],[1366,768],[1920,1080]]){
   const c=await browser.newContext({viewport:{width,height},ignoreHTTPSErrors:Boolean(proxy)}),p=await c.newPage();watch(p);
-  const resp=await p.goto(base+'/labs/physical-network.html',{waitUntil:'networkidle',timeout:60000});assert.equal(resp.status(),200);await geometry(p);await p.screenshot({path:resolve(out,`concept-${width}.png`),fullPage:true});
+  const resp=await p.goto(base+'/labs/physical-network.html',{waitUntil:'networkidle',timeout:60000});assert.equal(resp.status(),200);await geometry(p);const guideText=await p.locator('body').innerText();assert.doesNotMatch(guideText,/AP01|Access Switch|상위 Switch|CONCEPT GUIDE|INTERACTIVE LAB|Mental Model|Cable Type|Teaching Simplification|NOT_RUN/);await p.screenshot({path:resolve(out,`concept-${width}.png`),fullPage:true});
   assert.equal(await p.locator('.cg-primary').count(),1);await p.locator('.cg-evidence summary').click();assert.equal(await p.locator('.source-body').isVisible(),true);await geometry(p);await p.locator('.cg-primary').click();await p.waitForURL('**/physical-network-simulator.html');
-  assert.equal(await p.locator('#runBtn').isDisabled(),true);assert.equal(await p.locator('#resultArea').isVisible(),false);assert.match(await p.locator('#ap1Status').innerText(),/ONLINE/);assert.match(await p.locator('#utp1Status').innerText(),/1G/);await geometry(p);await p.screenshot({path:resolve(out,`initial-${width}.png`),fullPage:true});
+  assert.equal(await p.locator('#runBtn').isDisabled(),true);assert.equal(await p.locator('#resultArea').isVisible(),false);assert.equal(await p.locator('[data-part="ap1"] strong').innerText(),'AP A');assert.equal(await p.locator('[data-part="ap2"] strong').innerText(),'AP B');assert.equal(await p.locator('[data-part="access"] strong').innerText(),'Switch A');assert.equal(await p.locator('[data-part="distribution"] strong').innerText(),'Switch B');const labText=await p.locator('body').innerText();assert.doesNotMatch(labText,/AP01|AP02|Access Switch|상위 Switch|PHYSICAL NETWORK|Teaching Simulation|Reset ·|ONLINE|CONNECTED|REMOVED/);assert.match(await p.locator('#ap1Status').innerText(),/정상/);assert.match(await p.locator('#utp1Status').innerText(),/1G/);await geometry(p);await p.screenshot({path:resolve(out,`initial-${width}.png`),fullPage:true});
   await p.clock.install();
   for(let i=0;i<4;i++){
    await run(p,i,scenarios[i].answer);assert.match(await p.locator('#verdictTitle').innerText(),/정답입니다/);
-   const expect=[['ONLINE','ONLINE','UP'],['OFFLINE','ONLINE','UP'],['상위망 영향','상위망 영향','DOWN'],['상위망 영향','상위망 영향','DOWN']][i];
-   assert.match(await p.locator('#ap1Status').innerText(),new RegExp(expect[0]));assert.match(await p.locator('#ap2Status').innerText(),new RegExp(expect[1]));assert.match(await p.locator('#uplinkStatus').innerText(),new RegExp('UPLINK '+expect[2]));assert.equal(await p.locator('#accessStatus').innerText(),'전원 ON');
-   if(i===2){assert.match(await p.locator('#sfpaStatus').innerText(),/REMOVED/);assert.match(await p.locator('#ap1Status').innerText(),/전원 ON/);}
-   if(i===3){assert.match(await p.locator('#sfpaStatus').innerText(),/OK/);assert.match(await p.locator('#fiberaStatus').innerText(),/DISCONNECTED/);}
+   const expect=[['정상','정상','정상'],['연결 끊김','정상','정상'],['상위망 영향','상위망 영향','끊김'],['상위망 영향','상위망 영향','끊김']][i];
+   assert.match(await p.locator('#ap1Status').innerText(),new RegExp(expect[0]));assert.match(await p.locator('#ap2Status').innerText(),new RegExp(expect[1]));assert.match(await p.locator('#uplinkStatus').innerText(),new RegExp('상위 연결 '+expect[2]));assert.equal(await p.locator('#accessStatus').innerText(),'전원 켜짐');
+   if(i===2){assert.match(await p.locator('#sfpaStatus').innerText(),/제거됨/);assert.match(await p.locator('#ap1Status').innerText(),/전원 켜짐/);}
+   if(i===3){assert.match(await p.locator('#sfpaStatus').innerText(),/정상/);assert.match(await p.locator('#fiberaStatus').innerText(),/분리됨/);}
    await geometry(p);await p.screenshot({path:resolve(out,`${scenarios[i].id}-${width}.png`),fullPage:true});
    const score=await p.locator('#scoreText').innerText();await p.locator('#playbackBtn').click();await finish(p);assert.equal(await p.locator('#scoreText').innerText(),score);
-   await p.locator('#resetBtn').click();assert.match(await p.locator('#uplinkStatus').innerText(),/UPLINK UP/);assert.match(await p.locator('#ap1Status').innerText(),/ONLINE/);assert.equal(await p.locator('.disconnected').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);
+   await p.locator('#resetBtn').click();assert.match(await p.locator('#uplinkStatus').innerText(),/상위 연결 정상/);assert.match(await p.locator('#ap1Status').innerText(),/정상/);assert.equal(await p.locator('.disconnected').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);
    await p.locator(`[data-prediction="${scenarios[i].answer}"]`).click();await p.locator('#runBtn').click();await finish(p);
   }
   await p.locator('#nextBtn').click();assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 4 · 오답 0/);await p.locator('#restartBtn').click();
   // Wrong prediction changes grade, not the simulated physical state.
-  await run(p,1,1);assert.match(await p.locator('#verdictTitle').innerText(),/예상과 결과/);assert.match(await p.locator('#ap1Status').innerText(),/OFFLINE/);assert.match(await p.locator('#ap2Status').innerText(),/ONLINE/);
+  await run(p,1,1);assert.match(await p.locator('#verdictTitle').innerText(),/예상과 결과/);assert.match(await p.locator('#ap1Status').innerText(),/연결 끊김/);assert.match(await p.locator('#ap2Status').innerText(),/정상/);
   await p.locator('#reviewPanel summary').click();await p.locator('#prevEvent').click();const score=await p.locator('#scoreText').innerText();await p.locator('#nextEvent').click();assert.equal(await p.locator('#scoreText').innerText(),score);
   // Pause preserves the remaining time and state; reset cancels delayed callbacks.
   await p.locator('#playbackBtn').click();await p.clock.runFor(700);await p.locator('#playbackBtn').click();const event=await p.locator('#liveEventTitle').innerText();await p.clock.runFor(6000);assert.equal(await p.locator('#liveEventTitle').innerText(),event);await p.locator('#playbackBtn').click();await p.clock.runFor(1500);assert.equal(await p.locator('#liveEventTitle').innerText(),event);await finish(p);

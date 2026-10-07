@@ -4,7 +4,7 @@
 - Reviewed: 2026-10-07
 - Learning goal: AP와 네트워크 장비가 UTP·광케이블·SFP를 통해 어떻게 연결되는지 설명할 수 있다.
 - Core question: AP에서 상위 네트워크 장비까지 실제로 무엇을 거쳐 연결되는가?
-- Model: AP → UTP → Access Switch → SFP → Fiber → FDF → Fiber → SFP → Distribution/Core Switch.
+- Model: AP A / AP B → UTP → Switch A → SFP → Fiber → FDF → Fiber → SFP → Switch B.
 - Topology visualization: REQUIRED; provenance is **Teaching Simplification**, not an observed PNETLab topology.
 - Learner flow: Concept Guide → Interactive Lab; 5–8 minute guide is an editorial target, not a measured reading-time result.
 
@@ -12,7 +12,7 @@
 
 The explicit physical-topic work order takes precedence over the generic Pipeline's actual-lab promotion gate. Physical facts are checked against official sources. Browser QA validates implementation, not hardware. The runtime gate for actual PNETLab work is not invoked because no actual-lab run is requested or performed.
 
-Read Drive Network Learning Pipeline v1.10, Two-Stage Technical Learning Design v2.7, Network Lab Validation Standard v1.4, Network Topology Visualization v1.7 and Beginner Network Learning Page Audit v1.8, plus network-simulator-template. The project-index Validation Standard ID was unavailable; the current document linked by Pipeline was read instead. No shared learning-state or unrelated skill documents were changed for this explicitly scoped repository addition.
+Read the current project skills: Network Learning Pipeline v1.1, Two-Stage Technical Learning Design v1.1, and Network Lab Validation Standard v1.0. The physical-topic work order explicitly keeps this chapter at Concept Guide → Interactive Lab and does not force a PNETLab stage. No shared learning-state or unrelated skill documents were changed for this scoped re-audit.
 
 ## Official sources
 
@@ -45,8 +45,8 @@ Sources were opened and read, not accepted from search snippets. An apparent Cat
 | PHY-07 | Common Ethernet examples: 1G SFP, 10G SFP+; similar small form factor does not establish compatibility. GBIC and SFP are distinct. | Teaching Simplification | S5/S6/S9. SFP has other speed/application variants; these examples are not exhaustive definitions. “지빅” is a colloquial field term supplied in the work order, not a standard term. | CONFIRMED | NOT_RUN |
 | PHY-08 | FDF can be an intermediate fiber organization/connection point. | Teaching Simplification | S8 patching/frame products; not mandatory in every optical link and not a forwarding switch. | CONFIRMED | NOT_RUN |
 | PHY-09 | Cat5e can be encountered in operating networks; its label alone does not establish failure. | Teaching Simplification | S2 installed-cabling discussion + generalized user experience. No claim that a particular private site was measured. | CONFIRMED | NOT_RUN |
-| PHY-10 | Disconnect only AP01's sole UTP: AP01 loses wired connectivity; with sole PoE supply it also loses power; AP02 and shared uplink remain connected. | Teaching Simplification | Inference from S1/S3 with explicit independent AP cables, powered switch, no additional fault. | MODEL_DEFINED | NOT_RUN |
-| PHY-11 | Missing Access optical SFP or broken fiber path brings the sole uplink down while AP UTP/PoE and switch power remain up. Both APs' upstream-dependent service is affected. | Teaching Simplification | Inference from S3/S5/S7 under a single upstream path. Does not claim all WLAN/local services fail or every AP reboots. | MODEL_DEFINED | NOT_RUN |
+| PHY-10 | Disconnect only AP A's sole UTP: AP A loses wired connectivity; with sole PoE supply it also loses power; AP B and shared uplink remain connected. | Teaching Simplification | Inference from S1/S3 with explicit independent AP cables, powered switch, no additional fault. | MODEL_DEFINED | NOT_RUN |
+| PHY-11 | Missing Switch A-side optical SFP or broken fiber path brings the sole uplink down while AP UTP/PoE and switch power remain up. Both APs' upstream-dependent service is affected. | Teaching Simplification | Inference from S3/S5/S7 under a single upstream path. Does not claim all WLAN/local services fail or every AP reboots. | MODEL_DEFINED | NOT_RUN |
 
 All physical `actual` observations are null and hardware artifact lists empty. No live network, CLI, PCAP, optical meter or PNETLab experiment was run. Website counts for labs, faultScenarios, packetCaptures and recoveryValidations are **0** for this topic. Existing summary totals for those categories are preserved, not independently re-audited by this change. `completedTopics` counts completed topic objects (25 → 26), not hardware passes.
 
@@ -54,13 +54,13 @@ All physical `actual` observations are null and hardware artifact lists empty. N
 
 | Scenario | Baseline | Single changed variable | Expected browser model |
 |---|---|---|---|
-| Normal | Both Cat5e AP connections, compatible SFPs and Fiber present; powered switches | None | AP01/AP02 ONLINE, 1G UTP, PoE ON, UPLINK UP |
-| AP01 UTP removed | Same baseline | `utp1 = false` | AP01 OFFLINE/power OFF, AP02 ONLINE, switches ON, UPLINK UP |
-| Access SFP absent | Same baseline | `sfpa = false` | UPLINK DOWN, APs power ON/UTP UP, upstream service affected |
-| Access-side Fiber disconnected | Same baseline | `fibera = false` | SFPs still OK, UPLINK DOWN, APs power ON/UTP UP, upstream service affected |
+| Normal | Both Cat5e AP connections, compatible SFPs and Fiber present; powered switches | None | AP A/AP B 정상, UTP 1G 연결, PoE 공급, 상위 연결 정상 |
+| AP A UTP removed | Same baseline | `utp1 = false` | AP A 연결 끊김/전원 꺼짐, AP B 정상, 스위치 전원 켜짐, 상위 연결 정상 |
+| Switch A SFP absent | Same baseline | `sfpa = false` | 상위 연결 끊김, AP 전원 켜짐/UTP 연결, 상위망 서비스 영향 |
+| Switch A-side Fiber disconnected | Same baseline | `fibera = false` | SFP 장착 유지, 상위 연결 끊김, AP 전원 켜짐/UTP 연결, 상위망 서비스 영향 |
 | Reset | Any playback phase | Restore all baseline booleans | Cancel all old callbacks; normal links/power; current prediction/grade cleared |
 
-No actual port, building, company, address, configuration or cable-plant identity is used. AP01/AP02 are synthetic labels mandated for the teaching example. The Fiber/SFP state transition represents a resulting condition, not instructions to pull a live module with a cable attached. The 2490 ms step duration is reading time based on the existing ARP timing, not a measured link-detection time.
+No actual port, building, company, address, configuration or cable-plant identity is used. AP A / AP B and Switch A / Switch B are synthetic labels used consistently across the Concept Guide and Interactive Lab. The Fiber/SFP state transition represents a resulting condition, not instructions to pull a live module with a cable attached. The 2490 ms step duration is reading time based on the existing ARP timing, not a measured link-detection time.
 
 ## Scope deliberately omitted
 
