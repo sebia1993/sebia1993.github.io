@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="concept-visual-version" content="20261007-general-public-v4">
+<meta name="concept-visual-version" content="20261007-readable-dark-v5">
 <title>IP 주소와 네트워크 나누기 — Subnetting 입문</title>
 <meta name="description" content="IT 용어를 모르는 사람도 주소, 같은 네트워크, /25, Subnet Mask, Default Gateway의 관계를 그림부터 이해할 수 있도록 구성한 1단계 개념서입니다.">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../lab-ui.css">
 <style>
 html#ipConceptRoot{scroll-behavior:auto}
-#ipConcept{--mint:#7ee0c2;--blue2:#82caff;--amber2:#ffce86;overflow-wrap:anywhere}
+#ipConcept{--text:#f4f8fc;--body-text:#d7e3ef;--muted:#b6c7d8;--line:#35526d;--panel3:#102439;--surface:#102439;--surface-raised:#142d43;--surface-border:#3e607d;--mint:#7ee0c2;--blue2:#82caff;--amber2:#ffce86;overflow-wrap:anywhere}
 #ipConcept .shell{max-width:1080px}
 #ipConcept>header{position:static;top:auto;backdrop-filter:none;z-index:auto}
 #ipConcept .topbar{flex-wrap:wrap;min-height:60px;padding:10px 0}
 #ipConcept .nav{justify-content:flex-start}
 #ipConcept section{scroll-margin-top:16px;padding:30px 0}
-#ipConcept h2,#ipConcept h3{word-break:keep-all;overflow-wrap:anywhere}
+#ipConcept h2,#ipConcept h3{word-break:keep-all;overflow-wrap:anywhere}\n#ipConcept main p,#ipConcept main li{color:var(--body-text);font-weight:450}\n#ipConcept main p b,#ipConcept main li b{color:var(--text);font-weight:800}
 #ipConcept .hero{padding:38px 0 24px}
 #ipConcept .hero h1{font-size:clamp(2rem,5vw,3.7rem);line-height:1.08;margin:.35rem 0 .8rem}
 #ipConcept .hero p{max-width:820px;font-size:1.02rem;line-height:1.75}
@@ -29,16 +29,16 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .question-card p{margin:7px 0 0;color:var(--muted)}
 #ipConcept .section-head{align-items:flex-end}
 #ipConcept .section-head p{max-width:500px}
-#ipConcept .visual{margin:16px 0 0;border:1px solid #3d5872;border-radius:18px;padding:22px;background:#0d1b2a;min-width:0}
+#ipConcept .visual{margin:16px 0 0;border:1px solid var(--surface-border);border-radius:18px;padding:22px;background:var(--surface);min-width:0}
 #ipConcept .visual figcaption{margin-top:16px;color:#b8ccdf;font-size:.88rem;line-height:1.65}
 #ipConcept .v-label{display:block;margin-bottom:12px;color:#c0d2e4;font-size:.8rem;font-weight:800;letter-spacing:.03em}
 #ipConcept .device-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-#ipConcept .device-card{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;align-items:center;padding:16px;border:1px solid #496d89;border-radius:14px;background:#11283b;min-width:0}
+#ipConcept .device-card{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;align-items:center;padding:16px;border:1px solid #527996;border-radius:14px;background:var(--surface-raised);min-width:0}
 #ipConcept .device-icon{display:grid;place-items:center;width:62px;height:56px;border-radius:12px;background:#17364d;color:#bfe7ff}
 #ipConcept .device-icon svg{width:42px;height:42px}
 #ipConcept .device-card strong{display:block;font-size:1rem}
 #ipConcept .device-card span{display:block;margin-top:5px;color:#c6d7e5;font-size:.88rem}
-#ipConcept .plain-callout{margin-top:14px;padding:14px 16px;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;background:#10292c;line-height:1.7}
+#ipConcept .plain-callout{margin-top:14px;padding:14px 16px;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;background:#123034;line-height:1.7}
 #ipConcept .term-badge{display:block;width:fit-content;max-width:100%;margin-top:10px;padding:7px 12px;border:1px solid #4d7595;border-radius:14px;background:#132d43;color:#dcedfb;font-weight:850;font-size:.84rem;line-height:1.65}
 #ipConcept .neighborhoods{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:stretch}
 #ipConcept .neighborhood{position:relative;min-width:0;padding:18px;border:2px solid #3f806f;border-radius:16px;background:#102c2c}
@@ -58,12 +58,12 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .range-points{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:.8rem;color:#c6d8e8}
 #ipConcept .range-points b{color:#fff}
 #ipConcept .why-arrow{display:grid;place-items:center;margin:14px auto;width:46px;height:46px;border-radius:50%;border:1px solid #55758f;background:#17364e;color:#dcecff;font-size:1.4rem}
-#ipConcept .rule-card{padding:18px;border:1px solid #57748d;border-radius:14px;background:#14293b;text-align:center}
+#ipConcept .rule-card{padding:18px;border:1px solid #5b7892;border-radius:14px;background:var(--surface-raised);text-align:center}
 #ipConcept .rule-card strong{display:block;font-size:clamp(1.15rem,3vw,1.6rem)}
 #ipConcept .rule-card span{display:block;margin-top:7px;color:#c8d7e4}
 #ipConcept .route-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-#ipConcept .route-card{padding:18px;border:1px solid #487c6d;border-radius:16px;background:#102629;min-width:0}
-#ipConcept .route-card.off{border-color:#496f90;background:#122638}
+#ipConcept .route-card{padding:18px;border:1px solid #4f8c78;border-radius:16px;background:#12302e;min-width:0}
+#ipConcept .route-card.off{border-color:#527a9a;background:var(--surface-raised)}
 #ipConcept .route-card h3{margin:0 0 4px}
 #ipConcept .route-drawing{display:grid;grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);gap:6px;align-items:center;margin:18px 0}
 #ipConcept .route-drawing.three{grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr) 24px minmax(0,1fr)}
@@ -74,12 +74,12 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .mini-device span{font-size:.78rem;color:#bcd0df}
 #ipConcept .route-arrow{display:grid;place-items:center;color:#c6dcf0;font-size:1.5rem}
 #ipConcept .route-result{padding-top:12px;border-top:1px solid #426779;font-weight:850}
-#ipConcept .gateway-box{display:grid;grid-template-columns:86px minmax(0,1fr);gap:14px;align-items:center;margin-top:14px;padding:16px;border:1px solid #4c7392;border-radius:14px;background:#132c42}
+#ipConcept .gateway-box{display:grid;grid-template-columns:86px minmax(0,1fr);gap:14px;align-items:center;margin-top:14px;padding:16px;border:1px solid #567d9c;border-radius:14px;background:var(--surface-raised)}
 #ipConcept .door{position:relative;width:70px;height:78px;margin:auto;border:4px solid #9ec7e3;border-bottom:0;border-radius:8px 8px 0 0}
 #ipConcept .door:before{content:"";position:absolute;right:10px;top:34px;width:7px;height:7px;border-radius:50%;background:#ffce86}
 #ipConcept .door:after{content:"출구";position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);font-size:.75rem;color:#bdd4e6;white-space:nowrap}
 #ipConcept .notation{display:grid;grid-template-columns:1fr 60px 1fr;gap:12px;align-items:center}
-#ipConcept .notation-card{padding:20px;border:1px solid #50728f;border-radius:14px;background:#132d43;text-align:center}
+#ipConcept .notation-card{padding:20px;border:1px solid #587d9b;border-radius:14px;background:var(--surface-raised);text-align:center}
 #ipConcept .notation-card strong{display:block;font-size:1.35rem}
 #ipConcept .notation-card span{display:block;margin-top:6px;color:#c8d9e7;font-size:.86rem}
 #ipConcept .notation-eq{text-align:center;font-size:1.5rem;color:#c9e7ff;font-weight:900}
@@ -106,7 +106,7 @@ html#ipConceptRoot{scroll-behavior:auto}
 #ipConcept .next-stage p{margin:0;color:var(--muted);max-width:760px}
 #ipConcept .refs{display:grid;gap:8px}
 #ipConcept .refs a{color:var(--blue)}
-#ipConcept details.deep-dive{margin-top:14px;border:1px solid #3e617d;border-radius:14px;background:#102336}
+#ipConcept details.deep-dive{margin-top:14px;border:1px solid #486d8a;border-radius:14px;background:var(--surface)}
 #ipConcept details.deep-dive summary{cursor:pointer;padding:14px 16px;font-weight:850;min-height:48px}
 #ipConcept details.deep-dive>div{padding:0 16px 16px}
 #ipConcept .btn{min-height:48px}
