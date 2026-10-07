@@ -424,9 +424,9 @@ html#ipConceptRoot{scroll-behavior:auto}
  <div class="shell">
   <div class="note refs">
    <b>Reference</b>
-   <span><a href="https://www.rfc-editor.org/rfc/rfc1122.html">RFC 1122 §3.3.1.1</a> · 같은 연결 네트워크인지 판단하고, 아니면 gateway로 보내는 원리</span>
-   <span><a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632 §3.1</a> · IPv4 32bit와 CIDR Prefix Length 표기</span>
-   <span><a href="https://www.cisco.com/en/US/docs/security/pix/pix50/configuration/guide/subnets.html">Cisco · Subnet Masking and Addressing</a> · /25와 .128 mask의 주소 범위 참고</span>
+   <span><a href="https://datatracker.ietf.org/doc/html/rfc1122#section-3.3.1.1">RFC 1122 §3.3.1.1 · Local/Remote Decision</a> · 같은 Address Mask를 Source와 Destination에 적용해 같은 Connected Network인지 판단하고, 다르면 Gateway를 이용하는 원리</span>
+   <span><a href="https://datatracker.ietf.org/doc/html/rfc4632#section-3.1">RFC 4632 §3.1 · Basic Concept and Prefix Notation</a> · IPv4는 32bit이며, /25처럼 / 뒤 숫자는 Network Prefix로 사용하는 앞쪽 bit 수를 나타냄</span>
+   <span><a href="https://datatracker.ietf.org/doc/html/rfc1878#page-2">RFC 1878 · Variable Length Subnet Table for IPv4</a> · /25 = 255.255.255.128 대응을 직접 확인할 수 있는 참고 표 (Historic / Informational)</span>
   </div>
   <!-- Author validation evidence remains separate from the learner flow.
        Existing PASS claims/evidence: IPSUB-01..04, run 2026-10-03-ip-subnetting-01.
