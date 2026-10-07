@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261007-beginner-flow-v4">
+<meta name="lab-ui-version" content="20261007-repeat-learning-v5">
 <meta name="skill-review-version" content="20261007-observation-review-v3">
 <meta name="network-sim-version" content="20261007-topology-sim-v2">
 <meta name="summary-ui-version" content="20261007-summary-status-v2"><title>IP 주소 / Subnetting — 인터랙티브 실습</title>
@@ -344,7 +344,7 @@
 </main>
 <section class="complete" id="complete" hidden aria-labelledby="completionTitle"><h2 id="completionTitle" tabindex="-1">4문제를 모두 풀었습니다.</h2><strong id="completionScore"></strong><p>틀린 문제가 있어도 괜찮습니다. 아래에서 답을 다시 보면 계산 순서를 바로 복습할 수 있습니다.</p><div class="summary-list" id="summaryList" role="list" aria-label="문제별 답안 판정"></div><div class="lesson-actions"><button class="primary" id="reviewWrongBtn" type="button">오답 다시 보기</button><a class="secondary" href="ip-subnetting.html">개념서 다시 보기</a><a class="secondary" href="../roadmap.html">로드맵</a></div></section>
 <div class="scope"><details><summary>이 페이지가 단순화한 내용</summary><p>이 페이지는 실제 라우터를 구동하지 않고 검증된 Claim을 학습용 계산 모델로 재현합니다. 실제 검증은 Cisco 3725 IOS 12.4(15)T14, VPCS 1.0, PNETLab 내부 링크에서 수행했습니다. Proxy ARP는 비활성화했습니다. 최초 원격 ping에서 1회 timeout이 있었지만 같은 정상 구성의 추가 시험은 3/3 성공했으며, 이 초기 손실은 프로토콜의 필수 규칙으로 모델링하지 않습니다. NAT, Static/Dynamic Route, Proxy ARP, ICMP Redirect, VLAN/STP, 다른 OS의 세부 neighbor 동작은 이 실습 범위 밖입니다.</p></details></div>
-<p class="storage" id="storageNote">반복학습을 위해 페이지를 새로 열거나 새로고침하면 1번 문제부터 다시 시작합니다.</p>
+<p class="storage" id="storageNote">반복학습을 위해 새로고침하거나 이 실습에 다시 들어오면 1번 문제부터 미응답 상태로 시작합니다.</p>
 <noscript>문제를 풀려면 브라우저에서 JavaScript를 활성화해야 합니다.</noscript>
 </div>
 <script>
@@ -367,7 +367,13 @@ var $=function(id){return document.getElementById(id);};
 var idx=0, answers=lessons.map(function(){return {choice:null,submitted:false};}), summaryOpen=false, observation=null, traceStep=0, maskTryPrefix=25;
 /* Repetition-first lab: never auto-restore prior answers. Clear the legacy key once per load. */
 try{localStorage.removeItem(LEGACY_KEY);}catch(e){}
-function persist(){/* Current-page state stays in memory only. A reload/new entry starts fresh. */}
+function persist(){/* Current-page state stays in memory only. */}
+function resetPracticeSession(){
+ idx=0;
+ answers=lessons.map(function(){return {choice:null,submitted:false};});
+ summaryOpen=false;observation=null;traceStep=0;maskTryPrefix=25;
+ render();window.scrollTo({top:0,behavior:'instant'});
+}
 function ipToInt(ip){return ip.split('.').reduce(function(a,v){return ((a<<8)>>>0)+Number(v);},0)>>>0;}
 function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
 function net(ip,p){return intToIp(ipToInt(ip)&(p===0?0:(0xffffffff<<(32-p))>>>0))+'/'+p;}
@@ -587,6 +593,9 @@ $('simNext').addEventListener('click',function(){if(observation&&traceStep<obser
 $('maskTry25').addEventListener('click',function(){maskTryPrefix=25;renderMaskTry();});
 $('maskTry24').addEventListener('click',function(){maskTryPrefix=24;renderMaskTry();});
 window.addEventListener('resize',function(){if(observation)placeSimPacket(observation.events[traceStep]);});
+window.addEventListener('pageshow',function(event){
+ if(event.persisted)resetPracticeSession();
+});
 window.addEventListener('pageshow',function(event){if(event.persisted)location.reload();});
 render();persist();
 })();
