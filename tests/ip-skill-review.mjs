@@ -8,9 +8,10 @@ import vm from 'node:vm';
 import {chromium} from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=resolve(root,'test-results');
 await mkdir(out,{recursive:true});
-const file='labs/ip-subnetting-simulator.html',version='20261003-observation-review-v1';
+const file='labs/ip-subnetting-simulator.html',version='20261007-observation-review-v2';
 const key='network-learning:ip-subnetting:answers:v1';
 const source=await readFile(resolve(root,file),'utf8');
+assert.equal(source.includes('>\\n<meta name="network-sim-version"'),false,'head must not expose a literal \\n text node');
 const normalize=s=>s.replace(/\r\n/g,'\n').trim();
 const checks=[];
 // Exercise the same pure function shipped in the page, not an alternate test model.
@@ -78,6 +79,17 @@ async function surface(url,name){
     assert.ok((await page.locator('#modelEvent').innerText()).includes(fixtures[i].target));
     assert.equal(await page.locator('#simFlowDetails').getAttribute('open'),null);
     assert.equal(await page.locator('#modelObservation').getAttribute('data-outcome'),i===2?'unresolved':'resolved');
+    assert.equal(await page.locator('#simTopology [data-device-shape="host"]').count(),3,'three host-shaped device icons');
+    assert.equal(await page.locator('#simTopology [data-device-shape="router"]').count(),1,'one router-shaped device icon');
+    const flowOrder=await page.evaluate(()=>{
+      const model=document.querySelector('#modelObservation'),next=document.querySelector('#nextBtn'),calc=document.querySelector('#calculationDetails');
+      return !!(model.compareDocumentPosition(next)&Node.DOCUMENT_POSITION_FOLLOWING)&&!!(next.compareDocumentPosition(calc)&Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    assert.equal(flowOrder,true,'result flow must be verdict → topology → next/reset → numeric deepening');
+    assert.equal(await page.locator('.hero p').first().evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','hero learning copy contrast');
+    assert.equal(await page.locator('#feedback').evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','prediction feedback is primary copy');
+    assert.equal(await page.locator('#modelEvent').evaluate(e=>getComputedStyle(e).color),'rgb(244, 248, 252)','current event is primary copy');
+    assert.equal(await page.locator('#modelObservation').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 36, 57)','observation surface must separate from page background');
     assert.ok((await page.locator('#modelCaption').textContent()).includes('직접 전달'));
     assert.equal((await page.locator('body').innerText()).includes('PASS'),false);
     const distance=await page.evaluate(()=>document.querySelector('#nextBtn').getBoundingClientRect().bottom-document.querySelector('#verdictTitle').getBoundingClientRect().top);
@@ -96,6 +108,8 @@ async function surface(url,name){
     await input(page,'#simFlowDetails summary',touch);
     assert.equal(await page.locator('#calculationDetails').isVisible(),true);
     assert.equal(await page.locator('#decisionOut').innerText(),['같은 네트워크 (ON-LINK)','다른 네트워크 → Gateway','같은 네트워크로 잘못 판단','다른 네트워크 → Gateway'][i]);
+    assert.ok((await page.locator('#calculationDetails').innerText()).includes('Prefix Length'),'numeric deepening must use Prefix Length terminology');
+    assert.equal((await page.locator('#calculationDetails').innerText()).includes('PC1이 사용한 Mask'),false,'slash notation must not be mislabeled as Mask');
     assert.ok((await page.locator('#nextHopOut').innerText()).endsWith(fixtures[i].target));
     if(i===2){
       assert.equal(await page.locator('#srcIp').innerText(),'10.77.10.10/24');
@@ -141,7 +155,7 @@ async function surface(url,name){
   await page.goto(`${url}/${file}`);
   await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({schema:1,index:2,answers:[{choice:'on',submitted:true},{choice:'gw',submitted:true},{choice:'drop',submitted:true},{choice:'gw',submitted:true}]})),key);
   await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 바로 버린다');
+  assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
   assert.equal(await page.locator('#scoreText').innerText(),'정답 3 · 다시 볼 문제 1 · 남은 문제 0');
   assert.ok((await page.locator('#modelEvent').innerText()).includes('10.77.10.140'));
   await page.locator('#summaryReturnBtn').click();assert.equal(await page.locator('#complete').isVisible(),true);
