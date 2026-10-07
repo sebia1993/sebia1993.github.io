@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'test-results');
 await mkdir(output, { recursive: true });
 const pagePath = 'labs/ip-subnetting-simulator.html';
-const version = '20261007-repeat-learning-v5';
+const version = '20261007-auto-flow-v6';
 const legacyKey = 'network-learning:ip-subnetting:answers:v1';
 const normalize = s => s.replace(/\r\n/g, '\n').trim();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.ico': 'image/x-icon' };
@@ -75,6 +75,8 @@ async function verifySurface(url, name) {
         assert.equal(await page.locator('#choices button:disabled').count(), 3, 'submitted answers must be locked');
         assert.equal(await page.locator('#submitRow').isVisible(), false, 'primary action must change after submit');
         assert.equal(await page.locator('#calculationDetails').isVisible(), true);
+        assert.equal(await page.locator('#simAutoBtn').isVisible(), true);
+        assert.equal(await page.locator('#simAutoBtn').getAttribute('data-state'),'ready');
         assert.equal(await page.locator('#evidenceDetails').getAttribute('open'), null);
         assert.equal((await page.locator('body').innerText()).includes('PASS'), false, 'grade must not be confused with lab PASS');
         await atTop(page, '#verdictTitle', false);
@@ -169,7 +171,7 @@ async function verifySurface(url, name) {
       assert.equal(await page.locator('#lessonNo').innerText(), '문제 1 / 4');
       assert.equal(await page.locator('#complete').isVisible(), false);
       assert.deepEqual(errors, []);
-      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','same-run-review','fresh-start-reload','reentry-reset','retry','keyboard','skip','occlusion'] });
+      results.push({ surface:name,width,height,touch,scenarios:4,status:'PASS',flow:'next-only',graded:'2 correct / 2 incorrect',checks:['grade','next','prefix','auto-flow-visible','same-run-review','fresh-start-reload','reentry-reset','retry','keyboard','skip','occlusion'] });
       console.log(`PASS learner flow + scrolled targets ${name} ${width}x${height}`);
     } finally { await context.close(); }
   }
