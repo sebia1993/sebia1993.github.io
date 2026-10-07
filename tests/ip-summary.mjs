@@ -55,10 +55,14 @@ async function summaryCheck(page,expected){
  if(c>0&&c<4)assert.notEqual(bars.find(x=>x.grade==='correct').color,bars.find(x=>x.grade==='incorrect').color);
  return Math.min(...palette.map(x=>x.ratio));
 }
+async function waitComplete(page){
+ await page.waitForFunction(()=>document.querySelector('#modelObservation')?.dataset.flowState==='complete',undefined,{timeout:5000});
+}
 async function solve(page,choices){
  for(const choice of choices){
   await page.locator(`#choices [data-value="${choice}"]`).click();
   await page.locator('#runBtn').click();
+  await waitComplete(page);
   await page.locator('#nextBtn').click();
  }
 }
@@ -68,11 +72,10 @@ async function checkSurface(url,name){
   page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
   try{
    assert.equal((await page.goto(`${url}/${file}`,{waitUntil:'networkidle'})).status(),200);
+   await page.emulateMedia({reducedMotion:'reduce'});
    assert.equal(await page.locator('meta[name=summary-ui-version]').getAttribute('content'),version);
-   // Solve in sequence using only Next. Same 3/1 state as the user's example.
-   for(const choice of ['on','gw','drop','gw']){
-    await page.locator(`#choices [data-value="${choice}"]`).click();await page.locator('#runBtn').click();await page.locator('#nextBtn').click();
-   }
+   // Solve in sequence using only the primary Run and Next actions.
+   await solve(page,['on','gw','drop','gw']);
    const minContrast=await summaryCheck(page,['correct','correct','incorrect','correct']);
    if([360,1366].includes(width))await page.locator('#complete').screenshot({path:resolve(out,`summary-${name}-${width}.png`)});
    // Real hit target for the new error-review control, not just a text assertion.
