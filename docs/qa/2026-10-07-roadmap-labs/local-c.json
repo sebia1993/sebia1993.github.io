@@ -1,0 +1,65 @@
+{
+  "checks": 751,
+  "results": [
+    {
+      "topic": "wifi-rf",
+      "checks": 133,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "wlan-association",
+      "checks": 217,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "dot1x-radius",
+      "checks": 135,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "roaming-wlan-troubleshooting",
+      "checks": 133,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "fhrp",
+      "checks": 133,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    }
+  ]
+}

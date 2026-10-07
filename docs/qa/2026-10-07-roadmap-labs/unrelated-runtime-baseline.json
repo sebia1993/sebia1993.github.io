@@ -1,0 +1,10 @@
+{
+  "baseline": "cc7f148215d1a3cfff506fabd39458bcea5f0a1a",
+  "status": "Runtime 초기화 실패: loadPyodide is not defined",
+  "failed": [
+    {
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.js",
+      "error": "net::ERR_EMPTY_RESPONSE"
+    }
+  ]
+}

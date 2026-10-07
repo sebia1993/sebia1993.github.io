@@ -1,0 +1,422 @@
+{
+  "accessibility": [
+    {
+      "topic": "icmp-troubleshooting",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "vlan-trunk",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "inter-vlan-routing",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "stp",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "lacp",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "dhcp",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "dns",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "routing-table",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "ospf",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "acl",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "nat-pat",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "firewall-vpn",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "wifi-rf",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "wlan-association",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "dot1x-radius",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "roaming-wlan-troubleshooting",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "fhrp",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "vrf",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "bgp",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "redistribution",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "observability",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    },
+    {
+      "topic": "network-automation",
+      "status": "PASS",
+      "checks": [
+        "keyboard choice/run/pause/reset",
+        "focus retention",
+        "200% root font no document overflow",
+        "topology pan to end",
+        "landscape resize"
+      ]
+    }
+  ],
+  "timing": {
+    "reference": [
+      {
+        "title": "PC1 · 경로 판단",
+        "elapsed": 0,
+        "nextMs": 1779
+      },
+      {
+        "title": "SW1 · ARP Broadcast Flooding",
+        "elapsed": 1779,
+        "nextMs": 1202
+      },
+      {
+        "title": "PC3 → PC1 · ARP Reply",
+        "elapsed": 2982,
+        "nextMs": 2931
+      },
+      {
+        "title": "PC1 → PC3 · ICMP Echo Request",
+        "elapsed": 5912,
+        "nextMs": 3339
+      },
+      {
+        "title": "PC3 · ARP Cache HIT",
+        "elapsed": 9252,
+        "nextMs": 221
+      },
+      {
+        "title": "PC3 → PC1 · ICMP Echo Reply",
+        "elapsed": 9472,
+        "nextMs": null
+      }
+    ],
+    "icmp-troubleshooting": [
+      {
+        "title": "관찰 대기",
+        "state": "PREDICTED",
+        "elapsed": 0,
+        "nextMs": 68
+      },
+      {
+        "title": "R1 · Echo Request 전송",
+        "state": "RUNNING",
+        "elapsed": 68,
+        "nextMs": 2494
+      },
+      {
+        "title": "R2 · Request Forwarding",
+        "state": "RUNNING",
+        "elapsed": 2563,
+        "nextMs": 2502
+      },
+      {
+        "title": "R3 · Echo Reply 반환",
+        "state": "RUNNING",
+        "elapsed": 5065,
+        "nextMs": 2497
+      },
+      {
+        "title": "R1 · Reply 수신",
+        "state": "RUNNING",
+        "elapsed": 7562,
+        "nextMs": 2505
+      },
+      {
+        "title": "R1 · Reply 수신",
+        "state": "COMPLETED",
+        "elapsed": 10067,
+        "nextMs": 57
+      },
+      {
+        "title": "R1 · Echo Request 전송",
+        "state": "RUNNING",
+        "elapsed": 10124,
+        "nextMs": 2504
+      },
+      {
+        "title": "R2 · Request Forwarding",
+        "state": "RUNNING",
+        "elapsed": 12629,
+        "nextMs": 2500
+      },
+      {
+        "title": "R3 · Echo Reply 반환",
+        "state": "RUNNING",
+        "elapsed": 15129,
+        "nextMs": 2500
+      },
+      {
+        "title": "R1 · Reply 수신",
+        "state": "RUNNING",
+        "elapsed": 17629,
+        "nextMs": 2590
+      },
+      {
+        "title": "R1 · Reply 수신",
+        "state": "COMPLETED",
+        "elapsed": 20219,
+        "nextMs": null
+      }
+    ],
+    "bgp": [
+      {
+        "title": "관찰 대기",
+        "state": "PREDICTED",
+        "elapsed": 0,
+        "nextMs": 245
+      },
+      {
+        "title": "시작 조건 확인",
+        "state": "RUNNING",
+        "elapsed": 245,
+        "nextMs": 1077
+      },
+      {
+        "title": "상태와 경로 관찰",
+        "state": "RUNNING",
+        "elapsed": 1321,
+        "nextMs": 2484
+      },
+      {
+        "title": "관찰 값 비교",
+        "state": "RUNNING",
+        "elapsed": 3805,
+        "nextMs": 2501
+      },
+      {
+        "title": "관찰 값 비교",
+        "state": "COMPLETED",
+        "elapsed": 6306,
+        "nextMs": 59
+      },
+      {
+        "title": "시작 조건 확인",
+        "state": "RUNNING",
+        "elapsed": 6365,
+        "nextMs": 1056
+      },
+      {
+        "title": "상태와 경로 관찰",
+        "state": "RUNNING",
+        "elapsed": 7421,
+        "nextMs": 2500
+      },
+      {
+        "title": "관찰 값 비교",
+        "state": "RUNNING",
+        "elapsed": 9920,
+        "nextMs": 2501
+      },
+      {
+        "title": "관찰 값 비교",
+        "state": "COMPLETED",
+        "elapsed": 12422,
+        "nextMs": null
+      }
+    ]
+  },
+  "reference": [
+    {
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "width": 1366,
+      "status": "PASS"
+    },
+    {
+      "width": 1920,
+      "status": "PASS"
+    }
+  ]
+}

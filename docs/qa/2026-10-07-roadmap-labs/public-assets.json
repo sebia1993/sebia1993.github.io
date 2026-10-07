@@ -1,0 +1,366 @@
+[
+  {
+    "path": "labs/icmp-troubleshooting-simulator.html",
+    "status": 200,
+    "expected_sha256": "2f30d9957cedaed3bf34cda5e0413bdfa2298d6ef65b61c3597a0d15350bdca0",
+    "actual_sha256": "2f30d9957cedaed3bf34cda5e0413bdfa2298d6ef65b61c3597a0d15350bdca0",
+    "match": true
+  },
+  {
+    "path": "labs/vlan-trunk-simulator.html",
+    "status": 200,
+    "expected_sha256": "291384a11fbb52fb568a9dd8c2880f8f1519d9a09b1c8091eab3c78ba0bcd0d6",
+    "actual_sha256": "291384a11fbb52fb568a9dd8c2880f8f1519d9a09b1c8091eab3c78ba0bcd0d6",
+    "match": true
+  },
+  {
+    "path": "labs/inter-vlan-routing-simulator.html",
+    "status": 200,
+    "expected_sha256": "97d770a0bb39d3afd8ed78fef04e5bc6481d1c3879b8880e9e7151703ced2698",
+    "actual_sha256": "97d770a0bb39d3afd8ed78fef04e5bc6481d1c3879b8880e9e7151703ced2698",
+    "match": true
+  },
+  {
+    "path": "labs/stp-simulator.html",
+    "status": 200,
+    "expected_sha256": "ea5f87caff74843acc64b031d35eed982774ec4f3f354272eece3d89cd9ed136",
+    "actual_sha256": "ea5f87caff74843acc64b031d35eed982774ec4f3f354272eece3d89cd9ed136",
+    "match": true
+  },
+  {
+    "path": "labs/lacp-simulator.html",
+    "status": 200,
+    "expected_sha256": "2797d0242d824210ff9e2fe7513eede21f613d1935f4782a16b01d8b3086e2a5",
+    "actual_sha256": "2797d0242d824210ff9e2fe7513eede21f613d1935f4782a16b01d8b3086e2a5",
+    "match": true
+  },
+  {
+    "path": "labs/dhcp-simulator.html",
+    "status": 200,
+    "expected_sha256": "e65967b2f23e7fde00824f351fbe755cca3dfdd61aa2af93805b8e9dab421358",
+    "actual_sha256": "e65967b2f23e7fde00824f351fbe755cca3dfdd61aa2af93805b8e9dab421358",
+    "match": true
+  },
+  {
+    "path": "labs/dns-simulator.html",
+    "status": 200,
+    "expected_sha256": "59a3b6bcfb7e040ceedd6c94ecb20f1205d6e5e077fae6eea40e95fc2a5c8a25",
+    "actual_sha256": "59a3b6bcfb7e040ceedd6c94ecb20f1205d6e5e077fae6eea40e95fc2a5c8a25",
+    "match": true
+  },
+  {
+    "path": "labs/routing-table-simulator.html",
+    "status": 200,
+    "expected_sha256": "c2ed68dda3d636cdb61622e57e6029892b5b1ff6cc9b54b265f5e4f48f19a226",
+    "actual_sha256": "c2ed68dda3d636cdb61622e57e6029892b5b1ff6cc9b54b265f5e4f48f19a226",
+    "match": true
+  },
+  {
+    "path": "labs/ospf-simulator.html",
+    "status": 200,
+    "expected_sha256": "25853523885d6c794deea1856a191922b2bcc81aeee45761fc6789af85805fa4",
+    "actual_sha256": "25853523885d6c794deea1856a191922b2bcc81aeee45761fc6789af85805fa4",
+    "match": true
+  },
+  {
+    "path": "labs/acl-simulator.html",
+    "status": 200,
+    "expected_sha256": "d50a37859e094f34dd46905f7299a6de89f7fb56f0978693517fffcefdcef73a",
+    "actual_sha256": "d50a37859e094f34dd46905f7299a6de89f7fb56f0978693517fffcefdcef73a",
+    "match": true
+  },
+  {
+    "path": "labs/nat-pat-simulator.html",
+    "status": 200,
+    "expected_sha256": "ac3015a91136a6f2dd84df95b0554353d5f0e9705ec7e3983b62970f299b3729",
+    "actual_sha256": "ac3015a91136a6f2dd84df95b0554353d5f0e9705ec7e3983b62970f299b3729",
+    "match": true
+  },
+  {
+    "path": "labs/firewall-vpn-simulator.html",
+    "status": 200,
+    "expected_sha256": "2e7551992febfbd77aeedf8d3469758652775f62b928fda863239a1e307944b7",
+    "actual_sha256": "2e7551992febfbd77aeedf8d3469758652775f62b928fda863239a1e307944b7",
+    "match": true
+  },
+  {
+    "path": "labs/wifi-rf-simulator.html",
+    "status": 200,
+    "expected_sha256": "3ba8b5f29fd8778dc85e5eadf5afc32315eb138f80d5b6e657ca4ad12481ca7a",
+    "actual_sha256": "3ba8b5f29fd8778dc85e5eadf5afc32315eb138f80d5b6e657ca4ad12481ca7a",
+    "match": true
+  },
+  {
+    "path": "labs/wlan-association-simulator.html",
+    "status": 200,
+    "expected_sha256": "0c4b9d17d4c78b889a468e43a3a539be4ea84c0b6999dbd96c460da0c0f85ff0",
+    "actual_sha256": "0c4b9d17d4c78b889a468e43a3a539be4ea84c0b6999dbd96c460da0c0f85ff0",
+    "match": true
+  },
+  {
+    "path": "labs/dot1x-radius-simulator.html",
+    "status": 200,
+    "expected_sha256": "168318810884c3ec6a3f4c6989895da99b764d2136150e63f33b837accae6c60",
+    "actual_sha256": "168318810884c3ec6a3f4c6989895da99b764d2136150e63f33b837accae6c60",
+    "match": true
+  },
+  {
+    "path": "labs/roaming-wlan-troubleshooting-simulator.html",
+    "status": 200,
+    "expected_sha256": "4cfa51b8295f23da8f43a9bac8d92250c87fae2dd8ae2500f26d133a555bc913",
+    "actual_sha256": "4cfa51b8295f23da8f43a9bac8d92250c87fae2dd8ae2500f26d133a555bc913",
+    "match": true
+  },
+  {
+    "path": "labs/fhrp-simulator.html",
+    "status": 200,
+    "expected_sha256": "46f8f524600889b7c51d90fb8960b988c1208267ae9fd7d871f2cdf9fc407c1b",
+    "actual_sha256": "46f8f524600889b7c51d90fb8960b988c1208267ae9fd7d871f2cdf9fc407c1b",
+    "match": true
+  },
+  {
+    "path": "labs/vrf-simulator.html",
+    "status": 200,
+    "expected_sha256": "692c00b4618a00e4a71a0dd8a4b6d6f7053275d1631b5cdbb1bd1c4023b588d6",
+    "actual_sha256": "692c00b4618a00e4a71a0dd8a4b6d6f7053275d1631b5cdbb1bd1c4023b588d6",
+    "match": true
+  },
+  {
+    "path": "labs/bgp-simulator.html",
+    "status": 200,
+    "expected_sha256": "183c5b2c8903c383c567058b689fef79c8a04b77d06f1466d8ade7f9adfc7069",
+    "actual_sha256": "183c5b2c8903c383c567058b689fef79c8a04b77d06f1466d8ade7f9adfc7069",
+    "match": true
+  },
+  {
+    "path": "labs/redistribution-simulator.html",
+    "status": 200,
+    "expected_sha256": "7a05de35a6172f71d2e1c113eabd0fd1ce4482411b8eb91e061592d6d3782148",
+    "actual_sha256": "7a05de35a6172f71d2e1c113eabd0fd1ce4482411b8eb91e061592d6d3782148",
+    "match": true
+  },
+  {
+    "path": "labs/observability-simulator.html",
+    "status": 200,
+    "expected_sha256": "9567ce3781ee2c276b6797b978206f41d912bf67ce1b02426214e7d0619bd07a",
+    "actual_sha256": "9567ce3781ee2c276b6797b978206f41d912bf67ce1b02426214e7d0619bd07a",
+    "match": true
+  },
+  {
+    "path": "labs/network-automation-simulator.html",
+    "status": 200,
+    "expected_sha256": "0bda481c930a4b41b044e53dad8274b6e07e07294d6b087c5c150292c318d34a",
+    "actual_sha256": "0bda481c930a4b41b044e53dad8274b6e07e07294d6b087c5c150292c318d34a",
+    "match": true
+  },
+  {
+    "path": "labs/icmp-troubleshooting-model.js",
+    "status": 200,
+    "expected_sha256": "69f52caac39960d3ee65ac8def8516144618f0df7082293de0bba7a1171878eb",
+    "actual_sha256": "69f52caac39960d3ee65ac8def8516144618f0df7082293de0bba7a1171878eb",
+    "match": true
+  },
+  {
+    "path": "labs/vlan-trunk-model.js",
+    "status": 200,
+    "expected_sha256": "cef01f8e117fa7b5f535be889fdb3bbe9826008bda6f6e8a272d30e7847151aa",
+    "actual_sha256": "cef01f8e117fa7b5f535be889fdb3bbe9826008bda6f6e8a272d30e7847151aa",
+    "match": true
+  },
+  {
+    "path": "labs/inter-vlan-routing-model.js",
+    "status": 200,
+    "expected_sha256": "bf97bd69afe455644f55e98fc2b9010a1f0791344bae83acff30df3f34fa1e0d",
+    "actual_sha256": "bf97bd69afe455644f55e98fc2b9010a1f0791344bae83acff30df3f34fa1e0d",
+    "match": true
+  },
+  {
+    "path": "labs/stp-model.js",
+    "status": 200,
+    "expected_sha256": "e73a647c8a989ef903efede9b675dafd9220c9ac34619efd575b55ddcee20124",
+    "actual_sha256": "e73a647c8a989ef903efede9b675dafd9220c9ac34619efd575b55ddcee20124",
+    "match": true
+  },
+  {
+    "path": "labs/lacp-model.js",
+    "status": 200,
+    "expected_sha256": "9238ab4775d2486364d578581f478a68008780fb5a223ef3e5b5b9f401c148d6",
+    "actual_sha256": "9238ab4775d2486364d578581f478a68008780fb5a223ef3e5b5b9f401c148d6",
+    "match": true
+  },
+  {
+    "path": "labs/dhcp-model.js",
+    "status": 200,
+    "expected_sha256": "c6210458512a05fc4eb816fbd537bfab79b319e2e04729d32a886f6333cf6faa",
+    "actual_sha256": "c6210458512a05fc4eb816fbd537bfab79b319e2e04729d32a886f6333cf6faa",
+    "match": true
+  },
+  {
+    "path": "labs/dns-model.js",
+    "status": 200,
+    "expected_sha256": "64e1c509f8ff5f2f9ee70d77a3c2b682a905f571567dde676428bbf6c0b163ff",
+    "actual_sha256": "64e1c509f8ff5f2f9ee70d77a3c2b682a905f571567dde676428bbf6c0b163ff",
+    "match": true
+  },
+  {
+    "path": "labs/routing-table-model.js",
+    "status": 200,
+    "expected_sha256": "04692195cc5eab8e25bbe359a60c2400eb8075d703a37cac13647a3baf4afca7",
+    "actual_sha256": "04692195cc5eab8e25bbe359a60c2400eb8075d703a37cac13647a3baf4afca7",
+    "match": true
+  },
+  {
+    "path": "labs/ospf-model.js",
+    "status": 200,
+    "expected_sha256": "e7d43ca25e61692c253005c4f3762e9e6ccffdad8fc37bbaae41b47209fc8b16",
+    "actual_sha256": "e7d43ca25e61692c253005c4f3762e9e6ccffdad8fc37bbaae41b47209fc8b16",
+    "match": true
+  },
+  {
+    "path": "labs/acl-model.js",
+    "status": 200,
+    "expected_sha256": "e3d8682a710bf635fc4a72836a29a6a8ce61e3af735009ce252f568a678abddf",
+    "actual_sha256": "e3d8682a710bf635fc4a72836a29a6a8ce61e3af735009ce252f568a678abddf",
+    "match": true
+  },
+  {
+    "path": "labs/nat-pat-model.js",
+    "status": 200,
+    "expected_sha256": "a8c1c6b9a6f8275df1f331fd01d808ba8ff3be025be0f12b7bb5b925da29106b",
+    "actual_sha256": "a8c1c6b9a6f8275df1f331fd01d808ba8ff3be025be0f12b7bb5b925da29106b",
+    "match": true
+  },
+  {
+    "path": "labs/firewall-vpn-model.js",
+    "status": 200,
+    "expected_sha256": "518c37b5f9339fbbb1b5211613c80daa5e452f725c0971991382a54476929574",
+    "actual_sha256": "518c37b5f9339fbbb1b5211613c80daa5e452f725c0971991382a54476929574",
+    "match": true
+  },
+  {
+    "path": "labs/wifi-rf-model.js",
+    "status": 200,
+    "expected_sha256": "509e1c514713beb286467bf9d44b108e7d892708a7a95291effa9662793f9ec6",
+    "actual_sha256": "509e1c514713beb286467bf9d44b108e7d892708a7a95291effa9662793f9ec6",
+    "match": true
+  },
+  {
+    "path": "labs/wlan-association-model.js",
+    "status": 200,
+    "expected_sha256": "72c43a8f4f9f4ae09b2679c9cf5e14a1ca0c457f5ad41d7f0e7f772b4fad26ac",
+    "actual_sha256": "72c43a8f4f9f4ae09b2679c9cf5e14a1ca0c457f5ad41d7f0e7f772b4fad26ac",
+    "match": true
+  },
+  {
+    "path": "labs/dot1x-radius-model.js",
+    "status": 200,
+    "expected_sha256": "cc6969bdb939af5d50c34ebfc6f8ca453ea0ea0af7935514cc1896239da80368",
+    "actual_sha256": "cc6969bdb939af5d50c34ebfc6f8ca453ea0ea0af7935514cc1896239da80368",
+    "match": true
+  },
+  {
+    "path": "labs/roaming-wlan-troubleshooting-model.js",
+    "status": 200,
+    "expected_sha256": "7245756cfbd0ada140335da27878e7c4dc3fbede8166638d97a4ec9d4edf6fa8",
+    "actual_sha256": "7245756cfbd0ada140335da27878e7c4dc3fbede8166638d97a4ec9d4edf6fa8",
+    "match": true
+  },
+  {
+    "path": "labs/fhrp-model.js",
+    "status": 200,
+    "expected_sha256": "028d2e0e6f611b8fc7d5b01d573fd15bd52b52d92eb95f7cfd1872d9c340711b",
+    "actual_sha256": "028d2e0e6f611b8fc7d5b01d573fd15bd52b52d92eb95f7cfd1872d9c340711b",
+    "match": true
+  },
+  {
+    "path": "labs/vrf-model.js",
+    "status": 200,
+    "expected_sha256": "da1ef584a8034f7afde545d8bc0dc9ae6c292f570e6506dfb9d3a493b1b63319",
+    "actual_sha256": "da1ef584a8034f7afde545d8bc0dc9ae6c292f570e6506dfb9d3a493b1b63319",
+    "match": true
+  },
+  {
+    "path": "labs/bgp-model.js",
+    "status": 200,
+    "expected_sha256": "7879d386b037c69d0e27ee9963ea0ff65917e2b9b94f1a91fd4d8b25aff038a2",
+    "actual_sha256": "7879d386b037c69d0e27ee9963ea0ff65917e2b9b94f1a91fd4d8b25aff038a2",
+    "match": true
+  },
+  {
+    "path": "labs/redistribution-model.js",
+    "status": 200,
+    "expected_sha256": "4f3e6a66a180f521ee8c5d53bd739a0591299e57cc7bb53a0c467ffd1ee1eb95",
+    "actual_sha256": "4f3e6a66a180f521ee8c5d53bd739a0591299e57cc7bb53a0c467ffd1ee1eb95",
+    "match": true
+  },
+  {
+    "path": "labs/observability-model.js",
+    "status": 200,
+    "expected_sha256": "88f332724f21c3e9a820f2fc7a31e3dc365676c1e44888d4d4b5183239cf6666",
+    "actual_sha256": "88f332724f21c3e9a820f2fc7a31e3dc365676c1e44888d4d4b5183239cf6666",
+    "match": true
+  },
+  {
+    "path": "labs/network-automation-model.js",
+    "status": 200,
+    "expected_sha256": "244b033eeeb6827be15ad08b119dfeb4aef129887646f9a51d2a620c7154fb97",
+    "actual_sha256": "244b033eeeb6827be15ad08b119dfeb4aef129887646f9a51d2a620c7154fb97",
+    "match": true
+  },
+  {
+    "path": "labs/network-simulator-session.js",
+    "status": 200,
+    "expected_sha256": "eeaf99b4fc3b3a305e2fdc763fc1162f973e57ad59439aa523046c4f7b0abb74",
+    "actual_sha256": "eeaf99b4fc3b3a305e2fdc763fc1162f973e57ad59439aa523046c4f7b0abb74",
+    "match": true
+  },
+  {
+    "path": "labs/network-simulator-shell.css",
+    "status": 200,
+    "expected_sha256": "a6b09c8e7b61dc186c8d67101c8760fc64ffe4d68bfcec0de58ad49b2502b5b7",
+    "actual_sha256": "a6b09c8e7b61dc186c8d67101c8760fc64ffe4d68bfcec0de58ad49b2502b5b7",
+    "match": true
+  },
+  {
+    "path": "labs/ip-subnetting-devices.svg",
+    "status": 200,
+    "expected_sha256": "44fb1c13bb79b3dc04e9fefd87ddcf09b4668faebd313117798f1a10f6f44cfb",
+    "actual_sha256": "44fb1c13bb79b3dc04e9fefd87ddcf09b4668faebd313117798f1a10f6f44cfb",
+    "match": true
+  },
+  {
+    "path": "labs/arp-simulator-1.css",
+    "status": 200,
+    "expected_sha256": "3487125205b6e17786c81e2428439f7a3c554ba2f2b2fdfd721cb32a5e4d197d",
+    "actual_sha256": "3487125205b6e17786c81e2428439f7a3c554ba2f2b2fdfd721cb32a5e4d197d",
+    "match": true
+  },
+  {
+    "path": "labs/arp-simulator-2.css",
+    "status": 200,
+    "expected_sha256": "e62b2271e78c3d498dff6ad773514341732345dbb2415f906579f6dcbaa4d8cf",
+    "actual_sha256": "e62b2271e78c3d498dff6ad773514341732345dbb2415f906579f6dcbaa4d8cf",
+    "match": true
+  },
+  {
+    "path": "labs/arp-simulator-3.css",
+    "status": 200,
+    "expected_sha256": "81e9ae6dec5c40400a8c214d2ec9e846b42ad2821ad4b376f044a42900ef8132",
+    "actual_sha256": "81e9ae6dec5c40400a8c214d2ec9e846b42ad2821ad4b376f044a42900ef8132",
+    "match": true
+  },
+  {
+    "path": "labs/arp-simulator-mobile.css",
+    "status": 200,
+    "expected_sha256": "c5b6d62e0dc8fd4c2164a7f01e1144b7e4c4521c9458a512cc5ffccce5cf389a",
+    "actual_sha256": "c5b6d62e0dc8fd4c2164a7f01e1144b7e4c4521c9458a512cc5ffccce5cf389a",
+    "match": true
+  },
+  {
+    "path": "labs/arp-simulator-mobile-follow.css",
+    "status": 200,
+    "expected_sha256": "58d7dd5cfe2cdca2127b10fa81e0239373010844c5782aa73d951125c26473df",
+    "actual_sha256": "58d7dd5cfe2cdca2127b10fa81e0239373010844c5782aa73d951125c26473df",
+    "match": true
+  }
+]

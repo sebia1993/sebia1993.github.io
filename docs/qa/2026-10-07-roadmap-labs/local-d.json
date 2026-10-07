@@ -1,0 +1,65 @@
+{
+  "checks": 661,
+  "results": [
+    {
+      "topic": "vrf",
+      "checks": 133,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "bgp",
+      "checks": 132,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "redistribution",
+      "checks": 132,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "observability",
+      "checks": 132,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "network-automation",
+      "checks": 132,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    }
+  ]
+}

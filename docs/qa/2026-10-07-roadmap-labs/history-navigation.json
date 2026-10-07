@@ -1,0 +1,29 @@
+{
+  "checks": 305,
+  "results": [
+    {
+      "topic": "lacp",
+      "checks": 170,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "wifi-rf",
+      "checks": 135,
+      "scenarios": 6,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "checks": 1002,
+  "results": [
+    {
+      "topic": "icmp-troubleshooting",
+      "checks": 163,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "vlan-trunk",
+      "checks": 163,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "inter-vlan-routing",
+      "checks": 171,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "stp",
+      "checks": 171,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "lacp",
+      "checks": 167,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    },
+    {
+      "topic": "dhcp",
+      "checks": 167,
+      "scenarios": 5,
+      "viewports": [
+        360,
+        768,
+        1366,
+        1920
+      ],
+      "status": "PASS"
+    }
+  ]
+}

@@ -3,6 +3,12 @@ on:
   push:
     branches: [main]
     paths:
+      - 'labs/vrf-simulator.html'
+      - 'labs/vrf-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
+      - 'tests/fixtures/roadmap-simulator-models.json'
       - 'tests/vrf-public.mjs'
       - '.github/workflows/vrf-public-check.yml'
   workflow_dispatch:
