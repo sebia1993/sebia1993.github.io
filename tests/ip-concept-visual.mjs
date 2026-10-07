@@ -46,7 +46,7 @@ async function testSurface(url,surface){
    assert.equal(await page.locator('body > header').evaluate(e=>getComputedStyle(e).position),'static');
    assert.equal(await page.locator('.neighborhoods').evaluate(e=>getComputedStyle(e).display),'grid','subnet diagram CSS must parse; broken braces must not swallow following rules');
    assert.equal(await page.locator('body').evaluate(e=>getComputedStyle(e).color),'rgb(244, 248, 252)','primary text must stay bright on the dark theme');
-   assert.equal(await page.locator('.hero p').evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','main learning copy must be brighter than secondary copy');
+   assert.equal(await page.locator('.hero > .shell > p').first().evaluate(e=>getComputedStyle(e).color),'rgb(215, 227, 239)','main learning copy must be brighter than secondary copy');
    assert.equal(await page.locator('.term-item p').first().evaluate(e=>getComputedStyle(e).color),'rgb(182, 199, 216)','secondary terminology copy keeps a readable but lower visual priority');
    assert.equal(await page.locator('#storyVisual').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 36, 57)','learning cards must separate from the page background');
    const text=await page.locator('body').innerText();
