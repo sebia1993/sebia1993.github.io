@@ -1,99 +1,44 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>First-Hop Redundancy / FHRP — 인터랙티브 실습</title>
-<meta name="description" content="First-Hop Redundancy의 Virtual Router와 Failover 공통 원리를 예측하고, VRRP 표준과 HSRP/VRRP Cisco 검증 구현을 구분해 관찰하는 Interactive Lab입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
-<style>
-body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:930px;color:var(--muted)}
-.scope{margin-top:14px;padding:13px 15px;border:1px solid #347968;border-radius:13px;background:rgba(126,224,194,.05);color:#d6e2ef;font-size:.84rem}
-.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
-.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
-.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
-.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint)}
-.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
-.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}.choice:disabled{cursor:default}
-.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls .primary:disabled{opacity:.42;cursor:not-allowed}.hidden{display:none!important}
-.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
-.observation{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr);gap:14px}.view,.side{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3);min-width:0}.view h3,.side h3{margin:0 0 10px}
-.event{display:flex;gap:10px;align-items:center;padding:11px 13px;border:1px solid #355d82;border-radius:11px;background:#091624;margin-bottom:11px}.event b{color:var(--blue);white-space:nowrap}.event span{color:#d7e3ef;font-size:.82rem}
-.topology{border:1px solid #1c334a;border-radius:15px;background:#081522;padding:18px;overflow:hidden}.topo-desktop{display:grid;grid-template-columns:100px 44px 104px minmax(190px,1fr) 100px;gap:6px;align-items:center;min-height:310px}.topo-mobile{display:none}
-.node{text-align:center;position:relative}.device-icon{margin:0 auto 8px;position:relative;display:grid;place-items:center;color:#bdd1e5;background:#0d2032;border:2px solid #4f7394;transition:.25s}.device-icon.pc{width:70px;height:48px;border-radius:8px}.device-icon.pc:after{content:"";position:absolute;width:30px;height:8px;border-top:3px solid #4f7394;bottom:-11px}.device-icon.switch{width:84px;height:40px;border-radius:8px}.device-icon.switch:after{content:"● ● ● ●";font-size:9px;letter-spacing:4px;color:#6e94b8}.device-icon.router{width:70px;height:54px;border-radius:50%}.device-icon.router:before{content:"↔";font-size:1.4rem}.device-icon.remote{width:78px;height:54px;border-radius:42% 58% 48% 52%}.node strong{display:block;font-size:.88rem}.node small{display:block;color:var(--muted);font-size:.72rem;margin-top:3px;line-height:1.35}.node.active .device-icon{border-color:#347968;box-shadow:0 0 0 5px rgba(126,224,194,.08),0 0 20px rgba(126,224,194,.16)}.node.active strong{color:var(--mint)}.node.standby .device-icon{border-style:dashed}.node.failed .device-icon{border-color:#9a534d;background:#251214}.node.failed strong{color:#ff9c93}.node.track-low .device-icon{border-color:#8f6a38}.node.track-low strong{color:var(--amber)}
-.link{height:3px;background:#31465c;position:relative;border-radius:99px}.link:after{content:"→";position:absolute;right:-2px;top:-13px;color:#627d99;font-weight:950}.link.path{background:#347968;box-shadow:0 0 10px rgba(126,224,194,.35)}.link.path:after{color:var(--mint)}.link.failed{background:repeating-linear-gradient(90deg,#9a534d 0 8px,transparent 8px 14px);box-shadow:none}.link.failed:after{content:"×";color:#ff9c93;right:45%;top:-13px}.link.muted{opacity:.32}
-.router-stack{display:grid;gap:34px}.router-row{display:grid;grid-template-columns:36px 100px minmax(60px,1fr);gap:8px;align-items:center}.router-row .link:first-child:before{content:"";position:absolute;left:-9px;width:9px;height:3px;background:inherit}.topo-label{position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:.65rem;color:var(--muted);white-space:nowrap}.vip-chip{display:inline-flex;margin-top:8px;padding:5px 8px;border:1px solid #8f6a38;border-radius:999px;color:var(--amber);font-size:.68rem;font-weight:900}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:.72rem}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:20px;height:3px;background:#347968}.legend i.fail{background:#9a534d}.legend i.dashed{background:repeating-linear-gradient(90deg,#627d99 0 5px,transparent 5px 8px)}
-.state-list{display:grid;gap:8px}.state-row{display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624}.state-row span{color:var(--muted);font-size:.77rem}.state-row strong{font-size:.79rem;text-align:right}.state-row .ok{color:var(--mint)}.state-row .warn{color:var(--amber)}.state-row .bad{color:#ff9c93}
-.evidence{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#091624}.evidence summary{cursor:pointer;font-weight:850;color:#bcd2e7}.evidence ul{margin:9px 0 0;padding-left:1.1rem}.evidence li{margin:.4rem 0;color:var(--muted);font-size:.78rem}.scope-note{margin-top:12px;padding:12px 13px;border:1px solid #8f6a38;border-radius:11px;background:rgba(255,191,105,.05);font-size:.78rem;color:#d6e2ef}
-.nav-actions{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
-@media(max-width:900px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.stage-link{display:grid}.answer-grid{grid-template-columns:1fr}}
-@media(max-width:700px){header .topbar{display:block;padding:10px 0 8px}header .brand{display:block;margin-bottom:8px}.nav{flex-wrap:nowrap;overflow-x:auto}.topo-desktop{display:none}.topo-mobile{display:grid;gap:10px}.mobile-row{display:grid;place-items:center}.mobile-routers{display:grid;grid-template-columns:1fr 1fr;gap:16px}.mobile-arrow{display:grid;place-items:center;color:#627d99;font-weight:950}.mobile-arrow.path{color:var(--mint)}.mobile-up{display:grid;grid-template-columns:1fr 1fr;gap:16px}.mobile-up .link{width:76%;margin:auto}.router-stack{gap:16px}.hero{padding-top:42px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.course-bar>div{transition:none}}
-</style>
-</head>
-<body>
-<header><div class="shell topbar"><a class="brand" href="fhrp.html">← 개념서</a><nav class="nav"><a href="../roadmap.html">학습 로드맵</a></nav></div></header>
-<main>
-<section class="hero"><div class="wrap">
-<small>2단계 · INTERACTIVE LAB</small>
-<h1>First-Hop Redundancy · Virtual Gateway Failover</h1>
-<p>먼저 결과를 예상한 뒤 실행하세요. <b>Host의 Gateway가 바뀌는지, 실제 Forwarding Owner가 바뀌는지</b>를 분리해서 관찰합니다.</p>
-<div class="scope"><b>학습 기준:</b> Virtual Router / Forwarding Owner / Failover 공통 원리이며 현재 VRRP 표준은 RFC 9568의 VRRPv3입니다. <b>검증 구현:</b> Cisco IOL HSRPv2 + VRRPv2 실제 CLI/PCAP 결과를 상태로 재구성합니다. Browser Animation 자체는 실제 Evidence가 아닙니다.</div>
-<div class="start-guide">
-<div class="guide-step"><b>1</b><span><strong>예상</strong>Gateway·Role·Path가 어떻게 될지 선택</span></div>
-<div class="guide-step"><b>2</b><span><strong>실행</strong>검증된 상태 변화를 토폴로지로 재생</span></div>
-<div class="guide-step"><b>3</b><span><strong>설명</strong>유지된 값과 바뀐 값을 내 말로 정리</span></div>
-</div>
-</div></section>
-
-<section><div class="wrap">
-<div class="stage-link"><span><b>1단계 핵심:</b> 같은 Virtual Gateway를 유지하면서 실제 Forwarding Owner가 바뀔 수 있습니다. Active/Master/Standby/Backup은 프로토콜별 역할명입니다.</span><a class="btn" href="fhrp.html">개념서 다시 보기</a></div>
-<div class="lesson-tabs" id="lessonTabs"></div>
-<div class="course-progress"><div><b>진행률</b><small>6개 Claim을 그대로 확인합니다.</small></div><div class="course-bar"><div id="progressBar"></div></div><div class="course-count" id="progressCount">0 / 6</div></div>
-
-<article class="card lab-card">
-<div class="coach"><div class="coach-icon" id="lessonNo">01</div><div><div class="coach-title" id="lessonTitle"></div><div class="coach-text" id="lessonText"></div><div class="start-state" id="startState"></div></div></div>
-
-<div class="prediction">
-<h2 id="question"></h2><p>정답을 보기 전에 하나를 선택하세요.</p>
-<div class="options" id="options"></div>
-<div class="controls"><button class="btn primary" id="runBtn" disabled>예상과 실제 비교</button><button class="btn" id="resetBtn">이 문제 다시 시작</button></div>
-</div>
-
-<div class="feedback hidden" id="feedback">
-<div class="feedback-head"><strong>Prediction vs Actual</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
-<div class="answer-grid"><div class="answer-box"><small>내 예상</small><strong id="myAnswer"></strong></div><div class="answer-box"><small>실제 결과</small><strong id="actualAnswer"></strong></div></div>
-<p id="reason"></p>
-</div>
-
-<div class="observation">
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="lab-ui-version" content="20261007-roadmap-labs-v1"><title>First-Hop Redundancy / FHRP — 실습</title><link rel="icon" href="data:,"><meta name="description" content="First-Hop Redundancy / FHRP: 먼저 예상하고 단계별 관찰 뒤 내 답과 결과를 비교하는 실습.">
+<link rel="stylesheet" href="arp-simulator-1.css">
+<link rel="stylesheet" href="arp-simulator-2.css">
+<link rel="stylesheet" href="arp-simulator-3.css">
+<link rel="stylesheet" href="arp-simulator-mobile.css">
+<link rel="stylesheet" href="arp-simulator-mobile-follow.css">
+<style>#simVisual body{padding-bottom:34px}#simVisual .wrap{width:min(1180px,92vw);margin:auto}#simVisual .hero{padding:56px 0 26px}#simVisual .hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}#simVisual .hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}#simVisual .hero p{max-width:930px;color:var(--muted)}#simVisual .scope{margin-top:14px;padding:13px 15px;border:1px solid #cbd8e4;border-radius:13px;background:rgba(126,224,194,.05);color:#344d66;font-size:.84rem}#simVisual .start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}#simVisual .guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}#simVisual .guide-step span{font-size:.82rem;color:var(--muted)}#simVisual .guide-step strong{display:block;color:var(--text);font-size:.88rem}#simVisual .stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .stage-link span{color:var(--muted);font-size:.86rem}#simVisual .lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#simVisual .lesson-tabs::-webkit-scrollbar{display:none}#simVisual .lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}#simVisual .lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}#simVisual .lesson-tab.done::after{content:" ✓";color:var(--mint)}#simVisual .course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .course-progress small{display:block;color:var(--muted)}#simVisual .course-bar{height:8px;border-radius:999px;background:#f4f7fb;overflow:hidden}#simVisual .course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}#simVisual .course-count{font-size:.8rem;font-weight:850;color:var(--mint)}#simVisual .lab-card{padding:20px}#simVisual .coach{display:grid;grid-template-columns:42px 1fr;gap:12px}#simVisual .coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#f4f7fb}#simVisual .coach-title{font-size:1.18rem;font-weight:850}#simVisual .coach-text{color:var(--muted);margin-top:3px}#simVisual .start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#simVisual .start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#f4f7fb;color:#344d66;font-size:.76rem}#simVisual .prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#f4f7fb}#simVisual .prediction h2{font-size:1.08rem;margin:0 0 4px}#simVisual .prediction p{margin:0;color:var(--muted);font-size:.85rem}#simVisual .options{display:grid;gap:9px;margin-top:13px}#simVisual .choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}#simVisual .choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}#simVisual .choice.correct-answer{border-color:#cbd8e4}#simVisual .choice.wrong-answer{border-color:#9a534d}#simVisual .choice:disabled{cursor:default}#simVisual .controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}#simVisual .controls .primary:disabled{opacity:.42;cursor:not-allowed}#simVisual .hidden{display:none!important}#simVisual .feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .feedback.correct{border-color:#cbd8e4}#simVisual .feedback.incorrect{border-color:#9a534d}#simVisual .feedback-head{display:flex;justify-content:space-between;gap:12px}#simVisual .feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}#simVisual .feedback.correct .feedback-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .feedback.incorrect .feedback-badge{color:#344d66;border-color:#9a534d}#simVisual .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}#simVisual .answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .answer-box small{display:block;color:var(--muted);font-weight:800}#simVisual .answer-box strong{display:block;margin-top:3px}#simVisual .feedback p{margin:11px 0 0;color:#344d66}#simVisual .observation{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr);gap:14px}#simVisual .view,#simVisual .side{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3);min-width:0}#simVisual .view h3,#simVisual .side h3{margin:0 0 10px}#simVisual .event{display:flex;gap:10px;align-items:center;padding:11px 13px;border:1px solid #355d82;border-radius:11px;background:#f4f7fb;margin-bottom:11px}#simVisual .event b{color:var(--blue);white-space:nowrap}#simVisual .event span{color:#344d66;font-size:.82rem}#simVisual .topology{border:1px solid #cbd8e4;border-radius:15px;background:#f4f7fb;padding:18px;overflow:hidden}#simVisual .topo-desktop{display:grid;grid-template-columns:100px 44px 104px minmax(190px,1fr) 100px;gap:6px;align-items:center;min-height:310px}#simVisual .topo-mobile{display:none}#simVisual .node{text-align:center;position:relative}#simVisual .device-icon{margin:0 auto 8px;position:relative;display:grid;place-items:center;color:#344d66;background:#f4f7fb;border:2px solid #4f7394;transition:.25s}#simVisual .device-icon.pc{width:70px;height:48px;border-radius:8px}#simVisual .device-icon.pc:after{content:"";position:absolute;width:30px;height:8px;border-top:3px solid #4f7394;bottom:-11px}#simVisual .device-icon.switch{width:84px;height:40px;border-radius:8px}#simVisual .device-icon.switch:after{content:"● ● ● ●";font-size:9px;letter-spacing:4px;color:#6e94b8}#simVisual .device-icon.router{width:70px;height:54px;border-radius:50%}#simVisual .device-icon.router:before{content:"↔";font-size:1.4rem}#simVisual .device-icon.remote{width:78px;height:54px;border-radius:42% 58% 48% 52%}#simVisual .node strong{display:block;font-size:.88rem}#simVisual .node small{display:block;color:var(--muted);font-size:.72rem;margin-top:3px;line-height:1.35}#simVisual .node.active .device-icon{border-color:#cbd8e4;box-shadow:0 0 0 5px rgba(126,224,194,.08),0 0 20px rgba(126,224,194,.16)}#simVisual .node.active strong{color:var(--mint)}#simVisual .node.standby .device-icon{border-style:dashed}#simVisual .node.failed .device-icon{border-color:#9a534d;background:#251214}#simVisual .node.failed strong{color:#344d66}#simVisual .node.track-low .device-icon{border-color:#8f6a38}#simVisual .node.track-low strong{color:var(--amber)}#simVisual .link{height:3px;background:#f4f7fb;position:relative;border-radius:99px}#simVisual .link:after{content:"→";position:absolute;right:-2px;top:-13px;color:#627d99;font-weight:950}#simVisual .link.path{background:#f4f7fb;box-shadow:0 0 10px rgba(126,224,194,.35)}#simVisual .link.path:after{color:var(--mint)}#simVisual .link.failed{background:repeating-linear-gradient(90deg,#9a534d 0 8px,transparent 8px 14px);box-shadow:none}#simVisual .link.failed:after{content:"×";color:#344d66;right:45%;top:-13px}#simVisual .link.muted{opacity:.32}#simVisual .router-stack{display:grid;gap:34px}#simVisual .router-row{display:grid;grid-template-columns:36px 100px minmax(60px,1fr);gap:8px;align-items:center}#simVisual .router-row .link:first-child:before{content:"";position:absolute;left:-9px;width:9px;height:3px;background:inherit}#simVisual .topo-label{position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:.65rem;color:var(--muted);white-space:nowrap}#simVisual .vip-chip{display:inline-flex;margin-top:8px;padding:5px 8px;border:1px solid #8f6a38;border-radius:999px;color:var(--amber);font-size:.68rem;font-weight:900}#simVisual .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:.72rem}#simVisual .legend span{display:flex;align-items:center;gap:6px}#simVisual .legend i{width:20px;height:3px;background:#f4f7fb}#simVisual .legend i.fail{background:#9a534d}#simVisual .legend i.dashed{background:repeating-linear-gradient(90deg,#627d99 0 5px,transparent 5px 8px)}#simVisual .state-list{display:grid;gap:8px}#simVisual .state-row{display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f4f7fb}#simVisual .state-row span{color:var(--muted);font-size:.77rem}#simVisual .state-row strong{font-size:.79rem;text-align:right}#simVisual .state-row .ok{color:var(--mint)}#simVisual .state-row .warn{color:var(--amber)}#simVisual .state-row .bad{color:#344d66}#simVisual .evidence{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#f4f7fb}#simVisual .evidence summary{cursor:pointer;font-weight:850;color:#344d66}#simVisual .evidence ul{margin:9px 0 0;padding-left:1.1rem}#simVisual .evidence li{margin:.4rem 0;color:var(--muted);font-size:.78rem}#simVisual .scope-note{margin-top:12px;padding:12px 13px;border:1px solid #8f6a38;border-radius:11px;background:rgba(255,191,105,.05);font-size:.78rem;color:#344d66}#simVisual .nav-actions{display:flex;justify-content:space-between;gap:10px;margin-top:16px}@media (max-width:900px){#simVisual .start-guide{grid-template-columns:1fr}#simVisual .observation{grid-template-columns:1fr}#simVisual .stage-link{display:grid}#simVisual .answer-grid{grid-template-columns:1fr}}@media (max-width:700px){#simVisual header .topbar{display:block;padding:10px 0 8px}#simVisual header .brand{display:block;margin-bottom:8px}#simVisual .nav{flex-wrap:nowrap;overflow-x:auto}#simVisual .topo-desktop{display:none}#simVisual .topo-mobile{display:grid;gap:10px}#simVisual .mobile-row{display:grid;place-items:center}#simVisual .mobile-routers{display:grid;grid-template-columns:1fr 1fr;gap:16px}#simVisual .mobile-arrow{display:grid;place-items:center;color:#627d99;font-weight:950}#simVisual .mobile-arrow.path{color:var(--mint)}#simVisual .mobile-up{display:grid;grid-template-columns:1fr 1fr;gap:16px}#simVisual .mobile-up .link{width:76%;margin:auto}#simVisual .router-stack{gap:16px}#simVisual .hero{padding-top:42px}}@media (prefers-reduced-motion:reduce){#simVisual *{scroll-behavior:auto!important;animation:none!important;transition:none!important}#simVisual .course-bar>div{transition:none}}</style>
+<link rel="stylesheet" href="network-simulator-shell.css?v=20261007-1"></head>
+<body data-sim-mode="basic" data-topic="fhrp"><div class="wrap" id="simLab" data-state="IDLE">
+<header class="hero"><small>6단계 · 고급 엔터프라이즈 · 실습</small><h1>First-Hop Redundancy / FHRP</h1><p>먼저 결과를 예상한 뒤 실행하세요. <b>Host의 Gateway가 바뀌는지, 실제 Forwarding Owner가 바뀌는지</b>를 분리해서 관찰합니다.</p><div class="next-lab-actions"><a id="conceptGuideLink" href="fhrp.html">← First-Hop Redundancy / FHRP 학습 페이지</a><a href="../roadmap.html">학습 로드맵</a></div><div class="start-guide"><div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 문제의 조건을 확인합니다.</span></div><div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>결과를 보기 전에 골라보세요.</span></div><div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>흐름을 관찰하고 이유를 확인합니다.</span></div></div></header>
+<nav class="lesson-tabs" id="simTabs" aria-label="실습 문제"></nav><div class="course-progress"><div><strong>실습 진행도</strong><small id="simScore">예상과 관찰을 비교하면 완료됩니다.</small></div><div class="course-bar"><div id="simBar"></div></div><div class="course-count" id="simCount"></div></div>
+<main class="card lab-card" id="simMain"><div class="coach"><div class="coach-icon" id="simNumber"></div><div><div class="coach-title" id="simTitle"></div><div class="coach-text" id="simText"></div></div></div><div id="simConditions" class="sim-conditions"></div>
+<section class="prediction-card"><div class="prediction-copy"><small>① 예상하기 · 정답은 관찰 완료 후 공개됩니다</small><h2 id="simQuestion" tabindex="-1"></h2><p>틀려도 괜찮습니다. 내 예상과 관찰 결과를 비교해 보세요.</p></div><div class="prediction-options" id="simOptions" role="group" aria-labelledby="simQuestion"></div></section>
+<div class="controls sim-primary"><button class="ping-btn" id="simRun" disabled>② 실행해서 확인하기</button></div>
+<section id="simVisual" class="sim-visual" aria-label="주제별 관찰 모델"><div class="observation">
 <div class="view">
-<div class="event"><b>CURRENT EVENT</b><span id="eventText">Prediction을 선택하면 검증된 상태를 확인할 수 있습니다.</span></div>
+
 <div class="topology">
 <div class="topo-desktop">
-<div class="node" data-node="pc1"><div class="device-icon pc">PC</div><strong>PC1</strong><small>10.10.10.10/24</small><div class="vip-chip">GW 10.10.10.1</div></div>
+<div class="node" data-node="pc1"><div class="device-icon pc sim-device-holder"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><strong>PC1</strong><small>10.10.10.10/24</small><div class="vip-chip">GW 10.10.10.1</div></div>
 <div class="link" data-link="pc-sw"><span class="topo-label">CP-LAN</span></div>
-<div class="node" data-node="sw1"><div class="device-icon switch"></div><strong>SW1</strong><small>VLAN 10 · L2</small></div>
+<div class="node" data-node="sw1"><div class="device-icon switch sim-device-holder"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg></div><strong>SW1</strong><small>VLAN 10 · L2</small></div>
 <div class="router-stack">
-<div class="router-row"><div class="link" data-link="sw-r1"></div><div class="node" data-node="r1"><div class="device-icon router"></div><strong>R1</strong><small id="r1RoleD">priority 110</small></div><div class="link" data-link="r1-r3"><span class="topo-label">CP-R1-UP</span></div></div>
-<div class="router-row"><div class="link" data-link="sw-r2"></div><div class="node" data-node="r2"><div class="device-icon router"></div><strong>R2</strong><small id="r2RoleD">priority 100</small></div><div class="link" data-link="r2-r3"><span class="topo-label">CP-R2-UP</span></div></div>
+<div class="router-row"><div class="link" data-link="sw-r1"></div><div class="node" data-node="r1"><div class="device-icon router sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>R1</strong><small id="r1RoleD">priority 110</small></div><div class="link" data-link="r1-r3"><span class="topo-label">CP-R1-UP</span></div></div>
+<div class="router-row"><div class="link" data-link="sw-r2"></div><div class="node" data-node="r2"><div class="device-icon router sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>R2</strong><small id="r2RoleD">priority 100</small></div><div class="link" data-link="r2-r3"><span class="topo-label">CP-R2-UP</span></div></div>
 </div>
-<div class="node" data-node="r3"><div class="device-icon remote">R3</div><strong>Remote</strong><small>203.0.113.3/32</small></div>
+<div class="node" data-node="r3"><div class="device-icon remote sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>Remote</strong><small>203.0.113.3/32</small></div>
 </div>
 
 <div class="topo-mobile">
-<div class="mobile-row node" data-node="pc1"><div class="device-icon pc">PC</div><strong>PC1</strong><small>GW 10.10.10.1</small></div>
+<div class="mobile-row node" data-node="pc1"><div class="device-icon pc sim-device-holder"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><strong>PC1</strong><small>GW 10.10.10.1</small></div>
 <div class="mobile-arrow" data-mobile-path="pc-sw">↓</div>
-<div class="mobile-row node" data-node="sw1"><div class="device-icon switch"></div><strong>SW1</strong></div>
+<div class="mobile-row node" data-node="sw1"><div class="device-icon switch sim-device-holder"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg></div><strong>SW1</strong></div>
 <div class="mobile-arrow" data-mobile-path="sw">↓</div>
 <div class="mobile-routers">
-<div class="node" data-node="r1"><div class="device-icon router"></div><strong>R1</strong><small id="r1RoleM">priority 110</small></div>
-<div class="node" data-node="r2"><div class="device-icon router"></div><strong>R2</strong><small id="r2RoleM">priority 100</small></div>
+<div class="node" data-node="r1"><div class="device-icon router sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>R1</strong><small id="r1RoleM">priority 110</small></div>
+<div class="node" data-node="r2"><div class="device-icon router sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>R2</strong><small id="r2RoleM">priority 100</small></div>
 </div>
 <div class="mobile-up"><div class="link" data-link="r1-r3"></div><div class="link" data-link="r2-r3"></div></div>
-<div class="mobile-row node" data-node="r3"><div class="device-icon remote">R3</div><strong>Remote</strong><small>203.0.113.3</small></div>
+<div class="mobile-row node" data-node="r3"><div class="device-icon remote sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><strong>Remote</strong><small>203.0.113.3</small></div>
 </div>
 <div class="legend"><span><i></i> 실제 Echo Request Path</span><span><i class="dashed"></i> 대기/비선택 경로</span><span><i class="fail"></i> 장애 지점</span></div>
 </div>
@@ -103,110 +48,16 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
 <aside class="side">
 <h3>관찰 상태</h3>
 <div class="state-list" id="states"></div>
-<details class="evidence"><summary>현재 Claim의 검증 근거 보기</summary><ul id="evidenceList"></ul></details>
+
 </aside>
-</div>
-
-<div class="nav-actions"><button class="btn" id="prevBtn">← 이전 문제</button><button class="btn primary" id="nextBtn">다음 문제 →</button></div>
-</article>
 </div></section>
-</main>
-<footer class="footer"><div class="shell">FHRP Interactive Lab · Validated Actual → Learning Visualization</div></footer>
-
-<script>
-(function(){
-"use strict";
-var lessons=[
-{
-id:"FHRP-01",title:"Virtual Gateway",text:"Host는 어떤 주소를 Gateway로 보고, 실제 전달은 누가 수행할까요?",start:["PC1 GW = 10.10.10.1","R1/R2 physical IP는 별도","HSRP baseline"],
-question:"정상 HSRP에서 PC1이 Remote로 보낼 때 가장 정확한 설명은?",options:["PC1은 R1의 물리 IP를 매번 새로 선택한다.","PC1은 VIP를 Virtual MAC으로 해석하고 현재 Active R1이 전달한다.","R1과 R2가 같은 프레임을 동시에 upstream으로 전달한다."],correct:1,
-actual:"VIP/MAC 유지 · R1 Active가 Request 전달",reason:"PC1의 Gateway는 10.10.10.1이었고 ARP는 HSRPv2 Virtual MAC으로 해석됐습니다. 동일 Echo Request가 CP-R1-UP에서 확인됐습니다.",
-state:"normal",event:"PC1 → VIP/Virtual MAC → R1 Active → R3",evidence:["PC1 GW 10.10.10.1","HSRP VMAC 00:00:0c:9f:f0:0a","R1 Active / R2 Standby","Echo 3/3, request on CP-R1-UP"]
-},
-{
-id:"FHRP-02",title:"Priority / Hello",text:"선호 Active와 Peer 감시는 어떤 정보로 확인할까요?",start:["R1 priority 110","R2 priority 100","preempt both"],
-question:"이번 HSRP baseline에서 R1이 선호 Active였던 조건은?",options:["R1 priority 110 > R2 100이고 두 Router의 상태가 Hello로 유지됐다.","PC1이 R1의 물리 MAC을 Default Gateway로 저장했기 때문이다.","R2의 uplink를 shutdown했기 때문이다."],correct:0,
-actual:"R1 110 / R2 100 · HSRPv2 Hello 관측",reason:"Stable state는 R1 Active / R2 Standby였고 CP-LAN에서 HSRPv2 control을 직접 확인했습니다.",
-state:"priority",event:"HSRPv2 Hello · R1 priority 110 / R2 100 · R1 Active",evidence:["HSRPv2 group 10","224.0.0.102 UDP 1985→1985","hello 3s / hold 10s 실제 관측","R1 Active / R2 Standby"]
-},
-{
-id:"FHRP-03",title:"Active Failure",text:"R1의 LAN/FHRP 참여를 중단하면 Host 설정과 Forwarding Owner 중 무엇이 바뀔까요?",start:["R1 Active","R2 Standby","PC1 GW = VIP"],
-question:"R1 LAN/FHRP interface를 shutdown한 뒤 가장 정확한 결과는?",options:["PC1 Gateway가 자동으로 10.10.10.3으로 바뀐다.","Virtual MAC이 R2 physical MAC으로 바뀐다.","PC1 Gateway/VIP MAC은 유지되고 R2가 Active가 되어 Request를 전달한다."],correct:2,
-actual:"같은 VIP/MAC · Forwarding Owner R1 → R2",reason:"R1은 Init, R2는 Active가 됐고 PC1 Gateway와 HSRP Virtual MAC은 유지됐습니다. 안정화 후 Request는 CP-R2-UP로 이동했습니다.",
-state:"failover",event:"R1 LAN/FHRP Down → R2 Standby→Active → Request Path R2",evidence:["R1 e0/0 administrative shutdown","PC1 VIP/VMAC unchanged","transition Echo 30/30","stable R2 forwarding 3/3"]
-},
-{
-id:"FHRP-04",title:"Preemption Recovery",text:"높은 Priority Router가 복구되면 자동으로 역할을 되찾는다고 가정해도 될까요?",start:["R2 Active after failure","R1 priority 110","preempt enabled"],
-question:"이번 Lab에서 R1 interface를 복구했을 때 실제 결과는?",options:["R2가 계속 Active로 남고 R1은 영구 Standby가 됐다.","R1이 preempt로 다시 Active가 되고 같은 VIP/MAC의 Request Path가 R1로 돌아왔다.","PC1의 Default Gateway를 수동 변경해야 했다."],correct:1,
-actual:"R1 Active 복귀 · R2 Standby · VIP/MAC 유지",reason:"R1 priority 110과 preempt가 유지되어 복구 후 R1이 다시 Active가 됐습니다. 안정화 후 Request가 CP-R1-UP에서 확인됐습니다.",
-state:"recovery",event:"R1 복구 → Preempt → R1 Active / R2 Standby",evidence:["R1 priority 110 retained","preempt retained","restore traffic Echo 30/30","stable R1 forwarding 3/3"]
-},
-{
-id:"FHRP-05",title:"Upstream Tracking",text:"Client-facing LAN은 Up인데 upstream만 Down이면 무엇을 추적해야 할까요?",start:["R1 LAN Up","R1 upstream tracked","R1 110 / R2 100"],
-question:"R1 upstream만 Down시키고 tracking decrement 20을 적용한 실제 결과는?",options:["R1 effective priority가 110→90으로 내려가 R2가 Active가 됐다.","R1 LAN이 Up이므로 역할은 절대 바뀌지 않았다.","PC1의 Gateway IP가 R2 physical IP로 변경됐다."],correct:0,
-actual:"Track Down · 110→90 · R2 Active",reason:"R1 e0/0은 Up인 채 e0/1만 Down이었고 Track 1이 Down되며 Priority가 90으로 낮아졌습니다. 전환은 성공했지만 일시 손실/ICMP 오류도 관측됐습니다.",
-state:"tracking",event:"R1 upstream Down · LAN Up → Track Down → 110→90 → R2 Active",evidence:["R1 LAN remained up/up","Track 1 Down","effective priority 90","failure Echo 28/30, recovery 27/30","stable after each transition 3/3"]
-},
-{
-id:"FHRP-06",title:"VRRPv2 Failover",text:"VRRP도 같은 Virtual-Gateway 모델을 쓰지만 HSRP와 무엇이 다를까요?",start:["HSRP removed","VRRPv2 VRID 10","R1 110 / R2 100"],
-question:"R1 VRRP/LAN 참여를 중단했을 때 실제 관측으로 맞는 것은?",options:["VRRP는 HSRP UDP/1985를 그대로 사용했다.","VRRPv3가 검증됐고 HSRP Virtual MAC도 그대로 사용했다.","R2가 Master가 되고 같은 VRRP VIP/MAC을 유지했으며 protocol 112 Advertisement가 관측됐다."],correct:2,
-actual:"R2 Master · VRRP VIP/MAC 유지 · protocol 112",reason:"이번 Cisco IOL에서 실제 모드는 VRRPv2였습니다. R1 장애 시 R2가 Master가 됐고 복구 후 R1이 다시 Master가 됐습니다.",
-state:"vrrp",event:"VRRPv2 · R1 LAN Down → R2 Backup→Master · same VRRP VIP/MAC",evidence:["VRRP version 2 실제 패킷","VMAC 00:00:5e:00:01:0a","224.0.0.18 · IP protocol 112 · TTL 255","failure Echo 29/30","restore 30/30 · final stable 3/3"]
-}
-];
-var index=0,selected=null,executed=false,done=new Set();
-function el(id){return document.getElementById(id);}
-function all(q){return Array.prototype.slice.call(document.querySelectorAll(q));}
-function stateRow(label,value,kind){return '<div class="state-row"><span>'+label+'</span><strong class="'+(kind||'')+'">'+value+'</strong></div>';}
-function clearTopo(){
-all('[data-node]').forEach(function(n){n.classList.remove('active','standby','failed','track-low');});
-all('[data-link]').forEach(function(n){n.classList.remove('path','failed','muted');});
-all('[data-mobile-path]').forEach(function(n){n.classList.remove('path');});
-}
-function markNode(name,cls){all('[data-node="'+name+'"]').forEach(function(n){n.classList.add(cls);});}
-function markLink(name,cls){all('[data-link="'+name+'"]').forEach(function(n){n.classList.add(cls);});}
-function setRoles(r1,r2){
-el('r1RoleD').textContent=r1;el('r1RoleM').textContent=r1;el('r2RoleD').textContent=r2;el('r2RoleM').textContent=r2;
-}
-function applyState(s){
-clearTopo();markLink('pc-sw','path');all('[data-mobile-path]').forEach(function(n){n.classList.add('path');});
-if(s==='normal'||s==='priority'||s==='recovery'){
- markNode('r1','active');markNode('r2','standby');markLink('sw-r1','path');markLink('r1-r3','path');markLink('sw-r2','muted');markLink('r2-r3','muted');
- setRoles(s==='priority'?'Active · 110 · Hello':'Active · priority 110','Standby · priority 100');
- el('states').innerHTML=stateRow('Host Gateway','10.10.10.1','ok')+stateRow('Virtual MAC','00:00:0c:9f:f0:0a','ok')+stateRow('Forwarding Owner','R1 Active','ok')+(s==='priority'?stateRow('Control','HSRPv2 Hello',''):stateRow('R2','Standby',''));
-}
-if(s==='failover'){
- markNode('r1','failed');markNode('r2','active');markLink('sw-r1','failed');markLink('r1-r3','muted');markLink('sw-r2','path');markLink('r2-r3','path');setRoles('Init · LAN Down','Active · priority 100');
- el('states').innerHTML=stateRow('Host Gateway','10.10.10.1','ok')+stateRow('HSRP Virtual MAC','유지','ok')+stateRow('Forwarding Owner','R2 Active','ok')+stateRow('R1','LAN/FHRP Down','bad');
-}
-if(s==='tracking'){
- markNode('r1','track-low');markNode('r2','active');markLink('sw-r1','muted');markLink('r1-r3','failed');markLink('sw-r2','path');markLink('r2-r3','path');setRoles('LAN Up · Track Down · 90','Active · 100');
- el('states').innerHTML=stateRow('R1 client LAN','Up','ok')+stateRow('R1 upstream','Down','bad')+stateRow('R1 effective priority','110 → 90','warn')+stateRow('Forwarding Owner','R2 Active','ok');
-}
-if(s==='vrrp'){
- markNode('r1','failed');markNode('r2','active');markLink('sw-r1','failed');markLink('r1-r3','muted');markLink('sw-r2','path');markLink('r2-r3','path');setRoles('Init/Down · VRRPv2','Master · priority 100');
- el('states').innerHTML=stateRow('Host Gateway','10.10.10.1','ok')+stateRow('VRRP Virtual MAC','00:00:5e:00:01:0a','ok')+stateRow('Forwarding Owner','R2 Master','ok')+stateRow('Control','IP protocol 112','');
-}
-}
-function tabs(){
-el('lessonTabs').innerHTML=lessons.map(function(l,i){return '<button class="lesson-tab '+(i===index?'active ':'')+(done.has(i)?'done':'')+'" data-i="'+i+'">'+String(i+1).padStart(2,'0')+' · '+l.title+'</button>';}).join('');
-all('.lesson-tab').forEach(function(b){b.onclick=function(){go(Number(b.getAttribute('data-i')));};});
-}
-function progress(){el('progressCount').textContent=done.size+' / '+lessons.length;el('progressBar').style.width=(done.size/lessons.length*100)+'%';}
-function render(){
-var l=lessons[index];selected=null;executed=false;el('lessonNo').textContent=String(index+1).padStart(2,'0');el('lessonTitle').textContent=l.id+' · '+l.title;el('lessonText').textContent=l.text;el('startState').innerHTML=l.start.map(function(x){return '<span>'+x+'</span>';}).join('');el('question').textContent=l.question;
-el('options').innerHTML=l.options.map(function(x,i){return '<button class="choice" aria-pressed="false" data-i="'+i+'">'+x+'</button>';}).join('');
-all('.choice').forEach(function(b){b.onclick=function(){if(executed)return;selected=Number(b.getAttribute('data-i'));all('.choice').forEach(function(x){x.classList.remove('selected');x.setAttribute('aria-pressed','false');});b.classList.add('selected');b.setAttribute('aria-pressed','true');el('runBtn').disabled=false;};});
-el('runBtn').disabled=true;el('feedback').className='feedback hidden';el('eventText').textContent='Prediction을 선택하면 검증된 상태를 확인할 수 있습니다.';el('states').innerHTML=stateRow('Prediction','대기 중','warn')+stateRow('Gateway','10.10.10.1','');el('evidenceList').innerHTML='';clearTopo();markNode('r1','standby');markNode('r2','standby');setRoles('priority 110','priority 100');tabs();progress();el('prevBtn').disabled=index===0;el('nextBtn').textContent=index===lessons.length-1?'로드맵으로 →':'다음 문제 →';
-}
-function run(){
-if(selected===null||executed)return;executed=true;var l=lessons[index];
-all('.choice').forEach(function(b,i){b.disabled=true;if(i===l.correct)b.classList.add('correct-answer');if(i===selected&&i!==l.correct)b.classList.add('wrong-answer');});
-var ok=selected===l.correct;el('feedback').classList.remove('hidden','correct','incorrect');el('feedback').classList.add(ok?'correct':'incorrect');el('feedbackBadge').textContent=ok?'예상 적중':'예상과 다름';el('myAnswer').textContent=l.options[selected];el('actualAnswer').textContent=l.actual;el('reason').textContent=l.reason;el('eventText').textContent=l.event;el('evidenceList').innerHTML=l.evidence.map(function(x){return '<li>'+x+'</li>';}).join('');applyState(l.state);done.add(index);tabs();progress();
-}
-function go(i){index=Math.max(0,Math.min(lessons.length-1,i));render();window.scrollTo({top:document.querySelector('.lesson-tabs').offsetTop-80,behavior:'smooth'});}
-el('runBtn').onclick=run;el('resetBtn').onclick=render;el('prevBtn').onclick=function(){go(index-1);};el('nextBtn').onclick=function(){if(index===lessons.length-1){location.href='../roadmap.html';return;}go(index+1);};render();
-})();
-</script>
-</body>
-</html>
+<div class="live-event-strip" id="simEvent" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon">●</div><div class="live-event-main"><b id="eventTitle">관찰 대기</b><p id="eventDetail">예상 답을 고른 뒤 실행하세요.</p><span id="eventText" hidden></span></div><span class="live-event-kind" id="eventKind">대기</span></div>
+<div class="sim-playback"><button id="simPlayback" class="soft-btn" hidden>⏸ 일시정지</button><span id="simPosition"></span></div>
+<section id="simResult" hidden aria-label="내 예상과 결과 비교"><div class="prediction-feedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="simVerdict"></b><span id="simChosen"></span><span id="simCorrect"></span><p id="simReason"></p></div></section>
+<div id="simExtras" class="sim-extras" hidden><button id="simCompare" class="soft-btn" hidden>조건 바꿔 비교하기</button><button id="simRecover" class="soft-btn" hidden>복구 흐름 확인하기</button><span id="simExtraStatus"></span></div>
+<div class="next-row"><button class="soft-btn" id="simReset">현재 실습 다시 시작</button><button class="next-btn" id="simNext" disabled>완료 후 다음 실습 →</button></div>
+<details class="panel sim-review" id="simReview" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body action-bar"><button id="prevStepBtn">← 이전 흐름</button><span id="stepCount"></span><button id="nextStepBtn">다음 흐름 →</button></div></details>
+<details class="panel sim-evidence"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>학습용 모델입니다. 아래의 기존 검증 기록을 재사용하며, 브라우저 실행은 새로운 장비 검증이나 실제 통신 성공을 뜻하지 않습니다.</p><div id="simEvidence"></div><div id="simModelNotes"></div><div class="next-lab-actions"></div></div></details></main>
+<section class="course-complete" id="simSummary" hidden><h2>관찰 결과와 복습할 문제</h2><p id="simSummaryScore"></p><div class="completion-grid" id="simSummaryList"></div><div class="next-lab-actions"><button id="simWrong" class="soft-btn">오답 다시 보기</button><button id="simRestart" class="soft-btn">처음부터 다시</button><a href="fhrp.html">학습 페이지로 돌아가기</a></div></section>
+<div class="quick-next-bar" id="simQuick" hidden><div class="quick-next-copy"><small id="simQuickLabel"></small><strong id="simQuickText"></strong></div><button class="quick-next-btn" id="simQuickBtn"></button></div><div class="footer">학습용 시뮬레이션 · 새로고침 및 재진입 시 미응답 상태로 시작합니다.</div><noscript>실습을 진행하려면 JavaScript를 활성화해 주세요.</noscript></div>
+<script src="network-simulator-session.js?v=20261007-1"></script><script src="fhrp-model.js?v=20261007-1"></script></body></html>

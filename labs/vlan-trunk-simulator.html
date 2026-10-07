@@ -1,212 +1,19 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VLAN / 802.1Q — 인터랙티브 실습</title>
-<meta name="description" content="VLAN과 802.1Q Tagged/Untagged 전달을 예상하고, Cisco Access/Trunk/Native/Allowed 구현 사례와 비교하는 2단계 Interactive Lab입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
-<style>
-body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:880px;color:var(--muted)}
-.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
-.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
-.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
-.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
-.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
-.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.9}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
-.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
-.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
-.observation{margin-top:18px;display:grid;grid-template-columns:1.25fr .75fr;gap:14px;min-width:0}.topology,.observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
-
-.topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 6px}
-.network-topology{
-  --v10:#8eb6ff;--v20:#58b8ff;--v99:#79d8be;
-  position:relative;display:grid;
-  grid-template-columns:108px 48px 92px minmax(150px,1fr) 92px 48px 108px;
-  grid-template-rows:repeat(3,96px);
-  gap:10px 8px;align-items:center;min-width:680px;padding:30px 14px 14px;
-}
-.side-zone{
-  align-self:stretch;justify-self:stretch;border:1px dashed #315675;border-radius:14px;
-  background:rgba(10,29,45,.46);position:relative;z-index:0;pointer-events:none
-}
-.side-zone.left{grid-column:1/4;grid-row:1/4}.side-zone.right{grid-column:5/8;grid-row:1/4}
-.zone-title{
-  position:absolute;top:8px;left:11px;color:#87a8c3;font-size:.63rem;font-weight:900;
-  letter-spacing:.08em
-}
-.device-node{
-  position:relative;z-index:2;min-width:0;text-align:center;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:transparent;border:0;border-radius:0;
-  transition:opacity .18s,filter .18s
-}
-.device-icon-shell{
-  position:relative;display:grid;place-items:center;width:72px;height:54px;
-  transition:filter .18s,transform .18s
-}
-.device-node.host .device-icon-shell{width:62px;height:50px}
-.device-node.switch .device-icon-shell{width:80px;height:54px}
-.device-icon{display:block;width:100%;height:100%;overflow:visible}
-.device-icon .chassis{fill:#0d2133;stroke:#5f819c;stroke-width:2}
-.device-icon .screen{fill:#0b1a29;stroke:#75a1c3;stroke-width:2}
-.device-icon .screen-glow{fill:#15344d;opacity:.72}
-.device-icon .detail{fill:#7fa1b9}
-.device-icon .port{fill:#8fb1c7}
-.device-icon .port-dark{fill:#45657c}
-.device-icon .led{fill:#79d8be}
-.device-icon .stand{fill:#688aa2}
-.device-node b{display:block;font-size:.78rem;line-height:1.1;margin-top:2px}
-.device-node>span{display:block;color:var(--muted);font-size:.58rem;margin-top:2px;line-height:1.15}
-.device-node .vlan-chip{
-  display:inline-flex;margin-top:4px;padding:2px 6px;border-radius:999px;border:1px solid #36536d;
-  color:#c8d9e8;background:#0a1726;font-size:.53rem;font-weight:900;white-space:nowrap
-}
-.device-node.active .device-icon-shell{filter:drop-shadow(0 0 8px rgba(88,184,255,.35))}
-.device-node.active .device-icon-shell::after,
-.device-node.control .device-icon-shell::after,
-.device-node.stop .device-icon-shell::after{
-  content:"";position:absolute;inset:-7px;border-radius:16px;pointer-events:none
-}
-.device-node.active .device-icon-shell::after{
-  border:2px solid rgba(88,184,255,.75);animation:nodePulse .75s ease-out 1
-}
-.device-node.control .device-icon-shell{filter:drop-shadow(0 0 7px rgba(121,216,190,.28))}
-.device-node.control .device-icon-shell::after{border:2px solid rgba(121,216,190,.72)}
-.device-node.stop .device-icon-shell{filter:drop-shadow(0 0 7px rgba(245,180,80,.32))}
-.device-node.stop .device-icon-shell::after{border:2px solid rgba(245,180,80,.82)}
-.device-node.stop .device-icon .chassis,.device-node.stop .device-icon .screen{stroke:#d9a54d}
-.device-node.excluded{opacity:.34;filter:saturate(.35)}
-@keyframes nodePulse{0%{opacity:0;transform:scale(.9)}35%{opacity:1}100%{opacity:0;transform:scale(1.14)}}
-
-.pc10a{grid-column:1;grid-row:1}.pc20a{grid-column:1;grid-row:2}.pc99a{grid-column:1;grid-row:3}
-.sw1{grid-column:3;grid-row:1/4}.sw2{grid-column:5;grid-row:1/4}
-.pc10b{grid-column:7;grid-row:1}.pc20b{grid-column:7;grid-row:2}.pc99b{grid-column:7;grid-row:3}
-
-.topo-link{
-  position:relative;z-index:2;height:30px;display:flex;align-items:center;justify-content:center;
-  color:#dceaf7
-}
-.topo-link::before{
-  content:"";position:absolute;left:0;right:0;top:50%;height:4px;transform:translateY(-50%);
-  border-radius:999px;background:#223a54;transition:background .18s,height .18s,opacity .18s
-}
-.topo-link.access-left{grid-column:2}.topo-link.access-right{grid-column:6}
-.link10l{grid-row:1}.link20l{grid-row:2}.link99l{grid-row:3}
-.link10r{grid-row:1}.link20r{grid-row:2}.link99r{grid-row:3}
-.topo-link.trunk{grid-column:4;grid-row:2;height:48px}
-.topo-link.trunk::before{height:7px;background:#27425a}
-.trunk-meta{
-  position:absolute;left:50%;top:-22px;transform:translateX(-50%);white-space:nowrap;
-  color:#9bb3c7;font-size:.59rem;font-weight:850;background:#081522;padding:3px 7px;border-radius:999px;border:1px solid #29465f
-}
-.link-state{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;white-space:nowrap;
-  color:#e9f4ff;background:#081522;border:1px solid #2e526f;border-radius:7px;padding:2px 5px;
-  font-size:.55rem;font-weight:900;opacity:0;transition:opacity .15s
-}
-.packet-marker{
-  position:absolute;z-index:5;left:6%;top:50%;width:12px;height:12px;border-radius:50%;
-  transform:translate(-50%,-50%);background:#58b8ff;border:2px solid #dff4ff;
-  box-shadow:0 0 0 4px rgba(88,184,255,.12),0 0 10px rgba(88,184,255,.65);opacity:0
-}
-.topo-link.has-flow .packet-marker{opacity:1;animation:packetTravel .85s ease-in-out infinite}
-.topo-link.has-flow .link-state,.topo-link.blocked .link-state,.topo-link.isolated .link-state{opacity:1}
-.topo-link.active::before{background:#58b8ff;height:5px}
-.topo-link.tagged::before{background:linear-gradient(90deg,#58b8ff 0 55%,#a98bff 55% 100%);height:7px}
-.topo-link.native::before{background:#79d8be;height:7px}
-.topo-link.control::before{background:#79d8be;height:6px}
-.topo-link.blocked::before{background:#8f6a38;height:6px}
-.topo-link.blocked .link-state{color:#ffd79d;border-color:#8f6a38}
-.topo-link.blocked::after{
-  content:"×";position:absolute;right:3px;top:50%;transform:translateY(-52%);z-index:6;
-  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#2b2115;
-  border:1px solid #a4783a;color:#ffcf88;font-weight:1000
-}
-.topo-link.isolated{opacity:.48}
-.topo-link.isolated::before{background:repeating-linear-gradient(90deg,#31506a 0 8px,transparent 8px 14px)}
-.topo-link.isolated .link-state{color:#9fb4c6}
-.topo-link.active::after,.topo-link.tagged::after,.topo-link.native::after,.topo-link.control::after{
-  content:"▶";position:absolute;right:-4px;top:50%;transform:translateY(-53%);z-index:6;
-  color:#dceaf7;font-size:.72rem;font-weight:1000
-}
-@keyframes packetTravel{0%{left:7%}100%{left:93%}}
-.topology-legend{
-  display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:#7790a5;font-size:.62rem
-}
-.topology-legend span{display:inline-flex;gap:5px;align-items:center}
-.topology-legend i{display:inline-block;width:24px;height:4px;border-radius:999px;background:#223a54}
-.topology-legend .tag i{height:6px;background:linear-gradient(90deg,#58b8ff 0 55%,#a98bff 55% 100%)}
-.topology-legend .native i{height:6px;background:#79d8be}
-.topology-legend .stop i{height:6px;background:#8f6a38}
-.event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#0a1b2b}.event-strip small{display:block;color:var(--blue);font-weight:850}.event-strip strong{display:block;margin-top:3px}.event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
-.step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}.step-controls button{border:1px solid var(--line);border-radius:9px;background:#0b1b2b;color:var(--text);padding:8px 10px;cursor:pointer}.step-controls button:disabled{opacity:.35;cursor:default}.step-count{margin-left:auto;color:var(--muted);font-size:.78rem}
-.obs-grid{display:grid;gap:9px}.obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}.obs-item small{display:block;color:var(--muted);font-weight:800}.obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}
-.lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}.lesson-actions button{font:inherit}
-.scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
-.summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
-@media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
-@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.network-topology{min-width:640px;grid-template-columns:98px 44px 86px minmax(138px,1fr) 86px 44px 98px}.device-node.host .device-icon-shell{width:54px;height:45px}.device-node.switch .device-icon-shell{width:70px;height:48px}.device-node b{font-size:.72rem}.device-node>span{font-size:.54rem}.device-node .vlan-chip{font-size:.49rem;padding:2px 5px}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header class="hero">
-    <small>2단계 · INTERACTIVE LAB</small>
-    <h1>VLAN / 802.1Q</h1>
-    <p>1단계에서 배운 흐름을 직접 확인합니다. <b>먼저 결과를 예상</b>하고, Access → Trunk → Access에서 Tagged/Untagged와 장애 중단 지점을 비교하세요.</p>
-    <div class="scope" style="margin-top:14px;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> VLAN membership + 802.1Q Tagged/Untagged. 화면의 Access/Trunk/Native는 Cisco IOL 검증 구현을 표현합니다.</div>
-<div class="start-guide">
-      <div class="guide-step"><b>1</b><span><strong>문제 읽기</strong>이번 문제의 한 가지 판단만 봅니다.</span></div>
-      <div class="guide-step"><b>2</b><span><strong>먼저 예상</strong>Frame이 어느 VLAN·형태로 갈지 선택합니다.</span></div>
-      <div class="guide-step"><b>3</b><span><strong>실행 후 관찰</strong>내 답과 검증 기반 모델 흐름을 비교합니다.</span></div>
-    </div>
-  </header>
-
-  <nav class="lesson-tabs" id="lessonTabs" aria-label="VLAN 실습 문제 선택"></nav>
-
-  <div class="course-progress">
-    <div><strong>VLAN / Trunk 실습 진행도</strong><small>제출한 문제와 정답 수는 별도로 계산합니다.</small></div>
-    <div class="course-bar"><div id="courseBar"></div></div>
-    <div class="course-count" id="courseCount">결과 확인 0 / 5</div>
-  </div>
-
-  <div class="stage-link">
-    <span><b>2단계 Interactive Lab</b> · 문제 → 예상 → 실행 → 정오답/이유 → 다음 문제 순서로 진행합니다.</span>
-    <a class="btn" href="vlan-trunk.html">← 1단계 개념서</a>
-  </div>
-
-  <main id="labMain" class="card lab-card">
-    <div class="coach">
-      <div class="coach-icon" id="coachIcon">1</div>
-      <div>
-        <div class="coach-title" id="coachTitle"></div>
-        <div class="coach-text" id="coachText"></div>
-        <div class="start-state" id="startState"></div>
-      </div>
-    </div>
-
-    <section class="prediction">
-      <h2 id="question"></h2>
-      <p>정답을 몰라도 괜찮습니다. 먼저 예상하고 실행 후 실제 검증과 연결된 흐름을 확인하세요.</p>
-      <div class="options" id="choices"></div>
-      <div class="controls">
-        <button class="btn primary" id="runBtn" disabled>② 실행해서 확인하기</button>
-        <button class="btn" id="resetBtn">선택 초기화</button>
-      </div>
-    </section>
-
-    <section class="feedback" id="feedback" hidden tabindex="-1">
-      <div class="feedback-head"><strong>③ 내 예상과 실제 비교</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
-      <div class="answer-grid">
-        <div class="answer-box"><small>내 답</small><strong id="myAnswer"></strong></div>
-        <div class="answer-box"><small>올바른 답</small><strong id="correctAnswer"></strong></div>
-      </div>
-      <p id="feedbackReason"></p>
-    </section>
-
-    <section class="observation" id="observation" hidden>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="lab-ui-version" content="20261007-roadmap-labs-v1"><title>VLAN / 802.1Q — 실습</title><link rel="icon" href="data:,"><meta name="description" content="VLAN / 802.1Q: 먼저 예상하고 단계별 관찰 뒤 내 답과 결과를 비교하는 실습.">
+<link rel="stylesheet" href="arp-simulator-1.css">
+<link rel="stylesheet" href="arp-simulator-2.css">
+<link rel="stylesheet" href="arp-simulator-3.css">
+<link rel="stylesheet" href="arp-simulator-mobile.css">
+<link rel="stylesheet" href="arp-simulator-mobile-follow.css">
+<style>#simVisual body{padding-bottom:34px}#simVisual .wrap{width:min(1180px,92vw);margin:auto}#simVisual .hero{padding:56px 0 26px}#simVisual .hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}#simVisual .hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}#simVisual .hero p{max-width:880px;color:var(--muted)}#simVisual .start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}#simVisual .guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}#simVisual .guide-step span{font-size:.82rem;color:var(--muted)}#simVisual .guide-step strong{display:block;color:var(--text);font-size:.88rem}#simVisual .lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#simVisual .lesson-tabs::-webkit-scrollbar{display:none}#simVisual .lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}#simVisual .lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}#simVisual .lesson-tab.done::after{content:" ✓";color:var(--mint)}#simVisual .course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .course-progress small{display:block;color:var(--muted)}#simVisual .course-bar{height:8px;border-radius:999px;background:#f4f7fb;overflow:hidden}#simVisual .course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}#simVisual .course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}#simVisual .stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .stage-link span{color:var(--muted);font-size:.86rem}#simVisual .lab-card{padding:20px}#simVisual .coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}#simVisual .coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#f4f7fb}#simVisual .coach-title{font-size:1.18rem;font-weight:850}#simVisual .coach-text{color:var(--muted);margin-top:3px}#simVisual .start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#simVisual .start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#f4f7fb;color:#344d66;font-size:.76rem}#simVisual .prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#f4f7fb}#simVisual .prediction h2{font-size:1.08rem;margin:0 0 4px}#simVisual .prediction p{margin:0;color:var(--muted);font-size:.85rem}#simVisual .options{display:grid;gap:9px;margin-top:13px}#simVisual .choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}#simVisual .choice:hover{border-color:#3e6a91}#simVisual .choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}#simVisual .choice:disabled{cursor:default;opacity:.9}#simVisual .choice.correct-answer{border-color:#cbd8e4}#simVisual .choice.wrong-answer{border-color:#9a534d}#simVisual .controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}#simVisual .controls button{font:inherit}#simVisual .controls .primary:disabled{opacity:.42;cursor:not-allowed}#simVisual .feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .feedback.correct{border-color:#cbd8e4}#simVisual .feedback.incorrect{border-color:#9a534d}#simVisual .feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}#simVisual .feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}#simVisual .feedback.correct .feedback-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .feedback.incorrect .feedback-badge{color:#344d66;border-color:#9a534d}#simVisual .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}#simVisual .answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .answer-box small{display:block;color:var(--muted);font-weight:800}#simVisual .answer-box strong{display:block;margin-top:3px}#simVisual .feedback p{margin:11px 0 0;color:#344d66}#simVisual .observation{margin-top:18px;display:grid;grid-template-columns:1.25fr .75fr;gap:14px;min-width:0}#simVisual .topology,#simVisual .observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}#simVisual .topology h3,#simVisual .observation-side h3{margin:0 0 10px}#simVisual .topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 6px}#simVisual .network-topology{--v10:#8eb6ff;--v20:#58b8ff;--v99:#79d8be;position:relative;display:grid;grid-template-columns:108px 48px 92px minmax(150px,1fr) 92px 48px 108px;grid-template-rows:repeat(3,96px);gap:10px 8px;align-items:center;min-width:680px;padding:30px 14px 14px}#simVisual .side-zone{align-self:stretch;justify-self:stretch;border:1px dashed #cbd8e4;border-radius:14px;background:rgba(234,242,250,.46);position:relative;z-index:0;pointer-events:none}#simVisual .side-zone.left{grid-column:1/4;grid-row:1/4}#simVisual .side-zone.right{grid-column:5/8;grid-row:1/4}#simVisual .zone-title{position:absolute;top:8px;left:11px;color:#87a8c3;font-size:.63rem;font-weight:900;letter-spacing:.08em}#simVisual .device-node{position:relative;z-index:2;min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;border:0;border-radius:0;transition:opacity .18s,filter .18s}#simVisual .device-icon-shell{position:relative;display:grid;place-items:center;width:72px;height:54px;transition:filter .18s,transform .18s}#simVisual .device-node.host .device-icon-shell{width:62px;height:50px}#simVisual .device-node.switch .device-icon-shell{width:80px;height:54px}#simVisual .device-icon{display:block;width:100%;height:100%;overflow:visible}#simVisual .device-icon .chassis{fill:#e9f2fa;stroke:#5f819c;stroke-width:2}#simVisual .device-icon .screen{fill:#e9f2fa;stroke:#75a1c3;stroke-width:2}#simVisual .device-icon .screen-glow{fill:#e9f2fa;opacity:.72}#simVisual .device-icon .detail{fill:#7fa1b9}#simVisual .device-icon .port{fill:#8fb1c7}#simVisual .device-icon .port-dark{fill:#e9f2fa}#simVisual .device-icon .led{fill:#79d8be}#simVisual .device-icon .stand{fill:#688aa2}#simVisual .device-node b{display:block;font-size:.78rem;line-height:1.1;margin-top:2px}#simVisual .device-node>span{display:block;color:var(--muted);font-size:.58rem;margin-top:2px;line-height:1.15}#simVisual .device-node .vlan-chip{display:inline-flex;margin-top:4px;padding:2px 6px;border-radius:999px;border:1px solid #cbd8e4;color:#344d66;background:#f4f7fb;font-size:.53rem;font-weight:900;white-space:nowrap}#simVisual .device-node.active .device-icon-shell{filter:drop-shadow(0 0 8px rgba(88,184,255,.35))}#simVisual .device-node.active .device-icon-shell::after,#simVisual .device-node.control .device-icon-shell::after,#simVisual .device-node.stop .device-icon-shell::after{content:"";position:absolute;inset:-7px;border-radius:16px;pointer-events:none}#simVisual .device-node.active .device-icon-shell::after{border:2px solid rgba(88,184,255,.75);animation:nodePulse .75s ease-out 1}#simVisual .device-node.control .device-icon-shell{filter:drop-shadow(0 0 7px rgba(121,216,190,.28))}#simVisual .device-node.control .device-icon-shell::after{border:2px solid rgba(121,216,190,.72)}#simVisual .device-node.stop .device-icon-shell{filter:drop-shadow(0 0 7px rgba(245,180,80,.32))}#simVisual .device-node.stop .device-icon-shell::after{border:2px solid rgba(245,180,80,.82)}#simVisual .device-node.stop .device-icon .chassis,#simVisual .device-node.stop .device-icon .screen{stroke:#d9a54d}#simVisual .device-node.excluded{opacity:.34;filter:saturate(.35)}@keyframes nodePulse{0%{opacity:0;transform:scale(.9)}35%{opacity:1}100%{opacity:0;transform:scale(1.14)}}#simVisual .pc10a{grid-column:1;grid-row:1}#simVisual .pc20a{grid-column:1;grid-row:2}#simVisual .pc99a{grid-column:1;grid-row:3}#simVisual .sw1{grid-column:3;grid-row:1/4}#simVisual .sw2{grid-column:5;grid-row:1/4}#simVisual .pc10b{grid-column:7;grid-row:1}#simVisual .pc20b{grid-column:7;grid-row:2}#simVisual .pc99b{grid-column:7;grid-row:3}#simVisual .topo-link{position:relative;z-index:2;height:30px;display:flex;align-items:center;justify-content:center;color:#344d66}#simVisual .topo-link::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;transform:translateY(-50%);border-radius:999px;background:#f4f7fb;transition:background .18s,height .18s,opacity .18s}#simVisual .topo-link.access-left{grid-column:2}#simVisual .topo-link.access-right{grid-column:6}#simVisual .link10l{grid-row:1}#simVisual .link20l{grid-row:2}#simVisual .link99l{grid-row:3}#simVisual .link10r{grid-row:1}#simVisual .link20r{grid-row:2}#simVisual .link99r{grid-row:3}#simVisual .topo-link.trunk{grid-column:4;grid-row:2;height:48px}#simVisual .topo-link.trunk::before{height:7px;background:#f4f7fb}#simVisual .trunk-meta{position:absolute;left:50%;top:-22px;transform:translateX(-50%);white-space:nowrap;color:#344d66;font-size:.59rem;font-weight:850;background:#f4f7fb;padding:3px 7px;border-radius:999px;border:1px solid #cbd8e4}#simVisual .link-state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;white-space:nowrap;color:#344d66;background:#f4f7fb;border:1px solid #cbd8e4;border-radius:7px;padding:2px 5px;font-size:.55rem;font-weight:900;opacity:0;transition:opacity .15s}#simVisual .packet-marker{position:absolute;z-index:5;left:6%;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#58b8ff;border:2px solid #dff4ff;box-shadow:0 0 0 4px rgba(88,184,255,.12),0 0 10px rgba(88,184,255,.65);opacity:0}#simVisual .topo-link.has-flow .packet-marker{opacity:1;animation:packetTravel .85s ease-in-out infinite}#simVisual .topo-link.has-flow .link-state,#simVisual .topo-link.blocked .link-state,#simVisual .topo-link.isolated .link-state{opacity:1}#simVisual .topo-link.active::before{background:#58b8ff;height:5px}#simVisual .topo-link.tagged::before{background:linear-gradient(90deg,#58b8ff 0 55%,#a98bff 55% 100%);height:7px}#simVisual .topo-link.native::before{background:#79d8be;height:7px}#simVisual .topo-link.control::before{background:#79d8be;height:6px}#simVisual .topo-link.blocked::before{background:#8f6a38;height:6px}#simVisual .topo-link.blocked .link-state{color:#344d66;border-color:#8f6a38}#simVisual .topo-link.blocked::after{content:"×";position:absolute;right:3px;top:50%;transform:translateY(-52%);z-index:6;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#2b2115;border:1px solid #a4783a;color:#ffcf88;font-weight:1000}#simVisual .topo-link.isolated{opacity:.48}#simVisual .topo-link.isolated::before{background:repeating-linear-gradient(90deg,#f4f7fb 0 8px,transparent 8px 14px)}#simVisual .topo-link.isolated .link-state{color:#344d66}#simVisual .topo-link.active::after,#simVisual .topo-link.tagged::after,#simVisual .topo-link.native::after,#simVisual .topo-link.control::after{content:"▶";position:absolute;right:-4px;top:50%;transform:translateY(-53%);z-index:6;color:#344d66;font-size:.72rem;font-weight:1000}@keyframes packetTravel{0%{left:7%}100%{left:93%}}#simVisual .topology-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:#7790a5;font-size:.62rem}#simVisual .topology-legend span{display:inline-flex;gap:5px;align-items:center}#simVisual .topology-legend i{display:inline-block;width:24px;height:4px;border-radius:999px;background:#f4f7fb}#simVisual .topology-legend .tag i{height:6px;background:linear-gradient(90deg,#58b8ff 0 55%,#a98bff 55% 100%)}#simVisual .topology-legend .native i{height:6px;background:#79d8be}#simVisual .topology-legend .stop i{height:6px;background:#8f6a38}#simVisual .event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#f4f7fb}#simVisual .event-strip small{display:block;color:var(--blue);font-weight:850}#simVisual .event-strip strong{display:block;margin-top:3px}#simVisual .event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}#simVisual .step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}#simVisual .step-controls button{border:1px solid var(--line);border-radius:9px;background:#f4f7fb;color:var(--text);padding:8px 10px;cursor:pointer}#simVisual .step-controls button:disabled{opacity:.35;cursor:default}#simVisual .step-count{margin-left:auto;color:var(--muted);font-size:.78rem}#simVisual .obs-grid{display:grid;gap:9px}#simVisual .obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .obs-item small{display:block;color:var(--muted);font-weight:800}#simVisual .obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}#simVisual .lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}#simVisual .lesson-actions button{font:inherit}#simVisual .scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}#simVisual .scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}#simVisual .scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}#simVisual .scope-details a{color:var(--blue)}#simVisual .summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}#simVisual .summary-panel h2{margin-top:0}#simVisual .summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}#simVisual .summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}#simVisual .summary-metric strong{display:block;font-size:1.45rem}#simVisual .summary-metric span{color:var(--muted);font-size:.78rem}#simVisual .summary-list{display:grid;gap:10px;margin-top:16px}#simVisual .summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}#simVisual .summary-card.correct{border-left-color:var(--mint)}#simVisual .summary-card.incorrect{border-left-color:#ff8f86}#simVisual .summary-card.pending{border-left-color:var(--amber)}#simVisual .status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}#simVisual .summary-card.correct .status-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .summary-card.incorrect .status-badge{color:#344d66;border-color:#9a534d}#simVisual .summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}#simVisual .summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}#simVisual .summary-card button{font:inherit}@media (max-width:850px){#simVisual .start-guide{grid-template-columns:1fr}#simVisual .observation{grid-template-columns:1fr}#simVisual .summary-metrics{grid-template-columns:1fr 1fr}#simVisual .stage-link{align-items:flex-start;flex-direction:column}}@media (max-width:520px){#simVisual .wrap{width:min(94vw,1180px)}#simVisual .hero{padding-top:34px}#simVisual .course-progress{grid-template-columns:1fr auto}#simVisual .course-bar{grid-column:1/-1;grid-row:2}#simVisual .coach{grid-template-columns:34px 1fr}#simVisual .coach-icon{width:34px;height:34px}#simVisual .lab-card{padding:15px}#simVisual .answer-grid{grid-template-columns:1fr}#simVisual .topology{padding:12px}#simVisual .network-topology{min-width:640px;grid-template-columns:98px 44px 86px minmax(138px,1fr) 86px 44px 98px}#simVisual .device-node.host .device-icon-shell{width:54px;height:45px}#simVisual .device-node.switch .device-icon-shell{width:70px;height:48px}#simVisual .device-node b{font-size:.72rem}#simVisual .device-node>span{font-size:.54rem}#simVisual .device-node .vlan-chip{font-size:.49rem;padding:2px 5px}#simVisual .lesson-actions{justify-content:stretch}#simVisual .lesson-actions button{flex:1}#simVisual .summary-card{grid-template-columns:1fr}#simVisual .summary-card button{width:100%}}</style>
+<link rel="stylesheet" href="network-simulator-shell.css?v=20261007-1"></head>
+<body data-sim-mode="basic" data-topic="vlan-trunk"><div class="wrap" id="simLab" data-state="IDLE">
+<header class="hero"><small>1단계 · Campus LAN · 실습</small><h1>VLAN / 802.1Q</h1><p>1단계에서 배운 흐름을 직접 확인합니다. <b>먼저 결과를 예상</b>하고, Access → Trunk → Access에서 Tagged/Untagged와 장애 중단 지점을 비교하세요.</p><div class="next-lab-actions"><a id="conceptGuideLink" href="vlan-trunk.html">← VLAN / 802.1Q 학습 페이지</a><a href="../roadmap.html">학습 로드맵</a></div><div class="start-guide"><div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 문제의 조건을 확인합니다.</span></div><div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>결과를 보기 전에 골라보세요.</span></div><div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>흐름을 관찰하고 이유를 확인합니다.</span></div></div></header>
+<nav class="lesson-tabs" id="simTabs" aria-label="실습 문제"></nav><div class="course-progress"><div><strong>실습 진행도</strong><small id="simScore">예상과 관찰을 비교하면 완료됩니다.</small></div><div class="course-bar"><div id="simBar"></div></div><div class="course-count" id="simCount"></div></div>
+<main class="card lab-card" id="simMain"><div class="coach"><div class="coach-icon" id="simNumber"></div><div><div class="coach-title" id="simTitle"></div><div class="coach-text" id="simText"></div></div></div><div id="simConditions" class="sim-conditions"></div>
+<section class="prediction-card"><div class="prediction-copy"><small>① 예상하기 · 정답은 관찰 완료 후 공개됩니다</small><h2 id="simQuestion" tabindex="-1"></h2><p>틀려도 괜찮습니다. 내 예상과 관찰 결과를 비교해 보세요.</p></div><div class="prediction-options" id="simOptions" role="group" aria-labelledby="simQuestion"></div></section>
+<div class="controls sim-primary"><button class="ping-btn" id="simRun" disabled>② 실행해서 확인하기</button></div>
+<section id="simVisual" class="sim-visual" aria-label="주제별 관찰 모델"><section class="observation" id="observation">
       <div class="topology">
         <h3>모델 관찰 · VLAN 10 / 20 / 99</h3>
         <div class="topology-scroll" id="topologyScroll">
@@ -214,124 +21,30 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
             <div class="side-zone left"><span class="zone-title">SW1 SIDE · ACCESS</span></div>
             <div class="side-zone right"><span class="zone-title">SW2 SIDE · ACCESS</span></div>
 
-            <div class="device-node host vlan10 pc10a" id="pc10a"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC10A</b><span>Host A</span><small class="vlan-chip">Access VLAN 10</small></div>
-            <div class="device-node host vlan20 pc20a" id="pc20a"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC20A</b><span>Host A</span><small class="vlan-chip">Access VLAN 20</small></div>
-            <div class="device-node host vlan99 pc99a" id="pc99a"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC99A</b><span>Host A</span><small class="vlan-chip">Access VLAN 99</small></div>
+            <div class="device-node host vlan10 pc10a" id="pc10a"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC10A</b><span>Host A</span><small class="vlan-chip">Access VLAN 10</small></div>
+            <div class="device-node host vlan20 pc20a" id="pc20a"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC20A</b><span>Host A</span><small class="vlan-chip">Access VLAN 20</small></div>
+            <div class="device-node host vlan99 pc99a" id="pc99a"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC99A</b><span>Host A</span><small class="vlan-chip">Access VLAN 99</small></div>
 
             <div class="topo-link access-left link10l" id="link10L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state10L"></span></div>
             <div class="topo-link access-left link20l" id="link20L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state20L"></span></div>
             <div class="topo-link access-left link99l" id="link99L"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state99L"></span></div>
 
-            <div class="device-node switch sw1" id="sw1"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 84 52" focusable="false">
-                  <rect class="chassis" x="4" y="8" width="76" height="36" rx="7"/>
-                  <rect class="port-dark" x="10" y="16" width="46" height="18" rx="3"/>
-                  <rect class="port" x="14" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="24" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="34" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="44" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="14" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="24" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="34" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="44" y="27" width="7" height="4" rx="1"/>
-                  <circle class="led" cx="64" cy="21" r="2"/>
-                  <circle class="led" cx="71" cy="21" r="2"/>
-                  <rect class="detail" x="61" y="28" width="13" height="2" rx="1"/>
-                  <rect class="detail" x="61" y="33" width="9" height="2" rx="1"/>
-                </svg>
-              </div><b>SW1</b><span>Cisco IOL L2</span></div>
+            <div class="device-node switch sw1" id="sw1"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg></div><b>SW1</b><span>Cisco IOL L2</span></div>
 
             <div class="topo-link trunk" id="trunkLink">
               <span class="trunk-meta">TRUNK · Allowed 10,20,99 · Native 99</span>
               <span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="stateTrunk"></span>
             </div>
 
-            <div class="device-node switch sw2" id="sw2"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 84 52" focusable="false">
-                  <rect class="chassis" x="4" y="8" width="76" height="36" rx="7"/>
-                  <rect class="port-dark" x="10" y="16" width="46" height="18" rx="3"/>
-                  <rect class="port" x="14" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="24" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="34" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="44" y="20" width="7" height="5" rx="1"/>
-                  <rect class="port" x="14" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="24" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="34" y="27" width="7" height="4" rx="1"/>
-                  <rect class="port" x="44" y="27" width="7" height="4" rx="1"/>
-                  <circle class="led" cx="64" cy="21" r="2"/>
-                  <circle class="led" cx="71" cy="21" r="2"/>
-                  <rect class="detail" x="61" y="28" width="13" height="2" rx="1"/>
-                  <rect class="detail" x="61" y="33" width="9" height="2" rx="1"/>
-                </svg>
-              </div><b>SW2</b><span>Cisco IOL L2</span></div>
+            <div class="device-node switch sw2" id="sw2"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg></div><b>SW2</b><span>Cisco IOL L2</span></div>
 
             <div class="topo-link access-right link10r" id="link10R"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state10R"></span></div>
             <div class="topo-link access-right link20r" id="link20R"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state20R"></span></div>
             <div class="topo-link access-right link99r" id="link99R"><span class="packet-marker" aria-hidden="true"></span><span class="link-state" id="state99R"></span></div>
 
-            <div class="device-node host vlan10 pc10b" id="pc10b"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC10B</b><span>Host B</span><small class="vlan-chip">Access VLAN 10</small></div>
-            <div class="device-node host vlan20 pc20b" id="pc20b"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC20B</b><span>Host B</span><small class="vlan-chip" id="pc20bVlan">Access VLAN 20</small></div>
-            <div class="device-node host vlan99 pc99b" id="pc99b"><div class="device-icon-shell" aria-hidden="true">
-                <svg class="device-icon" viewBox="0 0 64 52" focusable="false">
-                  <rect class="screen" x="8" y="5" width="48" height="32" rx="4"/>
-                  <rect class="screen-glow" x="12" y="9" width="40" height="24" rx="2"/>
-                  <rect class="detail" x="17" y="14" width="18" height="2" rx="1"/>
-                  <rect class="detail" x="17" y="19" width="26" height="2" rx="1"/>
-                  <circle class="led" cx="49" cy="31" r="1.5"/>
-                  <rect class="stand" x="29" y="37" width="6" height="6" rx="1"/>
-                  <rect class="stand" x="22" y="43" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div><b>PC99B</b><span>Host B</span><small class="vlan-chip">Access VLAN 99</small></div>
+            <div class="device-node host vlan10 pc10b" id="pc10b"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC10B</b><span>Host B</span><small class="vlan-chip">Access VLAN 10</small></div>
+            <div class="device-node host vlan20 pc20b" id="pc20b"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC20B</b><span>Host B</span><small class="vlan-chip" id="pc20bVlan">Access VLAN 20</small></div>
+            <div class="device-node host vlan99 pc99b" id="pc99b"><div class="device-icon-shell sim-device-holder" aria-hidden="true"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC99B</b><span>Host B</span><small class="vlan-chip">Access VLAN 99</small></div>
           </div>
         </div>
         <div class="topology-legend" aria-label="토폴로지 표현 범례">
@@ -340,16 +53,8 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
           <span class="native"><i></i> Native / Untagged</span>
           <span class="stop"><i></i> Logical Stop</span>
         </div>
-        <div class="event-strip" aria-live="polite">
-          <small id="eventKind"></small>
-          <strong id="eventTitle"></strong>
-          <span id="eventDetail"></span>
-        </div>
-        <div class="step-controls">
-          <button id="prevStepBtn" type="button">← 이전 흐름</button>
-          <button id="nextStepBtn" type="button">다음 흐름 →</button>
-          <span class="step-count" id="stepCount"></span>
-        </div>
+
+
       </div>
       <aside class="observation-side">
         <h3>현재 관찰 값</h3>
@@ -359,38 +64,21 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
           <div class="obs-item"><small>한 줄 결론</small><strong id="observationConclusion"></strong></div>
         </div>
       </aside>
-    </section>
-
-    <details class="scope-details">
+    </section></section>
+<div class="live-event-strip" id="simEvent" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon">●</div><div class="live-event-main"><b id="eventTitle">관찰 대기</b><p id="eventDetail">예상 답을 고른 뒤 실행하세요.</p><span id="eventText" hidden></span></div><span class="live-event-kind" id="eventKind">대기</span></div>
+<div class="sim-playback"><button id="simPlayback" class="soft-btn" hidden>⏸ 일시정지</button><span id="simPosition"></span></div>
+<section id="simResult" hidden aria-label="내 예상과 결과 비교"><div class="prediction-feedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="simVerdict"></b><span id="simChosen"></span><span id="simCorrect"></span><p id="simReason"></p></div></section>
+<div id="simExtras" class="sim-extras" hidden><button id="simCompare" class="soft-btn" hidden>조건 바꿔 비교하기</button><button id="simRecover" class="soft-btn" hidden>복구 흐름 확인하기</button><span id="simExtraStatus"></span></div>
+<div class="next-row"><button class="soft-btn" id="simReset">현재 실습 다시 시작</button><button class="next-btn" id="simNext" disabled>완료 후 다음 실습 →</button></div>
+<details class="panel sim-review" id="simReview" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body action-bar"><button id="prevStepBtn">← 이전 흐름</button><span id="stepCount"></span><button id="nextStepBtn">다음 흐름 →</button></div></details>
+<details class="panel sim-evidence"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>학습용 모델입니다. 아래의 기존 검증 기록을 재사용하며, 브라우저 실행은 새로운 장비 검증이나 실제 통신 성공을 뜻하지 않습니다.</p><div id="simEvidence"></div><div id="simModelNotes"></div>
       <summary>가정과 실제 검증 근거 보기</summary>
       <div>
         이 화면은 학습용 시뮬레이션입니다. 모델은 2026-10-03 PNETLab의 Cisco IOL L2 2대 + VPCS 6대 검증 결과를 기반으로 합니다.
         Nexus 9000v는 자원 제약으로 직접 실행하지 않았고, VLAN-01~06은 IOL L2에서 6/6 PASS했습니다.
         <a href="../learning/campus/vlan-trunk/cisco-validation-2026-10-03.html">실제 검증 요약 →</a>
       </div>
-    </details>
-
-    <div class="lesson-actions">
-      <button class="btn" id="retryBtn" hidden>이 문제 다시 풀기</button>
-      <button class="btn" id="summaryBackBtn" hidden>전체 결과로 돌아가기</button>
-      <button class="btn primary" id="nextLessonBtn" disabled>다음 문제 →</button>
-    </div>
-  </main>
-
-  <section id="summaryPanel" class="summary-panel" hidden tabindex="-1">
-    <div class="eyebrow">학습 결과</div>
-    <h2>정오답과 복습할 문제를 구분해 확인하세요.</h2>
-    <div class="summary-metrics">
-      <div class="summary-metric"><strong id="submittedCount">0</strong><span>결과 확인</span></div>
-      <div class="summary-metric"><strong id="correctCount">0</strong><span>정답</span></div>
-      <div class="summary-metric"><strong id="wrongCount">0</strong><span>오답</span></div>
-      <div class="summary-metric"><strong id="pendingCount">5</strong><span>미응답</span></div>
-    </div>
-    <div class="summary-list" id="summaryList"></div>
-    <div class="controls" style="margin-top:16px"><button class="btn primary" id="continueBtn">미응답/오답 문제로 이동 →</button></div>
-  </section>
-</div>
-
-<script src="vlan-trunk-simulator.js?v=20261003-2"></script>
-</body>
-</html>
+    <div class="next-lab-actions"><a href="../learning/campus/vlan-trunk/cisco-validation-2026-10-03.html">실제 검증 요약 →</a></div></div></details></main>
+<section class="course-complete" id="simSummary" hidden><h2>관찰 결과와 복습할 문제</h2><p id="simSummaryScore"></p><div class="completion-grid" id="simSummaryList"></div><div class="next-lab-actions"><button id="simWrong" class="soft-btn">오답 다시 보기</button><button id="simRestart" class="soft-btn">처음부터 다시</button><a href="vlan-trunk.html">학습 페이지로 돌아가기</a></div></section>
+<div class="quick-next-bar" id="simQuick" hidden><div class="quick-next-copy"><small id="simQuickLabel"></small><strong id="simQuickText"></strong></div><button class="quick-next-btn" id="simQuickBtn"></button></div><div class="footer">학습용 시뮬레이션 · 새로고침 및 재진입 시 미응답 상태로 시작합니다.</div><noscript>실습을 진행하려면 JavaScript를 활성화해 주세요.</noscript></div>
+<script src="network-simulator-session.js?v=20261007-1"></script><script src="vlan-trunk-model.js?v=20261007-1"></script></body></html>

@@ -5,6 +5,10 @@ on:
     paths:
       - 'labs/bgp.html'
       - 'labs/bgp-simulator.html'
+      - 'labs/bgp-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
       - 'tests/bgp-final.mjs'
       - 'package.json'
       - '.github/workflows/bgp-check.yml'
@@ -12,6 +16,10 @@ on:
     paths:
       - 'labs/bgp.html'
       - 'labs/bgp-simulator.html'
+      - 'labs/bgp-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
       - 'tests/bgp-final.mjs'
       - 'package.json'
       - '.github/workflows/bgp-check.yml'
@@ -31,10 +39,12 @@ jobs:
           version: 11.19.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: node tests/bgp-final.mjs
+      - run: node tests/roadmap-simulators.mjs
+        env:
+          TOPIC: bgp
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: bgp-browser-evidence
-          path: test-results/bgp/
+          path: test-results/roadmap-simulators/
           retention-days: 7

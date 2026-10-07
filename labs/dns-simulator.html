@@ -1,117 +1,37 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DNS — 인터랙티브 실습</title>
-<meta name="description" content="DNS Query/Response, Recursive Resolver, Cache, DNS Server Down, Wrong DNS, NXDOMAIN을 예상하고 확인하는 2단계 Interactive Lab입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
-<style>
-body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:900px;color:var(--muted)}
-.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
-.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
-.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
-.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
-.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
-.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.9}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
-.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
-.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
-.observation{margin-top:18px;display:grid;grid-template-columns:1.45fr .55fr;gap:14px;min-width:0}.topology,.observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
-.topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 8px}.topology-stage{position:relative;width:930px;height:400px;margin:auto;border:1px solid #1c334a;border-radius:16px;background:#081522}
-.topology-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.net-link{stroke:#29455f;stroke-width:8;stroke-linecap:round}.net-link.query{stroke:var(--blue);stroke-width:10;stroke-dasharray:20 12;animation:pathFlow 1s linear infinite}.net-link.upstream{stroke:var(--violet);stroke-width:10;stroke-dasharray:12 10;animation:pathFlow 1.2s linear infinite}.net-link.response{stroke:var(--mint);stroke-width:10;stroke-dasharray:20 12;animation:pathFlow 1s linear infinite}.net-link.icmp{stroke:var(--amber);stroke-width:10;stroke-dasharray:18 12;animation:pathFlow 1s linear infinite}.net-link.arp{stroke:#d49b43;stroke-width:10;stroke-dasharray:8 9;animation:pathFlow 1.2s linear infinite}.net-link.stop{stroke:#9a534d;stroke-dasharray:6 10}.net-link.idle{stroke:#29455f}
-@keyframes pathFlow{to{stroke-dashoffset:-32}}
-.device{position:absolute;z-index:3;text-align:center}.device-icon{width:108px;height:62px;border:1px solid var(--line);border-radius:12px;background:#0a1726;display:grid;place-items:center}.device b{display:block;margin-top:6px;font-size:.82rem}.device span{display:block;color:var(--muted);font-size:.62rem}.device.active .device-icon{border-color:var(--blue);box-shadow:0 0 0 5px rgba(88,184,255,.08)}.device.upstream .device-icon{border-color:var(--violet)}.device.reply .device-icon{border-color:var(--mint)}.device.stop .device-icon{border-color:#9a534d}.device.cache .device-icon{border-color:#8f6a38}
-#pc1{left:18px;top:68px}#pc2{left:18px;top:246px}#sw1{left:178px;top:157px}#r1{left:342px;top:157px}#r2{left:535px;top:157px}#r3{left:748px;top:157px}
-.role-badge{position:absolute;z-index:5;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#07111f;color:var(--muted);font-size:.64rem;font-weight:900;white-space:nowrap}#cacheBadge{left:552px;top:118px}#authBadge{left:764px;top:118px}
-.link-label{position:absolute;z-index:5;padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#c7d7e7;font-size:.61rem;font-weight:800;white-space:nowrap}.link-label.query{color:var(--blue);border-color:#356d93}.link-label.upstream{color:var(--violet);border-color:#70649c}.link-label.response{color:var(--mint);border-color:#347968}.link-label.icmp,.link-label.arp{color:var(--amber);border-color:#8f6a38}.link-label.stop{color:#ff9c93;border-color:#9a534d}
-#label1{left:129px;top:104px}#label2{left:129px;top:282px}#label3{left:286px;top:183px}#label4{left:461px;top:183px}#label5{left:658px;top:183px}
-.packet-marker{position:absolute;z-index:6;display:none;padding:5px 8px;border-radius:999px;border:1px solid #356d93;background:#0b2134;color:var(--blue);font-size:.64rem;font-weight:900}.packet-marker.show{display:block}.packet-marker.upstream{color:var(--violet);border-color:#70649c}.packet-marker.reply{color:var(--mint);border-color:#347968}.packet-marker.icmp,.packet-marker.arp{color:var(--amber);border-color:#8f6a38}.packet-marker.error{color:#ff9c93;border-color:#9a534d;background:#251313}
-.state-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.state-box{padding:10px;border:1px solid var(--line);border-radius:10px;background:#091624}.state-box small{display:block;color:var(--muted);font-weight:800}.state-box strong{display:block;margin-top:3px}
-.event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#0a1b2b}.event-strip small{display:block;color:var(--blue);font-weight:850}.event-strip strong{display:block;margin-top:3px}.event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}.step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}.step-controls button{border:1px solid var(--line);border-radius:9px;background:#0b1b2b;color:var(--text);padding:8px 10px;cursor:pointer}.step-controls button:disabled{opacity:.35}.step-count{margin-left:auto;color:var(--muted);font-size:.78rem}
-.obs-grid{display:grid;gap:9px}.obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}.obs-item small{display:block;color:var(--muted);font-weight:800}.obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}
-.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.legend span{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:.7rem}.legend i{display:inline-block;width:22px;height:4px;border-radius:999px}.legend .query i{background:var(--blue)}.legend .upstream i{background:var(--violet)}.legend .response i{background:var(--mint)}.legend .icmp i{background:var(--amber)}.legend .stop i{background:#9a534d}
-.lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}.lesson-actions button{font:inherit}.scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
-.summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
-@media(prefers-reduced-motion:reduce){.net-link.query,.net-link.upstream,.net-link.response,.net-link.icmp,.net-link.arp{animation:none}}
-@media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
-@media(max-width:520px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid,.state-row{grid-template-columns:1fr}.topology{padding:12px}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<header class="hero">
-  <small>2단계 · INTERACTIVE LAB</small>
-  <h1>DNS</h1>
-  <p>같은 Physical Topology에서 <b>Client Query, Upstream Query, Cache Hit, Response, IP Traffic, Failure Stop</b> 위치를 비교합니다.</p>
-  <div class="start-guide">
-    <div class="guide-step"><b>1</b><span><strong>결과 예상</strong>Query가 어디까지 갈지 먼저 판단합니다.</span></div>
-    <div class="guide-step"><b>2</b><span><strong>실행</strong>실제 검증 기반 Packet Path를 단계별로 봅니다.</span></div>
-    <div class="guide-step"><b>3</b><span><strong>원인 분리</strong>Response 유무와 Stop 위치를 구분합니다.</span></div>
-  </div>
-</header>
-
-<nav class="lesson-tabs" id="lessonTabs" aria-label="DNS 실습 문제 선택"></nav>
-
-<div class="course-progress">
-  <div><strong>DNS 진행도</strong><small>결과 확인 수와 정답 수를 별도로 표시합니다.</small></div>
-  <div class="course-bar"><div id="courseBar"></div></div>
-  <div class="course-count" id="courseCount">결과 확인 0 / 5</div>
-</div>
-
-<div class="stage-link">
-  <span><b>2단계 Interactive Lab</b> · 예상 → 실행 → 정오답 → Packet 위치 관찰 → 단계 재생 → 다음 문제.</span>
-  <a class="btn" href="dns.html">← 1단계 개념서</a>
-</div>
-
-<main id="labMain" class="card lab-card">
-  <div class="coach">
-    <div class="coach-icon" id="coachIcon">1</div>
-    <div>
-      <div class="coach-title" id="coachTitle"></div>
-      <div class="coach-text" id="coachText"></div>
-      <div class="start-state" id="startState"></div>
-    </div>
-  </div>
-
-  <section class="prediction">
-    <h2 id="question"></h2>
-    <p>먼저 예상하세요. 실행 후 실제 검증과 같은 조건의 Query/Response 흐름을 보여줍니다.</p>
-    <div class="options" id="choices"></div>
-    <div class="controls">
-      <button class="btn primary" id="runBtn" disabled>② 실행해서 확인하기</button>
-      <button class="btn" id="resetBtn">선택 초기화</button>
-    </div>
-  </section>
-
-  <section class="feedback" id="feedback" hidden tabindex="-1">
-    <div class="feedback-head"><strong>③ 내 예상과 실제 비교</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
-    <div class="answer-grid">
-      <div class="answer-box"><small>내 답</small><strong id="myAnswer"></strong></div>
-      <div class="answer-box"><small>올바른 답</small><strong id="correctAnswer"></strong></div>
-    </div>
-    <p id="feedbackReason"></p>
-  </section>
-
-  <section class="observation" id="observation" hidden>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="lab-ui-version" content="20261007-roadmap-labs-v1"><title>DNS — 실습</title><link rel="icon" href="data:,"><meta name="description" content="DNS: 먼저 예상하고 단계별 관찰 뒤 내 답과 결과를 비교하는 실습.">
+<link rel="stylesheet" href="arp-simulator-1.css">
+<link rel="stylesheet" href="arp-simulator-2.css">
+<link rel="stylesheet" href="arp-simulator-3.css">
+<link rel="stylesheet" href="arp-simulator-mobile.css">
+<link rel="stylesheet" href="arp-simulator-mobile-follow.css">
+<style>#simVisual body{padding-bottom:34px}#simVisual .wrap{width:min(1180px,92vw);margin:auto}#simVisual .hero{padding:56px 0 26px}#simVisual .hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}#simVisual .hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}#simVisual .hero p{max-width:900px;color:var(--muted)}#simVisual .start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}#simVisual .guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}#simVisual .guide-step span{font-size:.82rem;color:var(--muted)}#simVisual .guide-step strong{display:block;color:var(--text);font-size:.88rem}#simVisual .lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#simVisual .lesson-tabs::-webkit-scrollbar{display:none}#simVisual .lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}#simVisual .lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}#simVisual .lesson-tab.done::after{content:" ✓";color:var(--mint)}#simVisual .course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .course-progress small{display:block;color:var(--muted)}#simVisual .course-bar{height:8px;border-radius:999px;background:#f4f7fb;overflow:hidden}#simVisual .course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}#simVisual .course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}#simVisual .stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .stage-link span{color:var(--muted);font-size:.86rem}#simVisual .lab-card{padding:20px}#simVisual .coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}#simVisual .coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#f4f7fb}#simVisual .coach-title{font-size:1.18rem;font-weight:850}#simVisual .coach-text{color:var(--muted);margin-top:3px}#simVisual .start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#simVisual .start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#f4f7fb;color:#344d66;font-size:.76rem}#simVisual .prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#f4f7fb}#simVisual .prediction h2{font-size:1.08rem;margin:0 0 4px}#simVisual .prediction p{margin:0;color:var(--muted);font-size:.85rem}#simVisual .options{display:grid;gap:9px;margin-top:13px}#simVisual .choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}#simVisual .choice:hover{border-color:#3e6a91}#simVisual .choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}#simVisual .choice:disabled{cursor:default;opacity:.9}#simVisual .choice.correct-answer{border-color:#cbd8e4}#simVisual .choice.wrong-answer{border-color:#9a534d}#simVisual .controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}#simVisual .controls button{font:inherit}#simVisual .controls .primary:disabled{opacity:.42;cursor:not-allowed}#simVisual .feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .feedback.correct{border-color:#cbd8e4}#simVisual .feedback.incorrect{border-color:#9a534d}#simVisual .feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}#simVisual .feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}#simVisual .feedback.correct .feedback-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .feedback.incorrect .feedback-badge{color:#344d66;border-color:#9a534d}#simVisual .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}#simVisual .answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .answer-box small{display:block;color:var(--muted);font-weight:800}#simVisual .answer-box strong{display:block;margin-top:3px}#simVisual .feedback p{margin:11px 0 0;color:#344d66}#simVisual .observation{margin-top:18px;display:grid;grid-template-columns:1.45fr .55fr;gap:14px;min-width:0}#simVisual .topology,#simVisual .observation-side{min-width:0;padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}#simVisual .topology h3,#simVisual .observation-side h3{margin:0 0 10px}#simVisual .topology-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 0 8px}#simVisual .topology-stage{position:relative;width:930px;height:400px;margin:auto;border:1px solid #cbd8e4;border-radius:16px;background:#f4f7fb}#simVisual .topology-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#simVisual .net-link{stroke:#91a9bf;stroke-width:8;stroke-linecap:round}#simVisual .net-link.query{stroke:var(--blue);stroke-width:10;stroke-dasharray:20 12;animation:pathFlow 1s linear infinite}#simVisual .net-link.upstream{stroke:var(--violet);stroke-width:10;stroke-dasharray:12 10;animation:pathFlow 1.2s linear infinite}#simVisual .net-link.response{stroke:var(--mint);stroke-width:10;stroke-dasharray:20 12;animation:pathFlow 1s linear infinite}#simVisual .net-link.icmp{stroke:var(--amber);stroke-width:10;stroke-dasharray:18 12;animation:pathFlow 1s linear infinite}#simVisual .net-link.arp{stroke:#d49b43;stroke-width:10;stroke-dasharray:8 9;animation:pathFlow 1.2s linear infinite}#simVisual .net-link.stop{stroke:#9a534d;stroke-dasharray:6 10}#simVisual .net-link.idle{stroke:#91a9bf}@keyframes pathFlow{to{stroke-dashoffset:-32}}#simVisual .device{position:absolute;z-index:3;text-align:center}#simVisual .device-icon{width:108px;height:62px;border:1px solid var(--line);border-radius:12px;background:#f4f7fb;display:grid;place-items:center}#simVisual .device b{display:block;margin-top:6px;font-size:.82rem}#simVisual .device span{display:block;color:var(--muted);font-size:.62rem}#simVisual .device.active .device-icon{border-color:var(--blue);box-shadow:0 0 0 5px rgba(88,184,255,.08)}#simVisual .device.upstream .device-icon{border-color:var(--violet)}#simVisual .device.reply .device-icon{border-color:var(--mint)}#simVisual .device.stop .device-icon{border-color:#9a534d}#simVisual .device.cache .device-icon{border-color:#8f6a38}#simVisual #pc1{left:18px;top:68px}#simVisual #pc2{left:18px;top:246px}#simVisual #sw1{left:178px;top:157px}#simVisual #r1{left:342px;top:157px}#simVisual #r2{left:535px;top:157px}#simVisual #r3{left:748px;top:157px}#simVisual .role-badge{position:absolute;z-index:5;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#f4f7fb;color:var(--muted);font-size:.64rem;font-weight:900;white-space:nowrap}#simVisual #cacheBadge{left:552px;top:118px}#simVisual #authBadge{left:764px;top:118px}#simVisual .link-label{position:absolute;z-index:5;padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:#f4f7fb;color:#344d66;font-size:.61rem;font-weight:800;white-space:nowrap}#simVisual .link-label.query{color:var(--blue);border-color:#356d93}#simVisual .link-label.upstream{color:var(--violet);border-color:#70649c}#simVisual .link-label.response{color:var(--mint);border-color:#cbd8e4}#simVisual .link-label.icmp,#simVisual .link-label.arp{color:var(--amber);border-color:#8f6a38}#simVisual .link-label.stop{color:#344d66;border-color:#9a534d}#simVisual #label1{left:129px;top:104px}#simVisual #label2{left:129px;top:282px}#simVisual #label3{left:286px;top:183px}#simVisual #label4{left:461px;top:183px}#simVisual #label5{left:658px;top:183px}#simVisual .packet-marker{position:absolute;z-index:6;display:none;padding:5px 8px;border-radius:999px;border:1px solid #356d93;background:#f4f7fb;color:var(--blue);font-size:.64rem;font-weight:900}#simVisual .packet-marker.show{display:block}#simVisual .packet-marker.upstream{color:var(--violet);border-color:#70649c}#simVisual .packet-marker.reply{color:var(--mint);border-color:#cbd8e4}#simVisual .packet-marker.icmp,#simVisual .packet-marker.arp{color:var(--amber);border-color:#8f6a38}#simVisual .packet-marker.error{color:#344d66;border-color:#9a534d;background:#251313}#simVisual .state-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}#simVisual .state-box{padding:10px;border:1px solid var(--line);border-radius:10px;background:#f4f7fb}#simVisual .state-box small{display:block;color:var(--muted);font-weight:800}#simVisual .state-box strong{display:block;margin-top:3px}#simVisual .event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#f4f7fb}#simVisual .event-strip small{display:block;color:var(--blue);font-weight:850}#simVisual .event-strip strong{display:block;margin-top:3px}#simVisual .event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}#simVisual .step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}#simVisual .step-controls button{border:1px solid var(--line);border-radius:9px;background:#f4f7fb;color:var(--text);padding:8px 10px;cursor:pointer}#simVisual .step-controls button:disabled{opacity:.35}#simVisual .step-count{margin-left:auto;color:var(--muted);font-size:.78rem}#simVisual .obs-grid{display:grid;gap:9px}#simVisual .obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .obs-item small{display:block;color:var(--muted);font-weight:800}#simVisual .obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}#simVisual .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#simVisual .legend span{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:.7rem}#simVisual .legend i{display:inline-block;width:22px;height:4px;border-radius:999px}#simVisual .legend .query i{background:var(--blue)}#simVisual .legend .upstream i{background:var(--violet)}#simVisual .legend .response i{background:var(--mint)}#simVisual .legend .icmp i{background:var(--amber)}#simVisual .legend .stop i{background:#9a534d}#simVisual .lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}#simVisual .lesson-actions button{font:inherit}#simVisual .scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}#simVisual .scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}#simVisual .scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}#simVisual .scope-details a{color:var(--blue)}#simVisual .summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}#simVisual .summary-panel h2{margin-top:0}#simVisual .summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}#simVisual .summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}#simVisual .summary-metric strong{display:block;font-size:1.45rem}#simVisual .summary-metric span{color:var(--muted);font-size:.78rem}#simVisual .summary-list{display:grid;gap:10px;margin-top:16px}#simVisual .summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}#simVisual .summary-card.correct{border-left-color:var(--mint)}#simVisual .summary-card.incorrect{border-left-color:#ff8f86}#simVisual .summary-card.pending{border-left-color:var(--amber)}#simVisual .status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}#simVisual .summary-card.correct .status-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .summary-card.incorrect .status-badge{color:#344d66;border-color:#9a534d}#simVisual .summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}#simVisual .summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}#simVisual .summary-card button{font:inherit}@media (prefers-reduced-motion:reduce){#simVisual .net-link.query,#simVisual .net-link.upstream,#simVisual .net-link.response,#simVisual .net-link.icmp,#simVisual .net-link.arp{animation:none}}@media (max-width:850px){#simVisual .start-guide{grid-template-columns:1fr}#simVisual .observation{grid-template-columns:1fr}#simVisual .summary-metrics{grid-template-columns:1fr 1fr}#simVisual .stage-link{align-items:flex-start;flex-direction:column}}@media (max-width:520px){#simVisual .wrap{width:min(94vw,1180px)}#simVisual .hero{padding-top:34px}#simVisual .course-progress{grid-template-columns:1fr auto}#simVisual .course-bar{grid-column:1/-1;grid-row:2}#simVisual .coach{grid-template-columns:34px 1fr}#simVisual .coach-icon{width:34px;height:34px}#simVisual .lab-card{padding:15px}#simVisual .answer-grid,#simVisual .state-row{grid-template-columns:1fr}#simVisual .topology{padding:12px}#simVisual .lesson-actions{justify-content:stretch}#simVisual .lesson-actions button{flex:1}#simVisual .summary-card{grid-template-columns:1fr}#simVisual .summary-card button{width:100%}}</style>
+<link rel="stylesheet" href="network-simulator-shell.css?v=20261007-1"></head>
+<body data-sim-mode="basic" data-topic="dns"><div class="wrap" id="simLab" data-state="IDLE">
+<header class="hero"><small>2단계 · 네트워크 서비스 · 실습</small><h1>DNS</h1><p>같은 Physical Topology에서 <b>Client Query, Upstream Query, Cache Hit, Response, IP Traffic, Failure Stop</b> 위치를 비교합니다.</p><div class="next-lab-actions"><a id="conceptGuideLink" href="dns.html">← DNS 학습 페이지</a><a href="../roadmap.html">학습 로드맵</a></div><div class="start-guide"><div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 문제의 조건을 확인합니다.</span></div><div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>결과를 보기 전에 골라보세요.</span></div><div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>흐름을 관찰하고 이유를 확인합니다.</span></div></div></header>
+<nav class="lesson-tabs" id="simTabs" aria-label="실습 문제"></nav><div class="course-progress"><div><strong>실습 진행도</strong><small id="simScore">예상과 관찰을 비교하면 완료됩니다.</small></div><div class="course-bar"><div id="simBar"></div></div><div class="course-count" id="simCount"></div></div>
+<main class="card lab-card" id="simMain"><div class="coach"><div class="coach-icon" id="simNumber"></div><div><div class="coach-title" id="simTitle"></div><div class="coach-text" id="simText"></div></div></div><div id="simConditions" class="sim-conditions"></div>
+<section class="prediction-card"><div class="prediction-copy"><small>① 예상하기 · 정답은 관찰 완료 후 공개됩니다</small><h2 id="simQuestion" tabindex="-1"></h2><p>틀려도 괜찮습니다. 내 예상과 관찰 결과를 비교해 보세요.</p></div><div class="prediction-options" id="simOptions" role="group" aria-labelledby="simQuestion"></div></section>
+<div class="controls sim-primary"><button class="ping-btn" id="simRun" disabled>② 실행해서 확인하기</button></div>
+<section id="simVisual" class="sim-visual" aria-label="주제별 관찰 모델"><section class="observation" id="observation">
     <div class="topology">
       <h3>검증 기반 Learning Topology · DNS</h3>
       <div class="topology-scroll">
         <div class="topology-stage">
           <svg class="topology-svg" viewBox="0 0 930 400" aria-hidden="true">
-            <line id="l1Svg" class="net-link idle" x1="126" y1="108" x2="178" y2="184"/>
-            <line id="l2Svg" class="net-link idle" x1="126" y1="286" x2="178" y2="221"/>
-            <line id="l3Svg" class="net-link idle" x1="286" y1="190" x2="342" y2="190"/>
-            <line id="l4Svg" class="net-link idle" x1="450" y1="190" x2="535" y2="190"/>
-            <line id="l5Svg" class="net-link idle" x1="643" y1="190" x2="748" y2="190"/>
+            <line id="l1Svg" class="net-link idle" x1="126" y1="108" x2="178" y2="184"></line>
+            <line id="l2Svg" class="net-link idle" x1="126" y1="286" x2="178" y2="221"></line>
+            <line id="l3Svg" class="net-link idle" x1="286" y1="190" x2="342" y2="190"></line>
+            <line id="l4Svg" class="net-link idle" x1="450" y1="190" x2="535" y2="190"></line>
+            <line id="l5Svg" class="net-link idle" x1="643" y1="190" x2="748" y2="190"></line>
           </svg>
 
-          <div class="device" id="pc1"><div class="device-icon"></div><b>PC1</b><span>192.0.2.10 · DNS .2</span></div>
-          <div class="device" id="pc2"><div class="device-icon"></div><b>PC2</b><span>192.0.2.11 · DNS .2</span></div>
-          <div class="device" id="sw1"><div class="device-icon"></div><b>SW1</b><span>Client LAN</span></div>
-          <div class="device" id="r1"><div class="device-icon"></div><b>R1</b><span>Gateway 192.0.2.1</span></div>
-          <div class="device" id="r2"><div class="device-icon"></div><b>R2</b><span>Resolver 198.51.100.2</span></div>
-          <div class="device" id="r3"><div class="device-icon"></div><b>R3</b><span>Authority + Lo0 .10</span></div>
+          <div class="device" id="pc1"><div class="device-icon sim-device-holder"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC1</b><span>192.0.2.10 · DNS .2</span></div>
+          <div class="device" id="pc2"><div class="device-icon sim-device-holder"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg></div><b>PC2</b><span>192.0.2.11 · DNS .2</span></div>
+          <div class="device" id="sw1"><div class="device-icon sim-device-holder"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg></div><b>SW1</b><span>Client LAN</span></div>
+          <div class="device" id="r1"><div class="device-icon sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><b>R1</b><span>Gateway 192.0.2.1</span></div>
+          <div class="device" id="r2"><div class="device-icon sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><b>R2</b><span>Resolver 198.51.100.2</span></div>
+          <div class="device" id="r3"><div class="device-icon sim-device-holder"><svg viewBox="0 0 140 110" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#router"></use></svg></div><b>R3</b><span>Authority + Lo0 .10</span></div>
 
           <span class="role-badge" id="cacheBadge">Cache / Recursive</span>
           <span class="role-badge" id="authBadge">lab.test Authority</span>
@@ -137,17 +57,9 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
         <div class="state-box"><small>IP Reachability</small><strong id="ipState">—</strong></div>
       </div>
 
-      <div class="event-strip">
-        <small id="eventKind"></small>
-        <strong id="eventTitle"></strong>
-        <span id="eventDetail"></span>
-      </div>
 
-      <div class="step-controls">
-        <button id="prevStepBtn" type="button">← 이전 흐름</button>
-        <button id="nextStepBtn" type="button">다음 흐름 →</button>
-        <span class="step-count" id="stepCount"></span>
-      </div>
+
+
     </div>
 
     <aside class="observation-side">
@@ -158,37 +70,21 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
         <div class="obs-item"><small>한 줄 결론</small><strong id="observationConclusion"></strong></div>
       </div>
     </aside>
-  </section>
-
-  <details class="scope-details">
+  </section></section>
+<div class="live-event-strip" id="simEvent" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon">●</div><div class="live-event-main"><b id="eventTitle">관찰 대기</b><p id="eventDetail">예상 답을 고른 뒤 실행하세요.</p><span id="eventText" hidden></span></div><span class="live-event-kind" id="eventKind">대기</span></div>
+<div class="sim-playback"><button id="simPlayback" class="soft-btn" hidden>⏸ 일시정지</button><span id="simPosition"></span></div>
+<section id="simResult" hidden aria-label="내 예상과 결과 비교"><div class="prediction-feedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="simVerdict"></b><span id="simChosen"></span><span id="simCorrect"></span><p id="simReason"></p></div></section>
+<div id="simExtras" class="sim-extras" hidden><button id="simCompare" class="soft-btn" hidden>조건 바꿔 비교하기</button><button id="simRecover" class="soft-btn" hidden>복구 흐름 확인하기</button><span id="simExtraStatus"></span></div>
+<div class="next-row"><button class="soft-btn" id="simReset">현재 실습 다시 시작</button><button class="next-btn" id="simNext" disabled>완료 후 다음 실습 →</button></div>
+<details class="panel sim-review" id="simReview" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body action-bar"><button id="prevStepBtn">← 이전 흐름</button><span id="stepCount"></span><button id="nextStepBtn">다음 흐름 →</button></div></details>
+<details class="panel sim-evidence"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>학습용 모델입니다. 아래의 기존 검증 기록을 재사용하며, 브라우저 실행은 새로운 장비 검증이나 실제 통신 성공을 뜻하지 않습니다.</p><div id="simEvidence"></div><div id="simModelNotes"></div>
     <summary>가정과 실제 검증 근거 보기</summary>
     <div>
       이 화면은 2026-10-04 Cisco IOL L3 3대, IOL L2 1대, VPCS 0.8.4 2대 재검증 결과를 학습용으로 단순화한 시뮬레이션입니다.
       첫 Run에서 DNS 실패 경로 중 구형 VPCS 0.8c worker가 종료된 DNS-04/05 INCONCLUSIVE를 보존하고, 공식 DNS 오류 수정이 포함된 VPCS 0.8.4를 이 Lab Client에만 적용해 재검증했습니다.
       <a href="../learning/services/dns/cisco-validation-2026-10-04.html">실제 검증 요약 →</a>
     </div>
-  </details>
-
-  <div class="lesson-actions">
-    <button class="btn" id="retryBtn" hidden>이 문제 다시 풀기</button>
-    <button class="btn" id="summaryBackBtn" hidden>전체 결과로 돌아가기</button>
-    <button class="btn primary" id="nextLessonBtn" disabled>다음 문제 →</button>
-  </div>
-</main>
-
-<section id="summaryPanel" class="summary-panel" hidden tabindex="-1">
-  <div class="eyebrow">학습 결과</div>
-  <h2>정오답과 복습할 문제를 구분해 확인하세요.</h2>
-  <div class="summary-metrics">
-    <div class="summary-metric"><strong id="submittedCount">0</strong><span>결과 확인</span></div>
-    <div class="summary-metric"><strong id="correctCount">0</strong><span>정답</span></div>
-    <div class="summary-metric"><strong id="wrongCount">0</strong><span>오답</span></div>
-    <div class="summary-metric"><strong id="pendingCount">5</strong><span>미응답</span></div>
-  </div>
-  <div class="summary-list" id="summaryList"></div>
-  <div class="controls" style="margin-top:16px"><button class="btn primary" id="continueBtn">미응답/오답 문제로 이동 →</button></div>
-</section>
-</div>
-<script src="dns-simulator.js?v=20261004-1"></script>
-</body>
-</html>
+  <div class="next-lab-actions"><a href="../learning/services/dns/cisco-validation-2026-10-04.html">실제 검증 요약 →</a></div></div></details></main>
+<section class="course-complete" id="simSummary" hidden><h2>관찰 결과와 복습할 문제</h2><p id="simSummaryScore"></p><div class="completion-grid" id="simSummaryList"></div><div class="next-lab-actions"><button id="simWrong" class="soft-btn">오답 다시 보기</button><button id="simRestart" class="soft-btn">처음부터 다시</button><a href="dns.html">학습 페이지로 돌아가기</a></div></section>
+<div class="quick-next-bar" id="simQuick" hidden><div class="quick-next-copy"><small id="simQuickLabel"></small><strong id="simQuickText"></strong></div><button class="quick-next-btn" id="simQuickBtn"></button></div><div class="footer">학습용 시뮬레이션 · 새로고침 및 재진입 시 미응답 상태로 시작합니다.</div><noscript>실습을 진행하려면 JavaScript를 활성화해 주세요.</noscript></div>
+<script src="network-simulator-session.js?v=20261007-1"></script><script src="dns-model.js?v=20261007-1"></script></body></html>

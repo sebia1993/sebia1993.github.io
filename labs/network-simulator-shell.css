@@ -1,0 +1,54 @@
+/* ARP CSS supplies the shell. Only topic visualization and lifecycle extensions live here. */
+[hidden]{display:none!important}.hidden,.dot-hidden{display:none!important}
+body{padding-bottom:104px}.hero .next-lab-actions{margin-top:16px}.hero .next-lab-actions a{color:#fff;border-color:#53758c;background:rgba(255,255,255,.06)}
+.sim-primary{display:flex;justify-content:flex-end;margin:14px 0}.sim-primary .ping-btn{min-width:250px}.sim-conditions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.sim-conditions span{font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#f4f7fb;color:var(--ink)}
+.prediction-option{font:inherit;min-height:48px}.prediction-option.selected{border-color:var(--green);background:var(--green-soft)}.prediction-option.correct-answer{border-color:var(--green);background:var(--green-soft)}.prediction-option.wrong-answer{border-color:var(--red);background:var(--red-soft)}
+.sim-playback,.sim-extras{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:14px 0;font-size:13px;color:var(--muted)}.sim-playback button{min-height:44px}.sim-review,.sim-evidence{margin-top:16px}.sim-review .action-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.sim-review button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+#simResult .prediction-feedback{display:grid;gap:9px}#simResult p{margin:0;line-height:1.7}.correct{color:var(--green)}.incorrect{color:var(--red)}.sim-summary-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:18px;color:var(--ink)}.sim-summary-card.incorrect{border-color:var(--red)}.sim-summary-card.correct{border-color:var(--green)}
+.sim-visual{--text:var(--ink);--panel3:#fff;--panel:#fff;--panel2:#f4f7fb;--mint:var(--green);--amber:var(--orange);color:var(--ink);font-size:16px;line-height:1.6;min-width:0}
+#simVisual>.observation{margin:0;grid-template-columns:minmax(0,1fr);gap:14px}#simVisual>.observation>.topology,#simVisual .view,#simVisual .rf-view,#simVisual .topology-card{border:1px solid var(--line);border-radius:18px;background:#f4f7fb;padding:16px;min-width:0}
+#simVisual .observation-side,#simVisual aside.side{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;min-width:0}
+#simVisual .observation-side h3,#simVisual .topology h3{font-size:14px;margin:0 0 10px}#simVisual .topology-stage,#simVisual .topo-canvas,#simVisual .topology-canvas{background:#f4f7fb;border-color:var(--line)}
+#simVisual .topo-node,#simVisual .device,#simVisual .device-node,#simVisual .stp-node,#simVisual .host,#simVisual .node-icon,#simVisual .switch-box{color:var(--ink)}
+#simVisual .node-icon svg{stroke:#466b8a}#simVisual .device-icon{background-color:#e9f2ff;color:var(--blue)}
+#simVisual .node.active,#simVisual .device.active,#simVisual .topo-node.active{filter:drop-shadow(0 0 5px rgba(14,167,125,.35))}
+#simVisual .packet-marker{transition:none}#simVisual :is(.net-link,.stp-link,.topo-link,.link){animation-duration:1440ms}#simLab[data-state=PAUSED] #simVisual *{animation-play-state:paused!important}
+#simVisual [id=eventText]{display:none}#simVisual .result-box{display:none}#simVisual p,#simVisual code,#simVisual strong,#simVisual small,#simVisual span{overflow-wrap:anywhere}
+#simVisual .state-row,#simVisual .tr-row,#simVisual .route-row,#simVisual .panel-box,#simVisual .obs-item,#simVisual .dot-state-row,#simVisual .dot-event{color:var(--ink);border-color:var(--line)}
+#simVisual .scope-note,#simVisual .standard-note{color:var(--ink);background:#fff4e5}#simVisual .scope-note b{color:var(--orange)}
+#simVisual[data-reveal=idle] :is(.observation-side,.side,.state-list,.stateList,.route-overlay,.dot-state-list,.dot-event-list,.route-table,.packet-view,.packet-card,.metric,.obs-grid){visibility:hidden}
+#simVisual[data-reveal=model] :is(.observation-side,.side,.state-list,.dot-state-list){visibility:hidden}
+#simVisual[data-reveal=events] .obs-grid{visibility:hidden}
+#simVisual[data-reveal=idle] :is(.token-text,.candidate-label){visibility:hidden}
+#simVisual svg.topology{max-height:540px;width:100%;display:block}#simVisual .svg-label,#simVisual .svg-sub,#simVisual .svg-zone,#simVisual .candidate-label,#simVisual .token-text{fill:var(--ink)}
+#simVisual .wlan-sequence{background:#f4f7fb;color:var(--ink);padding:16px;border:1px solid var(--line);border-radius:18px}.sequence-event{list-style:none;padding:12px;margin:8px 0;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;background:#fff}.sequence-event b,.sequence-event span{display:block}.sequence-event.to-sta{border-left-color:var(--green)}.sequence-event.local{border-left-style:dashed}.sequence-event.current{background:var(--green-soft)}
+#simVisual .wlan-sequence-list{min-height:180px;max-height:none;overflow:visible;padding:0}#simVisual .wlan-lane-head{display:flex;justify-content:space-around}#simVisual .wlan-actor svg{width:64px;height:54px;stroke:#466b8a;fill:none}#simVisual .wlan-actor{display:grid;text-align:center;justify-items:center}
+#simVisual .dot-lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}#simVisual .dot-panel{background:#f4f7fb;border:1px solid var(--line);padding:16px;border-radius:16px}#simVisual .dot-lanes{display:flex;justify-content:space-between;gap:8px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+@media(max-width:760px){.sim-primary .ping-btn{width:100%;min-width:0}.sim-conditions{gap:5px}.sim-conditions span{font-size:11px}.sim-visual{font-size:14px}#simVisual .dot-lab-grid{grid-template-columns:1fr}#simVisual .observation{grid-template-columns:minmax(0,1fr)}#simVisual .topology-scroll{max-width:100%;overflow:auto}#simVisual>.observation>.topology,#simVisual .view,#simVisual .rf-view,#simVisual .topology-card{padding:10px}#simVisual svg.topology{min-width:0}#simResult .prediction-feedback{font-size:13px}.sim-playback{justify-content:space-between}.sim-summary-card{padding:14px}.sim-review .action-bar{justify-content:space-between}.sim-review button{font-size:12px}#simQuick{z-index:100}}
+@media(prefers-reduced-motion:reduce){#simVisual *{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+#simVisual .sim-device-symbol{display:block;width:62px;height:46px;margin:0 auto;background:transparent;stroke:none;fill:initial}#simVisual .sim-device-holder{background:transparent!important;border:0!important;box-shadow:none!important}#simVisual .sim-device-holder::before,#simVisual .sim-device-holder::after{display:none!important}#simVisual .sim-device-holder .sim-device-symbol{width:100%;height:100%;max-height:62px}
+#simVisual svg.topology .sim-device-symbol{width:60px;height:42px}
+#simVisual .topo-link::before,#simVisual .path-link::before{background:#9cb0c2}#simVisual .topo-link.trunk::before{background:#7c96ae}#simVisual .topo-link.active::before{background:var(--green)}#simVisual .topo-link.tagged::before{background:var(--blue)}
+#simVisual .dot-panel{min-width:0;overflow-wrap:anywhere}#simVisual .dot-event code{white-space:normal;word-break:break-word}#simVisual .dot-event{min-width:0}#simVisual .dot-lane{min-width:0;font-size:12px}#simVisual .dot-lane small{display:block}
+#simResult .prediction-feedback{font-size:14px}#simResult .prediction-feedback-title{font-size:13px}#simVisual .zone-title{color:#526e85}
+@media(min-width:761px){#simQuick{display:none!important}}
+.course-complete:not([hidden]){display:block}
+#simVisual .topology .token-text.ok,#simVisual .topology .route-text,#simVisual .topology .svg-sub{fill:#365b73}#simVisual .topology .token-text.fail{fill:#b93545}#simVisual .topology .token-text.warn{fill:#9b5900}
+.sim-pan-note{display:none;font-size:12px;color:var(--blue);margin:0 0 8px;padding:8px 10px;background:var(--blue-soft);border-radius:8px}
+@media(max-width:760px){.sim-pan-note{display:block}#simVisual .dot-event{display:block}#simVisual .dot-event span{display:block;margin-bottom:5px}}
+
+/* Legible physical links and labels on the shared light canvas. */
+body[data-topic="icmp-troubleshooting"] #simVisual .topo-link:not(.active):not(.reply):not(.blocked),body[data-topic="inter-vlan-routing"] #simVisual .path-link:not(.active):not(.reply):not(.blocked){background:#91a9bf}
+body[data-topic="fhrp"] #simVisual .link:not(.failed),body[data-topic="vrf"] #simVisual .link:not(.path):not(.reply):not(.stop){background:#91a9bf}
+body[data-topic="fhrp"] #simVisual .link.path{background:var(--green)}
+#simVisual{--violet:#7253af}#simVisual .policy-badge{background:#fff4e5;color:#8b5000}#simVisual .stop-marker,#simVisual .packet-marker.error{background:#fff0ed;color:#9b2d36}
+body[data-topic="acl"] #simVisual .stop-marker{top:29%}
+#simVisual .stp-port-readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}#simVisual .stp-port-readouts>div{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px}#simVisual .stp-port-readouts .port-summary{font-size:12px}
+#simVisual .route-overlay{position:static;transform:none;width:auto;margin-top:12px}
+#simVisual .topology .route-text.ok{fill:#15715b}#simVisual .topology .route-text.warn{fill:#925500}
+@media(max-width:760px){#simVisual .stp-port-readouts{grid-template-columns:1fr}}
+#simOptions .prediction-option{min-width:0;overflow-wrap:anywhere}
+
+#simVisual .sim-svg-scroll{max-width:100%;overflow:auto;border-radius:16px}
+@media(max-width:760px){#simVisual .sim-svg-scroll svg.topology{min-width:820px;max-height:none}#simVisual .sim-svg-scroll svg.topology .svg-sub,#simVisual .sim-svg-scroll svg.topology .token-text,#simVisual .sim-svg-scroll svg.topology .route-text{font-size:11px}#simVisual .dot-lane{flex:1;padding:8px 4px}}

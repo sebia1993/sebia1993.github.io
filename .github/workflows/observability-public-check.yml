@@ -5,6 +5,10 @@ on:
     paths:
       - 'labs/observability.html'
       - 'labs/observability-simulator.html'
+      - 'labs/observability-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
       - 'roadmap.html'
       - 'learning-data.json'
       - 'tests/observability-public.mjs'
@@ -25,10 +29,13 @@ jobs:
           version: 11.19.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: node tests/observability-public.mjs
+      - run: node tests/roadmap-simulators.mjs
+        env:
+          TOPIC: observability
+          BASE_URL: https://sebia1993.github.io
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: observability-public-browser-evidence
-          path: test-results/observability-public/
+          path: test-results/roadmap-simulators/
           retention-days: 7

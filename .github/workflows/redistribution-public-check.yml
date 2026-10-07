@@ -5,6 +5,10 @@ on:
     paths:
       - 'labs/redistribution.html'
       - 'labs/redistribution-simulator.html'
+      - 'labs/redistribution-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
       - 'roadmap.html'
       - 'learning-data.json'
       - 'tests/redistribution-public.mjs'
@@ -25,10 +29,13 @@ jobs:
           version: 11.19.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: node tests/redistribution-public.mjs
+      - run: node tests/roadmap-simulators.mjs
+        env:
+          TOPIC: redistribution
+          BASE_URL: https://sebia1993.github.io
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: redistribution-public-browser-evidence
-          path: test-results/redistribution-public/
+          path: test-results/roadmap-simulators/
           retention-days: 7

@@ -5,6 +5,10 @@ on:
     paths:
       - 'labs/network-automation.html'
       - 'labs/network-automation-simulator.html'
+      - 'labs/network-automation-model.js'
+      - 'labs/network-simulator-*.js'
+      - 'labs/network-simulator-*.css'
+      - 'tests/roadmap-simulators.mjs'
       - 'roadmap.html'
       - 'learning-data.json'
       - 'tests/network-automation-public.mjs'
@@ -23,10 +27,13 @@ jobs:
         with: {version: 11.19.0}
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: node tests/network-automation-public.mjs
+      - run: node tests/roadmap-simulators.mjs
+        env:
+          TOPIC: network-automation
+          BASE_URL: https://sebia1993.github.io
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: network-automation-public-browser-evidence
-          path: test-results/network-automation-public/
+          path: test-results/roadmap-simulators/
           retention-days: 7

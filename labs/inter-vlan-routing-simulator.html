@@ -1,105 +1,31 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Inter-VLAN Routing — 인터랙티브 실습</title>
-<meta name="description" content="Same-VLAN과 L3 Gateway Routing의 공통 원리를 예상하고, Cisco SVI Routing/Down 및 Wrong Gateway 구현 사례와 비교하는 2단계 Interactive Lab입니다.">
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../lab-ui.css">
-<style>
-body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:56px 0 26px}.hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}.hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}.hero p{max-width:900px;color:var(--muted)}
-.start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}.guide-step span{font-size:.82rem;color:var(--muted)}.guide-step strong{display:block;color:var(--text);font-size:.88rem}
-.lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.lesson-tabs::-webkit-scrollbar{display:none}.lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}.lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}.lesson-tab.done::after{content:" ✓";color:var(--mint)}
-.course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.course-progress small{display:block;color:var(--muted)}.course-bar{height:8px;border-radius:999px;background:#15283b;overflow:hidden}.course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}.course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}
-.stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}.stage-link span{color:var(--muted);font-size:.86rem}
-.lab-card{padding:20px}.coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}.coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#0c2032}.coach-title{font-size:1.18rem;font-weight:850}.coach-text{color:var(--muted);margin-top:3px}.start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#091624;color:#c8d7e7;font-size:.76rem}
-.prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#0c1d2e}.prediction h2{font-size:1.08rem;margin:0 0 4px}.prediction p{margin:0;color:var(--muted);font-size:.85rem}.options{display:grid;gap:9px;margin-top:13px}.choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}.choice:hover{border-color:#3e6a91}.choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}.choice:disabled{cursor:default;opacity:.9}.choice.correct-answer{border-color:#347968}.choice.wrong-answer{border-color:#9a534d}
-.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.controls button{font:inherit}.controls .primary:disabled{opacity:.42;cursor:not-allowed}
-.feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}.feedback.correct{border-color:#347968}.feedback.incorrect{border-color:#9a534d}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}.feedback.correct .feedback-badge{color:var(--mint);border-color:#347968}.feedback.incorrect .feedback-badge{color:#ff9c93;border-color:#9a534d}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}.answer-box small{display:block;color:var(--muted);font-weight:800}.answer-box strong{display:block;margin-top:3px}.feedback p{margin:11px 0 0;color:#d6e2ef}
-.observation{margin-top:18px;display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.topology,.observation-side{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}.topology h3,.observation-side h3{margin:0 0 10px}
-.ivr-topology{display:grid;grid-template-columns:1fr 64px 1.05fr 64px 1fr;gap:7px;align-items:center}.zone{padding:12px;border:1px solid var(--line);border-radius:13px;background:#081522}.zone.active{border-color:#3e6a91;background:#0a1d2d}.zone.stop{border-color:#8f6a38}.zone-label{font-size:.7rem;font-weight:900;color:var(--muted);margin-bottom:8px}.host-stack{display:grid;gap:6px}.host{padding:9px 6px;border:1px solid var(--line);border-radius:9px;background:#0a1726;text-align:center}.host b{display:block;font-size:.78rem}.host span{display:block;color:var(--muted);font-size:.64rem}.host.active{border-color:var(--blue)}.host.reply{border-color:var(--mint)}.host.stop{border-color:var(--amber)}
-.switch-box{padding:12px;border:1px solid var(--line);border-radius:13px;background:#0a1726;text-align:center}.switch-box.active{border-color:var(--blue)}.switch-box.stop{border-color:var(--amber)}.switch-box b{display:block}.switch-box span{display:block;color:var(--muted);font-size:.68rem;margin-top:3px}.svi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.svi{padding:7px;border:1px solid var(--line);border-radius:8px;font-size:.66rem}.svi.active{border-color:var(--mint)}.svi.down{border-color:#9a534d;color:#ff9c93}
-.path-link{height:4px;background:#223a54;position:relative;border-radius:999px}.path-link.active{background:var(--blue)}.path-link.reply{background:var(--mint)}.path-link.blocked{background:#895a36}.path-arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-58%);font-size:.72rem;font-weight:900;color:#dceaf7;background:var(--panel3);padding:0 3px;white-space:nowrap}
-.packet-card{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#091624;display:grid;grid-template-columns:1fr 1fr;gap:8px}.packet-card div{min-width:0}.packet-card small{display:block;color:var(--muted);font-weight:800}.packet-card strong{display:block;margin-top:3px;overflow-wrap:anywhere}.event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#0a1b2b}.event-strip small{display:block;color:var(--blue);font-weight:850}.event-strip strong{display:block;margin-top:3px}.event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
-.step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}.step-controls button{border:1px solid var(--line);border-radius:9px;background:#0b1b2b;color:var(--text);padding:8px 10px;cursor:pointer}.step-controls button:disabled{opacity:.35;cursor:default}.step-count{margin-left:auto;color:var(--muted);font-size:.78rem}
-.obs-grid{display:grid;gap:9px}.obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}.obs-item small{display:block;color:var(--muted);font-weight:800}.obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}
-.lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}.lesson-actions button{font:inherit}
-.scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}.scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}.scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}.scope-details a{color:var(--blue)}
-.summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}.summary-panel h2{margin-top:0}.summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}.summary-metric strong{display:block;font-size:1.45rem}.summary-metric span{color:var(--muted);font-size:.78rem}.summary-list{display:grid;gap:10px;margin-top:16px}.summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}.summary-card.correct{border-left-color:var(--mint)}.summary-card.incorrect{border-left-color:#ff8f86}.summary-card.pending{border-left-color:var(--amber)}.status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}.summary-card.correct .status-badge{color:var(--mint);border-color:#347968}.summary-card.incorrect .status-badge{color:#ff9c93;border-color:#9a534d}.summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}.summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}.summary-card button{font:inherit}
-@media(max-width:850px){.start-guide{grid-template-columns:1fr}.observation{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr 1fr}.stage-link{align-items:flex-start;flex-direction:column}}
-@media(max-width:560px){.wrap{width:min(94vw,1180px)}.hero{padding-top:34px}.course-progress{grid-template-columns:1fr auto}.course-bar{grid-column:1/-1;grid-row:2}.coach{grid-template-columns:34px 1fr}.coach-icon{width:34px;height:34px}.lab-card{padding:15px}.answer-grid{grid-template-columns:1fr}.topology{padding:12px}.ivr-topology{grid-template-columns:1fr;gap:6px}.path-link{height:26px;width:4px;justify-self:center}.path-arrow{transform:translate(-50%,-50%);font-size:.65rem}.host-stack{grid-template-columns:1fr 1fr}.packet-card{grid-template-columns:1fr}.lesson-actions{justify-content:stretch}.lesson-actions button{flex:1}.summary-card{grid-template-columns:1fr}.summary-card button{width:100%}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header class="hero">
-    <small>2단계 · INTERACTIVE LAB</small>
-    <h1>Inter-VLAN Routing</h1>
-    <p>결과를 먼저 예상한 뒤, <b>Peer MAC인지 Gateway MAC인지</b>, 그리고 Routing 전후 <b>IP·TTL·Ethernet Header</b>가 어떻게 달라지는지 확인합니다.</p>
-    <div class="scope-note" style="margin:14px 0;padding:13px 15px;border:1px solid #3e6a91;border-radius:13px;background:rgba(88,184,255,.05);font-size:.84rem"><b>학습 기준:</b> Off-link Packet은 L3 Gateway로 보내고 Router는 새 L2 Header로 Forward합니다. SVI는 이번 Cisco IOL에서 사용한 Gateway Interface 구현입니다.</div>
-    <div class="start-guide">
-      <div class="guide-step"><b>1</b><span><strong>Next-Hop 예상</strong>같은 VLAN인지 다른 VLAN인지 먼저 판단합니다.</span></div>
-      <div class="guide-step"><b>2</b><span><strong>실행</strong>ARP 대상과 Frame 경로를 확인합니다.</span></div>
-      <div class="guide-step"><b>3</b><span><strong>비교</strong>IP·TTL·MAC과 장애 중단 지점을 연결합니다.</span></div>
-    </div>
-  </header>
-
-  <nav class="lesson-tabs" id="lessonTabs" aria-label="Inter-VLAN Routing 실습 문제 선택"></nav>
-
-  <div class="course-progress">
-    <div><strong>Inter-VLAN Routing 진행도</strong><small>제출한 문제와 정답 수는 별도로 계산합니다.</small></div>
-    <div class="course-bar"><div id="courseBar"></div></div>
-    <div class="course-count" id="courseCount">결과 확인 0 / 5</div>
-  </div>
-
-  <div class="stage-link">
-    <span><b>2단계 Interactive Lab</b> · 문제 → 예상 → 실행 → 정오답/이유 → 흐름 관찰 → 다음 문제.</span>
-    <a class="btn" href="inter-vlan-routing.html">← 1단계 개념서</a>
-  </div>
-
-  <main id="labMain" class="card lab-card">
-    <div class="coach">
-      <div class="coach-icon" id="coachIcon">1</div>
-      <div>
-        <div class="coach-title" id="coachTitle"></div>
-        <div class="coach-text" id="coachText"></div>
-        <div class="start-state" id="startState"></div>
-      </div>
-    </div>
-
-    <section class="prediction">
-      <h2 id="question"></h2>
-      <p>정답을 보기 전에 먼저 선택하세요. 실행 후 실제 검증과 같은 조건의 흐름을 보여줍니다.</p>
-      <div class="options" id="choices"></div>
-      <div class="controls">
-        <button class="btn primary" id="runBtn" disabled>② 실행해서 확인하기</button>
-        <button class="btn" id="resetBtn">선택 초기화</button>
-      </div>
-    </section>
-
-    <section class="feedback" id="feedback" hidden tabindex="-1">
-      <div class="feedback-head"><strong>③ 내 예상과 실제 비교</strong><span class="feedback-badge" id="feedbackBadge"></span></div>
-      <div class="answer-grid">
-        <div class="answer-box"><small>내 답</small><strong id="myAnswer"></strong></div>
-        <div class="answer-box"><small>올바른 답</small><strong id="correctAnswer"></strong></div>
-      </div>
-      <p id="feedbackReason"></p>
-    </section>
-
-    <section class="observation" id="observation" hidden>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="lab-ui-version" content="20261007-roadmap-labs-v1"><title>Inter-VLAN Routing — 실습</title><link rel="icon" href="data:,"><meta name="description" content="Inter-VLAN Routing: 먼저 예상하고 단계별 관찰 뒤 내 답과 결과를 비교하는 실습.">
+<link rel="stylesheet" href="arp-simulator-1.css">
+<link rel="stylesheet" href="arp-simulator-2.css">
+<link rel="stylesheet" href="arp-simulator-3.css">
+<link rel="stylesheet" href="arp-simulator-mobile.css">
+<link rel="stylesheet" href="arp-simulator-mobile-follow.css">
+<style>#simVisual body{padding-bottom:34px}#simVisual .wrap{width:min(1180px,92vw);margin:auto}#simVisual .hero{padding:56px 0 26px}#simVisual .hero small{color:var(--blue);font-weight:850;letter-spacing:.12em}#simVisual .hero h1{font-size:clamp(2rem,5vw,3.8rem);margin:.14em 0}#simVisual .hero p{max-width:900px;color:var(--muted)}#simVisual .start-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}#simVisual .guide-step{display:flex;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .guide-step>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #3e6a91;border-radius:8px;color:var(--blue)}#simVisual .guide-step span{font-size:.82rem;color:var(--muted)}#simVisual .guide-step strong{display:block;color:var(--text);font-size:.88rem}#simVisual .lesson-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#simVisual .lesson-tabs::-webkit-scrollbar{display:none}#simVisual .lesson-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--panel3);color:var(--muted);padding:9px 13px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}#simVisual .lesson-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(88,184,255,.08)}#simVisual .lesson-tab.done::after{content:" ✓";color:var(--mint)}#simVisual .course-progress{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .course-progress small{display:block;color:var(--muted)}#simVisual .course-bar{height:8px;border-radius:999px;background:#f4f7fb;overflow:hidden}#simVisual .course-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .25s}#simVisual .course-count{font-size:.8rem;font-weight:850;color:var(--mint);white-space:nowrap}#simVisual .stage-link{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3);margin-bottom:14px}#simVisual .stage-link span{color:var(--muted);font-size:.86rem}#simVisual .lab-card{padding:20px}#simVisual .coach{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}#simVisual .coach-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid #3e6a91;color:var(--blue);font-weight:900;background:#f4f7fb}#simVisual .coach-title{font-size:1.18rem;font-weight:850}#simVisual .coach-text{color:var(--muted);margin-top:3px}#simVisual .start-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#simVisual .start-state span{padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:#f4f7fb;color:#344d66;font-size:.76rem}#simVisual .prediction{margin-top:17px;padding:17px;border:1px solid #355d82;border-radius:15px;background:#f4f7fb}#simVisual .prediction h2{font-size:1.08rem;margin:0 0 4px}#simVisual .prediction p{margin:0;color:var(--muted);font-size:.85rem}#simVisual .options{display:grid;gap:9px;margin-top:13px}#simVisual .choice{width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel3);color:var(--text);font:inherit;cursor:pointer}#simVisual .choice:hover{border-color:#3e6a91}#simVisual .choice.selected{border-color:var(--blue);background:rgba(88,184,255,.09)}#simVisual .choice:disabled{cursor:default;opacity:.9}#simVisual .choice.correct-answer{border-color:#cbd8e4}#simVisual .choice.wrong-answer{border-color:#9a534d}#simVisual .controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}#simVisual .controls button{font:inherit}#simVisual .controls .primary:disabled{opacity:.42;cursor:not-allowed}#simVisual .feedback{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel3)}#simVisual .feedback.correct{border-color:#cbd8e4}#simVisual .feedback.incorrect{border-color:#9a534d}#simVisual .feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:center}#simVisual .feedback-badge{display:inline-flex;padding:5px 9px;border:1px solid;border-radius:999px;font-size:.76rem;font-weight:900}#simVisual .feedback.correct .feedback-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .feedback.incorrect .feedback-badge{color:#344d66;border-color:#9a534d}#simVisual .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}#simVisual .answer-box{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .answer-box small{display:block;color:var(--muted);font-weight:800}#simVisual .answer-box strong{display:block;margin-top:3px}#simVisual .feedback p{margin:11px 0 0;color:#344d66}#simVisual .observation{margin-top:18px;display:grid;grid-template-columns:1.25fr .75fr;gap:14px}#simVisual .topology,#simVisual .observation-side{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel3)}#simVisual .topology h3,#simVisual .observation-side h3{margin:0 0 10px}#simVisual .ivr-topology{display:grid;grid-template-columns:1fr 64px 1.05fr 64px 1fr;gap:7px;align-items:center}#simVisual .zone{padding:12px;border:1px solid var(--line);border-radius:13px;background:#f4f7fb}#simVisual .zone.active{border-color:#3e6a91;background:#f4f7fb}#simVisual .zone.stop{border-color:#8f6a38}#simVisual .zone-label{font-size:.7rem;font-weight:900;color:var(--muted);margin-bottom:8px}#simVisual .host-stack{display:grid;gap:6px}#simVisual .host{padding:9px 6px;border:1px solid var(--line);border-radius:9px;background:#f4f7fb;text-align:center}#simVisual .host b{display:block;font-size:.78rem}#simVisual .host span{display:block;color:var(--muted);font-size:.64rem}#simVisual .host.active{border-color:var(--blue)}#simVisual .host.reply{border-color:var(--mint)}#simVisual .host.stop{border-color:var(--amber)}#simVisual .switch-box{padding:12px;border:1px solid var(--line);border-radius:13px;background:#f4f7fb;text-align:center}#simVisual .switch-box.active{border-color:var(--blue)}#simVisual .switch-box.stop{border-color:var(--amber)}#simVisual .switch-box b{display:block}#simVisual .switch-box span{display:block;color:var(--muted);font-size:.68rem;margin-top:3px}#simVisual .svi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}#simVisual .svi{padding:7px;border:1px solid var(--line);border-radius:8px;font-size:.66rem}#simVisual .svi.active{border-color:var(--mint)}#simVisual .svi.down{border-color:#9a534d;color:#344d66}#simVisual .path-link{height:4px;background:#f4f7fb;position:relative;border-radius:999px}#simVisual .path-link.active{background:var(--blue)}#simVisual .path-link.reply{background:var(--mint)}#simVisual .path-link.blocked{background:#895a36}#simVisual .path-arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-58%);font-size:.72rem;font-weight:900;color:#344d66;background:var(--panel3);padding:0 3px;white-space:nowrap}#simVisual .packet-card{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#f4f7fb;display:grid;grid-template-columns:1fr 1fr;gap:8px}#simVisual .packet-card div{min-width:0}#simVisual .packet-card small{display:block;color:var(--muted);font-weight:800}#simVisual .packet-card strong{display:block;margin-top:3px;overflow-wrap:anywhere}#simVisual .event-strip{margin-top:12px;padding:12px;border:1px solid #355d82;border-radius:11px;background:#f4f7fb}#simVisual .event-strip small{display:block;color:var(--blue);font-weight:850}#simVisual .event-strip strong{display:block;margin-top:3px}#simVisual .event-strip span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}#simVisual .step-controls{display:flex;gap:8px;align-items:center;margin-top:11px}#simVisual .step-controls button{border:1px solid var(--line);border-radius:9px;background:#f4f7fb;color:var(--text);padding:8px 10px;cursor:pointer}#simVisual .step-controls button:disabled{opacity:.35;cursor:default}#simVisual .step-count{margin-left:auto;color:var(--muted);font-size:.78rem}#simVisual .obs-grid{display:grid;gap:9px}#simVisual .obs-item{padding:11px;border:1px solid var(--line);border-radius:10px}#simVisual .obs-item small{display:block;color:var(--muted);font-weight:800}#simVisual .obs-item strong{display:block;margin-top:3px;overflow-wrap:anywhere}#simVisual .lesson-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:17px}#simVisual .lesson-actions button{font:inherit}#simVisual .scope-details{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel3)}#simVisual .scope-details summary{padding:13px 15px;cursor:pointer;font-weight:800}#simVisual .scope-details>div{padding:0 15px 15px;color:var(--muted);font-size:.84rem}#simVisual .scope-details a{color:var(--blue)}#simVisual .summary-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel2)}#simVisual .summary-panel h2{margin-top:0}#simVisual .summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}#simVisual .summary-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel3)}#simVisual .summary-metric strong{display:block;font-size:1.45rem}#simVisual .summary-metric span{color:var(--muted);font-size:.78rem}#simVisual .summary-list{display:grid;gap:10px;margin-top:16px}#simVisual .summary-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-left-width:4px;border-radius:12px;background:var(--panel3)}#simVisual .summary-card.correct{border-left-color:var(--mint)}#simVisual .summary-card.incorrect{border-left-color:#ff8f86}#simVisual .summary-card.pending{border-left-color:var(--amber)}#simVisual .status-badge{display:inline-flex;margin-left:7px;padding:3px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:900}#simVisual .summary-card.correct .status-badge{color:var(--mint);border-color:#cbd8e4}#simVisual .summary-card.incorrect .status-badge{color:#344d66;border-color:#9a534d}#simVisual .summary-card.pending .status-badge{color:var(--amber);border-color:#8f6a38}#simVisual .summary-card p{margin:4px 0 0;color:var(--muted);font-size:.82rem}#simVisual .summary-card button{font:inherit}@media (max-width:850px){#simVisual .start-guide{grid-template-columns:1fr}#simVisual .observation{grid-template-columns:1fr}#simVisual .summary-metrics{grid-template-columns:1fr 1fr}#simVisual .stage-link{align-items:flex-start;flex-direction:column}}@media (max-width:560px){#simVisual .wrap{width:min(94vw,1180px)}#simVisual .hero{padding-top:34px}#simVisual .course-progress{grid-template-columns:1fr auto}#simVisual .course-bar{grid-column:1/-1;grid-row:2}#simVisual .coach{grid-template-columns:34px 1fr}#simVisual .coach-icon{width:34px;height:34px}#simVisual .lab-card{padding:15px}#simVisual .answer-grid{grid-template-columns:1fr}#simVisual .topology{padding:12px}#simVisual .ivr-topology{grid-template-columns:1fr;gap:6px}#simVisual .path-link{height:26px;width:4px;justify-self:center}#simVisual .path-arrow{transform:translate(-50%,-50%);font-size:.65rem}#simVisual .host-stack{grid-template-columns:1fr 1fr}#simVisual .packet-card{grid-template-columns:1fr}#simVisual .lesson-actions{justify-content:stretch}#simVisual .lesson-actions button{flex:1}#simVisual .summary-card{grid-template-columns:1fr}#simVisual .summary-card button{width:100%}}</style>
+<link rel="stylesheet" href="network-simulator-shell.css?v=20261007-1"></head>
+<body data-sim-mode="basic" data-topic="inter-vlan-routing"><div class="wrap" id="simLab" data-state="IDLE">
+<header class="hero"><small>1단계 · Campus LAN · 실습</small><h1>Inter-VLAN Routing</h1><p>결과를 먼저 예상한 뒤, <b>Peer MAC인지 Gateway MAC인지</b>, 그리고 Routing 전후 <b>IP·TTL·Ethernet Header</b>가 어떻게 달라지는지 확인합니다.</p><div class="next-lab-actions"><a id="conceptGuideLink" href="inter-vlan-routing.html">← Inter-VLAN Routing 학습 페이지</a><a href="../roadmap.html">학습 로드맵</a></div><div class="start-guide"><div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 문제의 조건을 확인합니다.</span></div><div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>결과를 보기 전에 골라보세요.</span></div><div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>흐름을 관찰하고 이유를 확인합니다.</span></div></div></header>
+<nav class="lesson-tabs" id="simTabs" aria-label="실습 문제"></nav><div class="course-progress"><div><strong>실습 진행도</strong><small id="simScore">예상과 관찰을 비교하면 완료됩니다.</small></div><div class="course-bar"><div id="simBar"></div></div><div class="course-count" id="simCount"></div></div>
+<main class="card lab-card" id="simMain"><div class="coach"><div class="coach-icon" id="simNumber"></div><div><div class="coach-title" id="simTitle"></div><div class="coach-text" id="simText"></div></div></div><div id="simConditions" class="sim-conditions"></div>
+<section class="prediction-card"><div class="prediction-copy"><small>① 예상하기 · 정답은 관찰 완료 후 공개됩니다</small><h2 id="simQuestion" tabindex="-1"></h2><p>틀려도 괜찮습니다. 내 예상과 관찰 결과를 비교해 보세요.</p></div><div class="prediction-options" id="simOptions" role="group" aria-labelledby="simQuestion"></div></section>
+<div class="controls sim-primary"><button class="ping-btn" id="simRun" disabled>② 실행해서 확인하기</button></div>
+<section id="simVisual" class="sim-visual" aria-label="주제별 관찰 모델"><section class="observation" id="observation">
       <div class="topology">
         <h3>모델 관찰 · VLAN10 ↔ SW1 SVI ↔ VLAN20</h3>
         <div class="ivr-topology">
           <div class="zone" id="zone10">
             <div class="zone-label">VLAN 10</div>
             <div class="host-stack">
-              <div class="host" id="pc10a"><b>PC10A</b><span>10.10.10.10</span></div>
-              <div class="host" id="pc10b"><b>PC10B</b><span>10.10.10.20</span></div>
+              <div class="host" id="pc10a"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg><b>PC10A</b><span>10.10.10.10</span></div>
+              <div class="host" id="pc10b"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg><b>PC10B</b><span>10.10.10.20</span></div>
             </div>
           </div>
           <div class="path-link" id="link10"><span class="path-arrow" id="link10Arrow">·</span></div>
-          <div class="switch-box" id="sw1">
+          <div class="switch-box" id="sw1"><svg viewBox="0 0 150 90" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#switch"></use></svg>
             <b>SW1 · L2 + L3</b>
             <span>ip routing</span>
             <div class="svi-grid">
@@ -111,8 +37,8 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
           <div class="zone" id="zone20">
             <div class="zone-label">VLAN 20</div>
             <div class="host-stack">
-              <div class="host" id="pc20a"><b>PC20A</b><span>10.10.20.10</span></div>
-              <div class="host" id="pc20b"><b>PC20B</b><span>10.10.20.20</span></div>
+              <div class="host" id="pc20a"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg><b>PC20A</b><span>10.10.20.10</span></div>
+              <div class="host" id="pc20b"><svg viewBox="0 0 100 85" aria-hidden="true" class="sim-device-symbol"><use href="ip-subnetting-devices.svg#pc"></use></svg><b>PC20B</b><span>10.10.20.20</span></div>
             </div>
           </div>
         </div>
@@ -124,16 +50,8 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
           <div><small>현재 판단</small><strong id="packetDecision">—</strong></div>
         </div>
 
-        <div class="event-strip" aria-live="polite">
-          <small id="eventKind"></small>
-          <strong id="eventTitle"></strong>
-          <span id="eventDetail"></span>
-        </div>
-        <div class="step-controls">
-          <button id="prevStepBtn" type="button">← 이전 흐름</button>
-          <button id="nextStepBtn" type="button">다음 흐름 →</button>
-          <span class="step-count" id="stepCount"></span>
-        </div>
+
+
       </div>
 
       <aside class="observation-side">
@@ -144,38 +62,21 @@ body{padding-bottom:34px}.wrap{width:min(1180px,92vw);margin:auto}.hero{padding:
           <div class="obs-item"><small>한 줄 결론</small><strong id="observationConclusion"></strong></div>
         </div>
       </aside>
-    </section>
-
-    <details class="scope-details">
+    </section></section>
+<div class="live-event-strip" id="simEvent" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon">●</div><div class="live-event-main"><b id="eventTitle">관찰 대기</b><p id="eventDetail">예상 답을 고른 뒤 실행하세요.</p><span id="eventText" hidden></span></div><span class="live-event-kind" id="eventKind">대기</span></div>
+<div class="sim-playback"><button id="simPlayback" class="soft-btn" hidden>⏸ 일시정지</button><span id="simPosition"></span></div>
+<section id="simResult" hidden aria-label="내 예상과 결과 비교"><div class="prediction-feedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="simVerdict"></b><span id="simChosen"></span><span id="simCorrect"></span><p id="simReason"></p></div></section>
+<div id="simExtras" class="sim-extras" hidden><button id="simCompare" class="soft-btn" hidden>조건 바꿔 비교하기</button><button id="simRecover" class="soft-btn" hidden>복구 흐름 확인하기</button><span id="simExtraStatus"></span></div>
+<div class="next-row"><button class="soft-btn" id="simReset">현재 실습 다시 시작</button><button class="next-btn" id="simNext" disabled>완료 후 다음 실습 →</button></div>
+<details class="panel sim-review" id="simReview" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body action-bar"><button id="prevStepBtn">← 이전 흐름</button><span id="stepCount"></span><button id="nextStepBtn">다음 흐름 →</button></div></details>
+<details class="panel sim-evidence"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>학습용 모델입니다. 아래의 기존 검증 기록을 재사용하며, 브라우저 실행은 새로운 장비 검증이나 실제 통신 성공을 뜻하지 않습니다.</p><div id="simEvidence"></div><div id="simModelNotes"></div>
       <summary>가정과 실제 검증 근거 보기</summary>
       <div>
         이 화면은 학습용 시뮬레이션입니다. 2026-10-04 PNETLab의 Cisco IOL SVI L3 Switch + VPCS 4대에서 IVR-01~06을 검증한 Actual을 기반으로 합니다.
         이 Lab에는 Trunk가 없으므로 802.1Q Tag를 애니메이션하지 않습니다. 두 SVI의 숫자 MAC은 이 이미지에서 동일했습니다.
         <a href="../learning/campus/inter-vlan-routing/cisco-validation-2026-10-04.html">실제 검증 요약 →</a>
       </div>
-    </details>
-
-    <div class="lesson-actions">
-      <button class="btn" id="retryBtn" hidden>이 문제 다시 풀기</button>
-      <button class="btn" id="summaryBackBtn" hidden>전체 결과로 돌아가기</button>
-      <button class="btn primary" id="nextLessonBtn" disabled>다음 문제 →</button>
-    </div>
-  </main>
-
-  <section id="summaryPanel" class="summary-panel" hidden tabindex="-1">
-    <div class="eyebrow">학습 결과</div>
-    <h2>정오답과 복습할 문제를 구분해 확인하세요.</h2>
-    <div class="summary-metrics">
-      <div class="summary-metric"><strong id="submittedCount">0</strong><span>결과 확인</span></div>
-      <div class="summary-metric"><strong id="correctCount">0</strong><span>정답</span></div>
-      <div class="summary-metric"><strong id="wrongCount">0</strong><span>오답</span></div>
-      <div class="summary-metric"><strong id="pendingCount">5</strong><span>미응답</span></div>
-    </div>
-    <div class="summary-list" id="summaryList"></div>
-    <div class="controls" style="margin-top:16px"><button class="btn primary" id="continueBtn">미응답/오답 문제로 이동 →</button></div>
-  </section>
-</div>
-
-<script src="inter-vlan-routing-simulator.js?v=20261004-1"></script>
-</body>
-</html>
+    <div class="next-lab-actions"><a href="../learning/campus/inter-vlan-routing/cisco-validation-2026-10-04.html">실제 검증 요약 →</a></div></div></details></main>
+<section class="course-complete" id="simSummary" hidden><h2>관찰 결과와 복습할 문제</h2><p id="simSummaryScore"></p><div class="completion-grid" id="simSummaryList"></div><div class="next-lab-actions"><button id="simWrong" class="soft-btn">오답 다시 보기</button><button id="simRestart" class="soft-btn">처음부터 다시</button><a href="inter-vlan-routing.html">학습 페이지로 돌아가기</a></div></section>
+<div class="quick-next-bar" id="simQuick" hidden><div class="quick-next-copy"><small id="simQuickLabel"></small><strong id="simQuickText"></strong></div><button class="quick-next-btn" id="simQuickBtn"></button></div><div class="footer">학습용 시뮬레이션 · 새로고침 및 재진입 시 미응답 상태로 시작합니다.</div><noscript>실습을 진행하려면 JavaScript를 활성화해 주세요.</noscript></div>
+<script src="network-simulator-session.js?v=20261007-1"></script><script src="inter-vlan-routing-model.js?v=20261007-1"></script></body></html>
