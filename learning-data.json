@@ -60,9 +60,9 @@
     },
     {
       "id": "stage8",
-      "title": "8단계 · Cloud / Data Center",
-      "goal": "캠퍼스에서 익힌 L2/L3 개념을 Cloud와 Data Center 구조로 확장합니다.",
-      "exitCriteria": "VPC/TGW와 Leaf-Spine/VXLAN/EVPN의 전달 경로를 기존 네트워크 개념과 연결해 설명합니다."
+      "title": "8단계 · Data Center Networking",
+      "goal": "캠퍼스에서 익힌 L2/L3 개념을 현대 Data Center Fabric 구조로 확장합니다.",
+      "exitCriteria": "Leaf-Spine/Clos, Underlay/Overlay, VXLAN/EVPN의 전달 경로를 기존 네트워크 개념과 연결해 설명합니다."
     }
   ],
   "topics": [
@@ -696,36 +696,14 @@
       "validationMode": "live-cisco-iol+python-netmiko-ssh-cli-json"
     },
     {
-      "id": "aws-network",
-      "category": "8단계 · Cloud / Data Center",
-      "title": "AWS Network",
-      "status": "planned",
-      "statusLabel": "장기 단계",
-      "summary": "VPC, Subnet, Route Table, Security Group, NACL, NAT Gateway, Transit Gateway를 연결합니다.",
-      "why": "기존 L2/L3 지식을 Cloud의 논리적 네트워크 구성에 대응시키는 단계입니다.",
-      "completeWhen": "온프레미스의 VLAN/Route/ACL 개념과 AWS 네트워크 요소의 역할 차이를 비교해 설명할 수 있습니다.",
-      "labs": 0,
-      "faultScenarios": 0,
-      "packetCaptures": 0,
-      "recoveryValidations": 0,
-      "explainNotes": 0,
-      "automations": 0,
-      "detailUrl": null,
-      "scope": {
-        "coreConcept": "Cloud logical routing/security constructs",
-        "standardOrProtocol": "Cloud provider architecture",
-        "vendorImplementation": "AWS 구성요소는 특정 구현으로 온프레미스 원리와 비교"
-      }
-    },
-    {
       "id": "dc-fabric",
-      "category": "8단계 · Cloud / Data Center",
+      "category": "8단계 · Data Center Networking",
       "title": "Leaf-Spine / VXLAN / EVPN",
       "status": "planned",
       "statusLabel": "장기 단계",
-      "summary": "Clos Fabric, Underlay/Overlay, VTEP, VXLAN/EVPN의 기본 전달 구조를 학습합니다.",
-      "why": "Campus 중심 경험을 현대 Data Center Fabric 구조로 확장하기 위한 최종 단계입니다.",
-      "completeWhen": "Underlay와 Overlay 역할을 분리하고 Endpoint 간 트래픽 경로를 개념적으로 추적할 수 있습니다.",
+      "summary": "Leaf-Spine/Clos Fabric, Underlay/Overlay, VTEP, VXLAN/EVPN의 기본 전달 구조를 학습합니다.",
+      "why": "Campus 중심 경험을 현대 Data Center Fabric 구조로 확장하고, 대규모 L3 Fabric과 Overlay의 역할을 연결하기 위한 최종 단계입니다.",
+      "completeWhen": "Leaf-Spine/Clos 구조와 Underlay·Overlay 역할을 분리하고 VXLAN/EVPN 기반 Endpoint 간 트래픽 경로를 개념적으로 추적할 수 있습니다.",
       "labs": 0,
       "faultScenarios": 0,
       "packetCaptures": 0,
