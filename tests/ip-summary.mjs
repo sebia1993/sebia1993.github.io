@@ -78,8 +78,8 @@ async function checkSurface(url,name){
    const pt=await wrong.evaluate(e=>{const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;return {x,y,hit:e.contains(document.elementFromPoint(x,y))};});assert.ok(pt.hit);
    if(touch)await page.touchscreen.tap(pt.x,pt.y);else await page.mouse.click(pt.x,pt.y);
    assert.equal(await page.locator('#lessonNo').innerText(),'문제 3 / 4');assert.equal(await page.locator('#verdictTitle').innerText(),'✕ 오답입니다');
-   assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 바로 버린다');
-   await page.reload({waitUntil:'networkidle'});assert.equal(await page.locator('#chosenAnswer').innerText(),'Mask가 다르면 바로 버린다');
+   assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
+   await page.reload({waitUntil:'networkidle'});assert.equal(await page.locator('#chosenAnswer').innerText(),'Prefix Length가 다르면 바로 버린다');
    await page.locator('#resetBtn').click();await page.locator('#choices [data-value="on"]').click();await page.locator('#runBtn').click();await page.locator('#nextBtn').click();await page.locator('#nextBtn').click();
    await summaryCheck(page,['correct','correct','correct','correct']);
    // Correct-answer review still works from keyboard, without resetting it.
