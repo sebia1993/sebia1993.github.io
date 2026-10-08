@@ -191,3 +191,16 @@ The user withdrew the claim that Cat5e is used in the managed workplace area: ca
 Source review CONFIRMED within the listed product scope; hardware result NOT_RUN. Existing real-photo credit, fiber content and dark theme retained. No physical cable was cut or tested.
 
 Browser QA for this correction: fresh pages at 360, 768, 1366 and 1920 px; normal and 200% root text size had no document overflow. No duplicate IDs, broken in-page anchors, page errors or failed assets; original photo loaded at 2048 px. Opened the source disclosure. Mobile and desktop subsection screenshots were visually reviewed. Independent technical review found no required correction. These checks do not certify cable performance.
+
+
+## 2026-10-08 — LC shape versus UPC/APC endface clarification
+
+User context: LC is used in their managed workplace area. This identifies the connector form only; no installed fiber mode or polish type is inferred. The earlier blue/green disclosure was correct within its singlemode examples but did not explain how it relates to LC, so it was rewritten around the LC question. Added a visible lead-in explaining that LC is not necessarily blue or green, a short distinction table, body-color location, multimode alternatives, and a specification-check reminder. Existing unlike-endface mating caution is retained. No image of the user's physical connector was supplied; their attachment is a screenshot of the guide.
+
+- [Corning cable assembly portfolio](https://www.corning.com/optical-communications/emea/en/home/products/fiber-optic-cable-assembly-information.html) explicitly lists LC UPC and LC APC. Connector form and polish are distinct attributes.
+- [Fluke Networks APC basics](https://www.flukenetworks.com/blog/cabling-chronicles/101-series-what-apc-connector-and-how-do-i-test-it) supports common singlemode body colors, slightly rounded UPC versus angled APC endfaces, and the incompatibility of directly mating unlike finishes. No oversimplified flat-UPC drawing is added.
+- [Corning UniCam FAQ](https://www.corning.com/optical-communications/worldwide/en/home/products/unicam-connectors-resource-center/unicam-faqs.html) documents beige, black and aqua multimode color examples and multiple keyed LC color variants. [Fluke Networks APC/CertiFiber](https://www.flukenetworks.com/knowledge-base/certifiber-pro/apc-connectors-and-certifiber-pro) also distinguishes blue singlemode UPC and beige multimode UPC. These are example product colors, not universal identification.
+
+Source review CONFIRMED within these bounds; physical connector identification NOT_RUN. No skill, simulator or other learning page changed.
+
+Browser QA: fresh pages at 360/768/1366/1920 px, disclosure opened with keyboard, no document overflow at normal or 200% text size, no duplicate IDs, failed assets or page errors. Desktop and mobile screenshots reviewed; shortened a narrow table row label for mobile readability. No physical connector inspection was performed.

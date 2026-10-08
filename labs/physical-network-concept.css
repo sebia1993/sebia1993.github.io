@@ -159,3 +159,8 @@
 .physical-concept .utp-category-compare a{color:#9cd6ff;text-underline-offset:3px}
 .physical-concept .utp-category-compare a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
 @media(max-width:600px){.physical-concept .utp-cutaway-grid{grid-template-columns:1fr;gap:28px}.physical-concept .utp-observation-table th,.physical-concept .utp-observation-table td{padding:12px 10px}.physical-concept .utp-observation-table th:first-child{width:28%}}
+
+/* LC form and endface finish are separate attributes. */
+.physical-concept .fiber-lc-connectors{scroll-margin-top:24px}
+.physical-concept .fiber-lc-connectors a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept .fiber-lc-connectors a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
