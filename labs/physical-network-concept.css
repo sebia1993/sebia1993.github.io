@@ -184,3 +184,34 @@
 .physical-concept .utp-pin-source a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
 @media(max-width:800px){.physical-concept .utp-wiring-grid{grid-template-columns:1fr;gap:30px}.physical-concept .utp-pinout-figure{padding:18px 14px}}
 @media(max-width:380px){.physical-concept .utp-pin-colors{column-gap:8px}.physical-concept .utp-pin-colors li{gap:6px;font-size:.83rem}.physical-concept .utp-wire-swatch{width:19px;flex-basis:19px}}
+
+/* Category performance comparison; the distance bars share a 100 m scale. */
+.physical-concept .utp-category-guide{scroll-margin-top:24px;margin:32px 0}
+.physical-concept .utp-bandwidth-note{padding:4px 18px;background:var(--cg-raised);border-left:3px solid #7edbc0;margin:20px 0}
+.physical-concept .utp-spec-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:24px 0}
+.physical-concept .utp-spec-table caption{text-align:left;font-weight:700;margin-bottom:12px}
+.physical-concept .utp-spec-key{width:21%}
+.physical-concept .utp-spec-table th,.physical-concept .utp-spec-table td{padding:15px 18px;text-align:left;vertical-align:top;border:1px solid var(--cg-line);overflow-wrap:anywhere;line-height:1.8;font-size:.94rem}
+.physical-concept .utp-spec-table thead th{background:var(--cg-raised);font-size:1.08rem;color:#f0f6fb}
+.physical-concept .utp-spec-table thead th:nth-child(2){border-top:3px solid #82caff}
+.physical-concept .utp-spec-table thead th:nth-child(3){border-top:3px solid #7edbc0}
+.physical-concept .utp-spec-value{font-size:1.4rem;white-space:nowrap;color:#e6f1fa}
+.physical-concept .utp-spec-footnote{font-size:.87rem;color:var(--cg-muted)}
+.physical-concept .utp-distance-figure h4{font-size:1.1rem;margin:0 0 12px;color:#f0f6fb}
+.physical-concept .utp-distance-intro{font-size:.9rem;margin:0 0 24px}
+.physical-concept .utp-distance-axis{display:flex;justify-content:space-between;font-size:.8rem;color:var(--cg-muted);padding-bottom:8px;border-bottom:1px solid var(--cg-line)}
+.physical-concept .utp-distance-row{margin-top:22px}
+.physical-concept .utp-distance-label{display:flex;justify-content:space-between;align-items:baseline;gap:8px 20px;flex-wrap:wrap;font-size:.95rem;margin-bottom:10px}
+.physical-concept .utp-distance-label>span{color:var(--cg-muted);font-size:.85rem}
+.physical-concept .utp-distance-track{height:18px;position:relative;background:linear-gradient(to right,transparent calc(50% - 1px),#4b6579 calc(50% - 1px),#4b6579 calc(50% + 1px),transparent calc(50% + 1px)),#071b2a;border-left:1px solid #7a93a6;border-right:1px solid #7a93a6}
+.physical-concept .utp-distance-bar{height:100%;display:block;background:#82caff;border-radius:0 3px 3px 0}
+.physical-concept .utp-distance-bar.is-cat6{background:#7edbc0}
+.physical-concept .utp-distance-bar.is-conditional{background:repeating-linear-gradient(125deg,#edc87b 0 7px,#8e7445 7px 11px);border:1px dashed #ffe0a3}
+.physical-concept .utp-distance-bar.is-cat6a{background:#c3b5ed}
+.physical-concept .utp-distance-row>p{font-size:.83rem;color:var(--cg-muted);margin:10px 0 0}
+.physical-concept .utp-distance-row.is-reference{border-top:1px solid var(--cg-line);padding-top:20px}
+.physical-concept .utp-distance-figure figcaption{margin-top:24px}
+.physical-concept .utp-category-guide a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept .utp-category-guide a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
+.physical-concept .utp-category-sources li+li{margin-top:10px}
+@media(max-width:600px){.physical-concept .utp-spec-table th,.physical-concept .utp-spec-table td{padding:12px 8px;font-size:.83rem;line-height:1.75}.physical-concept .utp-spec-table thead th{font-size:.95rem}.physical-concept .utp-spec-value{font-size:1rem;white-space:normal}.physical-concept .utp-spec-key{width:22%}.physical-concept .utp-distance-figure{padding:18px 14px}.physical-concept .utp-distance-label{font-size:.88rem}.physical-concept .utp-distance-label>span{font-size:.8rem}}
