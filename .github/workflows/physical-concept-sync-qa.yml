@@ -24,7 +24,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 11.19.0
-      - name: Apply guarded simulator integration
+      - name: Apply guarded simulator integration and history-state repair
         if: env.PUBLIC_CHECK == 'false'
         run: |
           python3 - <<'PY'
@@ -36,6 +36,21 @@ jobs:
           p.write_text(s.replace(old,r'id=\"physicalTopology'))
           PY
           python3 tools/apply-physical-concept-sync.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('labs/physical-network-simulator.html')
+          s=p.read_text()
+          a='<select id="practiceGroup" aria-label="실습 묶음 선택">'
+          b='<select id="practiceGroup" autocomplete="off" aria-label="실습 묶음 선택">'
+          assert s.count(a)==1
+          p.write_text(s.replace(a,b))
+          p=Path('labs/physical-network-simulator.js')
+          s=p.read_text()
+          a="window.addEventListener('pageshow',e=>{if(e.persisted)restart();});load(0);"
+          b="window.addEventListener('pageshow',()=>{cancel();records.clear();load(0);});load(0);"
+          assert s.count(a)==1
+          p.write_text(s.replace(a,b))
+          PY
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: python3 tests/check_site.py
