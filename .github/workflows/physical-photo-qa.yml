@@ -33,7 +33,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Install Korean screenshot font
         run: sudo apt-get install -y fonts-noto-cjk
-      - name: Photo rendering and accessibility regression
+      - name: Photo rendering and native no-script accessibility regression
         run: node tests/physical-network-photos-browser.mjs
       - name: Existing physical concept and simulator regression
         if: env.PUBLIC_CHECK == 'false'
