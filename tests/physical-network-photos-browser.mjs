@@ -95,8 +95,9 @@ try{
   await photos(p,{nativeScroll:true});await geometry(p);
   await p.locator('.utp-photo-provenance summary').focus();await p.keyboard.press('Enter');
   assert.notEqual(await p.locator('.utp-photo-provenance').getAttribute('open'),null);await geometry(p);
-  const clip=await p.locator('#utp-cross-section-photos').evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
-  await p.screenshot({path:out+'/'+mode+'.png',clip,captureBeyondViewport:true});
+  const bounds=await p.locator('#utp-cross-section-photos').evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
+  await writeFile(out+'/'+mode+'-bounds.json',JSON.stringify(bounds));
+  await p.screenshot({path:out+'/'+mode+'.png',fullPage:true});
   await ctx.close();
  }
  assert.deepEqual(errors,[]);
