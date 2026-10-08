@@ -1,5 +1,5 @@
 /* Reuse ARP shell and Concept Guide structure. Only physical topology geometry,
-   accessibility and the explicitly requested light Concept palette live here. */
+   accessibility and scoped Concept Guide details live here. */
 [hidden]{display:none!important}
 #physicalLab button{min-height:44px;touch-action:manipulation}
 #physicalLab :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
@@ -50,26 +50,21 @@ button.phy-element:hover{background:#fff;border-color:#bdd0df}
 .physical-summary b,.physical-summary span{display:block;margin-bottom:8px}
 .physical-summary .answer-badge{color:var(--green);font-weight:800}.physical-summary.incorrect .answer-badge{color:var(--orange)}
 .physical-notes{margin-top:16px}.physical-notes p{font-size:13px;line-height:1.8}
-/* Light palette uses ARP tokens; spacing and components remain concept-guide.css. */
-body.physical-concept{--cg-text:var(--ink);--cg-muted:#50687e;--cg-surface:#fff;--cg-raised:#edf4fa;--cg-line:#c6d7e5}
-.physical-concept .cg-header,.physical-concept .cg-evidence{background:#fff}
-.physical-concept .cg-header a,.physical-concept .cg-terms dt{color:var(--blue)}
-.physical-concept .cg-hero h1,.physical-concept .cg-section h2,.physical-concept .cg-node{color:var(--ink)}
-.physical-concept .cg-kicker,.physical-concept .cg-arrow{color:var(--muted)}
-.physical-concept .cg-lane-label,.physical-concept .cg-lane:nth-child(2) .cg-lane-label{color:var(--green)}
-.physical-concept .cg-node{border-color:var(--line)}
-.physical-concept .cg-table thead th{color:var(--ink)}
-.physical-concept .cg-question{background:var(--orange-soft);border-color:#dfbc8c}
-.physical-concept .cg-question h3{color:#8c4d00}
-.physical-concept .cg-next{background:var(--green-soft);border-color:#a7cdba}
-.physical-concept .cg-primary{background:var(--green);color:white;flex-shrink:1}
-.physical-concept .cg-skip:focus{color:white}
+/* Concept Guide inherits the shared dark theme; simulator keeps the ARP light shell. */
+body.physical-concept{--ink:var(--cg-text);--blue2:#82caff;--green2:#7ee0c2;--orange:#ffce86;--orange-soft:#2b2926;color:var(--cg-text)}
+.physical-concept .cg-primary{flex-shrink:1}
+.physical-concept .cg-section h3{color:#f4f8fc}
+.physical-concept .cg-question h3{color:var(--orange)}
+.physical-concept .phy-module,.physical-concept .phy-fdf{background:var(--cg-raised);border-color:var(--cg-line)}
+.physical-concept .field-point>b{color:var(--orange)}
+.physical-concept .source-body{color:var(--cg-text)}
+.physical-concept .check-flow small{color:var(--cg-muted)}
 .physical-concept .cg-section h3{font-size:1.12rem;margin-top:28px}
 .physical-concept .physical-map{grid-template-rows:180px;grid-template-columns:1.1fr .95fr 1.4fr .65fr .75fr .7fr .75fr .65fr 1.4fr;padding:10px 0}
 .physical-concept .phy-element{grid-row:1!important}
 .physical-concept .phy-status{display:none}
-.physical-concept .phy-element small{font-size:11px}
-.physical-concept .physical-figure{padding:20px 16px;background:#f4f7fb}
+.physical-concept .phy-element small{font-size:11px;color:var(--cg-muted)}
+.physical-concept .physical-figure{padding:20px 16px;background:var(--cg-surface)}
 .connector-figure{display:grid;grid-template-columns:180px minmax(0,1fr);gap:14px;align-items:center}
 .connector-figure svg{width:100%;max-width:180px}.connector-figure p{margin:6px 0 0}.connector-figure figcaption{grid-column:1/-1;margin-top:0!important}
 .field-point{border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:0 14px 14px 0;padding:18px 22px;margin:22px 0}
