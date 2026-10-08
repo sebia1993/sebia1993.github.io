@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-10-08",
+  "author": "TubeTimeUS",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "networkLabExecuted": false,
+  "photos": [
+    {
+      "category": "cat5e",
+      "title": "Cross section of a Cat5e patch cable.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Cross_section_of_a_Cat5e_patch_cable.jpg",
+      "sourceImage": "https://upload.wikimedia.org/wikipedia/commons/4/45/Cross_section_of_a_Cat5e_patch_cable.jpg",
+      "originalPath": "labs/images/cat5e-cross-section-original.jpg",
+      "previewPath": "labs/images/cat5e-cross-section.jpg",
+      "originalSha1": "9cf7f2c45afc35aa8e832f8659c1f6ed229cf466",
+      "originalSha256": "088372636ce1fcaa214e310274ccb63d1784c70b81c818abf28ac9bcb5980153",
+      "previewSha256": "05db8e746698fccd9da5da0c359a2fee3bda315c6aae1d3ce27bc34229d81b57",
+      "originalDimensions": [
+        4032,
+        3024
+      ],
+      "previewDimensions": [
+        1200,
+        900
+      ],
+      "changes": "Preview resized and JPEG recompressed only. No cropping, retouching, color editing, annotation or generated content. Original bytes retained."
+    },
+    {
+      "category": "cat6",
+      "title": "Cross section of a Cat6 patch cable.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Cross_section_of_a_Cat6_patch_cable.jpg",
+      "sourceImage": "https://upload.wikimedia.org/wikipedia/commons/4/41/Cross_section_of_a_Cat6_patch_cable.jpg",
+      "originalPath": "labs/images/cat6-cross-section-original.jpg",
+      "previewPath": "labs/images/cat6-cross-section.jpg",
+      "originalSha1": "05fd9cc30d0579635ea05848b70e1c2217e08587",
+      "originalSha256": "6e62b68dd3d7b7e2eafea2b9f382e485bd31b958a6149b423cd9357e0fb0cdd8",
+      "previewSha256": "f132d6b6c6334fa6f404d6c036983623e71712d5446c396272317799a3e3b51a",
+      "originalDimensions": [
+        4032,
+        3024
+      ],
+      "previewDimensions": [
+        1200,
+        900
+      ],
+      "changes": "Preview resized and JPEG recompressed only. No cropping, retouching, color editing, annotation or generated content. Original bytes retained."
+    }
+  ]
+}

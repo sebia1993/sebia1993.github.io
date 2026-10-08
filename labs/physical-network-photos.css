@@ -1,0 +1,16 @@
+/* Real specimen photographs only. Preserve the concept theme and full image bounds. */
+.physical-concept .utp-real-photos{margin-top:28px;scroll-margin-top:24px}
+.physical-concept .utp-real-photos>h4{font-size:1.16rem;line-height:1.6;margin:0 0 10px;color:var(--cg-text)}
+.physical-concept .utp-real-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:18px 0}
+.physical-concept .utp-real-photo{min-width:0;margin:0;padding:18px;border:1px solid var(--cg-line);border-radius:16px;background:var(--cg-surface);overflow-wrap:anywhere}
+.physical-concept .utp-real-photo h5{font-size:1.1rem;line-height:1.6;margin:0 0 14px;color:var(--cg-text)}
+.physical-concept .utp-real-photo-link{display:block;min-width:0;border-radius:10px;text-decoration:none;background:var(--cg-raised);border:1px solid var(--cg-line)}
+.physical-concept .utp-real-photo-link img{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:9px 9px 0 0}
+.physical-concept .utp-photo-open{display:block;min-height:44px;padding:10px 14px;text-align:center;font-size:.85rem;line-height:1.6;color:var(--cg-text)}
+.physical-concept .utp-real-photo figcaption{margin-top:14px;font-size:.92rem;line-height:1.85;color:var(--cg-text)}
+.physical-concept .utp-real-photo figcaption p{margin:0 0 12px}
+.physical-concept .utp-real-photo .utp-photo-credit{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--cg-line);font-size:.78rem;color:var(--cg-muted);line-height:1.8}
+.physical-concept .utp-photo-reading{font-size:.94rem}
+.physical-concept .utp-photo-scope{font-size:.86rem;color:var(--cg-muted)!important}
+@media(max-width:700px){.physical-concept .utp-real-photo-grid{grid-template-columns:minmax(0,1fr);gap:16px}.physical-concept .utp-real-photo{padding:14px}}
+@media(forced-colors:active){.physical-concept .utp-real-photo,.physical-concept .utp-real-photo-link{border:1px solid CanvasText}.physical-concept .utp-photo-open{color:LinkText}}
