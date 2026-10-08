@@ -112,3 +112,33 @@
 .physical-concept .fiber-recheck{border-left:3px solid #63c7b3;padding:8px 22px;background:var(--cg-raised);border-radius:0 12px 12px 0}
 @media(max-width:900px){.physical-concept .fiber-case-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.physical-concept .fiber-decision{grid-template-columns:1fr}.physical-concept .fiber-field-case{padding:18px}.physical-concept .fiber-polarity-example{grid-template-columns:1fr}}
+
+/* Front-facing port orientation: strand letters and Tx/Rx labels accompany color. */
+.physical-concept .fiber-port-orientation{scroll-margin-top:24px;margin:28px 0}
+.physical-concept .orientation-premise{padding:14px 18px;border-left:3px solid #82caff;background:var(--cg-raised)}
+.physical-concept .orientation-cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.physical-concept .orientation-case{min-width:0}
+.physical-concept .orientation-case-label{margin:0;color:#acd9ff!important;font-weight:700;font-size:.85rem}
+.physical-concept .orientation-case h5{margin:8px 0 18px;font-size:1.1rem;line-height:1.65;color:#f0f6fb}
+.physical-concept .orientation-face{position:relative;padding:16px;margin:12px 0;border:1px solid var(--cg-line);border-radius:12px;background:#0a1c2b}
+.physical-concept .orientation-device{display:flex;flex-direction:column;gap:4px;margin:0 0 12px;font-size:.9rem}
+.physical-concept .orientation-device>span{color:#b6c7d8;font-size:.85rem}
+.physical-concept .orientation-inverted{border-style:dashed;border-color:#acd9ff}
+.physical-concept .orientation-inverted .orientation-device>span{color:#acd9ff}
+.physical-concept .orientation-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.physical-concept .orientation-slot{min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:12px 6px;border:1px solid var(--cg-line);border-radius:8px;background:var(--cg-raised);overflow-wrap:anywhere}
+.physical-concept .orientation-slot small{font-size:.8rem;color:var(--cg-muted)}
+.physical-concept .orientation-slot>b{font-size:1rem}
+.physical-concept .orientation-strand{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-size:.9rem}
+.physical-concept .orientation-strand i{display:inline-block;width:12px;height:12px;flex:0 0 12px;border-radius:50%;border:1px solid #d7e3ef}
+.physical-concept .strand-red .orientation-strand i{background:#ef8e8e}
+.physical-concept .strand-blue .orientation-strand i{background:#78b9fa}
+.physical-concept .orientation-result{padding:12px;margin:14px 0 0;border-left:3px solid #63c7b3;background:var(--cg-raised)}
+.physical-concept .orientation-result>span{display:block;color:#aeead8;font-size:.85rem;margin-top:4px}
+.physical-concept .orientation-checks{padding-left:24px}.physical-concept .orientation-checks li+li{margin-top:12px}
+.physical-concept .orientation-takeaway{padding-block:14px}
+.physical-concept .orientation-source{font-size:.8rem;color:var(--cg-muted)!important}
+.physical-concept .fiber-port-orientation a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept .fiber-port-orientation a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
+@media(max-width:800px){.physical-concept .orientation-cases{grid-template-columns:1fr;gap:28px}}
+@media(max-width:480px){.physical-concept .orientation-face{padding:12px}.physical-concept .orientation-slots{gap:8px}.physical-concept .orientation-figure{padding:16px}}

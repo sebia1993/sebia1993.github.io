@@ -152,3 +152,25 @@ The user explicitly requested field decisions and actions for installed optics, 
 | After correction, verify both links/speed, model-specific Rx thresholds when supported, error growth/flapping, and affected service. Low Rx alone is not a root-cause diagnosis. | Cisco fiber troubleshooting, power sections; HPE detail fields and alarms | Field workflow synthesized from documented signals and the user's request. No universal dBm threshold, cable measurement or service-recovery evidence is claimed. |
 
 Source review CONFIRMED; physical/PNETLab verification NOT_RUN. Browser QA used fresh pages at 360, 768, 1366 and 1920 px, with normal and 200% text, expanded disclosures, keyboard operation, anchor/ID checks and error/asset monitoring. All passed; desktop/mobile selection and fault-case screenshots were visually reviewed. Wrong-wiring labels use nondirectional separators so Rx is not shown transmitting. Reading estimate is now 15–20 minutes for the accumulated requested material.
+
+## 2026-10-08 — Inverted module orientation and apparent strand order
+
+User reported a real field observation: A port 1 to B port 1 shows opposite red/blue order, while A port 1 to an inverted B port 2 can show the same order and still communicate. The guide verifies the principle using manufacturer installation documentation and duplex polarity guidance. This does not verify the unidentified device's exact port numbering, actual optic or cable mapping. No external engineer was contacted and no physical measurement was performed.
+
+| Fact / derived explanation | Primary source | Scope |
+|---|---|---|
+| Transceiver installation orientation differs by device and, on some devices, by row. Cisco 88-LC1-52Y8H-EM uses normal top/middle and inverted bottom SFP28/SFP+ mounting; Nexus 92300YC also documents an inverted downlink row. | [Cisco 8800 installation](https://www.cisco.com/c/en/us/td/docs/iosxr/cisco8000/hardware/hig-modular/b-8800-hardware-installation-guide-modular/connect_router_to_the_network.html), bale-clasp installation step 2; [Nexus 92300YC installation, p4](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/hw/n92300yc_hig/guide/b_c92300yc_nxos_mode_hardware_install_guide/b_c92300yc_nxos_mode_hardware_install_guide_chapter_0100.pdf) | Documented device examples, not an odd/even or 1/2 port rule. |
+| Read actual TX/RX markings or direction arrows and the correct model's mounting instructions. | [Cisco SFP/SFP+ installation notes](https://www.cisco.com/c/en/us/td/docs/interfaces_modules/transceiver_modules/installation/note/78_15160.html), steps 4–5 | Latch-up/latch-down and the observer's frame of reference affect apparent left/right positions. No universal left=Tx shortcut. |
+| Every duplex fiber still connects one transmitter to the opposite receiver through the entire path. | [Fluke Networks polarity basics](https://www.flukenetworks.com/blog/cabling-chronicles/b-c-s-fiber-polarity), End-to-End Duplex Polarity | FDF sections do not remove this requirement. |
+| Same visible strand order may be correct with opposite optic orientation: rotating the face 180 degrees exchanges physical Tx/Rx positions, not their functions. | Geometric teaching inference combining the installation facts and Tx-to-Rx requirement above | Both switch fronts are viewed head-on. Red R/blue B identify continuous strands for this example only. Intermediate patch-cord colors do not prove end-to-end identity. |
+
+Diagram contract (left-to-right slots, not a real device faceplate):
+- Both scenarios: A port 1 = red R / Tx, blue B / Rx.
+- Same orientation: B port 1 = blue B / Tx, red R / Rx.
+- Opposite orientation: B port 2 = red R / Rx, blue B / Tx.
+- Both therefore carry red A Tx → B Rx and blue B Tx → A Rx.
+- Module/fiber compatibility, distance and port conditions are assumed satisfied; the diagram establishes correct polarity, not an observed working link.
+
+The new subsection is linked from the existing polarity fault case. It explicitly discourages reversing a working cable merely because colors appear in the same order and does not instruct moving to another port or forcing a module into the wrong orientation. Red/blue teaching marks are distinguished from jacket or UPC/APC color conventions. Changes remain local to the Concept Guide and its source map; no skill or simulator changes.
+
+Source review CONFIRMED; hardware verification NOT_RUN. Browser QA at 360, 768, 1366 and 1920 px verified all four faces' Tx/Rx and strand mappings, unique IDs, internal anchors, normal and 200% text without horizontal overflow, and no page errors or failed assets. Desktop/mobile screenshots were visually reviewed, and a separate content review found the mapping and assumptions consistent.
