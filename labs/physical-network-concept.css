@@ -61,3 +61,24 @@
 .physical-concept .sfp-extra>div{padding:0 18px 4px}
 @media(max-width:800px){.physical-concept .sfp-examples{grid-template-columns:1fr}}
 @media(max-width:480px){.physical-concept .sfp-example{padding:18px}.physical-concept .sfp-spec-table th,.physical-concept .sfp-spec-table td{padding:12px 10px}.physical-concept .sfp-spec-table th:first-child{width:32%}}
+
+/* Duplex direction diagram is conceptual, not a physical port-position map. */
+.physical-concept .fiber-txrx{scroll-margin-top:24px;border-top:1px solid var(--cg-line);margin-top:36px;padding-top:12px}
+.physical-concept .fiber-txrx h4{font-size:1.1rem;margin:28px 0 12px;color:#f0f6fb}
+.physical-concept .txrx-figure{max-width:720px;margin-inline:auto}
+.physical-concept .txrx-heading,.physical-concept .txrx-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr) minmax(0,1fr);gap:12px;text-align:center;align-items:center}
+.physical-concept .txrx-heading{margin-bottom:12px}
+.physical-concept .txrx-row+.txrx-row{margin-top:14px}
+.physical-concept .txrx-port{min-width:0;display:grid;padding:12px;border:1px solid #63c7b3;border-radius:12px;background:var(--cg-raised);overflow-wrap:anywhere}
+.physical-concept .txrx-port b{font-size:1.2rem;color:#aeead8}
+.physical-concept .txrx-port small,.physical-concept .txrx-path small{font-size:.85rem}
+.physical-concept .txrx-path{min-width:0;display:grid;overflow-wrap:anywhere;color:#aeead8}
+.physical-concept .txrx-path>span{font-size:2rem;line-height:1.1}
+.physical-concept .txrx-return .txrx-port{border-color:#82caff}
+.physical-concept .txrx-return .txrx-port b,.physical-concept .txrx-return .txrx-path{color:#acd9ff}
+.physical-concept .txrx-safety{padding:12px 16px;border-left:3px solid #dfb36d;background:var(--cg-raised);font-size:.9rem}
+.physical-concept .txrx-wave-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:18px 0}
+.physical-concept .txrx-wave-table caption{text-align:left;font-weight:700;margin-bottom:10px}
+.physical-concept .txrx-wave-table th,.physical-concept .txrx-wave-table td{padding:12px;text-align:left;vertical-align:top;border:1px solid var(--cg-line);overflow-wrap:anywhere;line-height:1.8}
+.physical-concept .txrx-wave-table thead th{background:var(--cg-surface)}
+@media(max-width:480px){.physical-concept .txrx-heading,.physical-concept .txrx-row{gap:8px}.physical-concept .txrx-port{padding:10px 6px}.physical-concept .txrx-wave-table th,.physical-concept .txrx-wave-table td{padding:10px 6px}}
