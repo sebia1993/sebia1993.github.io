@@ -9,13 +9,8 @@
 .physical-concept .cable-photo-notes li+li{margin-top:12px}
 .physical-concept .cable-photo-credit{display:block;margin-top:8px;font-size:.78rem}
 .physical-concept .cable-photo-credit a{color:#82caff}
-.physical-concept .cable-pairs{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:16px 0;padding:0}
-.physical-concept .cable-pairs li{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cg-raised);border:1px solid var(--cg-line);border-radius:10px}
-.physical-concept .cable-pair-dot{width:14px;height:14px;flex:0 0 14px;border:1px solid #b6c7d8;border-radius:50%}
-.physical-concept .pair-orange{background:#f2994a}.physical-concept .pair-green{background:#54b783}.physical-concept .pair-blue{background:#559edd}.physical-concept .pair-brown{background:#a97855}
 .physical-concept .cable-pair-note{font-size:.85rem;color:var(--cg-muted)!important}
 @media(max-width:800px){.physical-concept .cable-photo-layout{grid-template-columns:1fr;gap:18px}}
-@media(max-width:480px){.physical-concept .cable-pairs{grid-template-columns:1fr}}
 @media(forced-colors:active){.physical-concept .cable-photo-link{border:1px solid CanvasText}}
 
 /* Jacket colors are examples; always pair swatches with readable labels. */
@@ -169,3 +164,23 @@
 .physical-concept .physical-switch-role p{margin:0}
 .physical-concept .physical-switch-note{font-size:.85rem;color:var(--cg-muted);margin:16px 0 0}
 @media(max-width:700px){.physical-concept .physical-switch-roles{grid-template-columns:1fr;gap:14px}.physical-concept .physical-switch-role{padding:18px}}
+
+/* T568B pin numbers are shown separately from internal twisted-pair grouping. */
+.physical-concept .utp-pinout{scroll-margin-top:24px;margin:30px 0}
+.physical-concept .utp-pinout-figure{padding:24px}
+.physical-concept .utp-wiring-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:start}
+.physical-concept .utp-wiring-panel{min-width:0}
+.physical-concept .utp-wiring-panel h4{font-size:1.05rem;margin:0 0 16px;color:#e6f1fa}
+.physical-concept .utp-internal-svg,.physical-concept .utp-plug-svg{display:block;width:100%;height:auto;max-width:440px;margin:0 auto}
+.physical-concept .utp-pair-takeaway{padding:14px 16px;margin:16px 0 0;font-size:.9rem;background:var(--cg-raised);border-left:3px solid #7edbc0}
+.physical-concept .utp-view-direction{font-size:.85rem;color:var(--cg-muted);margin:0 0 12px}
+.physical-concept .utp-pin-colors{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 14px;padding:0;margin:12px 0 0}
+.physical-concept .utp-pin-colors li{display:flex;gap:9px;align-items:center;min-width:0;font-size:.9rem}
+.physical-concept .utp-pin-number{display:grid;place-items:center;flex:0 0 24px;height:24px;border-radius:6px;background:var(--cg-raised);border:1px solid var(--cg-line);color:#f0f6fb}
+.physical-concept .utp-wire-swatch{display:inline-block;width:25px;height:8px;border-radius:4px;background:var(--wire-color);border:1px solid #bdd0df;flex:0 0 25px}
+.physical-concept .utp-wire-swatch.is-striped{background:repeating-linear-gradient(120deg,#f0f4f7 0 6px,var(--wire-color) 6px 10px)}
+.physical-concept .utp-pin-source{font-size:.8rem;color:var(--cg-muted)}
+.physical-concept .utp-pin-source a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept .utp-pin-source a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
+@media(max-width:800px){.physical-concept .utp-wiring-grid{grid-template-columns:1fr;gap:30px}.physical-concept .utp-pinout-figure{padding:18px 14px}}
+@media(max-width:380px){.physical-concept .utp-pin-colors{column-gap:8px}.physical-concept .utp-pin-colors li{gap:6px;font-size:.83rem}.physical-concept .utp-wire-swatch{width:19px;flex-basis:19px}}

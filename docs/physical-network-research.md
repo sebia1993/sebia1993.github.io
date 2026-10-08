@@ -224,3 +224,16 @@ The user judged the UPC/APC lesson unnecessary for this introductory page. Remov
 Retained a short LC explanation grounded in the user's managed-area context: LC is the connector form, not proof of singlemode or multimode. Retained the existing requirement to match replacement product specifications to the optic and panel; no claim that any LC cable is interchangeable was introduced. Cleaning, connector handling, Tx/Rx and fiber-mode compatibility guidance remain. Removed unused disclosure CSS. Scope: this Concept Guide and its notes only; no skill or simulator changes.
 
 Browser QA: fresh 360 and 1366 px pages, normal and 200% root text size, no document overflow, duplicate IDs, broken in-page anchors, page errors or failed assets. Confirmed the learner HTML contains no UPC/APC terms and visually reviewed the updated fiber section at both widths. Existing L2/L3 labels and physical path remain intact.
+
+
+## 2026-10-08 — UTP internal pairs and numbered RJ45 pins
+
+Replaced the four color-only chips with an original, code-drawn SVG teaching figure: a peeled-jacket view of four twisted pairs and a separate RJ45 plug view with pins 1–8. The existing real cable photo remains above it. The two views distinguish internal grouping from terminal order; numbers on the internal view identify the destination pins for this T568B example, not permanent numbers assigned to wire colors or an installed-site wiring claim.
+
+- [Blake UK wiring instructions](https://www.blake-uk.com/wiring-instructions.html), RJ45 Pin Numbering and T568B table: contacts visible, retaining clip away; left-to-right 1–8. T568B: 1 white/orange, 2 orange, 3 white/green, 4 blue, 5 white/blue, 6 green, 7 white/brown, 8 brown.
+- [Fluke Networks T568A/B](https://www.flukenetworks.com/knowledge-base/application-or-standards-articles-copper/differences-between-wiring-codes-t568a-vs): T568B orange pair 1/2 and green pair 3/6; T568A exchanges these pairs. Blue 4/5 and brown 7/8 stay the same. Its jack-front diagram is not reused as a plug-view diagram.
+- Diagram conventions: plug contact surface viewed with cable downward and latch behind; gold contacts are distinct from insulation color. Striped conductors have white insulation with color marks, plus text labels. The green pair's 3/6 split is called out. Cable is spread out solely for explanation, not to indicate stripping/untwisting length, manufacturing dimensions or termination procedure. Existing warning to preserve twist is retained.
+
+Source review CONFIRMED. No wiring, cable category, termination performance or workplace wiring standard was physically verified. No skills or simulator files changed.
+
+Browser QA: fresh pages at 360, 768, 1366 and 1920 px; two SVGs and all eight ordered pin labels render, normal and 200% root text size produce no document overflow, and no duplicate IDs, broken anchors, page errors or failed assets were found. Desktop/mobile screenshots were visually reviewed. Independent source and implementation review confirmed every color-to-pin mapping, all four pair associations and the plug viewing direction. Hardware validation NOT_RUN.
