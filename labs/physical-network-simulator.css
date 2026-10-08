@@ -1,0 +1,16 @@
+/* Simulator-only refinements; the shared physical Concept Guide stays unchanged. */
+#physicalLab.observation-pending .phy-status{color:var(--muted)}
+#physicalLab.observation-pending #uplinkStatus{background:#e8eef4;color:var(--muted)}
+#physicalLab .phy-ap1 .phy-status,#physicalLab .phy-ap2 .phy-status{min-height:32px}
+#physicalLab .physical-map{grid-template-rows:170px 170px}
+@media(max-width:900px){
+ #physicalLab .physical-map{grid-template-rows:auto}
+ /* Keep the same physical chain and readable labels with less repeated vertical space. */
+ #physicalLab .phy-cable{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 8px;min-height:48px;padding:6px 10px 6px 18px}
+ #physicalLab .phy-cable strong{text-align:left}
+ #physicalLab .phy-cable small{grid-row:2;text-align:left;margin-top:0}
+ #physicalLab .phy-cable .phy-status{grid-column:2;grid-row:1/3;margin-top:0}
+ #physicalLab .phy-utp1,#physicalLab .phy-utp2{display:block;min-height:64px}
+ #physicalLab .phy-utp1 strong,#physicalLab .phy-utp2 strong,#physicalLab .phy-utp1 small,#physicalLab .phy-utp2 small{text-align:center}
+ #physicalLab .phy-module,#physicalLab .phy-fdf{flex-wrap:wrap;min-height:44px}
+}

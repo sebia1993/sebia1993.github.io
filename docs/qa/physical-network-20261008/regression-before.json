@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-10-08T00:34:39.644Z",
+  "base": "http://127.0.0.1:43265",
+  "rows": [
+    {
+      "name": "guide component names",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n\n'SFP' !== 'SFP A'\n"
+    },
+    {
+      "name": "pre-run answer is not exposed by the normal baseline",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n\n'상위 연결 정상' !== '관찰 전'\n"
+    },
+    {
+      "name": "run focus stays on playback",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'runBtn'\n- 'playbackBtn'\n"
+    },
+    {
+      "name": "review hides final feedback on baseline scene",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n\ntrue !== false\n"
+    },
+    {
+      "name": "review final scene restores feedback without rescoring",
+      "result": "PASS"
+    },
+    {
+      "name": "next skips completed scenarios",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'AP A UTP 분리'\n- 'Fiber 분리'\n"
+    },
+    {
+      "name": "completion keyboard focus",
+      "result": "FAIL",
+      "reason": "Expected values to be strictly equal:\n\n'' !== 'verdictTitle'\n"
+    },
+    {
+      "name": "reset removes old active and failure state",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 360",
+      "result": "FAIL",
+      "reason": "The expression evaluated to a falsy value:\n\n  assert.ok(names.every(Boolean))\n"
+    },
+    {
+      "name": "run and event adjacent on mobile 360",
+      "result": "FAIL",
+      "reason": "map height 659.40625"
+    },
+    {
+      "name": "unique accessible cable names 768",
+      "result": "FAIL",
+      "reason": "The expression evaluated to a falsy value:\n\n  assert.ok(names.every(Boolean))\n"
+    },
+    {
+      "name": "run and event adjacent on mobile 768",
+      "result": "FAIL",
+      "reason": "map height 671.40625"
+    },
+    {
+      "name": "unique accessible cable names 1366",
+      "result": "FAIL",
+      "reason": "The expression evaluated to a falsy value:\n\n  assert.ok(names.every(Boolean))\n"
+    },
+    {
+      "name": "run and event adjacent on mobile 1366",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 1920",
+      "result": "FAIL",
+      "reason": "The expression evaluated to a falsy value:\n\n  assert.ok(names.every(Boolean))\n"
+    },
+    {
+      "name": "run and event adjacent on mobile 1920",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}
