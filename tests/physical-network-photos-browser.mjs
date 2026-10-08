@@ -24,10 +24,13 @@ if(!base){
 const browser=await chromium.launch({...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox','--disable-gpu']});
 const rows=[],errors=[];
 function watch(p){p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});p.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});p.on('requestfailed',r=>errors.push(r.url()+' '+r.failure()?.errorText));}
-async function photos(p){
- await p.locator('#utp-cross-section-photos').scrollIntoViewIfNeeded();
+async function photos(p,{nativeScroll=false}={}){
+ const section=p.locator('#utp-cross-section-photos');
+ if(nativeScroll)await section.evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));
+ else await section.scrollIntoViewIfNeeded();
  for(const img of await p.locator('.utp-real-photo img').all()){
-  await img.scrollIntoViewIfNeeded();
+  if(nativeScroll)await img.evaluate(e=>e.scrollIntoView({block:'center',behavior:'instant'}));
+  else await img.scrollIntoViewIfNeeded();
   await img.evaluate(e=>e.decode());
   assert.deepEqual(await img.evaluate(e=>[e.naturalWidth,e.naturalHeight]),[1200,900]);
   const rect=await img.boundingBox();assert.ok(rect.width>=250&&rect.height>180);
@@ -52,6 +55,7 @@ try{
   }
  }
  for(const [width,height]of [[360,800],[800,360],[768,1024],[1366,768],[1920,1080]]){
+  console.log('Checking viewport',width,height);
   const ctx=await browser.newContext({viewport:{width,height}}),p=await ctx.newPage();watch(p);
   const response=await p.goto(base+'/labs/physical-network.html?qa='+Date.now()+'#utp-cross-section-photos',{waitUntil:'networkidle'});
   assert.equal(response.status(),200);await photos(p);await geometry(p);
@@ -83,12 +87,16 @@ try{
   await ctx.close();
  }
  for(const mode of ['no-javascript','forced-colors']){
+  console.log('Checking accessibility mode',mode);
   const ctx=await browser.newContext({viewport:{width:360,height:800},javaScriptEnabled:mode!=='no-javascript',...(mode==='forced-colors'?{forcedColors:'active'}:{})});
   const p=await ctx.newPage();watch(p);
   await p.goto(base+'/labs/physical-network.html#utp-cross-section-photos',{waitUntil:'networkidle'});
-  await photos(p);await geometry(p);await p.locator('.utp-photo-provenance summary').click();
-  assert.notEqual(await p.locator('.utp-photo-provenance').getAttribute('open'),null);
-  await p.locator('#utp-cross-section-photos').screenshot({path:out+'/'+mode+'.png'});
+  // Native scrolling avoids the driver's rAF-based stability polling when page scripting is disabled.
+  await photos(p,{nativeScroll:true});await geometry(p);
+  await p.locator('.utp-photo-provenance summary').focus();await p.keyboard.press('Enter');
+  assert.notEqual(await p.locator('.utp-photo-provenance').getAttribute('open'),null);await geometry(p);
+  const clip=await p.locator('#utp-cross-section-photos').evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
+  await p.screenshot({path:out+'/'+mode+'.png',clip,captureBeyondViewport:true});
   await ctx.close();
  }
  assert.deepEqual(errors,[]);
