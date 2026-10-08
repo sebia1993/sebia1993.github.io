@@ -21,4 +21,5 @@ for old,new in {
  assert s.count(old)==1,old
  s=s.replace(old,new)
 p.write_text(s)
-print('Simulator HTML and scoped line renderer patched; shared guide/model/lessons/controller untouched.')
+p=root/'labs/physical-network-simulator-links.css';p.write_text(p.read_text()+'\n@media(max-width:900px){#physicalLab :is(.phy-ap1,.phy-ap2)>:is(strong,small,.phy-status){margin-left:18px}}\n')
+print('Simulator-only connection rendering updated.')
