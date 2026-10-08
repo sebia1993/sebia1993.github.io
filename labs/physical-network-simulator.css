@@ -14,3 +14,43 @@
  #physicalLab .phy-utp1 strong,#physicalLab .phy-utp2 strong,#physicalLab .phy-utp1 small,#physicalLab .phy-utp2 small{text-align:center}
  #physicalLab .phy-module,#physicalLab .phy-fdf{flex-wrap:wrap;min-height:44px}
 }
+/* Reuse the ARP shell; these additions only style the new observation material. */
+#physicalLab .practice-group{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px;font-size:13px;color:var(--muted)}
+#physicalLab .practice-group label{font-weight:800;color:var(--ink)}
+#physicalLab .practice-group select{font:inherit;min-height:44px;max-width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+#physicalLab .concept-section{font-size:12px;line-height:1.8;margin:0 0 14px}
+#physicalLab a{overflow-wrap:anywhere}
+#physicalLab .controls{order:-1}
+#physicalLab .inspection-surface{margin:14px 0;background:#fff}
+#physicalLab #inspectionBody{padding:0 18px 18px;color:var(--ink)}
+#physicalLab .inspection-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#physicalLab .inspection-card,#physicalLab .inspection-photo{min-width:0;margin:0;padding:16px;border:2px solid var(--line);border-radius:12px;background:var(--card);line-height:1.7;overflow-wrap:anywhere}
+#physicalLab .inspection-card h3,#physicalLab .inspection-photo h3{font-size:14px;margin:0 0 10px;color:var(--ink)}
+#physicalLab .inspection-card p{font-size:13px;margin:8px 0}
+#physicalLab .inspection-card .inspection-value{font-size:20px;font-weight:850;color:var(--ink)}
+#physicalLab .inspection-photo img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:8px}
+#physicalLab .inspection-photo>a{display:block;text-decoration:none}
+#physicalLab .inspection-photo>a>span{display:block;min-height:44px;padding:10px;font-size:12px;text-align:center}
+#physicalLab .inspection-photo figcaption{font-size:11px;color:var(--muted);line-height:1.8}
+#physicalLab .inspecting{border-color:var(--green2)!important;box-shadow:0 0 0 3px var(--green-soft);background:var(--green-soft)}
+#physicalLab .inspection-finding{padding:10px 12px;background:var(--blue-soft);border-left:3px solid var(--blue);border-radius:4px;font-size:13px;line-height:1.8}
+#physicalLab .inspection-request{border:1px solid var(--line);padding:14px;border-radius:12px;margin-bottom:14px;font-size:13px;line-height:1.8}
+#physicalLab .inspection-cable{height:12px;margin:28px 0;border-radius:8px;border:1px solid #247c80}
+#physicalLab .inspection-cable.aqua{background:#65d2d4}
+#physicalLab .inspection-ports{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px}
+#physicalLab .inspection-ports>div{border:2px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center}
+#physicalLab .inspection-ports small,#physicalLab .strand{display:block;margin-top:6px}
+#physicalLab .strand.red{color:#a02a2a;border-bottom:5px solid #d24b4b}
+#physicalLab .strand.blue{color:#185890;border-bottom:5px solid #347cb8}
+#physicalLab .phy-module small{line-height:1.5}
+@media(max-width:700px){
+ #physicalLab .inspection-grid{grid-template-columns:minmax(0,1fr)}
+ #physicalLab .inspection-card,#physicalLab .inspection-photo{padding:12px}
+ #physicalLab #inspectionBody{padding:0 10px 12px}
+ #physicalLab .practice-group>span{font-size:11px}
+ #physicalLab .inspection-surface .physical-heading{padding:12px;gap:6px}
+}
+@media(prefers-reduced-motion:reduce){#physicalLab .phy-element{transition:none}}
+@media(forced-colors:active){#physicalLab .inspecting{outline:3px solid Highlight}#physicalLab .strand{color:CanvasText;border-color:CanvasText}}
+
+@media(max-width:760px){#physicalLab .topology-shell,#physicalLab #predictionTitle{scroll-margin-top:76px}}
