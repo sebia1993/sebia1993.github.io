@@ -42,6 +42,12 @@ Google Drive `Two-Stage-Technical-Learning-Design-SKILL.md` v2.11 §7.9A에 관�
 
 ## 공개 확인
 
-**Public QA: NOT_RUN / 게시 승인 대기.** 자동 승인 검토가 `main` 직접 반영을 거절했다. 사유는 공개 배포로 이어지는 기본 브랜치 push에 대한 명시적 승인이 부족하고 별도 브랜치/PR이 더 안전하다는 것이다. 변경은 검토용 PR에 준비하며, 승인 후 기존 URL 배포와 필수 파일 일치/공개 브라우저 조작을 확인해야 한다. Local PASS를 Public PASS로 대신하지 않는다.
+**Public QA: PASS / 배포 완료.** 사용자의 “배포 진행해” 승인 후 PR #12를 병합했다. 배포 커밋은 `e9b1e7e2939e3c92a5434f6d8747892b91e5a040`, [GitHub Pages 빌드·배포](https://github.com/sebia1993/sebia1993.github.io/actions/runs/37709767412)는 성공했다.
+
+- 공개 URL의 실습 HTML·JS·모델 JS·전용 CSS 4개가 배포 소스와 바이트 단위로 일치한다. [파일 해시](physical-network-20261008/public-assets.json).
+- 공개 주소에서 360×800, 768×1024, 1366×768, 1920×1080 전체 시나리오·정답/오답·재생·일시정지·초기화·복습·링크 이동·재진입을 통과했다. 브라우저/자산 오류 0건. [공개 브라우저 결과](physical-network-20261008/public.json).
+- 회귀검사 18항목 PASS, 오류 0건. [공개 회귀 결과](physical-network-20261008/regression-public.json).
+- 병합 과정에서 동시 반영된 개념서 UTP 사진 및 설명을 보존했다. 병합본 정적 검사: 27개 주제 / 57개 페이지 / 751개 로컬 링크 PASS.
+- 실물 휴대폰 및 실물/PNETLab 검증은 기존대로 NOT_RUN이다.
 
 ARP/대상 초기·선택·재생·완료 화면을 네 viewport에서 각각 캡처했다. 물리 주제의 AP·케이블·모듈 구조는 주제별 도식이며 패킷 이동을 새로 추가하지 않았다. 공통 표면·선택지·Event·버튼은 ARP 스타일을 재사용한다.

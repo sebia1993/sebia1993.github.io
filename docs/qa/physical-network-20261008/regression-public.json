@@ -1,0 +1,79 @@
+{
+  "checkedAt": "2026-10-08T00:52:22.454Z",
+  "base": "https://sebia1993.github.io",
+  "rows": [
+    {
+      "name": "guide component names",
+      "result": "PASS"
+    },
+    {
+      "name": "pre-run answer is not exposed by the normal baseline",
+      "result": "PASS"
+    },
+    {
+      "name": "run focus stays on playback",
+      "result": "PASS"
+    },
+    {
+      "name": "review hides final feedback on baseline scene",
+      "result": "PASS"
+    },
+    {
+      "name": "review final scene restores feedback without rescoring",
+      "result": "PASS"
+    },
+    {
+      "name": "next skips completed scenarios",
+      "result": "PASS"
+    },
+    {
+      "name": "completion keyboard focus",
+      "result": "PASS"
+    },
+    {
+      "name": "reset removes old active and failure state",
+      "result": "PASS"
+    },
+    {
+      "name": "sequential path and mixed summary",
+      "result": "PASS"
+    },
+    {
+      "name": "retry returns directly to summary",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 360",
+      "result": "PASS"
+    },
+    {
+      "name": "compact map height budget 360",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 768",
+      "result": "PASS"
+    },
+    {
+      "name": "compact map height budget 768",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 1366",
+      "result": "PASS"
+    },
+    {
+      "name": "compact map height budget 1366",
+      "result": "PASS"
+    },
+    {
+      "name": "unique accessible cable names 1920",
+      "result": "PASS"
+    },
+    {
+      "name": "compact map height budget 1920",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}
