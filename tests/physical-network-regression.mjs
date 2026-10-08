@@ -1,4 +1,5 @@
 import {chromium} from 'playwright';
+import {lessons} from '../labs/physical-network-lessons.js';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
@@ -16,7 +17,7 @@ try{
  p.on('pageerror',e=>errors.push(e.message));
  await p.goto(base+'/labs/physical-network-simulator.html');await p.clock.install();
  async function run(i,answer){await p.locator(`[data-lesson="${i}"]`).click();await p.locator(`[data-prediction="${answer}"]`).click();await p.locator('#runBtn').click();}
- await check('guide component names',async()=>{for(const [part,name] of [['sfpa','SFP A'],['sfpb','SFP B'],['fdf','FDF A']])assert.equal(await p.locator(`[data-part="${part}"] strong`).innerText(),name);});
+ await check('guide component names',async()=>{for(const [part,name] of [['sfpa','지빅 A'],['sfpb','지빅 B'],['fdf','FDF A']])assert.equal(await p.locator(`[data-part="${part}"] strong`).innerText(),name);});
  await check('pre-run answer is not exposed by the normal baseline',async()=>{assert.equal(await p.locator('#uplinkStatus').innerText(),'관찰 전');assert.doesNotMatch(await p.locator('#ap1Status').innerText(),/정상/);assert.equal(await p.locator('#resultArea').isVisible(),false);});
  await run(2,1);
  await check('run focus stays on playback',async()=>assert.equal(await p.evaluate(()=>document.activeElement.id),'playbackBtn'));
@@ -32,13 +33,13 @@ try{
  await run(1,1);await p.clock.runFor(12000);
  await check('completion keyboard focus',async()=>assert.equal(await p.evaluate(()=>document.activeElement.id),'verdictTitle'));
  await p.locator('#playbackBtn').click();await p.clock.runFor(3000);await p.locator('#resetBtn').click();await p.clock.runFor(15000);
- await check('reset removes old active and failure state',async()=>{assert.equal(await p.locator('.phy-element.active,.phy-element.disconnected').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);assert.match(await p.locator('#courseCount').innerText(),/0 \/ 4/);});
+ await check('reset removes old active and failure state',async()=>{assert.equal(await p.locator('.phy-element.active,.phy-element.disconnected').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);assert.match(await p.locator('#courseCount').innerText(),/0 \/ 12/);});
  // Sequential learning, mixed grade summary, wrong-answer review and explicit retry.
  await p.reload();await p.clock.runFor(100);
- for(let i=0;i<4;i++){await p.locator(`[data-prediction="${[0,1,1,1][i]}"]`).click();await p.locator('#runBtn').click();await p.clock.runFor(12000);await p.locator('#nextBtn').click();}
- await check('sequential path and mixed summary',async()=>{assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 3 · 오답 1/);assert.equal(await p.locator('.physical-summary.incorrect').count(),1);});
+ for(let i=0;i<lessons.length;i++){await p.locator(`[data-prediction="${i===1?1:lessons[i].answer}"]`).click();await p.locator('#runBtn').click();await p.clock.runFor(12000);await p.locator('#nextBtn').click();}
+ await check('sequential path and mixed summary',async()=>{assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 11 · 오답 1/);assert.equal(await p.locator('.physical-summary.incorrect').count(),1);});
  await p.getByRole('button',{name:'오답 해설 보기',exact:true}).click();await p.locator('#resetBtn').click();await p.locator('[data-prediction="0"]').click();await p.locator('#runBtn').click();await p.clock.runFor(12000);await p.locator('#nextBtn').click();
- await check('retry returns directly to summary',async()=>{assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 4 · 오답 0/);});
+ await check('retry returns directly to summary',async()=>{assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 12 · 오답 0/);});
  for(const [w,h]of [[360,800],[768,1024],[1366,768],[1920,1080]]){await p.setViewportSize({width:w,height:h});await p.reload();await p.locator('[data-prediction="0"]').waitFor();await p.screenshot({path:`${out}/initial-${w}.png`,fullPage:true});await p.locator('.physical-map').screenshot({path:`${out}/map-${w}.png`});await check(`unique accessible cable names ${w}`,async()=>{const names=await p.locator('.phy-cable').evaluateAll(es=>es.map(e=>e.getAttribute('aria-label')));assert.ok(names.every(Boolean));assert.equal(new Set(names).size,names.length);});await check(`compact map height budget ${w}`,async()=>{if(w<=900){const r=await p.locator('.physical-map').boundingBox();assert.ok(r.height<650,`map height ${r.height}`);}});}
  await writeFile(out+(process.env.BASELINE?'/before.json':process.env.BASE_URL?'/public.json':'/local.json'),JSON.stringify({checkedAt:new Date().toISOString(),base,rows,errors},null,2));console.log(JSON.stringify(rows,null,2));if(!process.env.BASELINE)assert.ok(rows.every(r=>r.result==='PASS')&&!errors.length);
 }finally{await browser.close();server.close();}

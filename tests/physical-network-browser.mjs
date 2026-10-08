@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {extname,resolve} from 'node:path';
 import {scenarios,baseline,derive} from '../labs/physical-network-model.js';
+import {lessons} from '../labs/physical-network-lessons.js';
 const root=resolve(import.meta.dirname,'..'),out=resolve(root,'test-results/physical-network');await mkdir(out,{recursive:true});
 let server,base=process.env.BASE_URL;
 if(!base){server=createServer(async(req,res)=>{try{const path=new URL(req.url,'http://localhost').pathname;res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.json':'application/json'}[extname(path)]||'text/plain'));res.end(await readFile(root+path));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));base='http://127.0.0.1:'+server.address().port;}
@@ -32,7 +33,7 @@ try{
    await p.locator('#resetBtn').click();assert.match(await p.locator('#uplinkStatus').innerText(),i===0?/관찰 전/:/상위 연결 정상/);assert.match(await p.locator('#ap1Status').innerText(),i===0?/관찰 전/:/정상/);assert.equal(await p.locator('.disconnected').count(),0);assert.equal(await p.locator('#resultArea').isVisible(),false);
    await p.locator(`[data-prediction="${scenarios[i].answer}"]`).click();await p.locator('#runBtn').click();await finish(p);
   }
-  await p.locator('#nextBtn').click();assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 4 · 오답 0/);await p.locator('#restartBtn').click();
+  await p.locator('#nextBtn').click();assert.equal(await p.locator('#courseComplete').isVisible(),false);for(let i=4;i<lessons.length;i++){await p.locator(`[data-prediction="${lessons[i].answer}"]`).click();await p.locator('#runBtn').click();await finish(p);await p.locator('#nextBtn').click();}assert.equal(await p.locator('#courseComplete').isVisible(),true);assert.match(await p.locator('#completionScore').innerText(),/정답 12 · 오답 0/);await p.locator('#restartBtn').click();
   // Wrong prediction changes grade, not the simulated physical state.
   await run(p,1,1);assert.match(await p.locator('#verdictTitle').innerText(),/예상과 결과/);assert.match(await p.locator('#ap1Status').innerText(),/연결 끊김/);assert.match(await p.locator('#ap2Status').innerText(),/정상/);
   await p.locator('#reviewPanel summary').click();await p.locator('#prevEvent').click();const score=await p.locator('#scoreText').innerText();await p.locator('#nextEvent').click();assert.equal(await p.locator('#scoreText').innerText(),score);
@@ -43,7 +44,7 @@ try{
   for(const part of Object.keys((await import('../labs/physical-network-model.js')).roles)){await p.locator(`[data-part="${part}"]`).click();assert.ok((await p.locator('#roleDetail').innerText()).length>15);}
   // Actual hit test on scrolled reset control.
   await p.locator('#resetBtn').scrollIntoViewIfNeeded();assert.equal(await p.locator('#resetBtn').evaluate(e=>{const r=e.getBoundingClientRect(),top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return e===top||e.contains(top)}),true);
-  await p.locator('#conceptGuideLink').click();await p.waitForURL('**/physical-network.html');await p.goBack();assert.equal(await p.locator('#physicalLab').getAttribute('data-state'),'IDLE');assert.match(await p.locator('#courseCount').innerText(),/0 \/ 4/);
+  await p.locator('#conceptGuideLink').click();await p.waitForURL('**/physical-network.html');await p.goBack();assert.equal(await p.locator('#physicalLab').getAttribute('data-state'),'IDLE');assert.match(await p.locator('#courseCount').innerText(),/0 \/ 12/);
   await p.reload();await p.waitForSelector('[data-prediction]');assert.equal(await p.locator('#physicalLab').getAttribute('data-state'),'IDLE');
   await p.goto(base+'/roadmap.html',{waitUntil:'networkidle'});assert.equal(await p.locator('.topic h4').first().innerText(),'물리 네트워크 / UTP · Fiber · SFP');assert.deepEqual((await p.locator('.topic h4').allTextContents()).slice(1,5),['IP 주소 / Subnetting','Ethernet / MAC Table','ARP / Default Gateway','ICMP / Ping / Traceroute']);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);await p.locator('.topic').first().locator('a').first().click();await p.waitForURL('**/physical-network.html');
   rows.push({width,height,layout:'PASS',scenarios:'PASS',replayReset:'PASS',prediction:'PASS',navigation:'PASS',consoleAssets:'PASS'});console.log(`${width} × ${height}: PASS`);await c.close();
