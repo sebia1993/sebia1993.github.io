@@ -204,3 +204,14 @@ User context: LC is used in their managed workplace area. This identifies the co
 Source review CONFIRMED within these bounds; physical connector identification NOT_RUN. No skill, simulator or other learning page changed.
 
 Browser QA: fresh pages at 360/768/1366/1920 px, disclosure opened with keyboard, no document overflow at normal or 200% text size, no duplicate IDs, failed assets or page errors. Desktop and mobile screenshots reviewed; shortened a narrow table row label for mobile readability. No physical connector inspection was performed.
+
+
+## 2026-10-08 — L2 access switch and L3 upstream switch roles
+
+At the user's request, the Concept Guide teaching example now explicitly assigns Switch A the L2 access role and Switch B the upstream L3 role. Updated both summary routes, core figure labels and accessible description, recap and model scope. A retains the simple switch icon; B uses a distinct multiport switch illustration with routing arrows, not a router symbol. The drawings illustrate roles and do not identify installed models by appearance.
+
+Replaced the repeated nine-node text chain and vague upstream description with two short role cards. Switch A connects APs over UTP and forwards within the local network. Switch B aggregates downstream connections and routes between IP networks in this example. Both fiber segments around FDF A remain in the physical diagram; optics remain identified as modules installed in their respective switches.
+
+Primary support: [Cisco — Configure Inter-VLAN Routing with Catalyst Switches](https://www.cisco.com/c/en/us/support/docs/lan-switching/inter-vlan-routing/41260-189.html), Background Information, describes L2 access switches connecting to a switch providing L3 routing. This supports the role distinction, not the user's actual equipment or routing configuration. L3 capabilities require appropriate configuration; upstream position alone does not establish L3 operation. Source review CONFIRMED; hardware verification NOT_RUN. Changes are limited to this Concept Guide, its scoped stylesheet and research note; no skill or simulator changes.
+
+Browser QA: fresh pages at 360, 768, 1366 and 1920 px retained the ordered nine physical elements, explicit L2/L3 labels, unique IDs and working internal anchors. No document overflow at normal or 200% root text size, page errors or failed assets. Desktop and mobile section screenshots were visually reviewed. Independent content review found the role descriptions and model scope consistent. No hardware test was performed.
