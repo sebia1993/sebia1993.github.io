@@ -1,0 +1,59 @@
+name: Physical place examples QA
+on:
+  push:
+    branches: [work/physical-network-places-20261008]
+    paths: [.github/workflows/physical-places-qa.yml]
+permissions:
+  contents: write
+concurrency:
+  group: physical-place-examples-qa
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PUBLIC_CHECK: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - name: Apply guarded content patch on work branch only
+        if: env.PUBLIC_CHECK == 'false'
+        run: python3 tools/update-physical-places.py
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: python3 tests/check_site.py
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Four viewport place-example and accessibility checks
+        run: node tests/physical-network-places-browser.mjs
+      - name: Existing physical concept and simulator regression
+        if: env.PUBLIC_CHECK == 'false'
+        run: node tests/physical-network-browser.mjs
+      - name: Verify actual public HTML, CSS and browser interactions
+        if: env.PUBLIC_CHECK == 'true'
+        env:
+          BASE_URL: https://sebia1993.github.io
+        run: node tests/physical-network-places-browser.mjs
+      - name: Commit verified HTML to isolated work branch
+        if: env.PUBLIC_CHECK == 'false'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add labs/physical-network.html
+          git commit -m 'docs: use place-based cable application examples with dated sources'
+          git push origin HEAD:work/physical-network-places-20261008
+      - name: Report verified content blob IDs
+        run: |
+          git rev-parse HEAD
+          git ls-tree HEAD -- labs/physical-network.html labs/physical-network-applications.css docs/physical-network-application-cases.md tests/physical-network-applications.test.mjs tests/physical-network-places-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-place-qa-${{ github.run_id }}
+          path: test-results/physical-places/
+          retention-days: 3
