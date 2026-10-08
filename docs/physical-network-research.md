@@ -102,3 +102,18 @@ User-requested Concept Guide addition only; no skill or simulator changes. Color
 The existing instruction to match optical modules and media also applies when replacing a patch cord. Color, jacket print/product label and module specification are presented together. User-supplied Cat5e operating scope and photograph attribution remain unchanged.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px. The five-row labeled color table and keyboard-operated connector disclosure passed normal/200% text overflow checks, with no duplicate IDs, page errors or failed local assets. Mobile and desktop screenshots were visually reviewed. No physical cable test was performed.
+
+## 2026-10-08 — 지빅 naming and specification reading
+
+The user requested 지빅 as the convenient primary term on this Concept Guide, with singlemode/multimode identification and label reading. The guide explicitly defines this as a colloquial name for optical SFP/SFP+ modules; it does not equate the distinct GBIC and SFP form factors. Diagram labels are 지빅 A/B with SFP A/B aliases retained for the existing lab. No simulator, shared model or skill was changed. This narrowly extends the earlier excluded specification detail to two identification examples; optical power, full reach tables and installation procedures remain out of scope.
+
+| Claim / example | Primary source | Qualification |
+|---|---|---|
+| J9150D: 10G SFP+, LC, SR, 850 nm, MMF; OM3 up to 300m, OM4 up to 400m. | [HPE product naming](https://buy.hpe.com/us/en/options/transceiver-options/networking-transceiver-options/hpe-aruba-networking-10g-sfp-lc-sr-300m-om3-mmf-transceiver/p/j9150d) and [HPE Aruba transceiver guide](https://arubanetworking.hpe.com/techdocs/Switches/xcvrs/xcvr_guide/Content/GUID-C1449A69-FEA4-4DA4-AD25-C73A7FB9CF0A.html) | Manufacturer specifications, not a statement about the user's installed module or measured reach. |
+| J9151E: 10G SFP+, LC, LR, 1310 nm, SMF; up to 10km under specified conditions. | [HPE product naming](https://buy.hpe.com/kr/ko/options/transceiver-options/networking-transceiver-options/hpe-aruba-networking-10g-sfp-lc-lr-10km-smf-transceiver/p/j9151e) and the same HPE Aruba guide | Both examples use duplex LC; neither LC nor SFP+ identifies fiber mode. Singlemode does not mean single strand. |
+| Model-specific fiber mode is authoritative; wavelength alone is insufficient, as 1310nm LRM also supports MMF. | HPE Aruba guide, J9152D LRM rows; [Cisco 10G SFP+](https://www.cisco.com/c/en/us/products/collateral/interfaces-modules/transceiver-modules/data_sheet_c78-455693.html) cabling table | Only the stated 10GBASE-SR/LR examples are mapped directly. Latch/cable colors are treated as secondary clues. |
+| 1000BASE-SX is MMF; LX/LH may support MMF under specified conditions as well as SMF. | [Cisco Gigabit SFP](https://www.cisco.com/c/en/us/products/collateral/interfaces-modules/gigabit-ethernet-gbic-sfp-modules/datasheet-c78-366584.html), SX/LX sections and cabling table | Optional disclosure; not a universal SX/LX shortcut or a mode-conditioning tutorial. |
+
+Source review CONFIRMED; physical verification NOT_RUN. The example blocks rearrange manufacturer data as readable HTML and are not photographs or replicas of actual labels. Existing Cat5e operating scope, photo credit and fiber-color caveats are preserved.
+
+Browser QA: fresh pages at 360, 768, 1366 and 1920 px passed normal/200% text overflow checks. Verified six specification rows, unique IDs, retained SFP A/B aliases and keyboard expansion/collapse of the 1G explanation; no page errors or failed assets. Mobile/desktop screenshots and the renamed topology were visually reviewed. Estimated reading time was adjusted to 10–15 minutes for the accumulated user-requested additions.

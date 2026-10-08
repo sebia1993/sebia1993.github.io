@@ -39,3 +39,25 @@
 .physical-concept .fiber-connector-key{list-style:none;display:flex;flex-wrap:wrap;gap:14px 30px;margin:16px 0;padding:0}
 .physical-concept .fiber-connector-key li{display:flex;align-items:center;gap:10px}
 @media(max-width:480px){.physical-concept .fiber-color-table th,.physical-concept .fiber-color-table td{padding:12px 10px}.physical-concept .fiber-color-label{gap:6px}.physical-concept .fiber-swatch{width:26px;flex-basis:26px}}
+
+/* Optical transceiver identification stays local to the Concept Guide. */
+.physical-concept .sfp-specs{scroll-margin-top:24px}
+.physical-concept .sfp-read-order{padding-left:24px}.physical-concept .sfp-read-order li+li{margin-top:12px}
+.physical-concept .sfp-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.physical-concept .sfp-example{min-width:0;padding:22px;border:1px solid var(--cg-line);border-radius:14px;background:var(--cg-surface)}
+.physical-concept .sfp-example h4{font-size:1.35rem;color:#f0f6fb;margin:8px 0 16px}
+.physical-concept .sfp-example-kind{margin:0;font-weight:700;color:#aeead8!important}
+.physical-concept .sfp-spec-line{border-block:1px solid var(--cg-line);padding:14px 0;font-variant-numeric:tabular-nums}
+.physical-concept .sfp-spec-note{font-size:.85rem;color:var(--cg-muted)!important}
+.physical-concept .sfp-spec-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:22px 0}
+.physical-concept .sfp-spec-table caption{text-align:left;font-weight:700;margin-bottom:10px}
+.physical-concept .sfp-spec-table th,.physical-concept .sfp-spec-table td{text-align:left;vertical-align:top;padding:14px 16px;border:1px solid var(--cg-line);line-height:1.8;overflow-wrap:anywhere}
+.physical-concept .sfp-spec-table thead th{background:var(--cg-raised)}
+.physical-concept .sfp-spec-table th:first-child{width:27%}
+.physical-concept .sfp-caution{border-left:3px solid #73d7d7;padding:4px 18px;background:var(--cg-raised);margin:20px 0}
+.physical-concept .sfp-extra{border:1px solid var(--cg-line);border-radius:12px;background:var(--cg-raised);margin:20px 0}
+.physical-concept .sfp-extra summary{cursor:pointer;font-weight:700;padding:16px 18px}
+.physical-concept .sfp-extra summary:focus-visible{outline:3px solid #82caff;outline-offset:3px;border-radius:10px}
+.physical-concept .sfp-extra>div{padding:0 18px 4px}
+@media(max-width:800px){.physical-concept .sfp-examples{grid-template-columns:1fr}}
+@media(max-width:480px){.physical-concept .sfp-example{padding:18px}.physical-concept .sfp-spec-table th,.physical-concept .sfp-spec-table td{padding:12px 10px}.physical-concept .sfp-spec-table th:first-child{width:32%}}
