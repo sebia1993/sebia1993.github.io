@@ -17,3 +17,25 @@
 @media(max-width:800px){.physical-concept .cable-photo-layout{grid-template-columns:1fr;gap:18px}}
 @media(max-width:480px){.physical-concept .cable-pairs{grid-template-columns:1fr}}
 @media(forced-colors:active){.physical-concept .cable-photo-link{border:1px solid CanvasText}}
+
+/* Jacket colors are examples; always pair swatches with readable labels. */
+.physical-concept .fiber-colors{scroll-margin-top:24px}
+.physical-concept .fiber-color-table{width:100%;table-layout:fixed;margin:20px 0 12px;border-collapse:collapse}
+.physical-concept .fiber-color-table caption{text-align:left;color:var(--cg-text);font-weight:700;margin-bottom:10px}
+.physical-concept .fiber-color-table th,.physical-concept .fiber-color-table td{padding:14px 16px;text-align:left;vertical-align:middle;overflow-wrap:anywhere;border:1px solid var(--cg-line)}
+.physical-concept .fiber-color-table thead th{background:var(--cg-raised)}
+.physical-concept .fiber-color-table th:first-child{width:42%}
+.physical-concept .fiber-color-table tbody th{font-weight:600}
+.physical-concept .fiber-color-label{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.physical-concept .fiber-swatch{display:inline-block;width:40px;height:12px;flex:0 0 40px;border:1px solid #b6c7d8;border-radius:8px}
+.physical-concept .fiber-yellow{background:#f4d64b}.physical-concept .fiber-orange{background:#f39a46}.physical-concept .fiber-aqua{background:#73d7d7}.physical-concept .fiber-violet{background:#c4618c}.physical-concept .fiber-lime{background:#a7d844}.physical-concept .fiber-upc{background:#428cdd}.physical-concept .fiber-apc{background:#3b9d62}
+.physical-concept .fiber-color-sub{font-size:.85em;color:var(--cg-muted)}
+.physical-concept .fiber-color-note{font-size:.85rem;color:var(--cg-muted)!important}
+.physical-concept .fiber-color-check{border-left:3px solid #73d7d7;padding:4px 18px;background:var(--cg-raised);margin:20px 0}
+.physical-concept .fiber-connector-details{margin:20px 0;border:1px solid var(--cg-line);border-radius:12px;background:var(--cg-raised)}
+.physical-concept .fiber-connector-details summary{padding:16px 18px;font-weight:700;cursor:pointer}
+.physical-concept .fiber-connector-details summary:focus-visible{outline:3px solid #82caff;outline-offset:3px;border-radius:10px}
+.physical-concept .fiber-connector-body{padding:0 18px 4px}
+.physical-concept .fiber-connector-key{list-style:none;display:flex;flex-wrap:wrap;gap:14px 30px;margin:16px 0;padding:0}
+.physical-concept .fiber-connector-key li{display:flex;align-items:center;gap:10px}
+@media(max-width:480px){.physical-concept .fiber-color-table th,.physical-concept .fiber-color-table td{padding:12px 10px}.physical-concept .fiber-color-label{gap:6px}.physical-concept .fiber-swatch{width:26px;flex-basis:26px}}

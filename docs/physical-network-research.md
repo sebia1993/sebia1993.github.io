@@ -88,3 +88,17 @@ Photo: Richard Wheeler (Zephyris), “CAT5e Cable.jpg,” Wikimedia Commons. [Fi
 The earlier user-supplied operating context remains scoped to the user's managed area: Cat5e is currently used there; other teams' cabling is unknown. This is not independently measured evidence and does not identify a manufacturer, site, or complete cable plant.
 
 Browser QA: checked 360, 768, 1366 and 1920 px viewport widths, each in a fresh page. The original image loaded at 2048 × 1536, normal and doubled text sizes produced no horizontal document overflow, and no page errors or failed assets were observed. Mobile and desktop screenshots were visually reviewed. These are presentation checks, not cable or hardware validation.
+
+## 2026-10-08 — Fiber color identification
+
+User-requested Concept Guide addition only; no skill or simulator changes. Colored HTML swatches illustrate common indoor patch-cord jackets with readable Korean labels. This is not a record of the user's installed fiber plant. The original exclusion of OM/OS memorization remains: identifiers are introduced only to help read the jacket, without speed, wavelength or reach tables.
+
+| Claim | Primary source | Scope / status |
+|---|---|---|
+| Common premises jacket examples: yellow singlemode OS1/OS2, orange OM1/OM2, aqua OM3/OM4, lime green OM5. Other colors exist, outdoor jackets are often black, and internal fiber colors identify strands separately. | [FOA color guide](https://www.thefoa.org/tech/ColCodes.htm), Cable Jacket Colors / Fiber Color Codes | Source review CONFIRMED; hardware NOT_RUN. Examples, not universal identification or compatibility proof. |
+| OM4 may be aqua or Erika violet; orange and aqua alone do not distinguish the paired categories. Check printed classification. | [Belden: differentiating OM3 and OM4](https://www.belden.com/blog/differentiating-between-om3-and-om4) | Source review CONFIRMED; manufacturer convention clearly qualified. |
+| Common singlemode connector bodies use blue for UPC and green for APC. Unlike mating endfaces must not be joined; hybrid cords with different terminations at opposite ends do exist. | [Fluke Networks: APC connector basics](https://www.flukenetworks.com/blog/cabling-chronicles/101-series-what-apc-connector-and-how-do-i-test-it) | Source review CONFIRMED; optional short disclosure. No connector geometry, splicing, optical measurement or termination procedure added. |
+
+The existing instruction to match optical modules and media also applies when replacing a patch cord. Color, jacket print/product label and module specification are presented together. User-supplied Cat5e operating scope and photograph attribution remain unchanged.
+
+Browser QA: fresh pages at 360, 768, 1366 and 1920 px. The five-row labeled color table and keyboard-operated connector disclosure passed normal/200% text overflow checks, with no duplicate IDs, page errors or failed local assets. Mobile and desktop screenshots were visually reviewed. No physical cable test was performed.
