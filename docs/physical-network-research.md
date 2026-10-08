@@ -215,3 +215,12 @@ Replaced the repeated nine-node text chain and vague upstream description with t
 Primary support: [Cisco — Configure Inter-VLAN Routing with Catalyst Switches](https://www.cisco.com/c/en/us/support/docs/lan-switching/inter-vlan-routing/41260-189.html), Background Information, describes L2 access switches connecting to a switch providing L3 routing. This supports the role distinction, not the user's actual equipment or routing configuration. L3 capabilities require appropriate configuration; upstream position alone does not establish L3 operation. Source review CONFIRMED; hardware verification NOT_RUN. Changes are limited to this Concept Guide, its scoped stylesheet and research note; no skill or simulator changes.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px retained the ordered nine physical elements, explicit L2/L3 labels, unique IDs and working internal anchors. No document overflow at normal or 200% root text size, page errors or failed assets. Desktop and mobile section screenshots were visually reviewed. Independent content review found the role descriptions and model scope consistent. No hardware test was performed.
+
+
+## 2026-10-08 — Remove endface-polish theory from the beginner guide
+
+The user judged the UPC/APC lesson unnecessary for this introductory page. Removed its disclosure, color key, detailed comparison and dedicated source link. Also removed those terms from the cable-selection steps, example table and polarity caption so the same advanced content does not reappear later. Earlier source-review entries remain as historical change records, not current teaching requirements.
+
+Retained a short LC explanation grounded in the user's managed-area context: LC is the connector form, not proof of singlemode or multimode. Retained the existing requirement to match replacement product specifications to the optic and panel; no claim that any LC cable is interchangeable was introduced. Cleaning, connector handling, Tx/Rx and fiber-mode compatibility guidance remain. Removed unused disclosure CSS. Scope: this Concept Guide and its notes only; no skill or simulator changes.
+
+Browser QA: fresh 360 and 1366 px pages, normal and 200% root text size, no document overflow, duplicate IDs, broken in-page anchors, page errors or failed assets. Confirmed the learner HTML contains no UPC/APC terms and visually reviewed the updated fiber section at both widths. Existing L2/L3 labels and physical path remain intact.
