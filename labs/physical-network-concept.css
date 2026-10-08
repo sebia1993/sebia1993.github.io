@@ -82,3 +82,33 @@
 .physical-concept .txrx-wave-table th,.physical-concept .txrx-wave-table td{padding:12px;text-align:left;vertical-align:top;border:1px solid var(--cg-line);overflow-wrap:anywhere;line-height:1.8}
 .physical-concept .txrx-wave-table thead th{background:var(--cg-surface)}
 @media(max-width:480px){.physical-concept .txrx-heading,.physical-concept .txrx-row{gap:8px}.physical-concept .txrx-port{padding:10px 6px}.physical-concept .txrx-wave-table th,.physical-concept .txrx-wave-table td{padding:10px 6px}}
+
+/* Field decision examples stay local to this guide and reflow without fixed heights. */
+.physical-concept #fiber-field,.physical-concept .fiber-field-sub,.physical-concept .fiber-field-case{scroll-margin-top:24px}
+.physical-concept .fiber-field-sub{margin-top:36px}
+.physical-concept .fiber-decision{list-style:none;counter-reset:fiber-choice;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.physical-concept .fiber-decision li{counter-increment:fiber-choice;min-width:0;padding:20px;border:1px solid var(--cg-line);border-radius:12px;background:var(--cg-surface)}
+.physical-concept .fiber-decision li::before{content:"0" counter(fiber-choice);display:block;color:#aeead8;font-weight:700;margin-bottom:8px}
+.physical-concept .fiber-decision li>span{display:block;margin-top:8px}
+.physical-concept #fiber-field a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept #fiber-field a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
+.physical-concept .fiber-cli pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;padding:16px;border:1px solid var(--cg-line);border-radius:8px;background:#081725;color:#d7e3ef;line-height:1.8}
+.physical-concept .fiber-cli code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.physical-concept .fiber-care-list{padding-left:24px}.physical-concept .fiber-care-list li+li{margin-top:12px}
+.physical-concept .fiber-case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.physical-concept .fiber-field-case{min-width:0;padding:24px;border:1px solid var(--cg-line);border-radius:14px;background:var(--cg-surface)}
+.physical-concept .fiber-case-tag{color:#aeead8!important;font-weight:700;margin:0}
+.physical-concept .fiber-field-case h4{font-size:1.25rem;line-height:1.6;margin:10px 0 18px;color:#f0f6fb}
+.physical-concept .fiber-case-pair{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:16px;border-radius:10px;background:var(--cg-raised)}
+.physical-concept .fiber-case-pair>span{color:#f1bdb7}
+.physical-concept .fiber-field-case dl{margin:20px 0}.physical-concept .fiber-field-case dt{font-weight:700;color:#acd9ff;margin-top:18px}
+.physical-concept .fiber-field-case dd{margin:6px 0 0;line-height:1.85;color:var(--cg-text)}
+.physical-concept .fiber-polarity-example{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.physical-concept .fiber-polarity-example p{margin:0;padding:14px 10px;background:var(--cg-raised);border-radius:10px;overflow-wrap:anywhere}
+.physical-concept .fiber-polarity-example span{display:block;margin-bottom:8px;font-size:.85rem}
+.physical-concept .fiber-polarity-example p:first-child{border-top:2px solid #e2a59d}
+.physical-concept .fiber-polarity-example p:last-child{border-top:2px solid #63c7b3}
+.physical-concept .fiber-case-note{border-left:3px solid #dfb36d;padding-left:14px}
+.physical-concept .fiber-recheck{border-left:3px solid #63c7b3;padding:8px 22px;background:var(--cg-raised);border-radius:0 12px 12px 0}
+@media(max-width:900px){.physical-concept .fiber-case-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.physical-concept .fiber-decision{grid-template-columns:1fr}.physical-concept .fiber-field-case{padding:18px}.physical-concept .fiber-polarity-example{grid-template-columns:1fr}}
