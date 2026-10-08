@@ -19,8 +19,12 @@ test('existing physical states, event sequence and answers remain unchanged',()=
   assert.deepEqual(lessons[i].events.map(e=>[e.active,e.change]),core[i].events.map(e=>[e.active,e.change]));
  }
  const bytes=readFileSync(new URL('../labs/physical-network-model.js',import.meta.url));
- const actual=createHash('sha256').update(bytes).digest('hex');
- assert.equal(actual,'772ae647751e134c70036cc8f786256835b616b159189e4b781d05365e55f91e');
+ // Normalize checkout line endings only; no content, whitespace or state is ignored.
+ const canonical=value=>value.toString('utf8').replace(/\r\n/g,'\n');
+ const digest=value=>createHash('sha256').update(canonical(value)).digest('hex');
+ const expected='772ae647751e134c70036cc8f786256835b616b159189e4b781d05365e55f91e';
+ assert.equal(digest(bytes),expected);
+ assert.equal(digest(Buffer.from(canonical(bytes).replace(/\n/g,'\r\n'))),expected);
 });
 test('photo license, specimen limits and reuse are retained',()=>{
  const s=lessons.find(s=>s.id==='photo');
