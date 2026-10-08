@@ -44,7 +44,7 @@ Sources were opened and read, not accepted from search snippets. An apparent Cat
 | PHY-06 | Device support, speed and optical media must match; matching modules/interfaces at both ends form this example link. | Implementation Behavior | S5/S7/S9; module support is platform-specific, not an IEEE vendor-lock rule. | CONFIRMED | NOT_RUN |
 | PHY-07 | Common Ethernet examples: 1G SFP, 10G SFP+; similar small form factor does not establish compatibility. GBIC and SFP are distinct. | Teaching Simplification | S5/S6/S9. SFP has other speed/application variants; these examples are not exhaustive definitions. “지빅” is a colloquial field term supplied in the work order, not a standard term. | CONFIRMED | NOT_RUN |
 | PHY-08 | FDF can be an intermediate fiber organization/connection point. | Teaching Simplification | S8 patching/frame products; not mandatory in every optical link and not a forwarding switch. | CONFIRMED | NOT_RUN |
-| PHY-09 | Cat5e can be encountered in operating networks; its label alone does not establish failure. | Teaching Simplification | S2 installed-cabling discussion + generalized user experience. No claim that a particular private site was measured. | CONFIRMED | NOT_RUN |
+| PHY-09 | Cat5e can be encountered in operating networks; its label alone does not establish failure. | Teaching Simplification | S2 installed-cabling discussion. No assertion about the category installed at the user’s workplace; earlier user context was withdrawn on 2026-10-08. | CONFIRMED | NOT_RUN |
 | PHY-10 | Disconnect only AP A's sole UTP: AP A loses wired connectivity; with sole PoE supply it also loses power; AP B and shared uplink remain connected. | Teaching Simplification | Inference from S1/S3 with explicit independent AP cables, powered switch, no additional fault. | MODEL_DEFINED | NOT_RUN |
 | PHY-11 | Missing Switch A-side optical SFP or broken fiber path brings the sole uplink down while AP UTP/PoE and switch power remain up. Both APs' upstream-dependent service is affected. | Teaching Simplification | Inference from S3/S5/S7 under a single upstream path. Does not claim all WLAN/local services fail or every AP reboots. | MODEL_DEFINED | NOT_RUN |
 
@@ -85,7 +85,7 @@ Scope: Concept Guide only. The user requested a real stripped-cable photograph t
 
 Photo: Richard Wheeler (Zephyris), “CAT5e Cable.jpg,” Wikimedia Commons. [File description and license](https://commons.wikimedia.org/wiki/File:CAT5e_Cable.jpg), [original JPEG](https://upload.wikimedia.org/wikipedia/commons/d/d1/CAT5e_Cable.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Original 2048 × 1536 JPEG copied without changes to `labs/images/cat5e-twisted-pairs.jpg`. The caption credits the author, links the source and license, and identifies this as a general example rather than a photograph from the user's workplace. Display scaling uses CSS without cropping.
 
-The earlier user-supplied operating context remains scoped to the user's managed area: Cat5e is currently used there; other teams' cabling is unknown. This is not independently measured evidence and does not identify a manufacturer, site, or complete cable plant.
+Superseded on 2026-10-08: the user withdrew the earlier Cat5e workplace assertion because the installed category could not be confirmed. No installed category is now claimed for the managed area or other teams; see the Cat5e/Cat6 structure correction below.
 
 Browser QA: checked 360, 768, 1366 and 1920 px viewport widths, each in a fresh page. The original image loaded at 2048 × 1536, normal and doubled text sizes produced no horizontal document overflow, and no page errors or failed assets were observed. Mobile and desktop screenshots were visually reviewed. These are presentation checks, not cable or hardware validation.
 
@@ -99,7 +99,7 @@ User-requested Concept Guide addition only; no skill or simulator changes. Color
 | OM4 may be aqua or Erika violet; orange and aqua alone do not distinguish the paired categories. Check printed classification. | [Belden: differentiating OM3 and OM4](https://www.belden.com/blog/differentiating-between-om3-and-om4) | Source review CONFIRMED; manufacturer convention clearly qualified. |
 | Common singlemode connector bodies use blue for UPC and green for APC. Unlike mating endfaces must not be joined; hybrid cords with different terminations at opposite ends do exist. | [Fluke Networks: APC connector basics](https://www.flukenetworks.com/blog/cabling-chronicles/101-series-what-apc-connector-and-how-do-i-test-it) | Source review CONFIRMED; optional short disclosure. No connector geometry, splicing, optical measurement or termination procedure added. |
 
-The existing instruction to match optical modules and media also applies when replacing a patch cord. Color, jacket print/product label and module specification are presented together. User-supplied Cat5e operating scope and photograph attribution remain unchanged.
+The existing instruction to match optical modules and media also applies when replacing a patch cord. Color, jacket print/product label and module specification are presented together. Photograph attribution remains unchanged. The earlier workplace category assertion was later withdrawn; see the Cat5e/Cat6 correction below.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px. The five-row labeled color table and keyboard-operated connector disclosure passed normal/200% text overflow checks, with no duplicate IDs, page errors or failed local assets. Mobile and desktop screenshots were visually reviewed. No physical cable test was performed.
 
@@ -114,7 +114,7 @@ The user requested 지빅 as the convenient primary term on this Concept Guide, 
 | Model-specific fiber mode is authoritative; wavelength alone is insufficient, as 1310nm LRM also supports MMF. | HPE Aruba guide, J9152D LRM rows; [Cisco 10G SFP+](https://www.cisco.com/c/en/us/products/collateral/interfaces-modules/transceiver-modules/data_sheet_c78-455693.html) cabling table | Only the stated 10GBASE-SR/LR examples are mapped directly. Latch/cable colors are treated as secondary clues. |
 | 1000BASE-SX is MMF; LX/LH may support MMF under specified conditions as well as SMF. | [Cisco Gigabit SFP](https://www.cisco.com/c/en/us/products/collateral/interfaces-modules/gigabit-ethernet-gbic-sfp-modules/datasheet-c78-366584.html), SX/LX sections and cabling table | Optional disclosure; not a universal SX/LX shortcut or a mode-conditioning tutorial. |
 
-Source review CONFIRMED; physical verification NOT_RUN. The example blocks rearrange manufacturer data as readable HTML and are not photographs or replicas of actual labels. Existing Cat5e operating scope, photo credit and fiber-color caveats are preserved.
+Source review CONFIRMED; physical verification NOT_RUN. The example blocks rearrange manufacturer data as readable HTML and are not photographs or replicas of actual labels. Photo credit and fiber-color caveats are preserved. The earlier workplace category assertion was later withdrawn; see the Cat5e/Cat6 correction below.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px passed normal/200% text overflow checks. Verified six specification rows, unique IDs, retained SFP A/B aliases and keyboard expansion/collapse of the 1G explanation; no page errors or failed assets. Mobile/desktop screenshots and the renamed topology were visually reviewed. Estimated reading time was adjusted to 10–15 minutes for the accumulated user-requested additions.
 
@@ -131,7 +131,7 @@ User-requested Concept Guide addition only, after module identification. This na
 | Singlemode is not the same as single strand; the earlier J9150D SR and J9151E LR examples both use duplex LC. | [HPE Aruba 10G guide](https://arubanetworking.hpe.com/techdocs/Switches/xcvrs/xcvr_guide/Content/GUID-C1449A69-FEA4-4DA4-AD25-C73A7FB9CF0A.html) | Both modes can have conventional two-fiber examples. |
 | Do not look into an optical port or fiber end to identify transmitting light; appropriate detectors are used. | Fluke polarity guide, How to Check Duplex Polarity | Brief caution directly relevant to the identification question, not a measurement procedure. |
 
-No MPO polarity taxonomy, loss budget, live swapping procedure or hardware troubleshooting lab is added. Source review CONFIRMED; hardware/PNETLab verification NOT_RUN. The workplace Cat5e scope, real-photo attribution, fiber-color caveats and SFP/GBIC distinction are preserved.
+No MPO polarity taxonomy, loss budget, live swapping procedure or hardware troubleshooting lab is added. Source review CONFIRMED; hardware/PNETLab verification NOT_RUN. Real-photo attribution, fiber-color caveats and SFP/GBIC distinction are preserved. The earlier workplace category assertion was later withdrawn; see the Cat5e/Cat6 correction below.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px passed normal and doubled-text horizontal-overflow checks, including the expanded BiDi wavelength table. Verified unique IDs, three comparison rows and keyboard expansion/collapse; no page errors or failed local assets. Desktop and mobile screenshots were visually reviewed. This validates the learning-page presentation only.
 
@@ -174,3 +174,20 @@ Diagram contract (left-to-right slots, not a real device faceplate):
 The new subsection is linked from the existing polarity fault case. It explicitly discourages reversing a working cable merely because colors appear in the same order and does not instruct moving to another port or forcing a module into the wrong orientation. Red/blue teaching marks are distinguished from jacket or UPC/APC color conventions. Changes remain local to the Concept Guide and its source map; no skill or simulator changes.
 
 Source review CONFIRMED; hardware verification NOT_RUN. Browser QA at 360, 768, 1366 and 1920 px verified all four faces' Tx/Rx and strand mappings, unique IDs, internal anchors, normal and 200% text without horizontal overflow, and no page errors or failed assets. Desktop/mobile screenshots were visually reviewed, and a separate content review found the mapping and assumptions consistent.
+
+
+## 2026-10-08 — Cat5e/Cat6 structure and workplace-category correction
+
+The user withdrew the claim that Cat5e is used in the managed workplace area: cable markings could not be confirmed. Removed that assertion from the field point and recap, and changed the Concept Guide topology cable label to UTP. The operating category remains unconfirmed; observations in the managed area are not generalized to other teams. This correction supersedes earlier notes in this document. Generic Cat5e teaching examples, the sourced Cat5e photo, and the simulator model are not evidence of workplace inventory. No skill or simulator was changed.
+
+| Claim / teaching choice | Primary source and scope |
+|---|---|
+| Common four-pair Cat5e and Cat6 U/UTP examples have eight insulated conductors with corresponding color pairs. | [Belden 1583A](https://www.belden.com/products/cable/ethernet-cable/category-5e-cable/1583a) and [Belden 3612](https://www.belden.com/products/cable/ethernet-cable/category-6-cable/3612), construction / insulation. Not every product family or number of pairs. |
+| Some Cat6 uses a central X-shaped separator to separate pairs and maintain position. | Belden 3612 X-Spline construction; [Belden Category 6 overview](https://www.belden.com/products/cable/ethernet-cable/category-6-cable), spline purpose. The adjacent SVG cross-sections are simplified teaching drawings, not product measurements or documentary photos. |
+| A center spline is not a necessary visual feature of Cat6. | [Leviton 310-UTP6P-MLB](https://leviton.com/products/310-utp6p-mlb) explicitly describes ETL Cat6 verified, without center spline, 24 AWG. [Belden 2412](https://www.belden.com/products/cable/ethernet-cable/category-6-cable/2412) lists a dielectric-tape separator. |
+| 24 AWG vs 23 AWG is not a category-identification rule. | Belden 1583A is Cat5e/24 AWG; Belden 3612 is Cat6/23 AWG; Leviton 310-UTP6P-MLB is Cat6/24 AWG. Insulation is distinct from conductor diameter. |
+| Visible structure alone does not establish category or workplace inventory. | Inference from the documented overlapping constructions. Use product markings, part number, manufacturer and installation records; unresolved category stays unconfirmed. No claim of a certification test or cable measurement. |
+
+Source review CONFIRMED within the listed product scope; hardware result NOT_RUN. Existing real-photo credit, fiber content and dark theme retained. No physical cable was cut or tested.
+
+Browser QA for this correction: fresh pages at 360, 768, 1366 and 1920 px; normal and 200% root text size had no document overflow. No duplicate IDs, broken in-page anchors, page errors or failed assets; original photo loaded at 2048 px. Opened the source disclosure. Mobile and desktop subsection screenshots were visually reviewed. Independent technical review found no required correction. These checks do not certify cable performance.

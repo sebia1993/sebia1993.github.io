@@ -142,3 +142,20 @@
 .physical-concept .fiber-port-orientation a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
 @media(max-width:800px){.physical-concept .orientation-cases{grid-template-columns:1fr;gap:28px}}
 @media(max-width:480px){.physical-concept .orientation-face{padding:12px}.physical-concept .orientation-slots{gap:8px}.physical-concept .orientation-figure{padding:16px}}
+
+/* Cable structures are examples, not visual category identification rules. */
+.physical-concept .utp-category-compare{scroll-margin-top:24px;margin:32px 0}
+.physical-concept .utp-cutaway-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.physical-concept .utp-cutaway{min-width:0;text-align:center}
+.physical-concept .utp-cutaway h4{margin:0 0 12px;font-size:1.1rem;color:#f0f6fb}
+.physical-concept .utp-cutaway svg{display:block;width:200px;max-width:100%;height:auto;margin:0 auto}
+.physical-concept .utp-cutaway p{font-size:.9rem;margin:12px 0 0}
+.physical-concept .utp-category-caution{padding:4px 18px;border-left:3px solid #82caff;background:var(--cg-raised);margin:20px 0}
+.physical-concept .utp-observation-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:20px 0}
+.physical-concept .utp-observation-table caption{text-align:left;font-weight:700;margin-bottom:10px}
+.physical-concept .utp-observation-table th,.physical-concept .utp-observation-table td{padding:14px 16px;text-align:left;vertical-align:top;border:1px solid var(--cg-line);overflow-wrap:anywhere;line-height:1.8}
+.physical-concept .utp-observation-table thead th{background:var(--cg-raised)}
+.physical-concept .utp-observation-table th:first-child{width:24%}
+.physical-concept .utp-category-compare a{color:#9cd6ff;text-underline-offset:3px}
+.physical-concept .utp-category-compare a:focus-visible{outline:3px solid #82caff;outline-offset:3px}
+@media(max-width:600px){.physical-concept .utp-cutaway-grid{grid-template-columns:1fr;gap:28px}.physical-concept .utp-observation-table th,.physical-concept .utp-observation-table td{padding:12px 10px}.physical-concept .utp-observation-table th:first-child{width:28%}}
