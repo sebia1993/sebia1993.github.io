@@ -1,0 +1,49 @@
+{
+  "base": "http://127.0.0.1:34055",
+  "checkedAt": "2026-10-08T00:40:16.964Z",
+  "rows": [
+    {
+      "width": 360,
+      "height": 800,
+      "layout": "PASS",
+      "scenarios": "PASS",
+      "replayReset": "PASS",
+      "prediction": "PASS",
+      "navigation": "PASS",
+      "consoleAssets": "PASS"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "layout": "PASS",
+      "scenarios": "PASS",
+      "replayReset": "PASS",
+      "prediction": "PASS",
+      "navigation": "PASS",
+      "consoleAssets": "PASS"
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "layout": "PASS",
+      "scenarios": "PASS",
+      "replayReset": "PASS",
+      "prediction": "PASS",
+      "navigation": "PASS",
+      "consoleAssets": "PASS"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "layout": "PASS",
+      "scenarios": "PASS",
+      "replayReset": "PASS",
+      "prediction": "PASS",
+      "navigation": "PASS",
+      "consoleAssets": "PASS"
+    }
+  ],
+  "errors": [],
+  "hardware": "NOT_RUN",
+  "classification": "Teaching Simulation QA"
+}
