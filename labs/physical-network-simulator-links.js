@@ -59,8 +59,8 @@ export function connectSimulator(map){
     const slot=parts[s.cable].querySelector('.phy-wire-slot').getBoundingClientRect();
     if(narrow){
      const a=local(slot.left+slot.width/2,slot.top),b=local(slot.left+slot.width/2,slot.bottom);
-     const iconTop=local(0,parts[s.to].querySelector('svg').getBoundingClientRect().top).y;
-     const bend=s.kind==='copper'?(b.y+iconTop)/2:(b.y+q.y)/2;
+     const entryTop=local(0,parts[s.to].getBoundingClientRect().top).y;
+     const bend=s.kind==='copper'?(b.y+entryTop)/2:(b.y+q.y)/2;
      points.push({x:a.x,y:p.y},a,b,{x:b.x,y:bend},{x:q.x,y:bend},q);breakAt={x:a.x,y:(a.y+b.y)/2};
     }else{
      const a=local(slot.left,slot.top+slot.height/2),b=local(slot.right,slot.top+slot.height/2);
@@ -80,10 +80,10 @@ export function connectSimulator(map){
  }
  function schedule(){if(!queued&&!destroyed)queued=requestAnimationFrame(()=>{queued=0;draw();});}
  const resize=new ResizeObserver(schedule);resize.observe(map);Object.values(parts).forEach(el=>resize.observe(el));
- const mutations=new MutationObserver(schedule);Object.values(parts).forEach(el=>mutations.observe(el,{attributes:true,attributeFilter:['class']}));
+ const mutations=new MutationObserver(schedule);Object.values(parts).forEach(el=>mutations.observe(el,{attributes:true,attributeFilter:['class','style']}));
  const media=matchMedia('(max-width:900px)');media.addEventListener('change',schedule);
- document.fonts?.ready.then(schedule);window.addEventListener('pageshow',schedule);
- const api={draw,destroy(){destroyed=true;cancelAnimationFrame(queued);resize.disconnect();mutations.disconnect();media.removeEventListener('change',schedule);window.removeEventListener('pageshow',schedule);}};
+ document.fonts?.ready.then(schedule);window.addEventListener('pageshow',schedule);window.addEventListener('resize',schedule);
+ const api={draw,destroy(){destroyed=true;cancelAnimationFrame(queued);resize.disconnect();mutations.disconnect();media.removeEventListener('change',schedule);window.removeEventListener('pageshow',schedule);window.removeEventListener('resize',schedule);}};
  instances.set(map,api);draw();return api;
 }
 if(typeof document!=='undefined')for(const map of document.querySelectorAll('#physicalLab .physical-map'))connectSimulator(map);

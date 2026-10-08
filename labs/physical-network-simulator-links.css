@@ -9,14 +9,14 @@
 #physicalLab .continuous-links .physical-link.module{stroke-width:2.5}
 #physicalLab .physical-break{fill:none;stroke:var(--red);stroke-width:2.5;stroke-linecap:round;pointer-events:none}
 @media(max-width:900px){
- #physicalLab .physical-map{--phy-axis:vertical;row-gap:16px}
- #physicalLab .phy-cable{position:relative;padding-left:64px;width:100%;justify-self:stretch}
+ #physicalLab .physical-map{--phy-axis:vertical;row-gap:3px}
+ #physicalLab .phy-cable{position:relative;padding:2px 10px 2px 64px;min-height:44px;width:100%;justify-self:stretch}
  #physicalLab .phy-wire-slot{position:absolute;left:32px;top:0;bottom:0;width:0;height:auto;margin:0}
- #physicalLab .phy-utp1,#physicalLab .phy-utp2{padding-left:22px;border-bottom:2px solid transparent;border-radius:13px}
+ #physicalLab .phy-utp1,#physicalLab .phy-utp2{padding-left:22px;min-height:52px;border-bottom:2px solid transparent;border-radius:13px}
  #physicalLab .phy-utp1 .phy-wire-slot,#physicalLab .phy-utp2 .phy-wire-slot{left:8px}
  #physicalLab .phy-utp1.disconnected,#physicalLab .phy-utp2.disconnected{border-bottom-color:var(--red);border-bottom-style:solid}
  #physicalLab .phy-access,#physicalLab .phy-distribution{width:100%;grid-template-columns:74px minmax(0,1fr);justify-self:stretch}
- #physicalLab .phy-module,#physicalLab .phy-fdf{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,auto);gap:2px 6px;width:100%;margin:0;padding:8px;justify-self:stretch;text-align:left}
+ #physicalLab .phy-module,#physicalLab .phy-fdf{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,auto);gap:2px 6px;width:100%;margin:0;padding:4px 8px;justify-self:stretch;text-align:left}
  #physicalLab .phy-module strong,#physicalLab .phy-fdf strong{grid-column:2;grid-row:1}
  #physicalLab .phy-module small,#physicalLab .phy-fdf small{grid-column:2;grid-row:2;margin:0}
  #physicalLab .phy-module .phy-status{grid-column:3;grid-row:1/3;margin:0}
@@ -28,3 +28,5 @@
  #physicalLab .phy-element.disconnected,#physicalLab .phy-element.affected{border-width:2px}
 }
 @media(min-width:901px){#physicalLab .phy-module .phy-status{min-height:32px}}
+
+@media(max-width:900px){#physicalLab :is(.phy-ap1,.phy-ap2)>:is(strong,small,.phy-status){margin-left:18px}}
