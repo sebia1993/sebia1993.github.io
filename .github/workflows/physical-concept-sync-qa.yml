@@ -4,7 +4,7 @@ on:
     branches: [work/physical-concept-sync-20261008]
     paths: [.github/workflows/physical-concept-sync-qa.yml]
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: physical-concept-sync-qa
   cancel-in-progress: false
@@ -12,88 +12,40 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      PUBLIC_CHECK: 'false'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - uses: pnpm/action-setup@v4
         with:
           version: 11.19.0
-      - name: Apply guarded simulator integration and history-state repair
-        if: env.PUBLIC_CHECK == 'false'
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('tools/apply-physical-concept-sync.py')
-          s=p.read_text()
-          old=r'id=\"physicalTopology\"'
-          assert s.count(old)==1
-          p.write_text(s.replace(old,r'id=\"physicalTopology'))
-          PY
-          python3 tools/apply-physical-concept-sync.py
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('labs/physical-network-simulator.html')
-          s=p.read_text()
-          a='<select id="practiceGroup" aria-label="실습 묶음 선택">'
-          b='<select id="practiceGroup" autocomplete="off" aria-label="실습 묶음 선택">'
-          assert s.count(a)==1
-          p.write_text(s.replace(a,b))
-          p=Path('labs/physical-network-simulator.js')
-          s=p.read_text()
-          a="window.addEventListener('pageshow',e=>{if(e.persisted)restart();});load(0);"
-          b="window.addEventListener('pageshow',()=>{cancel();records.clear();load(0);});load(0);"
-          assert s.count(a)==1
-          p.write_text(s.replace(a,b))
-          PY
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: python3 tests/check_site.py
       - run: pnpm exec playwright install --with-deps chromium
       - run: sudo apt-get install -y fonts-noto-cjk
-      - name: Approved IP reference regression
-        if: env.PUBLIC_CHECK == 'false'
-        run: node tests/ip-network-sim.mjs
-      - name: Original physical states and complete twelve-lesson flow
-        run: node tests/physical-network-browser.mjs
-      - name: Reset replay pause answer and summary regression
-        run: node tests/physical-network-regression.mjs
-      - name: ARP shell parity and actual wall-clock playback
-        run: node tests/physical-network-accessibility.mjs
-      - name: Four viewport new lessons and accessibility checks
-        run: node tests/physical-network-sync-browser.mjs
-      - name: Compare actual published files and exercise public interactions
-        if: env.PUBLIC_CHECK == 'true'
+      - name: Verify actual published files and new lessons at four viewports
         env:
           BASE_URL: https://sebia1993.github.io
         run: node tests/physical-network-sync-browser.mjs
-      - name: Stage only verified content on work branch
-        if: env.PUBLIC_CHECK == 'false'
-        run: |
-          git diff --exit-code 9e1abb38e058116e4e856ef99cbd28524c2fe17b -- labs/physical-network.html labs/physical-network-model.js labs/physical-network-topology.js labs/physical-network.css labs/images roadmap.html labs/arp-simulator-1.css labs/arp-simulator-2.css labs/arp-simulator-3.css labs/arp-default-gateway-simulator.html labs/ip-subnetting-simulator.html
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add package.json labs/physical-network-simulator.html labs/physical-network-simulator.js labs/physical-network-simulator.css tests/physical-network-browser.mjs tests/physical-network-regression.mjs tests/physical-network-accessibility.mjs
-          git commit -m 'feat: synchronize physical simulator with updated concept examples'
-          git push origin HEAD:work/physical-concept-sync-20261008
-      - name: Record verified content blob IDs
+      - name: Public original physical states and full twelve-lesson completion
+        env:
+          BASE_URL: https://sebia1993.github.io
+        run: node tests/physical-network-browser.mjs
+      - name: Public reset, replay, grades and mixed completion summary
+        env:
+          BASE_URL: https://sebia1993.github.io
+        run: node tests/physical-network-regression.mjs
+      - name: Record exact tested source blob IDs
+        if: always()
         run: |
           mkdir -p test-results/physical-sync
           git rev-parse HEAD > test-results/physical-sync/commit.txt
           git ls-tree HEAD -- package.json labs/physical-network-simulator.html labs/physical-network-simulator.js labs/physical-network-simulator.css labs/physical-network-lessons.js tests/physical-network-browser.mjs tests/physical-network-regression.mjs tests/physical-network-accessibility.mjs tests/physical-network-sync-browser.mjs tests/physical-network-sync.test.mjs docs/physical-network-concept-sync.md > test-results/physical-sync/blobs.txt
-      - name: Archive exact candidate and screenshots for review
-        if: always()
-        run: |
-          mkdir -p test-results
-          tar --exclude=./.git --exclude=./node_modules --exclude=./test-results -czf test-results/physical-sync-site.tar.gz .
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: physical-sync-qa-${{ github.run_id }}
+          name: physical-sync-public-${{ github.run_id }}
           path: test-results/
           retention-days: 3
