@@ -1,0 +1,12 @@
+/* Place-first examples: scoped to the physical-network concept page. */
+.physical-concept #utp-application-places,.physical-concept #utp-application-cases{scroll-margin-top:24px}
+.physical-concept .utp-place-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.physical-concept .utp-place-card{min-width:0;padding:20px;border:1px solid var(--cg-line);border-radius:12px;background:var(--cg-surface);overflow-wrap:anywhere}
+.physical-concept .utp-place-card .utp-place-type{font-size:.85rem;color:var(--cg-muted);margin:0 0 8px}
+.physical-concept .utp-place-card h4{font-size:1.1rem;line-height:1.6;margin:0 0 12px}
+.physical-concept .utp-place-card p{font-size:.95rem;line-height:1.85}
+.physical-concept .utp-place-card .utp-case-meta{font-size:.85rem;color:var(--cg-muted);padding-bottom:12px;border-bottom:1px solid var(--cg-line)}
+.physical-concept .utp-place-card .utp-case-source{margin-bottom:0;font-size:.85rem}
+.physical-concept .utp-case-scope{font-size:.85rem;color:var(--cg-muted);line-height:1.85}
+.physical-concept .utp-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(max-width:700px){.physical-concept .utp-place-grid{grid-template-columns:minmax(0,1fr)}.physical-concept .utp-place-card{padding:16px}.physical-concept .utp-application-cases summary{line-height:1.8}}
