@@ -54,3 +54,14 @@
 @media(forced-colors:active){#physicalLab .inspecting{outline:3px solid Highlight}#physicalLab .strand{color:CanvasText;border-color:CanvasText}}
 
 @media(max-width:760px){#physicalLab .topology-shell,#physicalLab #predictionTitle{scroll-margin-top:76px}}
+
+/* Same distance scale in both cards; numbers remain the accessible source of meaning. */
+#physicalLab .inspection-source{font-size:11px;margin-top:12px}
+#physicalLab .inspection-source a{display:inline-block;padding:8px 0}
+#physicalLab .inspection-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#physicalLab .inspection-distance{margin:12px 0 4px}
+#physicalLab .inspection-ruler{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:10px 0 6px}
+#physicalLab .inspection-track{height:14px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+#physicalLab .inspection-range{display:block;height:100%;background:var(--green2)}
+#physicalLab .inspection-range.conditional{background:repeating-linear-gradient(135deg,var(--blue),var(--blue) 4px,var(--blue-soft) 4px,var(--blue-soft) 8px)}
+@media(forced-colors:active){#physicalLab .inspection-track{border-color:CanvasText;background:Canvas}#physicalLab .inspection-range{background:Highlight}#physicalLab .inspection-range.conditional{background:Canvas;border:2px dashed CanvasText}}
