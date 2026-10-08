@@ -16,6 +16,8 @@ jobs:
       PUBLIC_CHECK: 'false'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -24,7 +26,16 @@ jobs:
           version: 11.19.0
       - name: Apply guarded simulator integration
         if: env.PUBLIC_CHECK == 'false'
-        run: python3 tools/apply-physical-concept-sync.py
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/apply-physical-concept-sync.py')
+          s=p.read_text()
+          old=r'id=\"physicalTopology\"'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,r'id=\"physicalTopology'))
+          PY
+          python3 tools/apply-physical-concept-sync.py
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: python3 tests/check_site.py
