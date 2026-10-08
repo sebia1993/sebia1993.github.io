@@ -237,3 +237,10 @@ Replaced the four color-only chips with an original, code-drawn SVG teaching fig
 Source review CONFIRMED. No wiring, cable category, termination performance or workplace wiring standard was physically verified. No skills or simulator files changed.
 
 Browser QA: fresh pages at 360, 768, 1366 and 1920 px; two SVGs and all eight ordered pin labels render, normal and 200% root text size produce no document overflow, and no duplicate IDs, broken anchors, page errors or failed assets were found. Desktop/mobile screenshots were visually reviewed. Independent source and implementation review confirmed every color-to-pin mapping, all four pair associations and the plug viewing direction. Hardware validation NOT_RUN.
+
+
+## 2026-10-08 — Clarify the Switch B role description
+
+Reworded the Switch B card at the user's request. The heading is now “Switch B · L3 스위치”; its first sentence explains the visible relationship to Switch A through the fiber path. The second directly defines routing as forwarding data between different IP networks. Removed the vague aggregation phrase and the assumption of multiple downstream switches that are not drawn. This is an editorial clarification of the existing teaching role, with the model-scope note retained; no additional hardware or routing claim is made. The existing Cisco L2/L3 source remains applicable. No skill, simulator, diagram or stylesheet changed.
+
+Browser QA: reviewed the core section at 360 and 1366 px; the new heading and two sentences are visible without clipping. No document overflow at normal or 200% root text size, broken internal anchors, duplicate IDs, page errors or failed assets. Desktop and mobile screenshots reviewed.
