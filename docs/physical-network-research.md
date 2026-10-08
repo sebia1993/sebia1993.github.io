@@ -71,3 +71,20 @@ Optical power/DOM/DDM, loss budgets, wavelength and detailed reach tables, OM/OS
 Learner baseline: first Roadmap topic, no prior networking knowledge. AP, Switch, Port, UTP/Copper, PoE, Fiber, SFP/Transceiver, FDF, Link and Uplink are introduced with adjacent plain-language roles. No IP arithmetic, VLAN, routing or protocol knowledge is required. The required English topic title is followed by role-first pictures. One final self-explanation question and one primary lab CTA. FDF remains a supporting element; the longest instructional section is UTP.
 
 Content review fixes: distinguish AP power from upstream service, qualify Cat5e by channel conditions, avoid universal SFP speed/compatibility rules, distinguish FDF from a forwarding switch, make all model assumptions visible. No real-world claim was promoted from browser test output.
+
+
+## 2026-10-08 — Cat5e internal-structure photograph
+
+Scope: Concept Guide only. The user requested a real stripped-cable photograph to help understand occasional cable replacement. No skill, simulator, roadmap or actual network was changed.
+
+| Claim | Official documentary source | Scope / status |
+|---|---|---|
+| The common 4-pair Cat5e U/UTP example has eight individually insulated copper conductors beneath an outer jacket. | [CommScope 57535-2](https://www.commscope.com/product-type/cables/twisted-pair-cables/category-5e-cables/item57535-2/) — General/Material Specifications | Source review CONFIRMED; hardware NOT_RUN. No measurement of the user's cable model. |
+| The four pairs use blue/orange/green/brown and matching white-striped conductors. | [Belden 1213](https://www.belden.com/products/cable/ethernet-cable/category-5e-cable/1213) — Construction / Insulation | Source review CONFIRMED. Pair membership, not RJ45 pin order. |
+| Twisting reduces crosstalk; excessive untwisting at termination can impair performance. | [Fluke Networks: Physics of Twisted Pair Cabling](https://www.flukenetworks.com/blog/cabling-chronicles/physics-twisted-pair-cabling) | Source review CONFIRMED; brief structural explanation only, no termination tutorial or certification claim. |
+
+Photo: Richard Wheeler (Zephyris), “CAT5e Cable.jpg,” Wikimedia Commons. [File description and license](https://commons.wikimedia.org/wiki/File:CAT5e_Cable.jpg), [original JPEG](https://upload.wikimedia.org/wikipedia/commons/d/d1/CAT5e_Cable.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Original 2048 × 1536 JPEG copied without changes to `labs/images/cat5e-twisted-pairs.jpg`. The caption credits the author, links the source and license, and identifies this as a general example rather than a photograph from the user's workplace. Display scaling uses CSS without cropping.
+
+The earlier user-supplied operating context remains scoped to the user's managed area: Cat5e is currently used there; other teams' cabling is unknown. This is not independently measured evidence and does not identify a manufacturer, site, or complete cable plant.
+
+Browser QA: checked 360, 768, 1366 and 1920 px viewport widths, each in a fresh page. The original image loaded at 2048 × 1536, normal and doubled text sizes produced no horizontal document overflow, and no page errors or failed assets were observed. Mobile and desktop screenshots were visually reviewed. These are presentation checks, not cable or hardware validation.

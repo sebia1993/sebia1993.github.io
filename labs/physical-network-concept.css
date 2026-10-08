@@ -1,0 +1,19 @@
+/* Physical Concept Guide only: sourced cable photograph and adjacent explanations. */
+.physical-concept .cable-inside{scroll-margin-top:24px}
+.physical-concept .cable-photo-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:24px}
+.physical-concept .cable-photo-link{display:block;min-width:0;border-radius:12px;overflow:hidden}
+.physical-concept .cable-photo img{display:block;width:100%;height:auto}
+.physical-concept .cable-photo-notes{min-width:0}
+.physical-concept .cable-photo-count{margin:0 0 14px;color:#aeead8!important;font-size:1.15rem}
+.physical-concept .cable-photo-notes ol{padding-left:22px;margin:0}
+.physical-concept .cable-photo-notes li+li{margin-top:12px}
+.physical-concept .cable-photo-credit{display:block;margin-top:8px;font-size:.78rem}
+.physical-concept .cable-photo-credit a{color:#82caff}
+.physical-concept .cable-pairs{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:16px 0;padding:0}
+.physical-concept .cable-pairs li{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cg-raised);border:1px solid var(--cg-line);border-radius:10px}
+.physical-concept .cable-pair-dot{width:14px;height:14px;flex:0 0 14px;border:1px solid #b6c7d8;border-radius:50%}
+.physical-concept .pair-orange{background:#f2994a}.physical-concept .pair-green{background:#54b783}.physical-concept .pair-blue{background:#559edd}.physical-concept .pair-brown{background:#a97855}
+.physical-concept .cable-pair-note{font-size:.85rem;color:var(--cg-muted)!important}
+@media(max-width:800px){.physical-concept .cable-photo-layout{grid-template-columns:1fr;gap:18px}}
+@media(max-width:480px){.physical-concept .cable-pairs{grid-template-columns:1fr}}
+@media(forced-colors:active){.physical-concept .cable-photo-link{border:1px solid CanvasText}}
