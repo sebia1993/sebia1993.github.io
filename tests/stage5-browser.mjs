@@ -41,7 +41,8 @@ try{
    await page.evaluate(()=>document.fonts.ready);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${topic} concept overflow`);
    if(topic==='wifi-rf'){
-    const diagram=page.locator('img[src="wifi-rf-spectrum.svg"]');
+    // Match the same asset with or without a cache-busting query string.
+    const diagram=page.locator('#cg-picture img[src="wifi-rf-spectrum.svg"], #cg-picture img[src^="wifi-rf-spectrum.svg?"]');
     assert.ok(await diagram.evaluate(e=>e.complete&&e.naturalWidth>0));
     assert.ok((await diagram.boundingBox()).width<=400);
    }
