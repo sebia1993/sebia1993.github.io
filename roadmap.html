@@ -212,15 +212,16 @@ fetch('./learning-data.json',{cache:'no-store'}).then(function(r){
 
       const hasPage=Boolean(t.detailUrl);
       const hasInteractive=Boolean(interactiveUrls[t.id]);
+      const isDraft=t.contentStatus==='draft';
       const badgeClass=hasInteractive?'active':hasPage?'next':'planned';
-      const badgeText=hasInteractive?'2단계 학습 가능':hasPage?'학습 페이지 준비됨':esc(t.statusLabel||'예정');
+      const badgeText=isDraft?'학습 초안 · 검증 대기':hasInteractive?'2단계 학습 가능':hasPage?'학습 페이지 준비됨':esc(t.statusLabel||'예정');
       const summary=summaryOverrides[t.id]||t.summary||'';
 
       let actions='';
       if(hasInteractive && hasPage){
         actions='<div class="topic-actions"><a class="btn primary" href="'+esc(t.detailUrl)+'">1단계 · 개념서 →</a><a class="btn" href="'+esc(interactiveUrls[t.id])+'">2단계 · 실습 →</a></div>';
       }else if(hasPage){
-        actions='<div class="topic-actions"><a class="btn" href="'+esc(t.detailUrl)+'">학습 페이지 →</a></div>';
+        actions='<div class="topic-actions"><a class="btn" href="'+esc(t.detailUrl)+'">'+(isDraft?'학습 초안 보기 →':'학습 페이지 →')+'</a></div>';
       }else{
         actions='<span class="disabled">학습 순서에 따라 페이지를 추가합니다.</span>';
       }
