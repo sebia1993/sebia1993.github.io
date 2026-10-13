@@ -1,0 +1,16 @@
+{
+  "html_structure": "PASS",
+  "unique_ids_and_internal_anchors": "PASS",
+  "single_h1": "PASS",
+  "shared_theme": "PASS",
+  "consistent_devices": "PASS",
+  "static_diagrams": 3,
+  "device_count": 6,
+  "no_broken_future_lab_link": "PASS",
+  "draft_and_noindex": "PASS",
+  "evidence_counters_unchanged": "PASS",
+  "css_delimiters": "PASS",
+  "css_full_parser": "NOT_RUN",
+  "browser_viewports": "NOT_RUN",
+  "actual_network_validation": "NOT_RUN"
+}

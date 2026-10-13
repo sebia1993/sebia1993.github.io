@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Leaf–Spine 구조에서 Underlay와 Overlay를 구분하고, VXLAN과 EVPN이 서버 간 통신을 나누어 맡는 원리를 그림으로 이해합니다.">
+<meta name="robots" content="noindex">
+<title>Data Center Networking — 학습 초안</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="concept-guide.css?v=20261007-names">
+<style>
+.dc-page .dc-draft{margin:0 0 18px;padding:12px 16px;border:1px solid #8f6a38;border-radius:12px;background:#2b2926;color:#f4d29f;font-size:.86rem;line-height:1.8}
+.dc-page .dc-subtitle{margin:0 0 14px;color:#addbff;font-size:1.02rem;font-weight:700}
+.dc-page .dc-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.82rem;color:var(--cg-muted);margin-top:16px}
+.dc-page .dc-why{max-width:900px;margin:12px 0 0}
+.dc-page .dc-fabric{max-width:800px;margin:24px auto 0}
+.dc-page .dc-layer-title{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-bottom:12px;color:var(--cg-text);font-size:.85rem}
+.dc-page .dc-layer-title span{color:var(--cg-muted)}
+.dc-page .dc-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.dc-page .dc-device{width:78%;max-width:230px;min-width:0;margin-inline:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:14px 10px;border:1px solid #7296b6;border-radius:12px;background:var(--cg-raised);text-align:center}
+.dc-page .dc-device b{color:#f4f8fc;font-size:1.02rem;line-height:1.5}
+.dc-page .dc-device span{color:var(--cg-muted);font-size:.82rem;line-height:1.7}
+.dc-page .dc-device-leaf{border-color:#7ee0c2;background:#15342f}
+.dc-page .dc-device-leaf span{color:#c1e5db}
+.dc-page .dc-device-host{background:#192741;border-style:dashed}
+.dc-page .dc-wire{display:block;width:100%;height:100px;overflow:visible}
+.dc-page .dc-wire path{fill:none;stroke:#90adc9;stroke-width:2;vector-effect:non-scaling-stroke}
+.dc-page .dc-wire .dc-cross-halo{stroke:var(--cg-surface);stroke-width:7}
+.dc-page .dc-host-wire{height:40px}
+.dc-page .dc-key{display:flex;flex-wrap:wrap;gap:8px 22px;margin:16px 0 0;color:var(--cg-muted);font-size:.8rem;line-height:1.8}
+.dc-page .dc-key span{display:flex;align-items:center;gap:8px}
+.dc-page .dc-key i{width:25px;height:0;border-top:2px solid #90adc9}
+.dc-page .dc-caption-note{display:block;margin-top:6px}
+.dc-page .dc-aside{padding:14px 18px;border-left:3px solid #addbff;background:#102439;border-radius:0 10px 10px 0;margin:16px 0 0;font-size:.92rem}
+.dc-page .dc-aside b{color:#addbff}
+.dc-page .dc-layer-model{display:grid;gap:18px}
+.dc-page .dc-overlay{padding:18px;border:2px dashed #b7a8ff;border-radius:12px;background:#252740}
+.dc-page .dc-overlay h3,.dc-page .dc-underlay h3{font-size:1rem;margin:0 0 8px;color:#ede9ff}
+.dc-page .dc-overlay p,.dc-page .dc-underlay p{margin:4px 0 0;font-size:.92rem}
+.dc-page .dc-endpoints{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;margin-top:14px;text-align:center}
+.dc-page .dc-endpoints strong{display:block;color:#f4f8fc}
+.dc-page .dc-endpoints small{display:block;color:var(--cg-muted);font-size:.83rem;line-height:1.8}
+.dc-page .dc-endpoints .dc-logical-line{color:#d2c8ff;font-weight:800;padding:6px}
+.dc-page .dc-underlay{padding:18px;border:1px solid #7296b6;border-radius:12px;background:#142d43}
+.dc-page .dc-underlay h3{color:#addbff}
+.dc-page .dc-path{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:12px 0 0;color:#e7f2fc;font-size:.92rem}
+.dc-page .dc-path b{padding:5px 10px;background:#0c1c2c;border:1px solid #58738c;border-radius:7px}
+.dc-page .dc-packet{padding:18px;border:2px solid #76bdeb;border-radius:14px;background:#15324a;margin-top:12px}
+.dc-page .dc-packet-label{display:block;color:#d8ecff;font-weight:800;font-size:.95rem}
+.dc-page .dc-packet small{display:block;margin-top:5px;color:#c4d9ea;font-size:.84rem;line-height:1.8}
+.dc-page .dc-vxlan{margin-top:14px;padding:14px;border:1px dashed #b7a8ff;border-radius:10px;background:#272a46;color:#e2dbff;font-size:.92rem;line-height:1.8}
+.dc-page .dc-inner{margin-top:12px;padding:16px;border:1px solid #7ee0c2;border-radius:10px;background:#15342f;color:#e2f4ee}
+.dc-page .dc-inner small{color:#c1e5db}
+.dc-page .dc-compare-wrap{border-radius:14px;overflow:hidden;border:1px solid var(--cg-line)}
+.dc-page .dc-compare-wrap .cg-table th:first-child{width:26%}
+.dc-page .dc-refs{padding:0 20px 18px}
+.dc-page .dc-refs ul{padding-left:20px;margin-bottom:0}
+.dc-page .dc-refs li{margin:12px 0;color:var(--cg-text);line-height:1.8;font-size:.88rem}
+.dc-page .dc-refs a{color:#addbff;text-underline-offset:3px}
+.dc-page .dc-refs small{display:block;color:var(--cg-muted);font-size:.83rem}
+.dc-page .dc-next-status{font-size:.88rem;margin-top:10px!important;color:#d6e7e2!important}
+.dc-page .dc-self-answer{margin-top:14px;border-top:1px solid #8f6a38;padding-top:10px;color:var(--cg-text);font-size:.91rem}
+.dc-page .dc-self-answer summary{cursor:pointer;min-height:44px;display:list-item;padding:9px 0;color:#f4d29f;font-weight:700}
+.dc-page .dc-self-answer p{margin:8px 0 0}
+@media(max-width:680px){
+ .dc-page .dc-device{width:87%;padding:12px 6px}
+ .dc-page .dc-wire{height:76px}
+ .dc-page .dc-host-wire{height:32px}
+ .dc-page .dc-layer-title{display:block;line-height:1.8}
+ .dc-page .dc-layer-title span{display:block}
+ .dc-page .dc-compare-wrap .cg-table th:first-child{width:31%}
+ .dc-page .dc-overlay,.dc-page .dc-underlay,.dc-page .dc-packet{padding:14px}
+ .dc-page .dc-vxlan,.dc-page .dc-inner{padding:11px}
+ .dc-page .dc-endpoints{grid-template-columns:1fr}
+ .dc-page .dc-logical-line{transform:rotate(90deg)}
+}
+@media(forced-colors:active){
+ .dc-page .dc-wire path{stroke:CanvasText}
+ .dc-page .dc-wire .dc-cross-halo{stroke:Canvas}
+ .dc-page .dc-overlay,.dc-page .dc-device,.dc-page .dc-packet,.dc-page .dc-inner{border-color:CanvasText}
+}
+</style>
+</head>
+<body class="concept-page dc-page" data-topic="dc-fabric" data-content-status="draft">
+<a class="cg-skip" href="#cg-main">본문으로 건너뛰기</a>
+<header class="cg-header"><div class="cg-shell cg-topbar">
+ <a href="../roadmap.html#topics">← 학습 로드맵</a>
+ <nav aria-label="학습 목차"><a href="#cg-picture">핵심 그림</a><a href="#cg-flow">전달 순서</a><a href="#cg-review">복습</a></nav>
+</div></header>
+<main id="cg-main" tabindex="-1">
+<section class="cg-hero"><div class="cg-shell">
+ <aside class="dc-draft" aria-label="제작 상태"><strong>학습 초안</strong> · 공식 문헌을 바탕으로 작성했습니다. 실제 장비·패킷 검증 전이며, 최종 학습 자료로 승인된 버전은 아닙니다.</aside>
+ <p class="cg-kicker">8단계 · DATA CENTER NETWORKING · 1단계 개념 이해</p>
+ <h1>서버를 잇는 길과<br>논리 네트워크를 나누어 생각하기</h1>
+ <p class="dc-subtitle">Leaf–Spine / VXLAN / EVPN</p>
+ <p class="cg-goal">Server A에서 Server B로 가는 길을 따라가며, 실제 운반망과 그 위의 논리 네트워크가 각각 무엇을 맡는지 설명합니다.</p>
+ <p class="cg-prior">앞선 학습 · <a href="vlan-trunk.html">VLAN</a>, <a href="routing-table.html">라우팅</a>, <a href="bgp.html">BGP</a>를 연결합니다. 로드맵의 직전 주제는 <a href="network-automation.html">Network Automation</a>입니다.</p>
+ <div class="dc-meta"><span>읽는 시간 약 7~8분</span><span>장비 4대 · 서버 2대의 같은 예시</span></div>
+</div></section>
+
+<section class="cg-section" id="cg-picture"><div class="cg-shell">
+ <p class="cg-kicker">01 · 질문과 그림으로 시작</p>
+ <h2>서로 다른 스위치에 연결된 서버를 같은 네트워크로 묶으려면?</h2>
+ <p class="dc-why">데이터센터에는 서비스를 실행하고 데이터를 저장하는 서버가 모여 있습니다. 사용자와 서버 사이뿐 아니라, 서버끼리도 데이터를 주고받습니다. 서버가 늘어날 때 연결을 확장하면서도, 서비스별 네트워크는 나누어 유지해야 합니다.</p>
+ <p class="cg-summary"><b>30초 핵심</b> · 먼저 서버 사이를 오갈 수 있는 IP 운반망을 만듭니다. 그 위에서 원래 프레임에 운반용 정보를 덧붙여 보내면, 떨어진 서버도 같은 논리 네트워크로 묶을 수 있습니다.</p>
+ <figure class="cg-figure" aria-labelledby="fabric-title">
+  <strong id="fabric-title">먼저 배선과 장비의 역할만 보세요.</strong>
+  <div class="dc-fabric">
+   <div class="dc-layer-title"><b>서버 연결 스위치 사이를 이어 주는 계층</b><span>여기에 Spine이라는 이름을 붙입니다.</span></div>
+   <div class="dc-row">
+    <div class="dc-device" data-device="sw-c"><b>Switch C</b><span>Spine · L3 중계</span></div>
+    <div class="dc-device" data-device="sw-d"><b>Switch D</b><span>Spine · L3 중계</span></div>
+   </div>
+   <svg class="dc-wire" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path d="M25 0 V100 M75 0 V100 M25 0 L75 100"/>
+    <path class="dc-cross-halo" d="M75 0 L25 100"/>
+    <path d="M75 0 L25 100"/>
+   </svg>
+   <div class="dc-row">
+    <div class="dc-device dc-device-leaf" data-device="sw-a"><b>Switch A</b><span>Leaf · 서버 연결</span></div>
+    <div class="dc-device dc-device-leaf" data-device="sw-b"><b>Switch B</b><span>Leaf · 서버 연결</span></div>
+   </div>
+   <svg class="dc-wire dc-host-wire" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M25 0 V100 M75 0 V100"/></svg>
+   <div class="dc-row">
+    <div class="dc-device dc-device-host" data-device="server-a"><b>Server A</b><span>10.10.10.11/24</span></div>
+    <div class="dc-device dc-device-host" data-device="server-b"><b>Server B</b><span>10.10.10.12/24</span></div>
+   </div>
+  </div>
+  <div class="dc-key"><span><i aria-hidden="true"></i>실선 = 장비 사이의 링크</span><span>선의 교차 = 연결점이 아님</span></div>
+  <figcaption>Switch A와 Switch B는 각각 Switch C·Switch D 모두에 연결됩니다. Switch A에서 Switch B까지는 Switch C를 거치는 길과 Switch D를 거치는 길이 있습니다. 서버 주소는 학습용 예시입니다.<span class="dc-caption-note">이 그림은 2계층 Leaf–Spine 구성의 축소 예시입니다. 서버 이중 연결과 외부망 연결은 생략했습니다.</span></figcaption>
+ </figure>
+ <dl class="cg-terms">
+  <div><dt>Leaf / Spine</dt><dd>Leaf는 서버를 연결하고, Spine은 Leaf 사이를 잇습니다. 이 예시의 Leaf는 단순 L2 스위치가 아니라 <b>L3 전달 기능도 사용하는 장비</b>입니다.</dd></div>
+  <div><dt>Fabric</dt><dd>여러 스위치가 함께 만드는 연결망입니다. 여기서는 각 Leaf를 모든 Spine에 연결하여 구성합니다.</dd></div>
+ </dl>
+ <p class="dc-aside"><b>길이 두 개면 데이터를 두 번 보낼까요?</b> 비용이 같은 여러 경로를 이용하는 ECMP를 구성할 수 있습니다. 일반적으로 흐름별로 길을 골라 분산하며, 같은 패킷을 두 길로 복제하는 뜻은 아닙니다. 이 예시에서는 Switch C 경로 하나를 따라갑니다.</p>
+</div></section>
+
+<section class="cg-section" id="cg-layers"><div class="cg-shell">
+ <p class="cg-kicker">02 · 같은 연결을 두 가지 관점으로 보기</p>
+ <h2>운반하는 길과, 그 길 위에 만든 네트워크</h2>
+ <figure class="cg-figure" aria-labelledby="layers-title">
+  <strong id="layers-title">새 케이블을 추가하는 것이 아니라 역할을 나눕니다.</strong>
+  <div class="dc-layer-model" style="margin-top:18px">
+   <div class="dc-overlay">
+    <h3>Overlay · 서비스가 사용하는 논리 네트워크</h3>
+    <p>서로 다른 Leaf에 있는 두 서버를 같은 L2 네트워크에 연결합니다.</p>
+    <div class="dc-endpoints"><div><strong>Server A</strong><small>10.10.10.11/24</small></div><span class="dc-logical-line" aria-hidden="true">↔</span><div><strong>Server B</strong><small>10.10.10.12/24</small></div></div>
+   </div>
+   <div class="dc-underlay">
+    <h3>Underlay · 실제 패킷을 운반하는 IP 네트워크</h3>
+    <p>Switch A에서 Switch B의 터널 끝점 주소까지 도달할 수 있도록 라우팅합니다.</p>
+    <div class="dc-path" aria-label="선택한 운반 경로: Switch A에서 Switch C를 거쳐 Switch B"><b>Switch A</b><span aria-hidden="true">→</span><b>Switch C</b><span aria-hidden="true">→</span><b>Switch B</b></div>
+   </div>
+  </div>
+  <figcaption>점선 상자는 논리적인 연결 범위이며 직접 연결한 케이블이 아닙니다. 두 서버를 같은 서브넷의 서로 다른 IP 주소로 설정하는 것만으로 연결되지는 않습니다. 해당 논리 네트워크 설정과 그 사이를 운반할 경로가 함께 필요합니다.</figcaption>
+ </figure>
+ <p class="dc-aside"><b>기존 VLAN 학습과 연결하면</b> · VLAN은 연결된 L2 구간을 나누는 방식이었습니다. 여기서는 그 L2 연결을 IP 운반망 너머로 이어 줍니다. 이때 원래 Ethernet 프레임을 IP 패킷 안에 넣는 방식이 <b>VXLAN</b>입니다.</p>
+</div></section>
+
+<section class="cg-section" id="cg-vxlan"><div class="cg-shell">
+ <p class="cg-kicker">03 · 원래 프레임에 운반용 정보를 덧붙이기</p>
+ <h2>서버의 목적지와 운반망의 목적지는 다릅니다.</h2>
+ <p>이 예시에서 Switch A는 Server A의 프레임을 감싸고, Switch B는 감싼 정보를 벗겨 Server B로 전달합니다. VXLAN의 이런 입구·출구 역할을 <b>VTEP(터널 끝점)</b>이라고 부릅니다.</p>
+ <figure class="cg-figure" aria-labelledby="packet-title">
+  <strong id="packet-title">Switch A → Switch B로 운반 중인 패킷을 펼쳐 보면</strong>
+  <div class="dc-packet">
+   <span class="dc-packet-label">운반용 정보 · 바깥쪽 IP + UDP</span>
+   <small>출발 VTEP: Switch A · 192.0.2.11 → 목적 VTEP: Switch B · 192.0.2.12<br>UDP는 여기서 VXLAN 데이터를 운반하는 데 사용하는 프로토콜입니다.</small>
+   <div class="dc-vxlan"><b>VXLAN 정보 · VNI 10100</b><br>어느 논리 L2 네트워크에 속하는지 식별하는 번호
+    <div class="dc-inner"><strong>원래 Ethernet 프레임</strong><small>목적 MAC: Server B의 MAC<br>안쪽 IP: 10.10.10.11 → 10.10.10.12</small></div>
+   </div>
+  </div>
+  <figcaption>중간의 Switch C는 바깥쪽 목적 IP를 기준으로 Switch B 쪽으로 전달합니다. 여기서는 VXLAN을 끝내지 않는 L3 중계 역할로 그렸습니다. 그림은 역할 구분용이며 실제 헤더의 전체 필드·길이를 표현하지 않습니다.</figcaption>
+ </figure>
+ <dl class="cg-terms">
+  <div><dt>VNI</dt><dd>VXLAN의 24비트 네트워크 식별자입니다. 이 예시에서 <b>10100</b>은 두 서버가 속할 논리 L2 네트워크를 뜻합니다. 로컬 VLAN을 이 VNI에 연결하며, VLAN 번호와 VNI 숫자가 같을 필요는 없습니다.</dd></div>
+ </dl>
+ <p class="cg-scope">이번 범위 · Server A/B는 같은 서브넷·같은 L2 VNI에 있습니다. 서로 다른 VNI 사이의 라우팅은 다루지 않습니다. VXLAN으로 감싸는 것 자체가 데이터 암호화를 뜻하지는 않습니다.</p>
+</div></section>
+
+<section class="cg-section" id="cg-flow"><div class="cg-shell">
+ <p class="cg-kicker">04 · 목적지 위치를 알고 있을 때의 전달 순서</p>
+ <h2>그런데 Switch A는 “Server B가 Switch B 뒤에 있다”는 것을 어떻게 알까요?</h2>
+ <p><b>EVPN</b>은 BGP로 끝점의 도달 정보를 주고받는 제어 기능입니다. 이 예시에서는 Server B의 MAC 주소와 도달할 VTEP 정보를 배워 둡니다. <b>EVPN은 위치를 알리고, VXLAN은 실제 프레임을 운반합니다.</b></p>
+ <p class="cg-scope">시작 조건 · Underlay 경로, VNI 연결, EVPN 경로와 원격 MAC 전달 정보가 준비되어 있고, Server A도 ARP로 Server B의 MAC 주소를 알고 있습니다. 따라서 이미 아는 한 목적지로 보내는 Known Unicast만 살펴봅니다.</p>
+ <ol class="cg-steps">
+  <li><b>Server A → Switch A</b><br>Server B가 같은 서브넷이므로 Server B의 MAC 주소를 목적지로 한 프레임을 보냅니다.</li>
+  <li><b>Switch A가 감쌉니다.</b><br>Server B의 MAC에 대응하는 원격 VTEP가 Switch B임을 확인합니다. VNI 10100과 바깥쪽 목적 IP 192.0.2.12를 붙입니다.</li>
+  <li><b>Switch C가 중계합니다.</b><br>선택된 Underlay 경로를 따라 Switch B로 IP 패킷을 전달합니다. 원래 서버 프레임의 목적지를 다시 결정하는 단계가 아닙니다.</li>
+  <li><b>Switch B → Server B</b><br>VNI 10100에 대응하는 로컬 L2 네트워크를 확인하고 VXLAN 포장을 벗깁니다. 해당 네트워크에서 Server B의 포트로 원래 프레임을 전달합니다.</li>
+ </ol>
+ <p class="dc-aside"><b>두 가지 “라우팅”을 구분하세요.</b> 운반망에서는 바깥쪽 IP 패킷을 라우팅합니다. 하지만 여기서 두 서버는 같은 L2 네트워크에 있으므로, Server A의 원래 패킷을 다른 서브넷으로 라우팅하는 예시는 아닙니다.</p>
+</div></section>
+
+<section class="cg-section" id="cg-compare"><div class="cg-shell">
+ <p class="cg-kicker">05 · 헷갈리기 쉬운 역할</p>
+ <h2>각각 다른 질문에 답합니다.</h2>
+ <div class="dc-compare-wrap"><table class="cg-table">
+  <caption class="cg-scope" style="padding:12px;text-align:left">이 페이지의 같은 서브넷·같은 L2 VNI 예시 기준</caption>
+  <thead><tr><th scope="col">구분</th><th scope="col">맡는 역할</th></tr></thead>
+  <tbody>
+   <tr><th scope="row">Leaf–Spine</th><td>서버 연결 장비와 중계 장비를 어떻게 연결할까?</td></tr>
+   <tr><th scope="row">Underlay</th><td>목적 VTEP의 IP 주소까지 어떤 길로 운반할까?</td></tr>
+   <tr><th scope="row">Overlay / VNI</th><td>어떤 논리 네트워크에 속한 통신일까?</td></tr>
+   <tr><th scope="row">VXLAN</th><td>원래 프레임을 IP 네트워크 위로 어떻게 실어 보낼까?</td></tr>
+   <tr><th scope="row">EVPN</th><td>원격 끝점에 도달할 정보를 어떻게 서로 알릴까?</td></tr>
+  </tbody>
+ </table></div>
+ <p class="cg-scope">Leaf–Spine이라고 반드시 VXLAN을 쓰는 것은 아닙니다. 또 VXLAN 자체가 EVPN을 필수로 요구하는 것은 아닙니다. 여기서는 함께 사용하는 한 가지 구성을 배우고 있습니다.</p>
+</div></section>
+
+<section class="cg-section" id="cg-review"><div class="cg-shell">
+ <p class="cg-kicker">06 · 복습</p>
+ <h2>꼭 기억할 네 가지</h2>
+ <div class="cg-review">
+  <ul><li>Leaf는 서버를 연결하고 Spine은 Leaf 사이를 잇습니다.</li><li>Underlay는 IP 운반망, Overlay는 그 위의 논리 네트워크입니다.</li><li>VTEP가 VXLAN 포장을 붙이고 벗기며, VNI로 네트워크를 구분합니다.</li><li>EVPN은 도달 정보를 알리고 VXLAN은 실제 데이터를 운반합니다.</li></ul>
+  <article class="cg-question"><h3>내 말로 설명하기</h3><p>Server B의 IP는 10.10.10.12인데, 중간의 Switch C가 192.0.2.12를 목적지로 보는 이유는 무엇일까요?</p>
+   <details class="dc-self-answer"><summary>설명 방향 확인하기</summary><p>10.10.10.12는 원래 프레임 안의 서버 목적지입니다. Switch A가 그 프레임을 Switch B까지 운반하려고 바깥쪽 IP 정보를 붙였기 때문에, Switch C는 목적 VTEP 주소인 192.0.2.12를 보고 전달합니다.</p></details>
+  </article>
+ </div>
+</div></section>
+
+<section class="cg-section" id="cg-next"><div class="cg-shell">
+ <div class="cg-next"><div><p class="cg-kicker">다음 학습 · 2단계 실습</p><h2>다음에는 두 겹의 경로를 직접 관찰합니다.</h2><p>바깥쪽 목적지와 안쪽 목적지가 어디서 사용되는지 확인할 예정입니다.</p><p class="dc-next-status">실습 페이지는 아직 준비 중입니다.</p></div><a class="cg-primary" href="../roadmap.html#topics">로드맵으로 돌아가기 →</a></div>
+ <p class="cg-scope">학습 범위 · 같은 L2 VNI의 Known Unicast. 첫 ARP·Broadcast 처리, 서로 다른 서브넷의 라우팅, 이중 연결, 장애 수렴 시간, 장비별 설정은 이번 기본 설명에서 제외했습니다.</p>
+</div></section>
+
+<details class="cg-shell cg-evidence" id="cg-sources"><summary>선택 · 공식 출처와 설명 범위 보기</summary>
+ <div class="dc-refs">
+  <p class="cg-evidence-intro" style="padding:0">공식 문헌 확인: 2026-10-13. 아래 자료는 설명의 문헌 근거입니다. 이번 제작에서 실제 장비의 동작을 관측한 기록을 뜻하지 않습니다.</p>
+  <ul>
+   <li><a href="https://www.rfc-editor.org/rfc/rfc7938.html">RFC 7938 · 대규모 데이터센터의 BGP 라우팅</a><small>§3.2, §6 · Clos 계열 구조와 다중 경로 설계. Informational 문서입니다.</small></li>
+   <li><a href="https://www.rfc-editor.org/rfc/rfc7348.html">RFC 7348 · VXLAN</a><small>§4, §4.1, §5 · Overlay, VTEP, VNI와 캡슐화. Informational 문서이며, 이 문서의 데이터 평면 학습 예시를 EVPN의 동작 근거로 사용하지 않았습니다.</small></li>
+   <li><a href="https://www.rfc-editor.org/rfc/rfc8365.html">RFC 8365 · EVPN을 사용하는 네트워크 가상화 Overlay</a><small>§4, §5.1 · EVPN 제어 기능과 VXLAN 데이터 전달의 결합. Standards Track 문서입니다.</small></li>
+   <li><a href="https://www.rfc-editor.org/rfc/rfc7432.html">RFC 7432 · BGP EVPN</a><small>§7.2, §9.2 · MAC/IP Advertisement Route. IP 정보는 선택 사항이며, EVPN이 광고하는 모든 경로가 서버 IP를 반드시 포함하는 것은 아닙니다.</small></li>
+  </ul>
+  <p class="cg-scope">이 그림에서는 Leaf가 VTEP를 겸하고 Spine은 L3 중계만 맡습니다. 실제 설계에서는 역할이 달라질 수 있습니다. EVPN의 모든 경로 유형이나 BGP 세션 배치를 그린 것은 아닙니다.</p>
+ </div>
+</details>
+</main>
+<footer class="cg-footer"><div class="cg-shell">Data Center Networking · 학습 초안 · 개념 이해 → 실습 확인</div></footer>
+</body>
+</html>
