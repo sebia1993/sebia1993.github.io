@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="670" viewBox="0 0 400 670" role="img" aria-labelledby="title desc">
+  <title id="title">같은 축에서 비교하는 채널 폭과 겹침</title>
+  <desc id="desc">위: 같은 80 MHz 공간을 20 MHz 네 칸으로 나눴습니다. 20, 40, 80 MHz는 각각 한 칸, 두 칸, 네 칸을 사용합니다. 아래: ch1 중심 2412 MHz, ch3 중심 2422 MHz를 같은 주파수 축에서 비교합니다. 각각 20 MHz인 명목 구간은 2412부터 2422 MHz까지 10 MHz 겹칩니다. 실제 간섭 피해 측정이 아닙니다.</desc>
+  <rect width="400" height="670" rx="14" fill="#102439"/>
+  <g font-family="system-ui, sans-serif" fill="#edf5fc" font-size="19">
+    <text x="18" y="32" font-weight="700">같은 80 MHz 공간에서 폭 비교</text>
+    <text x="18" y="60" fill="#b6c7d8" font-size="18">색: 사용한 칸 · 빈칸: 남은 공간</text>
+    <g stroke="#58738c" stroke-dasharray="4 5">
+      <path d="M112 82V255M178 82V255M244 82V255M310 82V255M376 82V255"/>
+    </g>
+    <g fill="#142d43" stroke="#7895ae">
+      <rect x="112" y="88" width="264" height="32" rx="3"/>
+      <rect x="112" y="148" width="264" height="32" rx="3"/>
+      <rect x="112" y="208" width="264" height="32" rx="3"/>
+    </g>
+    <g fill="#4c9b88" stroke="#9be8d1">
+      <rect data-width-mhz="20" x="112" y="88" width="66" height="32" rx="3"/>
+      <rect data-width-mhz="40" x="112" y="148" width="132" height="32" rx="3"/>
+      <rect data-width-mhz="80" x="112" y="208" width="264" height="32" rx="3"/>
+    </g>
+    <text x="18" y="111">20 MHz</text><text x="18" y="171">40 MHz</text><text x="18" y="231">80 MHz</text>
+    <text x="112" y="280" fill="#b6c7d8" font-size="18">한 칸 = 20 MHz</text>
+    <path d="M18 303H382" stroke="#58738c"/>
+    <text x="18" y="338" font-weight="700">중심은 10 MHz 차이, 폭은 20 MHz</text>
+    <text x="18" y="366" fill="#b6c7d8" font-size="18">두 줄은 같은 주파수 축을 사용합니다.</text>
+    <g stroke="#58738c" stroke-dasharray="4 5">
+      <path d="M28 392V550M142 392V550M256 392V550M370 392V550"/>
+    </g>
+    <rect data-channel="1" x="28" y="407" width="228" height="38" rx="4" fill="#254f70" stroke="#90c8ee"/>
+    <rect data-channel="3" x="142" y="469" width="228" height="38" rx="4" fill="#4d422c" stroke="#ffcf83"/>
+    <path d="M142 400V451M256 462V514" stroke="#edf5fc" stroke-width="2"/>
+    <text x="44" y="433">ch1 · 중심 2412</text>
+    <text x="159" y="496">ch3 · 중심 2422</text>
+    <path d="M28 544H370" stroke="#9cb5cb"/>
+    <g text-anchor="middle" fill="#d7e3ef" font-size="18">
+      <text x="28" y="571">2402</text><text x="142" y="571">2412</text><text x="256" y="571">2422</text><text x="370" y="571">2432</text>
+    </g>
+    <text x="313" y="597" fill="#b6c7d8" font-size="18">MHz</text>
+    <path d="M142 605V618H256V605" stroke="#9be8d1" fill="none" stroke-width="2"/>
+    <text x="199" y="646" text-anchor="middle" fill="#aeead8">겹침 10 MHz · 명목 구간</text>
+  </g>
+</svg>

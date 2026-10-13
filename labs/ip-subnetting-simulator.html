@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="lab-ui-version" content="20261007-arp-template-v1">
+<meta name="lab-ui-version" content="20261013-audit-v1">
 <meta name="description" content="먼저 예상하고 주소 범위를 관찰하세요. ARP 실습과 같은 UI에서 IP의 Network, Broadcast, Host 범위를 확인합니다.">
 <title>IP / Subnetting — 실습</title>
 <link rel="icon" href="data:,">
@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="arp-simulator-3.css?v=20260921-mode17">
 <link rel="stylesheet" href="arp-simulator-mobile.css?v=20260921-mode17">
 <link rel="stylesheet" href="arp-simulator-mobile-follow.css?v=20260921-mode17">
-<link rel="stylesheet" href="ip-subnetting-simulator.css?v=20261007-arp-template-v1">
+<link rel="stylesheet" href="ip-subnetting-simulator.css?v=20261013-audit-v1">
 </head>
 <body data-sim-mode="basic">
 <div class="wrap" id="ipLab" data-state="IDLE">
@@ -38,10 +38,11 @@
   <button type="button" class="view-mode-btn" data-view-mode="advanced" aria-pressed="false"><b>고급 모드</b><small>자유 계산 · 검증 근거</small></button>
  </div>
 </section>
-<div class="beginner-key"><b>처음이라면 이 순서만 기억하세요.</b><span><strong>경계 확인 → 주소 범위 나누기 → 내 IP가 속한 범위 → 시작·끝·Host 확인</strong></span></div>
+<div class="beginner-key"><b>처음이라면 이 순서만 기억하세요.</b><span><strong>같은 네트워크 판단 → 경계 변경·복구 → 주소 범위 계산</strong></span></div>
 <main class="card lab-card">
  <div class="coach"><div class="coach-icon" id="coachIcon">1</div><div><div class="coach-title" id="coachTitle"></div><div class="coach-text" id="coachText"></div></div><button class="hint-trigger" id="hintBtn">막혔나요? 힌트</button></div>
  <div class="hint-box" id="hintBox"></div>
+ <div class="beginner-key" id="calculationIntro" hidden><b>주소 계산을 시작하기 전에</b><span>IPv4는 32비트입니다. /26이면 Network 부분 26비트, 남은 Host 부분 6비트로 2⁶ = 64개 주소를 묶습니다. 아래 /26·/27·/30 문제에서는 묶음의 첫 주소가 Network, 마지막 주소가 Broadcast이며 그 사이가 장비에 쓸 Host 범위입니다. 예를 들어 마지막 숫자 0~63이 한 묶음이면 다음 묶음은 64부터 시작합니다. 계산 장면은 192.168.10.x 예제를 사용하며, 앞의 10.77.10.x 토폴로지와는 별도 주소 범위 연습입니다.</span></div>
  <section class="prediction-card" aria-labelledby="predictionTitle">
   <div class="prediction-copy"><small>① 예상하기 · 정답은 관찰 완료 후 공개됩니다</small><h2 id="predictionTitle" tabindex="-1"></h2><p id="predictionHelp">정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 주소 범위와 비교해 보세요.</p></div>
   <div class="prediction-options" id="predictionOptions" role="group" aria-label="예상 답 선택"></div>
@@ -50,7 +51,7 @@
   <div class="controls" id="primaryControls"><button class="ping-btn" id="runBtn" disabled>② 실행해서 확인하기</button></div>
   <div class="observation" id="modelObservation" data-flow-state="ready">
    <section class="topology-shell address-surface" id="addressSurface" aria-label="Subnet 주소 범위 시각화">
-    <div class="surface-heading"><strong>IP / SUBNETTING · ADDRESS SPACE</strong><span id="spaceScope"></span></div>
+    <div class="surface-heading"><strong>IP / Subnetting · 주소 범위</strong><span id="spaceScope"></span></div>
     <div class="address-target"><small>관찰할 IP 주소</small><strong id="targetIp"></strong><span class="protocol-badge" id="prefixBadge"></span></div>
     <div class="boundary-visual" id="boundaryVisual" aria-label="IPv4 32비트 경계"></div><div class="boundary-labels"><span id="networkBits">Network 부분</span><span id="hostBits">Host 부분</span></div>
     <div class="space-caption"><strong id="spaceTitle">주소 범위 · 실행하면 경계가 나타납니다.</strong><span id="blockSize"></span></div>
@@ -62,37 +63,37 @@
      <div class="kv" data-reveal="hosts"><label>HOST · 장비 주소 범위</label><div id="hostsOut">—</div></div>
     </div>
    </section>
-   <section class="topology-shell network-surface" id="networkSurface" hidden aria-label="PC1과 PC3는 SW1, PC2는 SW2에 연결된 네트워크">
-    <div class="surface-heading"><strong>IP / SUBNETTING · LAB TOPOLOGY</strong><span>실제 연결 위치와 IP 판단을 비교하세요.</span></div>
+   <section class="topology-shell network-surface" id="networkSurface" hidden aria-label="PC A과 PC C는 Switch A, PC B는 Switch B에 연결된 네트워크">
+    <div class="surface-heading"><strong>IP / Subnetting · 실습 토폴로지</strong><span>실제 연결 위치와 IP 판단을 비교하세요.</span></div>
     <div class="network-canvas" id="networkCanvas">
-     <div class="lan-zone zone-a"><b>LAN A · SW1 쪽</b></div><div class="lan-zone zone-b"><b>LAN B · SW2 쪽</b></div>
+     <div class="lan-zone zone-a"><b>LAN A · Switch A 쪽</b></div><div class="lan-zone zone-b"><b>LAN B · Switch B 쪽</b></div>
      <svg class="connection-layer" id="connectionLayer" aria-hidden="true"><defs><marker id="requestArrow" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#12a57e"/></marker><marker id="replyArrow" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#2f7fd0"/></marker></defs><g id="idleLinks"></g><g id="activeLinks"></g><circle id="packetMarker" r="8" fill="#0ea77d" stroke="#fff" stroke-width="3" hidden/></svg>
-     <div class="network-device pc1" data-node="pc1"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC1</strong><small id="pc1Address"></small></div>
-     <div class="network-device sw1" data-node="sw1"><svg viewBox="0 0 150 90" aria-hidden="true"><use href="ip-subnetting-devices.svg#switch"/></svg><strong>SW1</strong><small>LAN A</small></div>
-     <div class="network-device r1" data-node="r1"><svg viewBox="0 0 140 110" aria-hidden="true"><use href="ip-subnetting-devices.svg#router"/></svg><strong>R1 · Gateway</strong><small>.1/25 ↔ .129/25</small></div>
-     <div class="network-device sw2" data-node="sw2"><svg viewBox="0 0 150 90" aria-hidden="true"><use href="ip-subnetting-devices.svg#switch"/></svg><strong>SW2</strong><small>LAN B</small></div>
-     <div class="network-device pc2" data-node="pc2"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC2</strong><small>10.77.10.140/25</small></div>
-     <div class="network-device pc3" data-node="pc3"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC3</strong><small>10.77.10.20/25</small></div>
+     <div class="network-device pc1" data-node="pc1"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC A</strong><small id="pc1Address"></small></div>
+     <div class="network-device sw1" data-node="sw1"><svg viewBox="0 0 150 90" aria-hidden="true"><use href="ip-subnetting-devices.svg#switch"/></svg><strong>Switch A</strong><small>LAN A</small></div>
+     <div class="network-device r1" data-node="r1"><svg viewBox="0 0 140 110" aria-hidden="true"><use href="ip-subnetting-devices.svg#router"/></svg><strong>Router A · Gateway</strong><small>.1/25 ↔ .129/25</small></div>
+     <div class="network-device sw2" data-node="sw2"><svg viewBox="0 0 150 90" aria-hidden="true"><use href="ip-subnetting-devices.svg#switch"/></svg><strong>Switch B</strong><small>LAN B</small></div>
+     <div class="network-device pc2" data-node="pc2"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC B</strong><small>10.77.10.140/25</small></div>
+     <div class="network-device pc3" data-node="pc3"><svg viewBox="0 0 100 85" aria-hidden="true"><use href="ip-subnetting-devices.svg#pc"/></svg><strong>PC C</strong><small>10.77.10.20/25</small></div>
     </div>
-    <div class="network-comparison" id="networkComparison">PC1이 사용하는 경계와 상대 주소를 비교합니다.</div>
+    <div class="network-comparison" id="networkComparison">PC A가 사용하는 경계와 상대 주소를 비교합니다.</div>
    </section>
-   <div class="live-event-strip" id="liveEventStrip" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon" id="liveEventIcon">●</div><div class="live-event-main"><b id="liveEventTitle">관찰 대기</b><p id="liveEventDetail">예상 답을 고른 뒤 실행하면 현재 단계가 여기에 표시됩니다.</p></div><span class="live-event-kind" id="liveEventKind">대기</span></div>
+   <div class="live-event-strip" id="liveEventStrip" role="status" aria-live="polite" aria-atomic="true"><div class="live-event-icon" id="liveEventIcon">●</div><div class="live-event-main"><b id="liveEventTitle" tabindex="-1">관찰 대기</b><p id="liveEventDetail">예상 답을 고른 뒤 실행하면 현재 단계가 여기에 표시됩니다.</p></div><span class="live-event-kind" id="liveEventKind">대기</span></div>
   </div>
  </div>
  <div class="playback-controls"><button class="soft-btn" id="playbackBtn" hidden>⏸ 일시정지</button><span id="playbackStatus"></span></div>
- <section id="resultArea" hidden aria-label="내 예상과 실제 비교"><div class="prediction-feedback" id="predictionFeedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="verdictTitle"></b><span id="chosenAnswer"></span><span id="correctAnswer"></span><p id="reasonText"></p></div></section>
+ <section id="resultArea" hidden aria-label="내 예상과 실제 비교"><div class="prediction-feedback" id="predictionFeedback"><div class="prediction-feedback-title">③ 내 예상과 실제 비교</div><b id="verdictTitle" tabindex="-1"></b><span id="chosenAnswer"></span><span id="correctAnswer"></span><p id="reasonText"></p></div></section>
  <div class="next-row"><button class="soft-btn" id="resetBtn">현재 실습 다시 시작</button><button class="next-btn" id="nextBtn" disabled>완료 후 다음 실습 →</button></div>
  <details class="panel review-panel" id="reviewPanel" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body"><div class="action-bar"><button id="prevEvent">← 이전 흐름</button><span id="reviewPosition"></span><button id="nextEvent">다음 흐름 →</button></div></div></details>
- <details class="panel review-panel" id="maskPanel" hidden><summary>직접 바꿔보기 · PC1의 경계</summary><div class="panel-body"><p>답안과 점수는 유지됩니다. 실제 배치는 그대로 두고 PC1의 계산 기준만 비교합니다.</p><div class="action-bar"><button data-mask="25">/25 정상</button><button data-mask="24">/24 오설정</button></div><p id="maskResult"></p></div></details>
+ <details class="panel review-panel" id="maskPanel" hidden><summary>직접 바꿔보기 · PC A의 경계</summary><div class="panel-body"><p>답안과 점수는 유지됩니다. 실제 배치는 그대로 두고 PC A의 계산 기준만 비교합니다.</p><div class="action-bar"><button data-mask="25">/25 정상</button><button data-mask="24">/24 오설정</button></div><p id="maskResult"></p></div></details>
 </main>
 <div class="quick-next-bar" id="quickNextBar" hidden><div class="quick-next-copy"><small id="quickNextLabel">예상 선택 완료</small><strong id="quickNextCopy">여기서 바로 관찰을 시작할 수 있습니다.</strong></div><button class="quick-next-btn" id="quickNextBtn">② 실행해서 확인하기</button></div>
-<section class="course-complete" id="courseComplete" hidden><div class="eyebrow2">기초 실습 완료</div><h2>7문제의 관찰을 모두 마쳤습니다.</h2><p id="completionScore"></p><div class="completion-grid" id="summaryList"></div><div class="next-lab-actions"><button class="soft-btn" id="reviewWrongBtn">오답 다시 보기</button><button class="soft-btn" id="restartBtn">처음부터 다시</button><a href="ip-subnetting.html">개념서 다시 보기</a><a href="../roadmap.html">학습 로드맵</a></div></section>
+<section class="course-complete" id="courseComplete" tabindex="-1" hidden><div class="eyebrow2">기초 실습 완료</div><h2 id="completionTitle">관찰 결과</h2><p id="completionScore"></p><div class="completion-grid" id="summaryList"></div><div class="next-lab-actions"><button class="soft-btn" id="reviewWrongBtn">오답 다시 보기</button><button class="soft-btn" id="restartBtn">처음부터 다시</button><a href="ip-subnetting.html">개념서 다시 보기</a><a href="../roadmap.html">학습 로드맵</a></div></section>
 <div class="details-grid">
  <details class="panel" id="calculatorPanel"><summary>보조 도구 · 자유 IP / CIDR 계산</summary><div class="panel-body"><form id="calculatorForm"><div class="advanced-actions"><div class="field"><label for="ipInput">IP ADDRESS</label><input id="ipInput" value="192.168.10.70" inputmode="decimal" autocomplete="off"></div><div class="field"><label for="prefixInput">PREFIX LENGTH · 0–32</label><input id="prefixInput" value="26" inputmode="numeric" autocomplete="off"></div></div><div class="action-bar"><button type="submit">계산하기</button><button type="button" id="randomBtn">무작위 문제</button><button type="button" id="practiceInputBtn">이 주소로 예상·관찰하기</button></div></form><p id="calculatorMessage" role="status"></p><div class="packet-grid" id="calculatorResult"></div></div></details>
- <details class="panel"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>주소 계산은 저장소의 IPv4 계산 모듈을 사용합니다. /31은 Point-to-Point, /32는 Host Route 문맥입니다.</p><p>기존 네 가지 네트워크 시나리오는 Cisco 3725 IOS 12.4(15)T14 · VPCS 1.0 · PNETLab에서 확인한 2026-10-03 기록을 재사용합니다. R1의 Proxy ARP는 꺼져 있고 링크는 정상입니다. 초기 ARP 지연에 따른 ping 손실은 필수 규칙으로 모델링하지 않습니다.</p><p id="evidenceText"></p><div class="next-lab-actions"><a href="../results/ip-subnetting.json">기존 검증 요약</a><a href="ip-subnetting.html">Concept Guide</a><a href="https://www.rfc-editor.org/rfc/rfc1878">RFC 1878</a><a href="https://www.rfc-editor.org/rfc/rfc3021">RFC 3021</a></div></div></details>
+ <details class="panel"><summary>실습 조건 · 기존 검증 근거</summary><div class="panel-body"><p>주소 계산은 저장소의 IPv4 계산 모듈을 사용합니다. /31은 Point-to-Point, /32는 Host Route 문맥입니다.</p><p>기존 네 가지 네트워크 시나리오는 Cisco 3725 IOS 12.4(15)T14 · VPCS 1.0 · PNETLab에서 확인한 2026-10-03 기록을 재사용합니다. Router A의 Proxy ARP는 꺼져 있고 링크는 정상입니다. 초기 ARP 지연에 따른 ping 손실은 필수 규칙으로 모델링하지 않습니다.</p><p>기존 검증 기록의 이름 대응: PC A = PC1 · PC B = PC2 · PC C = PC3 · Switch A = SW1 · Switch B = SW2 · Router A = R1. 아래 원본 관측 문구의 이름은 보존합니다.</p><p id="evidenceText"></p><div class="next-lab-actions"><a href="../results/ip-subnetting.json">기존 검증 요약</a><a href="ip-subnetting.html">Concept Guide</a><a href="https://www.rfc-editor.org/rfc/rfc1878">RFC 1878</a><a href="https://www.rfc-editor.org/rfc/rfc3021">RFC 3021</a></div></div></details>
 </div>
 <div class="footer">학습용 시뮬레이션입니다. 주소 계산에는 Packet을 사용하지 않으며, 전달 시나리오에서만 경로를 표시합니다. 브라우저 애니메이션은 실제 장비 검증 기록이 아닙니다. 새로고침·재진입하면 미응답 상태로 시작합니다.</div>
 <noscript>실습을 진행하려면 JavaScript를 활성화해 주세요.</noscript>
 </div>
-<script type="module" src="ip-subnetting-simulator.js?v=20261007-arp-template-v1"></script>
+<script type="module" src="ip-subnetting-simulator.js?v=20261013-audit-v1"></script>
 </body></html>

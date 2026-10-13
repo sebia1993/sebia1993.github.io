@@ -387,6 +387,7 @@ Object.assign(adapter.presentation.labels, {
 });
 PacketLabPresentation.attach(adapter, {
   "desktop": ".ivr-topology",
+  "pathScopedEdges": true,
   "height": 510,
   "note": "VLAN 10 단말은 위쪽, VLAN 20 단말은 아래쪽입니다. Switch A의 SVI는 Vlan10 10.10.10.1, Vlan20 10.10.20.1입니다. L2 전달과 SVI Routing을 구분합니다.",
   "nodes": [

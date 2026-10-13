@@ -51,7 +51,7 @@
   section{scroll-margin-top:108px}
 }
 </style>
-<link rel="stylesheet" href="concept-guide.css?v=20261007-names">
+<link rel="stylesheet" href="concept-guide.css?v=20261013-audit-v1">
 <script src="concept-guide.js?v=20261007" defer></script>
 </head>
 <body class="concept-page" data-concept-audit="20261007">
@@ -64,8 +64,8 @@
 <section class="cg-section" id="cg-flow"><div class="cg-shell"><p class="cg-kicker">03 · 동작 순서</p><h2>핵심 흐름을 연결해 봅니다.</h2><ol class="cg-steps"><li>프레임이 들어온 포트를 확인합니다.</li><li>출발지 MAC과 수신 포트를 짝지어 기록하거나 갱신합니다.</li><li>목적지 MAC을 표에서 찾습니다.</li><li>위치를 알면 해당 포트로, 모르면 수신 포트를 제외한 전달 가능한 포트들로 보냅니다.</li></ol></div></section>
 <section class="cg-section" id="cg-compare"><div class="cg-shell"><p class="cg-kicker">04 · 헷갈리는 지점</p><h2>헷갈리는 의미를 구분해서 읽으세요.</h2><table class="cg-table"><thead><tr><th scope="col">구분</th><th scope="col">뜻</th></tr></thead><tbody><tr><th scope="row">목적지 위치를 앎 · Known Unicast</th><td>기록된 목적지 포트로 전달합니다.</td></tr><tr><th scope="row">목적지 위치를 모름 · Unknown Unicast</th><td>여러 포트로 보내는 Flooding을 합니다. 모두에게 보내는 주소인 Broadcast와는 구분합니다.</td></tr></tbody></table></div></section>
 <section class="cg-section" id="cg-review"><div class="cg-shell"><p class="cg-kicker">05 · 복습</p><h2>꼭 기억할 세 가지</h2><div class="cg-review"><ul><li>출발지를 보고 배우고, 목적지를 보고 전달합니다.</li><li>MAC Table은 MAC과 포트의 관계입니다.</li><li>표에 목적지가 없다고 해서 프레임을 항상 버리는 것은 아닙니다.</li></ul><article class="cg-question"><h3>내 말로 설명하기</h3><p>PC A가 먼저 데이터를 보냈다면 Switch A는 PC A와 PC B 중 누구의 위치를 배웠을까요? 이유도 말해 보세요.</p></article></div></div></section>
-<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="ethernet-mac-table-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · ARP와 Ping의 상세 흐름은 뒤의 학습에서 배웁니다. 여기서는 스위치의 학습과 전달 판단에 집중합니다.</p></div></section>
-<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-device-aliases"><p><b>장비 이름 대응</b> · 본문의 짧은 이름과 같은 장비입니다. 기존 상세 자료·실습·검증 기록의 원래 이름은 보존합니다.</p><ul><li><strong>PC A</strong> · 기존 표기 PC1</li><li><strong>PC B</strong> · 기존 표기 PC2</li><li><strong>Switch A</strong> · 기존 표기 SW1</li></ul></div><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
+<section class="cg-section" id="cg-next"><div class="cg-shell"><div class="cg-next"><div><p class="cg-kicker">2단계 · INTERACTIVE LAB</p><h2>예상한 뒤 직접 확인해 보세요.</h2><p>방금 배운 원리를 실습에서 관찰합니다.</p></div><a class="cg-primary" href="ethernet-mac-table-simulator.html">실습 페이지로 이동 →</a></div><p class="cg-scope">학습 범위 · ARP와 Ping의 상세 흐름은 뒤의 학습에서 배웁니다. 여기서는 스위치의 학습과 전달 판단에 집중합니다. 실습의 PC C는 Flooding을 받은 다른 포트를 비교하기 위한 관찰 단말입니다. Aging 문제에서는 먼저 예상한 뒤 한 번 실행하여 엔트리 소멸·첫 전달·재학습·다음 전달을 관찰합니다.</p></div></section>
+<details class="cg-shell cg-evidence" id="cg-evidence"><summary>선택 · 기존 상세 설명과 검증 근거 보기</summary><p class="cg-evidence-intro">아래는 기존 상세 자료입니다. 첫 학습의 필수 단계가 아니며, 당시의 구현·관측 조건과 한계를 함께 보존했습니다. 이번 개편은 설명과 화면 검수이며 실제 장비 검증을 새로 수행한 기록이 아닙니다.</p><div class="cg-device-aliases"><p><b>장비 이름 대응</b> · 본문의 짧은 이름과 같은 장비입니다. 기존 상세 자료·실습·검증 기록의 원래 이름은 보존합니다.</p><ul><li><strong>PC A</strong> · 기존 표기 PC1</li><li><strong>PC B</strong> · 기존 표기 PC2</li><li><strong>Switch A</strong> · 기존 표기 SW1</li><li><strong>PC C</strong> · 기존 표기 PC3</li></ul></div><div class="cg-archive"><!-- ORIGINAL-CONCEPT-START -->
 <section class="preview-hero">
   <div class="shell">
     <div class="eyebrow">1단계 · CONCEPT GUIDE</div>

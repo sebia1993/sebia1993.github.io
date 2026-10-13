@@ -65,10 +65,10 @@ adapter.presentation={
  labels:{'SUPP↔SW1':'PC A ↔ Switch A','SW1↔FreeRADIUS':'Switch A ↔ Server A','Supplicant↔Authenticator = EAPOL, Authenticator↔RADIUS = RADIUS':'PC A ↔ Switch A는 EAPOL, Switch A ↔ Server A는 RADIUS','Supplicant가 RADIUS Server에 직접 RADIUS를 전송':'PC A가 Server A에 직접 RADIUS를 전송','Protocol Boundary':'프로토콜 경계','Protocol':'프로토콜','Credential':'자격정보','Lab Password':'실습 비밀번호','Identity':'Identity','Evidence':'근거','Data success':'데이터 통신 성공','Data Plane':'Data Plane','Backend':'뒤쪽','Packet direction':'패킷 방향','Full EAP byte hash':'전체 EAP 바이트 해시','Explicit server response':'명시적인 서버 응답','Both Access-Accept':'둘 다 Access-Accept','AAA Server no-response / timeout':'AAA 서버 무응답 / Timeout','Baseline':'기준 상태','exact-match':'정확히 일치'},
  lessons:[
   {title:'PC A와 Server A 사이에서 어떤 프로토콜이 보일까요?',brief:'학습 페이지의 PC A → Switch A → Server A 구성입니다. 각 연결 구간의 역할을 나눠 관찰합니다.',hints:['PC A는 Supplicant, Switch A는 Authenticator입니다.','같은 EAP 대화가 두 구간에서 어떻게 운반되는지 보세요.']},
-  {title:'Switch A가 같은 EAP를 중계했는지 어떻게 알까요?',brief:'실제 정상 BLUE 인증에서 보존된 EAPOL·RADIUS 근거를 비교합니다. 애니메이션은 전체 20개 교환의 요약입니다.',hints:['시각만 비슷한 패킷이 같은 패킷일까요?','Identifier·방향뿐 아니라 실제 EAP 바이트도 대조합니다.']},
-  {title:'Access-Accept 뒤에 무엇을 더 확인할까요?',brief:'BLUE 사용자의 정상 인증입니다. 서버 응답, Switch A 상태, PC A의 주소와 통신을 연결해 봅니다.',hints:['서버의 성공과 Switch A의 접속 허용을 구분하세요.','허용 이후 주소와 실제 데이터 통신도 확인합니다.']},
+  {title:'Switch A는 PC A의 EAP 응답을 어떻게 전달할까요?',brief:'PC A가 보낸 EAP 응답을 Switch A가 Server A로 전달하는 구간입니다. EAP 내용과 구간별 운반 방식을 나눠 관찰합니다.',conditions:['PC A → Switch A: EAPOL','PC A의 EAP 응답 수신','다음 대상: Server A'],question:'Switch A가 서버 쪽 구간에 전달하는 방식은?',choices:[[1,'PC A가 Server A로 RADIUS를 직접 보낸다'],[0,'같은 EAP 응답을 RADIUS의 EAP-Message에 담아 보낸다'],[2,'서버 쪽 구간에도 EAPOL을 그대로 보낸다']],correctKey:0,reason:'EAP는 인증 대화의 내용입니다. Switch A는 PC A 쪽의 EAPOL에서 받은 EAP 응답을 서버 쪽 RADIUS Access-Request의 EAP-Message에 담아 중계합니다.',hints:['인증 대화의 내용인 EAP와 이를 운반하는 프로토콜을 구분하세요.','PC A 쪽은 EAPOL, Server A 쪽은 RADIUS입니다.']},
+  {title:'Access-Accept 뒤에 무엇을 더 확인할까요?',brief:'BLUE 사용자의 정상 인증입니다. 서버 응답, Switch A 상태, PC A의 주소와 통신을 연결해 봅니다.',conditions:['유효한 사용자 BLUE','서버 응답 이후 상태 확인','VLAN20 정책'],hints:['서버의 성공과 Switch A의 접속 허용을 구분하세요.','허용 이후 주소와 실제 데이터 통신도 확인합니다.']},
   {title:'잘못된 비밀번호와 서버 무응답은 어떻게 구분할까요?',brief:'BLUE에 잘못된 실습 비밀번호를 사용한 기존 사례입니다. 응답 유무와 명시적인 거절을 확인합니다.',hints:['서버가 어떤 RADIUS 응답을 보냈는지 확인하세요.','EAP Failure 한 줄만으로 모든 실패를 같은 원인으로 분류하지 않습니다.']},
-  {title:'둘 다 인증에 성공해도 VLAN은 다를 수 있을까요?',brief:'BLUE와 GREEN은 둘 다 유효한 사용자입니다. 인증 결과와 적용된 VLAN·주소를 따로 비교합니다.',hints:['인증은 자격 확인, 인가는 허용 범위 결정입니다.','Tunnel Attributes와 Switch A의 실제 VLAN을 연결해 보세요.']},
+  {title:'둘 다 인증에 성공해도 VLAN은 다를 수 있을까요?',brief:'BLUE와 GREEN은 둘 다 유효한 사용자입니다. 인증 결과와 적용된 VLAN·주소를 따로 비교합니다.',reason:'인증 결과는 둘 다 성공입니다. 서버가 VLAN을 알려 주는 RADIUS 속성(Tunnel Attributes)을 전달했고, Switch A의 VLAN과 PC A가 받은 주소도 각 정책에 맞게 달라졌습니다.',hints:['인증은 자격 확인, 인가는 허용 범위 결정입니다.','VLAN을 알려 주는 RADIUS 속성과 Switch A에 실제 적용된 VLAN을 연결해 보세요.']},
   {title:'Access-Request만 반복되면 어디를 확인할까요?',brief:'정상 BLUE 조건에서 Server A의 FreeRADIUS 서비스만 중단한 사례입니다.',hints:['응답이 없는 것과 Access-Reject를 받은 것은 다릅니다.','IP 계층 응답과 RADIUS 응답을 구분해서 읽으세요.']}
  ]
 };
@@ -81,9 +81,9 @@ const dotFrames=[
  ],
  [
   ['PC A의 EAP Response','단말이 보내는 EAP Response를 CP-EAPOL에서 확인합니다.',0,1,'EAPOL 안의 EAP Response'],
-  ['EAP를 RADIUS에 넣어 전달','Switch A가 같은 EAP를 EAP-Message에 넣어 Access-Request로 전달합니다.',1,2,'동일 EAP 바이트를 RADIUS에서 대조'],
+  ['EAP를 RADIUS에 넣어 전달','Switch A가 같은 EAP를 EAP-Message에 넣어 Access-Request로 전달합니다.',1,2,'같은 EAP 응답 · 운반 방식은 RADIUS'],
   ['다음 EAP 요청을 되돌려 전달','Server A의 Access-Challenge 안에 다음 EAP Request가 실립니다.',2,1,'Access-Challenge + EAP Request'],
-  ['PC A로 전달','Switch A가 EAP Request를 PC A에 전달합니다. 최초 Request/Identity는 Switch A가 로컬로 생성한 예외입니다.',1,0,'정상 BLUE에서 총 20개 EAP 바이트 일치']
+  ['PC A로 전달','Switch A가 서버의 다음 EAP 요청을 EAPOL로 PC A에 전달합니다. 같은 인증 대화가 구간별로 다른 방식에 실립니다.',1,0,'같은 EAP 요청 · 운반 방식은 EAPOL']
  ],
  [
   ['서버의 인증 성공 응답','기존 근거에서 Server A의 Access-Accept #324를 확인했습니다.',2,1,'Access-Accept #324'],
@@ -98,8 +98,8 @@ const dotFrames=[
   ['데이터 중단 근거','CP-EAPOL의 ARP는 있었지만 CP-DATA에 대응 ARP가 없었고 Ping은 0/3이었습니다.',null,null,'Ping 0/3 · 복구는 별도 관찰']
  ],
  [
-  ['BLUE 인증·인가','BLUE는 Access-Accept를 받고 Tunnel Private-Group-ID 20이 적용됐습니다.',2,1,'BLUE · Access-Accept · VLAN20'],
-  ['GREEN 인증·인가','GREEN도 Access-Accept를 받지만 Tunnel Private-Group-ID는 30입니다.',2,1,'GREEN · Access-Accept · VLAN30'],
+  ['BLUE 인증·인가','BLUE는 Access-Accept를 받고 서버가 알려 준 VLAN 20이 적용됐습니다.',2,1,'BLUE · Access-Accept · VLAN20'],
+  ['GREEN 인증·인가','GREEN도 Access-Accept를 받지만 서버가 알려 준 VLAN은 30입니다.',2,1,'GREEN · Access-Accept · VLAN30'],
   ['실제 VLAN과 주소 비교','Switch A Session과 DHCP 주소가 각각 VLAN20/10.77.20.10, VLAN30/10.77.30.10에 대응합니다.',null,null,'두 사용자 모두 Ping 3/3 · 적용 VLAN은 다름']
  ],
  [

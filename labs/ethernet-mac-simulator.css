@@ -616,3 +616,10 @@ body[data-sim-mode="basic"].prediction-selected .controls{
   pointer-events:auto!important;
   touch-action:manipulation;
 }
+
+/* Playback controls remain keyboard and touch reachable in both modes. */
+.playback-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0;color:#526d82;font-size:13px}
+.playback-controls button{min-height:44px}
+[hidden]{display:none!important}
+#liveEventTitle:focus,#predictionFeedback:focus,#predictionTitle:focus,#courseComplete:focus{outline:3px solid #2563eb;outline-offset:4px}
+#macLab[data-state="PAUSED"] *,#macLab[data-state="COMPLETED"] *{animation-play-state:paused!important}

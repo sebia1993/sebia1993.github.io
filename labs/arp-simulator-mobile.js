@@ -9,16 +9,16 @@
   mobile.innerHTML=`
     <div class="mt-head">
       <strong>모바일 토폴로지</strong>
-      <span id="mtDest" class="mt-dest">PC3 · ON-LINK</span>
+      <span id="mtDest" class="mt-dest">PC C · ON-LINK</span>
     </div>
     <div class="mt-direction-note"><b>초록</b> = 요청 방향 · <b>파랑</b> = 응답 방향 · ARP/ICMP 프로토콜 색상 구분이 아닙니다.</div>
 
     <section class="mt-zone">
-      <div class="mt-zone-title"><span>LAN A · SW1 SIDE</span><span id="mtLanANet">R2 eth0</span></div>
+      <div class="mt-zone-title"><span>LAN A · Switch A SIDE</span><span id="mtLanANet">Router B eth0</span></div>
 
       <article id="mtPc1" class="mt-device">
         <div class="mt-device-head">
-          <div class="mt-device-name"><span class="mt-icon">PC</span>PC1</div>
+          <div class="mt-device-name"><span class="mt-icon">PC</span>PC A</div>
           <div class="mt-device-actions"><button class="mt-mini-btn" data-m-device="pc1">⚙ 설정</button></div>
         </div>
         <div class="mt-info">
@@ -29,16 +29,16 @@
         </div>
       </article>
 
-      <button class="mt-link" data-m-link="pc1sw1" aria-label="PC1 SW1 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
+      <button class="mt-link" data-m-link="pc1sw1" aria-label="PC A Switch A 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
 
-      <div id="mtSw1" class="mt-switch">SW1 · Ethernet Switch</div>
+      <div id="mtSw1" class="mt-switch">Switch A · Ethernet Switch</div>
 
       <div class="mt-branch">
         <div class="mt-branch-row">
-          <button class="mt-branch-elbow" data-m-link="sw1pc3" aria-label="SW1 PC3 링크 상태 변경"></button>
+          <button class="mt-branch-elbow" data-m-link="sw1pc3" aria-label="Switch A PC C 링크 상태 변경"></button>
           <article id="mtPc3" class="mt-device">
             <div class="mt-device-head">
-              <div class="mt-device-name"><span class="mt-icon">PC</span>PC3</div>
+              <div class="mt-device-name"><span class="mt-icon">PC</span>PC C</div>
               <div class="mt-device-actions">
                 <button class="mt-mini-btn select" data-m-dest="pc3">목적지</button>
                 <button class="mt-mini-btn" data-m-device="pc3">⚙</button>
@@ -51,33 +51,33 @@
             </div>
           </article>
         </div>
-        <div class="mt-branch-note">PC3는 SW1의 다른 포트에 연결된 같은 LAN의 호스트입니다.</div>
+        <div class="mt-branch-note">PC C는 Switch A의 다른 포트에 연결된 같은 LAN의 호스트입니다.</div>
       </div>
 
-      <button class="mt-link mt-main-after-branch" data-m-link="sw1r2" aria-label="SW1 R2 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
+      <button class="mt-link mt-main-after-branch" data-m-link="sw1r2" aria-label="Switch A Router B 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
     </section>
 
     <article id="mtR2" class="mt-device mt-router">
       <div class="mt-device-head">
-        <div class="mt-device-name"><span class="mt-icon">R</span>R2 · Router</div>
+        <div class="mt-device-name"><span class="mt-icon">R</span>Router B</div>
         <div class="mt-device-actions"><button class="mt-mini-btn" data-m-device="r2">⚙ 설정</button></div>
       </div>
       <div class="mt-info">
-        <div class="mt-if"><div><b>eth0 · LAN A</b><span id="mtR2e0">—</span></div><div class="mt-if-state"><i id="mtR2e0Led" class="mt-led"></i><b id="mtR2e0State">UP</b></div></div>
-        <div class="mt-if"><div><b>eth1 · LAN B</b><span id="mtR2e1">—</span></div><div class="mt-if-state"><i id="mtR2e1Led" class="mt-led"></i><b id="mtR2e1State">UP</b></div></div>
+        <div class="mt-if"><div><b style="display:block">eth0 · LAN A</b><span style="display:block" id="mtR2e0">—</span></div><div class="mt-if-state"><i id="mtR2e0Led" class="mt-led"></i><b id="mtR2e0State">UP</b></div></div>
+        <div class="mt-if"><div><b style="display:block">eth1 · LAN B</b><span style="display:block" id="mtR2e1">—</span></div><div class="mt-if-state"><i id="mtR2e1Led" class="mt-led"></i><b id="mtR2e1State">UP</b></div></div>
       </div>
     </article>
 
-    <button class="mt-link" data-m-link="r2sw2" aria-label="R2 SW2 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
+    <button class="mt-link" data-m-link="r2sw2" aria-label="Router B Switch B 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
 
     <section class="mt-zone lan-b">
-      <div class="mt-zone-title"><span>LAN B · SW2 SIDE</span><span id="mtLanBNet">R2 eth1</span></div>
-      <div id="mtSw2" class="mt-switch">SW2 · Ethernet Switch</div>
-      <button class="mt-link" data-m-link="sw2pc2" aria-label="SW2 PC2 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
+      <div class="mt-zone-title"><span>LAN B · Switch B SIDE</span><span id="mtLanBNet">Router B eth1</span></div>
+      <div id="mtSw2" class="mt-switch">Switch B · Ethernet Switch</div>
+      <button class="mt-link" data-m-link="sw2pc2" aria-label="Switch B PC B 링크 상태 변경"><i class="mt-break">×</i><span class="mt-link-status"></span></button>
 
       <article id="mtPc2" class="mt-device">
         <div class="mt-device-head">
-          <div class="mt-device-name"><span class="mt-icon">PC</span>PC2</div>
+          <div class="mt-device-name"><span class="mt-icon">PC</span>PC B</div>
           <div class="mt-device-actions">
             <button class="mt-mini-btn select" data-m-dest="pc2">목적지</button>
             <button class="mt-mini-btn" data-m-device="pc2">⚙</button>
@@ -148,9 +148,9 @@
 
     const target=state.dest==="pc3"?state.pc3Ip:state.pc2Ip;
     const local=sameSubnet(state.pc1Ip,target,state.mask);
-    setText("#mtPc1Decision",`${state.dest.toUpperCase()} ${target} → ${local?"ON-LINK":"VIA GATEWAY"}`);
+    setText("#mtPc1Decision",`${selectedDestination().name} ${target} → ${local?"ON-LINK":"VIA GATEWAY"}`);
     const destBadge=$m("#mtDest");
-    destBadge.textContent=`${state.dest.toUpperCase()} · ${local?"ON-LINK":"VIA GATEWAY"}`;
+    destBadge.textContent=`${selectedDestination().name} · ${local?"ON-LINK":"VIA GATEWAY"}`;
     destBadge.classList.toggle("remote",!local);
     $m("#mtDecisionBox").classList.toggle("warn",state.dest==="pc2"&&local);
 
@@ -184,45 +184,45 @@
     if(kind==="ready")return;
     if(title.includes("목적지 네트워크 판단")){
       markDevices(["mtPc1"]);
-    }else if(title.includes("SW1 · ARP")){
+    }else if(title.includes("Switch A · ARP")){
       markDevices(["mtPc1","mtSw1"]);
       markLinks(["pc1sw1","sw1pc3","sw1r2"]);
-    }else if(title.includes("PC1 → PC3")){
+    }else if(title.includes("PC A → PC C")){
       markDevices(["mtPc1","mtSw1","mtPc3"]);markLinks(["pc1sw1","sw1pc3"]);
-    }else if(title.includes("PC1 → R2")){
+    }else if(title.includes("PC A → Router B")){
       markDevices(["mtPc1","mtSw1","mtR2"]);markLinks(["pc1sw1","sw1r2"]);
-    }else if(title.includes("R2 · Route Lookup")){
+    }else if(title.includes("Router B · Route Lookup")){
       markDevices(["mtR2"]);
-    }else if(title.includes("R2 → PC2")){
+    }else if(title.includes("Router B → PC B")){
       markDevices(["mtR2","mtSw2","mtPc2"]);markLinks(["r2sw2","sw2pc2"]);
-    }else if(title.includes("R2 → PC3")){
+    }else if(title.includes("Router B → PC C")){
       markDevices(["mtR2","mtSw1","mtPc3"]);markLinks(["sw1r2","sw1pc3"]);
     }else if(kind==="reply"&&title.includes("ARP Reply")){
-      if(title.startsWith("PC3 → PC1")){
+      if(title.startsWith("PC C → PC A")){
         markDevices(["mtPc3","mtSw1","mtPc1"],"reply-active");markLinks(["sw1pc3","pc1sw1"],true);
-      }else if(title.startsWith("PC3 → R2")){
+      }else if(title.startsWith("PC C → Router B")){
         markDevices(["mtPc3","mtSw1","mtR2"],"reply-active");markLinks(["sw1pc3","sw1r2"],true);
-      }else if(title.startsWith("PC2 → R2")){
+      }else if(title.startsWith("PC B → Router B")){
         markDevices(["mtPc2","mtSw2","mtR2"],"reply-active");markLinks(["sw2pc2","r2sw2"],true);
-      }else if(title.startsWith("R2")&&title.includes("→ PC3")){
+      }else if(title.startsWith("Router B")&&title.includes("→ PC C")){
         markDevices(["mtR2","mtSw1","mtPc3"],"reply-active");markLinks(["sw1r2","sw1pc3"],true);
-      }else if(title.startsWith("R2")&&title.includes("→ PC2")){
+      }else if(title.startsWith("Router B")&&title.includes("→ PC B")){
         markDevices(["mtR2","mtSw2","mtPc2"],"reply-active");markLinks(["r2sw2","sw2pc2"],true);
-      }else if(title.startsWith("R2")&&title.includes("→ PC1")){
+      }else if(title.startsWith("Router B")&&title.includes("→ PC A")){
         markDevices(["mtR2","mtSw1","mtPc1"],"reply-active");markLinks(["sw1r2","pc1sw1"],true);
       }
     }else if(kind==="reply"&&title.includes("Echo Reply")){
-      if(title.startsWith("PC3 → PC1")){
+      if(title.startsWith("PC C → PC A")){
         markDevices(["mtPc3","mtSw1","mtPc1"],"reply-active");markLinks(["sw1pc3","pc1sw1"],true);
-      }else if(title.startsWith("PC3 → R2")){
+      }else if(title.startsWith("PC C → Router B")){
         markDevices(["mtPc3","mtSw1","mtR2"],"reply-active");markLinks(["sw1pc3","sw1r2"],true);
-      }else if(title.startsWith("PC2 → R2")){
+      }else if(title.startsWith("PC B → Router B")){
         markDevices(["mtPc2","mtSw2","mtR2"],"reply-active");markLinks(["sw2pc2","r2sw2"],true);
-      }else if(title.startsWith("R2 → PC1")){
+      }else if(title.startsWith("Router B → PC A")){
         markDevices(["mtR2","mtSw1","mtPc1"],"reply-active");markLinks(["sw1r2","pc1sw1"],true);
       }
     }else if(kind==="error"){
-      const map=[["PC1↔SW1","pc1sw1"],["SW1↔PC3","sw1pc3"],["SW1↔R2","sw1r2"],["R2↔SW2","r2sw2"],["SW2↔PC2","sw2pc2"]];
+      const map=[["PC A↔Switch A","pc1sw1"],["Switch A↔PC C","sw1pc3"],["Switch A↔Router B","sw1r2"],["Router B↔Switch B","r2sw2"],["Switch B↔PC B","sw2pc2"]];
       let matched=false;
       map.forEach(([label,key])=>{
         if((title+" "+detail).includes(label)){

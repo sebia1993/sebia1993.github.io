@@ -5,13 +5,13 @@
   function syncPingLabel(){
     const btn=document.querySelector("#pingBtn");
     if(!btn)return;
-    const name=state.dest==="pc3"?"PC3":"PC2";
+    const name=state.dest==="pc3"?"PC C":"PC B";
     btn.textContent=state.busy?`${name}로 PING 전송 중…`:`▶ ${name}로 PING 보내기`;
   }
 
   const baseChooseDest=chooseDest;
-  chooseDest=function(dest){
-    baseChooseDest(dest);
+  chooseDest=function(...args){
+    baseChooseDest(...args);
     syncPingLabel();
   };
 
@@ -32,13 +32,13 @@
       ["Destination IP",a.dstIp,b.dstIp,"그대로","same"],
       ["Source MAC",a.srcMac,b.srcMac,"라우터 경계에서 변경","changed"],
       ["Destination MAC",a.dstMac,b.dstMac,"라우터 경계에서 변경","changed"],
-      ["TTL",a.ttl,b.ttl,`Simulator ${a.ttl} → R2 이후 ${b.ttl}`,"changed"]
+      ["TTL",a.ttl,b.ttl,`Simulator ${a.ttl} → Router B 이후 ${b.ttl}`,"changed"]
     ];
     mobileCompare.innerHTML=rows.map(([name,before,after,meaning,kind])=>`
       <article class="mobile-compare-card">
         <h5>${name}</h5>
-        <div class="mobile-compare-row"><b>PC1 → R2</b><code>${before??"—"}</code></div>
-        <div class="mobile-compare-row"><b>${b.compareLabel||"R2 → 목적지"}</b><code>${after??"—"}</code></div>
+        <div class="mobile-compare-row"><b>PC A → Router B</b><code>${before??"—"}</code></div>
+        <div class="mobile-compare-row"><b>${b.compareLabel||"Router B → 목적지"}</b><code>${after??"—"}</code></div>
         <div class="mobile-compare-meaning ${kind}">${meaning}</div>
       </article>`).join("");
   }
@@ -50,8 +50,8 @@
   };
 
   const baseConfigureLesson=configureLesson;
-  configureLesson=function(i){
-    baseConfigureLesson(i);
+  configureLesson=function(...args){
+    baseConfigureLesson(...args);
     syncPingLabel();
     renderMobileComparison();
   };

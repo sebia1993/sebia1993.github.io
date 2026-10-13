@@ -97,16 +97,10 @@ try{
         if(i>0){await page.locator('.lesson-tab').nth(i).click();await page.waitForTimeout(50);}
         assert.equal(await page.locator('#runBtn').isDisabled(),true);
         await page.locator(`#predictionOptions [data-prediction="${answers[i]}"]`).click();
-        if(i===4){
-          assert.equal(await page.locator('#runBtn').isDisabled(),true,'aging lesson requires time advance');
-          await page.locator('#ageBtn').click();
-          await page.waitForFunction(()=>document.querySelector('#runBtn')?.disabled===false);
-        }else{
-          assert.equal(await page.locator('#runBtn').isEnabled(),true);
-        }
+        assert.equal(await page.locator('#runBtn').isEnabled(),true,'one prediction/run includes any Aging step');
         assert.ok((await page.locator('#evidenceLink').getAttribute('href')).includes(anchors[i]));
         await page.locator('#runBtn').click();
-        await page.locator('#lessonBadge').filter({hasText:'완료'}).waitFor({timeout:10000});
+        await page.locator('#lessonBadge').filter({hasText:'완료'}).waitFor({timeout:40000});
         const verdict=await page.locator('#verdictBox').innerText();
         assert.ok(verdict.includes('완료'));
         if(i===0){

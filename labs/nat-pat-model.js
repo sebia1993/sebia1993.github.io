@@ -62,7 +62,16 @@ const originalReset=adapter.reset;adapter.reset=i=>{originalReset(i);S.clear();}
 function mapping(items){S.rows('translationList',items);}
 adapter.buildPlan=(i,mode='normal')=>{
  const s=lessons[i],m=s.mode,E=S.event,M=S.move;
- if(mode==='recover')return[E('NAT 조건 원복','기존 검증에서 NAT 선택 조건 또는 inside 역할을 복구합니다.',()=>S.clear()),M('내부 요청 다시 전달','두 내부 장비가 다시 정상 변환되는지 확인합니다.',['r1','r2','r3'],'ICMP'),E('변환 기록 복구','Router A와 Router D에 각각 변환 기록이 있습니다.',()=>mapping([['Router A','변환됨'],['Router D','변환됨']])),M('응답 경로 확인','응답이 원래 내부 장비로 돌아갑니다.',['r3','r2','r4'],'Echo Reply',()=>{},'return'),E('복구 결과 확인','두 내부 장비의 Ping은 각각 3/3으로 복구됐습니다.',()=>apply('recover'))];
+ if(mode==='recover')return[
+  E('NAT 조건 원복',m==='selectionFail'?'Router D를 NAT 선택 대상에 다시 포함합니다.':'Router A 쪽 인터페이스의 NAT inside 역할을 복구합니다.',()=>S.clear()),
+  M('Router A 요청 확인','Router A가 시작한 요청은 Router B에서 변환되어 Router C로 전달됩니다.',['r1','r2','r3'],'A · Echo Request'),
+  E('Router A 변환 기록','Router A의 변환 기록을 확인한 뒤 같은 Ping의 응답 경로를 봅니다.',()=>mapping([['Router A','변환됨']])),
+  M('Router A의 응답 확인','Router A가 보낸 요청의 응답은 Router B를 거쳐 Router A로 돌아갑니다.',['r3','r2','r1'],'A · Echo Reply',()=>{},'return'),
+  M('Router D 요청 확인','이제 Router D가 시작한 별도 요청을 같은 외부 Router까지 따라갑니다.',['r4','r2','r3'],'D · Echo Request'),
+  E('두 변환 기록 확인','Router A와 Router D의 변환 기록은 각각의 내부 장비에 대응합니다.',()=>mapping([['Router A','변환됨'],['Router D','변환됨']])),
+  M('Router D의 응답 확인','Router D가 보낸 요청의 응답은 Router B를 거쳐 Router D로 돌아갑니다.',['r3','r2','r4'],'D · Echo Reply',()=>{},'return'),
+  E('복구 결과 확인','기존 복구 검증에서 두 내부 장비의 Ping은 각각 3/3이었습니다. 두 왕복을 순서대로 표현한 학습용 장면입니다.',()=>apply('recover'))
+ ];
  if(mode!=='normal')return null;
  const start=E('관찰 위치 확인','CP11은 Router A, CP14는 Router D의 내부 링크입니다. CP23은 NAT 바깥쪽입니다.',()=>S.clear()),done=()=>S.finish(s,()=>apply(m));
  if(m==='basic')return[start,M('내부 요청 전달','CP11에서 출발지는 10.0.11.2입니다.',['r1','r2'],'ICMP'),E('주소 대응 기록','Inside Local 10.0.11.2와 Inside Global 198.51.100.5를 연결합니다.',()=>mapping([['Inside Local','10.0.11.2'],['Inside Global','198.51.100.5']])),M('외부에서 같은 요청 관찰','CP23에서는 출발지가 198.51.100.5로 보이고 목적지는 유지됩니다.',['r2','r3'],'ICMP .5'),M('응답 역변환','Translation Table을 이용해 원래 내부 장비로 돌아갑니다.',['r3','r2','r1'],'Echo Reply',()=>{},'return'),done()];

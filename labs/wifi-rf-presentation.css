@@ -1,0 +1,3 @@
+/* RF geometry is instructional; reuse the shared simulator surface. */
+#simVisual .rf-spectrum-diagram{display:block;width:100%;max-width:400px;height:auto;margin:0 auto 10px}
+body.concept-page .cg-topic-diagram[src^="wifi-rf-spectrum.svg"]{max-width:400px}

@@ -15,6 +15,9 @@
 #simVisual .packet-mobile-device.is-reply .packet-device-frame,#simVisual .packet-mobile-link.is-reply{stroke:var(--mint,#1c9c88)}
 #simVisual .packet-mobile-device.is-stop .packet-device-frame,#simVisual .packet-mobile-link.is-stop{stroke:#c27827}
 #simVisual .packet-mobile-link.is-stop{stroke-dasharray:5 5}
+/* Outside this VLAN is normal isolation, not a failed port or cable. */
+#simVisual .packet-mobile-device.is-excluded .packet-device-frame{stroke:#9eafbd;fill:#f3f6f8}
+#simVisual .packet-mobile-link.is-excluded{stroke:#9eafbd;stroke-dasharray:none;opacity:.65}
 #simVisual .packet-mobile-marker{fill:var(--blue,#2589dc);stroke:#fff;stroke-width:3;filter:drop-shadow(0 1px 4px #21436340)}
 #simVisual .packet-mobile-marker.is-reply{fill:var(--mint,#1c9c88)}
 #simVisual .packet-mobile-marker.is-stop{fill:#c27827}

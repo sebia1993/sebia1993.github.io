@@ -6,7 +6,7 @@
   const mobile = document.querySelector("#mobileTopology");
   if (!mobile) return;
 
-  let autoFollow = localStorage.getItem("arpMobileAutoFollow") !== "off";
+  let autoFollow = localStorage.getItem("arpMobileAutoFollow") === "on";
   let userPauseUntil = 0;
   let pauseTimer = null;
   let lastTarget = null;
@@ -161,34 +161,34 @@
     clearReplyTimers();
     if (!autoFollow || !mq.matches || kind !== "reply") return;
 
-    if (title.startsWith("PC2 → R2")) {
-      return scrollToRegion(["#mtPc2", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC2 → R2" : "Echo Reply · PC2 → R2" });
+    if (title.startsWith("PC B → Router B")) {
+      return scrollToRegion(["#mtPc2", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC B → Router B" : "Echo Reply · PC B → Router B" });
     }
-    if (title.startsWith("PC3 → R2")) {
-      return scrollToRegion(["#mtPc3", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC3 → R2" : "Echo Reply · PC3 → R2" });
+    if (title.startsWith("PC C → Router B")) {
+      return scrollToRegion(["#mtPc3", "#mtR2"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC C → Router B" : "Echo Reply · PC C → Router B" });
     }
-    if (title.startsWith("PC3 → PC1")) {
-      return scrollToRegion(["#mtPc3", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC3 → PC1" : "Echo Reply · PC3 → PC1" });
+    if (title.startsWith("PC C → PC A")) {
+      return scrollToRegion(["#mtPc3", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · PC C → PC A" : "Echo Reply · PC C → PC A" });
     }
-    if (title.startsWith("R2") && title.includes("→ PC1")) {
-      return scrollToRegion(["#mtR2", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · R2 → PC1" : "Echo Reply · R2 → PC1" });
+    if (title.startsWith("Router B") && title.includes("→ PC A")) {
+      return scrollToRegion(["#mtR2", "#mtPc1"], { force: true, label: title.includes("ARP Reply") ? "ARP Reply · Router B → PC A" : "Echo Reply · Router B → PC A" });
     }
-    if (title.startsWith("R2") && title.includes("→ PC2")) {
-      return scrollToRegion(["#mtR2", "#mtPc2"], { force: true, label: "ARP Reply · R2 → PC2" });
+    if (title.startsWith("Router B") && title.includes("→ PC B")) {
+      return scrollToRegion(["#mtR2", "#mtPc2"], { force: true, label: "ARP Reply · Router B → PC B" });
     }
-    if (title.startsWith("R2") && title.includes("→ PC3")) {
-      return scrollToRegion(["#mtR2", "#mtPc3"], { force: true, label: "ARP Reply · R2 → PC3" });
+    if (title.startsWith("Router B") && title.includes("→ PC C")) {
+      return scrollToRegion(["#mtR2", "#mtPc3"], { force: true, label: "ARP Reply · Router B → PC C" });
     }
   }
 
   function focusError(title, detail) {
     const combined = `${title} ${detail}`;
     const pairs = [
-      ["PC1↔SW1", "pc1sw1"],
-      ["SW1↔PC3", "sw1pc3"],
-      ["SW1↔R2", "sw1r2"],
-      ["R2↔SW2", "r2sw2"],
-      ["SW2↔PC2", "sw2pc2"]
+      ["PC A↔Switch A", "pc1sw1"],
+      ["Switch A↔PC C", "sw1pc3"],
+      ["Switch A↔Router B", "sw1r2"],
+      ["Router B↔Switch B", "r2sw2"],
+      ["Switch B↔PC B", "sw2pc2"]
     ];
     for (const [label, key] of pairs) {
       if (combined.includes(label)) {
@@ -198,11 +198,11 @@
         );
       }
     }
-    if (combined.includes("PC2")) {
-      return scrollToElement(mobile.querySelector("#mtPc2"), { force: true, label: "장애 · PC2" });
+    if (combined.includes("PC B")) {
+      return scrollToElement(mobile.querySelector("#mtPc2"), { force: true, label: "장애 · PC B" });
     }
-    if (combined.includes("R2") || combined.includes("Gateway")) {
-      return scrollToElement(mobile.querySelector("#mtR2"), { force: true, label: "장애 · R2" });
+    if (combined.includes("Router B") || combined.includes("Gateway")) {
+      return scrollToElement(mobile.querySelector("#mtR2"), { force: true, label: "장애 · Router B" });
     }
     return scrollToElement(mobile.querySelector("#mtPc1"), { force: true, label: "장애 원인 확인" });
   }
@@ -226,25 +226,25 @@
     clearReplyTimers();
 
     if (title.includes("목적지 네트워크 판단")) {
-      return scrollToElement(mobile.querySelector("#mtPc1"), { force, label: "판단 중 · PC1" });
+      return scrollToElement(mobile.querySelector("#mtPc1"), { force, label: "판단 중 · PC A" });
     }
-    if (title.includes("SW1 · ARP")) {
-      return scrollToElement(mobile.querySelector("#mtSw1"), { force, label: "ARP Broadcast · SW1" });
+    if (title.includes("Switch A · ARP")) {
+      return scrollToElement(mobile.querySelector("#mtSw1"), { force, label: "ARP Broadcast · Switch A" });
     }
-    if (title.includes("PC1 → PC3")) {
-      return scrollToRegion(["#mtSw1", "#mtPc3"], { force, label: "ICMP · PC3 방향" });
+    if (title.includes("PC A → PC C")) {
+      return scrollToRegion(["#mtSw1", "#mtPc3"], { force, label: "ICMP · PC C 방향" });
     }
-    if (title.includes("PC1 → R2")) {
-      return scrollToElement(mobile.querySelector("#mtR2"), { force, label: "ICMP · R2 도착" });
+    if (title.includes("PC A → Router B")) {
+      return scrollToElement(mobile.querySelector("#mtR2"), { force, label: "ICMP · Router B 도착" });
     }
-    if (title.includes("R2 · Route Lookup")) {
-      return scrollToElement(mobile.querySelector("#mtR2"), { force, label: "Route Lookup · R2" });
+    if (title.includes("Router B · Route Lookup")) {
+      return scrollToElement(mobile.querySelector("#mtR2"), { force, label: "Route Lookup · Router B" });
     }
-    if (title.includes("R2 → PC2")) {
-      return scrollToRegion(["#mtSw2", "#mtPc2"], { force, label: "ICMP · PC2 방향" });
+    if (title.includes("Router B → PC B")) {
+      return scrollToRegion(["#mtSw2", "#mtPc2"], { force, label: "ICMP · PC B 방향" });
     }
-    if (title.includes("R2 → PC3")) {
-      return scrollToRegion(["#mtSw1", "#mtPc3"], { force, label: "ICMP · PC3 방향" });
+    if (title.includes("Router B → PC C")) {
+      return scrollToRegion(["#mtSw1", "#mtPc3"], { force, label: "ICMP · PC C 방향" });
     }
 
     const errorNode = mobile.querySelector(".error-active");
@@ -286,9 +286,9 @@
       if (!mq.matches || !autoFollow) return;
       userPauseUntil = 0;
       clearReplyTimers();
-      setControlState("PING 시작 · PC1");
+      setControlState("PING 시작 · PC A");
       setTimeout(() => {
-        scrollToElement(mobile.querySelector("#mtPc1"), { force: true, label: "PING 시작 · PC1" });
+        scrollToElement(mobile.querySelector("#mtPc1"), { force: true, label: "PING 시작 · PC A" });
       }, 20);
     }, true);
   }

@@ -1,5 +1,8 @@
 import {lessons,eventsFor,addressLesson,addressWindow,subnetInfo,parseIPv4} from './ip-subnetting-model.js';
 const $=id=>document.getElementById(id);
+const present=text=>String(text).replace(/\b(PC1|PC2|PC3|SW1|SW2|R1)\b/g,name=>({PC1:'PC A',PC2:'PC B',PC3:'PC C',SW1:'Switch A',SW2:'Switch B',R1:'Router A'})[name]).replace(/((?:PC|Switch|Router) [ABC])은/g,'$1는');
+const focusOwned=()=>document.activeElement===document.body||['runBtn','quickNextBtn','playbackBtn','liveEventTitle'].includes(document.activeElement?.id);
+const pendingIndex=()=>{for(let offset=1;offset<=lessons.length;offset++){const i=(idx+offset)%lessons.length;if(!answers[i].observed)return i;}return -1;};
 // Values copied from the ARP reference: move() 420 + 180 ms;
 // showRouteLookup() 1050 ms; CSS primaryActionReveal / event transition 180 ms.
 const TEMPO=Object.freeze({segment:420,arrival:180,judgment:1050});
@@ -22,10 +25,10 @@ function renderControls(){
  $('primaryControls').hidden=activePlayback()||complete;
  $('playbackBtn').hidden=!activePlayback()&&!complete;
  $('playbackBtn').textContent=state==='RUNNING'?'⏸ 일시정지':state==='PAUSED'?'▶ 이어서 보기':'↻ 흐름 다시 보기';
- $('nextBtn').disabled=!complete;$('nextBtn').textContent=custom?'기본 문제로 돌아가기':idx===lessons.length-1?'전체 학습 결과 보기':'다음 실습 →';
- $('resultArea').hidden=!complete;$('reviewPanel').hidden=!complete;
+ $('nextBtn').disabled=!complete;$('nextBtn').textContent=custom?'기본 문제로 돌아가기':pendingIndex()<0?'전체 학습 결과 보기':'다음 미완료 실습 →';
+ $('resultArea').hidden=!complete||step!==events.length-1;$('reviewPanel').hidden=!complete;
  $('maskPanel').hidden=!complete||current().type!=='network'||current().dst!=='10.77.10.140';
- $('playbackStatus').textContent=activePlayback()?`${state==='PAUSED'?'일시정지':'관찰 중'} · ${step+1} / ${events.length}`:complete?'관찰 완료 · 다시 보기는 점수를 바꾸지 않습니다.':'';
+ $('playbackStatus').textContent=activePlayback()?`${state==='PAUSED'?'일시정지':'관찰 중'} · ${step+1} / ${events.length}`:complete?(step===events.length-1?'관찰 완료 · 최종 결과':'이전 장면 복습 중 · 마지막 장면에서 최종 결과를 확인합니다.'):'';
  const show=!!a.choice&&!activePlayback();$('quickNextBar').hidden=!show;document.body.classList.toggle('quick-next-visible',show);
  $('quickNextLabel').textContent=complete?'현재 실습 완료':'예상 선택 완료';
  $('quickNextCopy').textContent=complete?'예상과 관찰을 비교했습니다. 다음 문제로 이동하세요.':'스크롤하지 않고 여기서 바로 관찰을 시작할 수 있습니다.';
@@ -41,29 +44,29 @@ function renderProgress(){
 function renderChoices(){
  const a=answer(),l=current();$('predictionOptions').replaceChildren();
  l.choices.forEach(([id,label])=>{
-  const b=document.createElement('button');b.type='button';b.dataset.prediction=id;b.textContent=label;b.setAttribute('aria-pressed',String(a.choice===id));b.classList.toggle('selected',a.choice===id);
+  const b=document.createElement('button');b.type='button';b.dataset.prediction=id;b.textContent=present(label);b.setAttribute('aria-pressed',String(a.choice===id));b.classList.toggle('selected',a.choice===id);
   b.disabled=activePlayback()||a.observed;
   if(state==='COMPLETED'){if(id===l.answer)b.classList.add('correct');else if(id===a.choice)b.classList.add('incorrect');}
-  b.addEventListener('click',()=>{if(activePlayback()||answer().observed)return;answer().choice=id;setState('PREDICTED');renderChoices();});$('predictionOptions').append(b);
+  b.addEventListener('click',()=>{if(activePlayback()||answer().observed)return;answer().choice=id;setState('PREDICTED');renderChoices();document.querySelector(`[data-prediction="${CSS.escape(id)}"]`)?.focus();});$('predictionOptions').append(b);
  });
 }
 function result(){
  const l=current(),a=answer(),correct=a.choice===l.answer;
  $('predictionFeedback').className='prediction-feedback '+(correct?'correct':'incorrect');
  $('verdictTitle').textContent=correct?'✓ 정답입니다':'✕ 예상과 결과가 달랐습니다';
- $('chosenAnswer').textContent='내 예상: '+(l.choices.find(c=>c[0]===a.choice)?.[1]||'—');
- $('correctAnswer').textContent='실제 정답: '+l.choices.find(c=>c[0]===l.answer)[1];$('reasonText').textContent=l.explain;
+ $('chosenAnswer').textContent='내 예상: '+present(l.choices.find(c=>c[0]===a.choice)?.[1]||'—');
+ $('correctAnswer').textContent='실제 정답: '+present(l.choices.find(c=>c[0]===l.answer)[1]);$('reasonText').textContent=present(l.explain);
 }
 function resetView(){
  cancel();step=-1;elapsed=0;events=eventsFor(current());
  $('hintBox').classList.remove('show');$('hintBox').textContent='';$('reviewPanel').open=false;$('maskPanel').open=false;$('courseComplete').hidden=true;
  $('networkSurface').hidden=current().type!=='network';$('addressSurface').hidden=current().type!=='address';
- const l=current();$('coachIcon').textContent=custom?'＋':idx+1;$('coachTitle').textContent=custom?'내 주소로 관찰하기':l.type==='address'?l.label:l.title;
- $('coachText').textContent=l.type==='address'?'주소 하나가 속한 범위를 찾습니다. 시작과 끝이 무엇인지 관찰해 보세요.':`PC1 ${l.src}/${l.prefix} → ${l.dstNode} ${l.dst}. 주소와 실제 연결 위치를 함께 봅니다.`;
- $('predictionTitle').textContent=l.title;$('evidenceText').textContent=l.evidence||'주소 범위 계산은 실제 패킷 통신과 별개입니다. 주소를 사용할 수 있는지는 실제 환경의 예약·정책도 확인해야 합니다.';
+ const l=current();$('coachIcon').textContent=custom?'＋':idx+1;$('coachTitle').textContent=custom?'내 주소로 관찰하기':present(l.type==='address'?l.label:l.title);
+ $('coachText').textContent=l.type==='address'?'주소 하나가 속한 범위를 찾습니다. 시작과 끝이 무엇인지 관찰해 보세요.':present(`PC1 ${l.src}/${l.prefix} → ${l.dstNode} ${l.dst}. 주소와 실제 연결 위치를 함께 봅니다.`);
+ $('predictionTitle').textContent=present(l.title);$('calculationIntro').hidden=l.type!=='address';$('evidenceText').textContent=l.evidence||'주소 범위 계산은 실제 패킷 통신과 별개입니다. 주소를 사용할 수 있는지는 실제 환경의 예약·정책도 확인해야 합니다.';
  $('liveEventStrip').className='live-event-strip';$('liveEventIcon').textContent='●';$('liveEventTitle').textContent='관찰 대기';$('liveEventDetail').textContent='예상 답을 고른 뒤 실행하면 경계부터 순서대로 표시됩니다.';$('liveEventKind').textContent='대기';
  setState(answer().observed?'COMPLETED':answer().choice?'PREDICTED':'IDLE');
- if(l.type==='address')renderAddress();else{$('pc1Address').textContent=l.src+'/'+l.prefix;$('networkComparison').textContent='각 PC의 IP 주소는 그대로 두고, PC1의 경계 규칙으로 비교합니다.';drawNetwork();}
+ if(l.type==='address')renderAddress();else{$('pc1Address').textContent=l.src+'/'+l.prefix;$('networkComparison').textContent='각 PC의 IP 주소는 그대로 두고, PC A의 경계 규칙으로 비교합니다.';drawNetwork();}
  if(answer().observed){step=events.length-1;renderEvent();result();}
  renderChoices();renderProgress();renderControls();
 }
@@ -117,16 +120,16 @@ function renderNetworkMotion(){
 function renderEvent(){
  const e=events[step];if(!e)return;
  $('liveEventStrip').className='live-event-strip '+e.tone;$('liveEventIcon').textContent=String(step+1).padStart(2,'0');
- $('liveEventTitle').textContent=`단계 ${String(step+1).padStart(2,'0')} · ${e.title}`;$('liveEventDetail').textContent=e.text;$('liveEventKind').textContent=e.kind;
+ $('liveEventTitle').textContent=`단계 ${String(step+1).padStart(2,'0')} · ${present(e.title)}`;$('liveEventDetail').textContent=present(e.text);$('liveEventKind').textContent=e.kind;
  if(current().type==='address')renderAddress();else{
-  const o=e.observation;$('networkComparison').textContent=`PC1 기준 /${current().prefix}: ${o.sourceNetwork} ${o.onLink?'＝':'≠'} ${o.destinationNetwork}`;
+  const o=e.observation;$('networkComparison').textContent=`PC A 기준 /${current().prefix}: ${o.sourceNetwork} ${o.onLink?'＝':'≠'} ${o.destinationNetwork}`;
   renderNetworkMotion();
  }
  renderControls();
 }
 function complete(){
- cancelAnimationFrame(frame);frame=0;answer().observed=true;setState('COMPLETED');renderEvent();result();renderChoices();renderProgress();
- $('resultArea').scrollIntoView({block:'center',behavior:'instant'});
+ const moveFocus=focusOwned();cancelAnimationFrame(frame);frame=0;answer().observed=true;setState('COMPLETED');renderEvent();result();renderChoices();renderProgress();
+ if(moveFocus){$('verdictTitle').focus({preventScroll:true});$('resultArea').scrollIntoView({block:'center',behavior:'instant'});}
 }
 function tick(now,token){
  if(token!==generation||state!=='RUNNING')return;
@@ -142,7 +145,7 @@ function run(){
  if(state!=='PREDICTED')return;
  cancel();events=eventsFor(current());step=0;elapsed=0;setState('RUNNING');renderChoices();renderEvent();const token=generation;frame=requestAnimationFrame(t=>tick(t,token));
  // A single deliberate reveal at Run; no event-by-event scrolling.
- $('modelObservation').scrollIntoView({block:'start',behavior:'instant'});
+ $('liveEventTitle').focus({preventScroll:true});$('modelObservation').scrollIntoView({block:'start',behavior:'instant'});
 }
 function playback(){
  if(state==='RUNNING'){cancelAnimationFrame(frame);frame=0;lastTime=0;setState('PAUSED');}
@@ -150,11 +153,12 @@ function playback(){
  else if(state==='COMPLETED'){cancel();step=0;elapsed=0;setState('RUNNING');renderChoices();renderEvent();const token=generation;frame=requestAnimationFrame(t=>tick(t,token));}
 }
 function summary(){
- cancel();$('courseComplete').hidden=false;$('completionScore').textContent=$('scoreText').textContent;$('summaryList').replaceChildren();
- lessons.forEach((l,i)=>{const a=answers[i],correct=a.choice===l.answer,el=document.createElement('div');el.className='summary-item '+(correct?'correct':'incorrect');const b=document.createElement('b');b.textContent=`${i+1} · ${l.label.replace(/^\d · /,'')}`;const s=document.createElement('span');s.textContent=a.observed?(correct?'✓ 정답':'✕ 오답 · 다시 보기'):'미응답';const btn=document.createElement('button');btn.className='soft-btn';btn.textContent='답과 이유 다시 보기';btn.onclick=()=>{goTo(i);$('predictionTitle').focus();};el.append(b,s,btn);$('summaryList').append(el);});
- $('courseComplete').scrollIntoView({block:'start',behavior:'instant'});
+ const done=answers.filter(a=>a.observed).length;if(done!==lessons.length){goTo(pendingIndex());return;}
+ cancel();$('completionTitle').textContent=`${done}문제의 관찰을 모두 마쳤습니다.`;$('courseComplete').hidden=false;$('completionScore').textContent=$('scoreText').textContent;$('summaryList').replaceChildren();
+ lessons.forEach((l,i)=>{const a=answers[i],correct=a.choice===l.answer,el=document.createElement('div');el.className='summary-item '+(!a.observed?'unanswered':correct?'correct':'incorrect');const b=document.createElement('b');b.textContent=`${i+1} · ${l.label.replace(/^\d · /,'')}`;const s=document.createElement('span');s.textContent=a.observed?(correct?'✓ 정답':'✕ 오답 · 다시 보기'):'미응답';const btn=document.createElement('button');btn.className='soft-btn';btn.textContent=a.observed?'답과 이유 다시 보기':'문제 풀기';btn.onclick=()=>{goTo(i);$('predictionTitle').focus();};el.append(b,s,btn);$('summaryList').append(el);});
+ $('courseComplete').focus({preventScroll:true});$('courseComplete').scrollIntoView({block:'start',behavior:'instant'});
 }
-function next(){if(state!=='COMPLETED')return;if(custom)goTo(idx);else if(idx<lessons.length-1){goTo(idx+1);$('predictionTitle').focus();}else summary();}
+function next(){if(state!=='COMPLETED')return;if(custom)goTo(idx);else {const i=pendingIndex();if(i>=0){goTo(i);$('predictionTitle').focus();}else summary();}}
 function readInput(){const ip=$('ipInput').value.trim(),text=$('prefixInput').value.trim();parseIPv4(ip);if(!/^(0|[1-9]\d?)$/.test(text))throw new Error('Prefix Length는 0~32의 정수로 입력하세요.');return {ip,prefix:Number(text),info:subnetInfo(ip,Number(text))};}
 function calculate(){
  $('calculatorResult').replaceChildren();$('calculatorMessage').classList.remove('error');
@@ -165,7 +169,7 @@ function customPractice(){if(!calculate())return;const {ip,prefix}=readInput();c
 lessons.forEach((l,i)=>{const b=document.createElement('button');b.className='lesson-tab';b.dataset.lesson=i;b.textContent=`${i+1} · ${l.label.replace(/^\d · /,'')}`;b.onclick=()=>goTo(i);$('lessonTabs').append(b);});
 $('runBtn').onclick=run;$('playbackBtn').onclick=playback;$('resetBtn').onclick=resetCurrent;$('nextBtn').onclick=next;$('quickNextBtn').onclick=()=>state==='COMPLETED'?next():run();
 $('prevEvent').onclick=()=>{if(state==='COMPLETED'&&step>0){step--;renderEvent();}};$('nextEvent').onclick=()=>{if(state==='COMPLETED'&&step<events.length-1){step++;renderEvent();}};
-$('hintBtn').onclick=()=>{$('hintBox').classList.toggle('show');$('hintBox').textContent=current().type==='address'?'주소 범위는 같은 크기로 나뉩니다. 내 IP가 시작과 끝 사이에 들어가는 범위를 찾아보세요.':'PC1이 자신의 경계 규칙으로 계산한 두 Network가 같은지 먼저 비교하세요.';};
+$('hintBtn').onclick=()=>{$('hintBox').classList.toggle('show');$('hintBox').textContent=current().type==='address'?'주소 범위는 같은 크기로 나뉩니다. 내 IP가 시작과 끝 사이에 들어가는 범위를 찾아보세요.':'PC A가 자신의 경계 규칙으로 계산한 두 Network가 같은지 먼저 비교하세요.';};
 $('reviewWrongBtn').onclick=()=>{const i=answers.findIndex((a,i)=>a.observed&&a.choice!==lessons[i].answer);goTo(i<0?0:i);$('predictionTitle').focus();};
 function restart(){cancel();answers=lessons.map(()=>({choice:null,observed:false}));custom=null;idx=0;resetView();}
 $('restartBtn').onclick=restart;

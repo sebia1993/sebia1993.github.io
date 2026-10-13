@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" role="img" aria-labelledby="title description">
+<title id="title">케이블 세 개와 STP 전달 경로</title>
+<desc id="description">Switch A, B, C는 세 케이블로 삼각형을 이룬다. A가 Root인 정상 상태에서 A와 C는 직접 전달한다. B와 C 사이 케이블도 연결되어 있지만 C 쪽 포트는 Alternate로 사용자 데이터 전달을 대기한다. A와 C의 링크에 장애가 나면 A, B, C 경로로 전환할 수 있다.</desc>
+<rect x="1" y="1" width="358" height="358" rx="16" fill="#12263a" stroke="#4c718c"/>
+<g font-family="system-ui,sans-serif" fill="#e7f1ff" text-anchor="middle">
+<text x="180" y="34" font-size="21" font-weight="700">물리 연결은 삼각형 그대로</text>
+<g fill="none" stroke-linecap="round" stroke-width="4">
+<path d="M142 88 H218" stroke="#84a5b9"/>
+<path d="M91 122 L155 244" stroke="#61dab8"/>
+<path d="M269 122 L205 244" stroke="#95aabd"/>
+</g>
+<path d="M116 168 L132 197 L132 184 M132 197 L120 191" stroke="#61dab8" stroke-width="4" fill="none"/>
+<g fill="#19354b" stroke="#7498b2" stroke-width="1.5">
+<rect x="14" y="57" width="128" height="67" rx="10"/>
+<rect x="218" y="57" width="128" height="67" rx="10"/>
+<rect x="116" y="244" width="128" height="67" rx="10"/>
+</g>
+<g font-size="21" font-weight="700"><text x="78" y="85">Switch A</text><text x="282" y="85">Switch B</text><text x="180" y="272">Switch C</text></g>
+<g font-size="16"><text x="78" y="110" fill="#9aefd5">Root · 기준</text><text x="282" y="110">경유 경로</text><text x="180" y="297">직접 경로 사용</text></g>
+<circle cx="211" cy="231" r="10" fill="#12263a" stroke="#ffc779" stroke-width="3"/>
+<path d="M205 231 H217" stroke="#ffc779" stroke-width="3"/>
+<text x="77" y="192" font-size="16" fill="#9aefd5">정상 전달</text>
+<text x="292" y="165" font-size="16">케이블 Up</text>
+<text x="292" y="190" font-size="16" fill="#ffd498">C 쪽 포트</text>
+<text x="292" y="215" font-size="16" fill="#ffd498">데이터 대기</text>
+<text x="180" y="339" font-size="16">A–C 장애 후 A → B → C로 전환</text>
+</g></svg>

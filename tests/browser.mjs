@@ -57,6 +57,7 @@ try{
     assert.equal(await page.locator('.lesson-tab').count(),7);
     assert.equal(await page.locator('#runBtn').isDisabled(),true);
     assert.equal(await page.locator('#resultArea').isVisible(),false);
+    await page.locator('[data-lesson="4"]').click();
     await page.locator('[data-prediction="192.168.10.64/26"]').click();
     await page.locator('#runBtn').click();
     assert.equal(await page.locator('#resultArea').isVisible(),false);

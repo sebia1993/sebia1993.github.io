@@ -132,6 +132,7 @@ const $=id=>document.getElementById(id);
 
 const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
 function resetVisual(){
+    $('dnsState').textContent='관찰 전';$('ipState').textContent='관찰 전';
     ['pc1','pc2','sw1','r1','r2','r3'].forEach(id=>$(id).className='device');
     ['l1','l2','l3','l4','l5'].forEach((k,i)=>{$(k+'Svg').setAttribute('class','net-link idle');$('label'+(i+1)).className='link-label';});
     $('label1').textContent='CP1 · PC1 Edge';
@@ -161,11 +162,14 @@ function showMarker(m){
   }
 function applyStep(){
     const s=scenarios[lesson],step=s.steps[stepIndex]; resetVisual();
-    Object.entries(step.links||{}).forEach(([k,v])=>setLink(k,v));
+    // DNS and ARP processing can stop while the IP links remain healthy.
+    Object.entries(step.links||{}).forEach(([k,v])=>setLink(k,v==='stop'?'idle':v));
     (step.nodes||[]).forEach(id=>{
       const cls=step.kind.includes('CACHE')&&id==='r2'?'cache':step.kind.includes('AUTH')&&id==='r3'?'upstream':step.kind.includes('NXDOMAIN')?'stop':step.kind.includes('RESPONSE')||step.kind.includes('RECOVERY')?'reply':'active';
       $(id).classList.add(cls);
     });
+    const stopNode={'SERVICE DOWN':'r2','WRONG DNS':'pc1'}[step.kind];
+    if(stopNode){$(stopNode).classList.remove('active');$(stopNode).classList.add('stop');}
     showMarker(step.marker);
     $('dnsState').textContent=step.dns||'—'; $('ipState').textContent=step.ip||'—';
     $('eventKind').textContent=step.kind; $('eventTitle').textContent=step.title; $('eventDetail').textContent=step.detail;
@@ -194,11 +198,16 @@ adapter.presentation = {
       ]
     },
     {
-      "title": "Resolver가 다시 물으면 DNS ID도 같을까요?",
-      "brief": "PC A → Router B와 Router B → Router C는 서로 다른 조회 구간입니다. 같은 이름의 두 Transaction을 비교합니다.",
+      "title": "저장된 답이 없으면 어디까지 물어볼까요?",
+      "brief": "PC A가 설정된 DNS인 Router B에 묻습니다. 유효한 Cache가 없을 때 Router B가 답을 찾는 경로를 예상하세요. DNS ID는 관찰할 두 조회를 구분하는 번호입니다.",
+      "question": "Router B에 유효한 Cache가 없다면, 이 구성에서 다음 조회는 어디로 갈까요?",
+      "conditions": ["PC A의 DNS = Router B", "Router B의 Cache = 유효한 답 없음", "상위 DNS = Router C"],
+      "choices": [["rewrite", "Router B가 상위 DNS인 Router C에 다시 묻습니다."], ["same", "PC A가 Router B를 건너뛰고 Router C에 직접 묻습니다."], ["none", "저장된 답이 없으므로 다른 서버에는 묻지 않고 종료합니다."]],
+      "correctKey": "rewrite",
+      "reason": "Router B는 유효한 Cache가 없으면 설정된 상위 DNS인 Router C에 묻고 받은 답을 PC A에 돌려줍니다. 이번 기록에서 두 조회의 DNS ID가 달랐다는 사실은 부가 관찰이며, 고정된 ID 값을 외울 필요는 없습니다.",
       "hints": [
-        "이름과 QTYPE, 시점을 함께 확인하세요.",
-        "단말 쪽 Query / Response는 같은 구간의 ID로 대응합니다."
+        "PC A에 설정된 DNS는 Router B입니다.",
+        "Router B의 Cache에 답이 없을 때 사용할 상위 DNS를 확인하세요."
       ]
     },
     {

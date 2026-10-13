@@ -8,41 +8,77 @@ const lessons=[
 {title:'복구 완료 조건',id:'OBS-06',text:'복구 명령을 입력한 것과 실제로 복구가 증명된 것은 다릅니다.',start:['R1 E0/0 no shutdown','Management Link 유지','모든 Evidence 재확인'],question:'다음 중 “복구 완료”라고 가장 강하게 말할 수 있는 상태는 무엇일까요?',options:['no shutdown 명령 입력만 완료','Ping만 3/3','Interface up/up + Ping3/3 + SNMP1/1 + Syslog up + linkUp Trap'],correct:2,actual:'여러 Evidence가 함께 정상으로 복귀',observed:'up/up · 3/3 · 1/1 · Syslog up · linkUp Trap',reason:'한 가지 신호만 정상이어도 다른 상태가 남아 있을 수 있습니다. 이번 Run은 Data/Management와 장비 상태, Event Log, Notification이 서로 모순되지 않는 최종 상태까지 확인했습니다.',event:'복구 후 CP-DATA #61-66, Syslog #52/#54, linkUp #56, SNMP GET #70/#71 및 final #73/#74를 확인했습니다.',state:'recovery',evidence:['E0/0 및 E0/1 up/up','Recovery Ping 3/3','SNMP Admin/Oper 1/1','Syslog up transition','linkUp Trap + final SNMP poll 성공'],scope:'복구 Evidence는 관측한 기간과 조건 안에서의 정상 상태를 증명합니다. 무한 시간의 가용성을 보장한다는 뜻은 아닙니다.'}
 ];
 
-const row=(k,v,c)=>'<div class="state-row"><span>'+k+'</span><b class="'+(c||'')+'">'+v+'</b></div>';
-
 const $=id=>document.getElementById(id);
-const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
-function resetTopo(){el('linkData').setAttribute('class','link data-on');el('linkMgmt').setAttribute('class','link mgmt-on');el('nodeR1').setAttribute('class','node r1');el('nodeR2').setAttribute('class','node');el('nodeNMS').setAttribute('class','node');el('dataToken').textContent='CP-DATA · Ping 3/3';el('dataToken').setAttribute('class','token-text ok');el('r1Token').textContent='R1 · Admin1 / Oper1';el('r1Token').setAttribute('class','token-text ok');el('mgmtToken').textContent='CP-MGMT · GET/Response';el('mgmtToken').setAttribute('class','token-text ok');}
-function applyState(s){resetTopo();
- if(s==='packet'){el('linkData').setAttribute('class','link data-off');el('nodeR1').classList.add('fail');el('dataToken').textContent='Failure marker · 0/3';el('dataToken').setAttribute('class','token-text fail');el('r1Token').textContent='원인은 다른 Evidence와 대조';el('r1Token').setAttribute('class','token-text warn');el('states').innerHTML=row('Baseline','Ping 3/3','ok')+row('Failure','Ping 0/3','fail')+row('Recovery','Ping 3/3','ok')+row('결론','Ping만으로 원인 확정 X','warn');return;}
- if(s==='get'){el('nodeNMS').classList.add('active');el('mgmtToken').textContent='GET → Response';el('mgmtToken').setAttribute('class','token-text ok');el('r1Token').textContent='1/1 → 2/2 → 1/1';el('r1Token').setAttribute('class','token-text warn');el('states').innerHTML=row('Baseline','Admin1 / Oper1','ok')+row('Failure','Admin2 / Oper2','fail')+row('Recovery','Admin1 / Oper1','ok')+row('sysUpTime','계속 증가','ok');return;}
- if(s==='trap'){el('nodeR1').classList.add('active');el('nodeNMS').classList.add('active');el('mgmtToken').textContent='R1 → NMS1 · Trap';el('mgmtToken').setAttribute('class','token-text warn');el('states').innerHTML=row('Polling','NMS1→R1→NMS1','')+row('linkDown','R1→NMS1','warn')+row('linkUp','R1→NMS1','ok')+row('State value','GET으로 증명','ok');return;}
- if(s==='correlate'){el('linkData').setAttribute('class','link data-off');el('nodeR1').classList.add('fail');el('nodeNMS').classList.add('active');el('dataToken').textContent='Packet gap';el('dataToken').setAttribute('class','token-text fail');el('r1Token').textContent='E0/0 down';el('r1Token').setAttribute('class','token-text fail');el('mgmtToken').textContent='Syslog + GET + delayed Trap';el('mgmtToken').setAttribute('class','token-text warn');el('states').innerHTML=row('Packet','Failure marker 없음','fail')+row('Syslog','E0/0 down','fail')+row('SNMP GET','2 / 2','fail')+row('Trap','linkDown · 늦게 도착','warn');return;}
- if(s==='recovery'){el('nodeR1').classList.add('active');el('nodeR2').classList.add('active');el('nodeNMS').classList.add('active');el('dataToken').textContent='CP-DATA · Ping 3/3';el('r1Token').textContent='R1 · up/up · 1/1';el('mgmtToken').textContent='Syslog up + linkUp';el('states').innerHTML=row('Interface','up/up','ok')+row('Data','Ping 3/3','ok')+row('SNMP','Admin1 / Oper1','ok')+row('Events','Syslog up + linkUp','ok');return;}
-}
-const adapter={raw:lessons,kind:'state',reset(i){index=i;recovered=false;resetTopo();},show(){applyState(lessons[index].state);},recover:null,compare:null};
+const el=$;
 const S=SecurityLab;
-adapter.presentation={names:S.names,labels:{...S.labels,'Ping 실패의 의미':'Ping 실패로 어디까지 알 수 있을까요?','현재 상태는 무엇으로?':'현재 상태는 무엇으로 확인할까요?','GET과 Trap':'GET과 Trap은 무엇이 다를까요?','시간이 딱 맞아야 하나?':'기록 시간이 달라도 같은 사건일까요?','복구 완료 조건':'어떤 근거가 모여야 복구 완료일까요?','Packet gap':'관측 Packet 없음','Failure marker':'장애 시험 Packet','delayed Trap':'늦게 도착한 Trap','State value':'상태값','Events':'사건 기록','Management Link 유지':'관리 링크 유지','continuous capture':'연속 Capture','positive control':'정상 대조군','clock domain/offset':'시계 기준과 시각 차이','Phase':'관측 단계','timestamp':'기록 시각','Notification':'알림','Data':'데이터','Recovery marker':'복구 시험 Packet'},lessons:[
-{title:'Ping 실패로 원인까지 알 수 있을까요?',brief:'Router A의 데이터 링크와 별도 관리 링크를 구분합니다. Ping과 장비 상태가 각각 무엇을 알려 주는지 관찰합니다.',hints:['Ping 실패는 통신 결과입니다.','같은 시간의 인터페이스와 Syslog·SNMP를 함께 보세요.','Capture에 Packet이 없다는 사실은 정상 전후 대조도 필요합니다.']},
-{title:'현재 인터페이스 상태는 무엇으로 확인할까요?',brief:'PC A가 Router A에 SNMP GET을 보냅니다. 학습 페이지의 Admin·Oper를 구분해 응답값을 읽습니다.',hints:['GET은 관리 단말에서 질문을 시작합니다.','ifAdminStatus와 ifOperStatus는 각각 설정과 동작 상태입니다.','이번 Trap에 포함되지 않은 값을 만들어 내지 않습니다.']},
-{title:'GET과 Trap의 시작점은 같을까요?',brief:'관리 링크는 유지된 조건입니다. 누가 먼저 보내는지와 자료의 역할을 구분합니다.',hints:['GET Request는 PC A가 시작합니다.','Trap은 Agent가 스스로 보내는 알림입니다.','알림의 방향과 현재 상태 조회를 구분하세요.']},
-{title:'기록 시각이 달라도 같은 사건일까요?',brief:'서로 다른 자료가 같은 Router A E0/0 장애를 가리키는지 확인합니다. 화면 순서는 관찰 안내이며 실제 처리 시간 재현이 아닙니다.',hints:['같은 장비와 인터페이스인지 먼저 보세요.','서로 다른 수집 방식은 도착 시각이 다를 수 있습니다.','31.187초는 이 실험의 관측값이며 일반 규칙이 아닙니다.']},
-{title:'복구 완료에는 어떤 근거가 필요할까요?',brief:'설정 원복 행동과 실제 정상화 결과를 나누어 확인합니다. 데이터·관리·장비 상태를 함께 봅니다.',hints:['명령 입력만으로 결과를 확정하지 않습니다.','Ping과 인터페이스, SNMP를 함께 확인하세요.','Syslog up·linkUp과 최종 상태가 모순되지 않아야 합니다.']}
+let index=0;
+const token=(id,text,tone='')=>{el(id).textContent=text;el(id).setAttribute('class','token-text '+tone);};
+// Each scene owns every visible status. Replaying a recovery must not inherit
+// failure classes, tokens or table rows from an earlier event.
+function scene({data='unknown',dataText='통신 관찰 대기',routerText='상태 관찰 대기',management='관리 링크 유지',rows=[],focus=[]}={}){
+ S.clear();
+ el('linkMgmt').setAttribute('class','link mgmt-on');
+ el('linkData').setAttribute('class','link'+(data==='up'?' data-on':data==='down'?' data-off':''));
+ if(data==='down')el('nodeR1').classList.add('fail');
+ token('dataToken',dataText,data==='up'?'ok':data==='down'?'fail':'');
+ token('r1Token',routerText,data==='up'?'ok':data==='down'?'fail':'');
+ token('mgmtToken',management,'ok');
+ S.rows('states',rows);S.focus(focus);
+}
+const normalScene=(rows=[],management='관리 링크 유지')=>scene({data:'up',dataText:'CP-DATA · Ping 3/3',routerText:'E0/0 · Admin1 / Oper1',management,rows});
+const failureScene=(rows=[],management='관리 링크 유지')=>scene({data:'down',dataText:'CP-DATA · Ping 0/3',routerText:'E0/0 · Admin2 / Oper2',management,rows});
+function applyState(state){
+ if(state==='packet')return normalScene([['현재 장면','복구 후 정상','ok'],['관측 이력','정상 3/3 → 장애 0/3 → 복구 3/3'],['원인 판단','Ping과 인터페이스·Syslog·SNMP를 함께 확인']],'Syslog up · linkUp · GET 1/1');
+ if(state==='get')return normalScene([['현재 장면','복구 후 Admin1 / Oper1','ok'],['GET 관측 이력','1/1 → 2/2 → 1/1'],['sysUpTime','계속 증가']],'SNMP GET → Response');
+ if(state==='trap')return scene({dataText:'이 장면은 알림 방향 비교',routerText:'SNMP Agent',management:'Router A → PC A · Trap',rows:[['GET','PC A → Router A → PC A'],['Trap 알림 이력','linkDown / linkUp'],['Admin / Oper 값','별도 GET으로 확인']],focus:['nodeR1','nodeNMS']});
+ if(state==='correlate')return failureScene([['현재 장면','같은 E0/0 장애의 근거 대조'],['Packet','장애 marker 없음'],['Syslog','E0/0 down'],['SNMP GET','Admin2 / Oper2'],['Trap','linkDown · 늦게 도착']],'Syslog down · GET 2/2 · linkDown');
+ return normalScene([['현재 장면','복구 후 정상','ok'],['인터페이스','데이터·관리 모두 up/up'],['Ping','3/3'],['SNMP GET','Admin1 / Oper1'],['사건 기록','Syslog up · linkUp']],'GET 1/1 · Syslog up · linkUp');
+}
+const adapter={raw:lessons,kind:'state',reset(i){index=i;S.clear();},show(){applyState(lessons[index].state);},recover:null,compare:null};
+adapter.presentation={names:S.names,labels:{...S.labels,'Packet gap':'관측 Packet 없음','Failure marker':'장애 시험 Packet','delayed Trap':'늦게 도착한 Trap','State value':'상태값','Events':'사건 기록','Management Link 유지':'관리 링크 유지','continuous capture':'연속 Capture','positive control':'정상 대조군','clock domain/offset':'시계 기준과 시각 차이','Phase':'관측 단계','timestamp':'기록 시각','Notification':'알림','Data':'데이터','Recovery marker':'복구 시험 Packet'},lessons:[
+ {title:'Ping 실패로 원인까지 알 수 있을까요?',brief:'Router A의 데이터 링크와 별도 관리 링크를 구분합니다. Ping과 장비 상태가 각각 무엇을 알려 주는지 관찰합니다.',hints:['Ping 실패는 통신 결과입니다.','같은 시간의 인터페이스와 Syslog·SNMP를 함께 보세요.','Capture에 Packet이 없다는 사실은 정상 전후 대조도 필요합니다.']},
+ {title:'현재 인터페이스 상태는 무엇으로 확인할까요?',brief:'PC A가 Router A에 SNMP GET을 보냅니다. 학습 페이지의 Admin·Oper를 구분해 응답값을 읽습니다.',hints:['GET은 관리 단말에서 질문을 시작합니다.','ifAdminStatus와 ifOperStatus는 각각 설정과 동작 상태입니다.','이번 Trap에 포함되지 않은 값을 만들어 내지 않습니다.']},
+ {title:'GET과 Trap의 시작점은 같을까요?',brief:'관리 링크는 유지된 조건입니다. 누가 먼저 보내는지와 자료의 역할을 구분합니다.',hints:['GET Request는 PC A가 시작합니다.','Trap은 Agent가 스스로 보내는 알림입니다.','알림의 방향과 현재 상태 조회를 구분하세요.']},
+ {title:'기록 시각이 달라도 같은 사건일까요?',brief:'서로 다른 자료가 같은 Router A E0/0 장애를 가리키는지 확인합니다. 화면 순서는 관찰 안내이며 실제 처리 시간 재현이 아닙니다.',hints:['같은 장비와 인터페이스인지 먼저 보세요.','서로 다른 수집 방식은 도착 시각이 다를 수 있습니다.','31.187초는 이 실험의 관측값이며 일반 규칙이 아닙니다.']},
+ {title:'복구 완료에는 어떤 근거가 필요할까요?',brief:'설정 원복 행동과 실제 정상화 결과를 나누어 확인합니다. 데이터·관리·장비 상태를 함께 봅니다.',hints:['명령 입력만으로 결과를 확정하지 않습니다.','Ping과 인터페이스, SNMP를 함께 확인하세요.','Syslog up·linkUp과 최종 상태가 모순되지 않아야 합니다.']}
 ]};
-const originalReset=adapter.reset;adapter.reset=i=>{originalReset(i);S.clear();};
-function observed(items){S.rows('states',items);}
-function token(id,text,tone=''){el(id).textContent=text;el(id).setAttribute('class','token-text '+tone);}
-function dataDown(){el('linkData').setAttribute('class','link data-off');el('nodeR1').classList.add('fail');token('dataToken','CP-DATA · Ping 0/3','fail');}
 adapter.buildPlan=(i,mode='normal')=>{
  if(mode!=='normal')return null;
- const s=lessons[i],E=S.event,M=S.move,done=()=>S.finish(s,()=>applyState(s.state));
- const start=E('관측 경로 확인','Router A↔B는 데이터 경로, Router A↔PC A는 별도 관리 경로입니다.',()=>S.clear());
- if(s.state==='packet')return[start,E('정상 대조군','같은 연속 Capture에서 정상 시험 Packet은 Request 3개와 Reply 3개였습니다.',()=>{observed([['정상 대조','Ping 3/3']]);token('dataToken','CP-DATA · Ping 3/3','ok');}),E('장애 통신 결과','실제 장애 시험의 Ping은 0/3이었고 해당 marker ICMP는 Capture에 없었습니다.',()=>{dataDown();observed([['정상 대조','Ping 3/3'],['장애 관측','Ping 0/3 · marker 없음']]);}),E('다른 근거와 대조','인터페이스 상태·Syslog·SNMP가 같은 Router A E0/0 변화를 가리키는지 봅니다.',()=>{S.focus(['nodeR1','nodeNMS']);observed([['통신','Ping 0/3'],['인터페이스','down'],['Syslog','E0/0 down'],['SNMP GET','Admin2 / Oper2']]);}),E('복구 대조군 확인','같은 Capture에서 복구 시험 Packet의 Request 3개와 Reply 3개가 다시 확인됐습니다.',()=>{token('dataToken','복구 Ping 3/3','ok');observed([['정상 → 장애 → 복구','3/3 → 0/3 → 3/3'],['판단','Ping과 상태 근거를 함께 사용']]);}),done()];
- if(s.state==='get')return[start,M('관리 단말이 질문','PC A가 Router A의 같은 OID를 조회합니다.',['nodeNMS','nodeR1'],'SNMP GET'),M('정상 상태 응답','GET Response에서 ifAdminStatus=1, ifOperStatus=1을 읽습니다.',['nodeR1','nodeNMS'],'Response',()=>{observed([['정상','Admin1 / Oper1']]);token('r1Token','Admin1 / Oper1','ok');},'return'),E('장애 상태 조회 결과','장애 단계의 같은 OID는 Admin2 / Oper2였습니다.',()=>{dataDown();token('r1Token','Admin2 / Oper2','fail');observed([['정상','Admin1 / Oper1'],['장애','Admin2 / Oper2']]);}),E('복구 상태 조회 결과','복구 단계의 GET Response는 다시 Admin1 / Oper1이었습니다.',()=>{token('r1Token','Admin1 / Oper1','ok');observed([['정상','1 / 1'],['장애','2 / 2'],['복구','1 / 1'],['sysUpTime','계속 증가']]);}),done()];
- if(s.state==='trap')return[start,M('GET은 질문부터 시작','현재 상태를 읽을 때는 PC A가 먼저 Request를 보냅니다.',['nodeNMS','nodeR1'],'SNMP GET'),M('GET Response','Router A는 질문에 대한 상태 응답을 보냅니다.',['nodeR1','nodeNMS'],'Response',()=>observed([['GET','PC A → Router A → PC A']]),'return'),E('상태 변화 알림의 시작점','Trap은 PC A의 질문을 기다리지 않고 Router A가 시작합니다.',()=>{S.focus(['nodeR1']);observed([['GET','관리 단말이 질문'],['Trap','장비가 알림 시작']]);}),M('linkDown 알림 전달','Router A가 PC A로 비동기 linkDown 알림을 보냅니다.',['nodeR1','nodeNMS'],'linkDown Trap',()=>token('mgmtToken','Router A → PC A · Trap','warn')),E('이번 Trap의 범위','이번 Trap에는 Admin/Oper 값이 없었습니다. 그 상태값은 GET으로 확인했습니다.',()=>observed([['linkDown / linkUp','Router A → PC A'],['Admin / Oper 값','GET으로 확인']])),done()];
- if(s.state==='correlate')return[start,E('장애 통신 관찰','CP-DATA에서 장애 marker가 없었고 Ping 시험은 0/3이었습니다.',()=>{dataDown();observed([['Packet','장애 marker 없음']]);}),E('장비 사건 기록 대조','Syslog는 Router A E0/0 down을 기록했습니다.',()=>observed([['Packet','장애 marker 없음'],['Syslog','E0/0 down']])),E('현재 상태 대조','SNMP GET은 같은 인터페이스의 Admin2 / Oper2를 반환했습니다.',()=>observed([['Packet','장애 marker 없음'],['Syslog','E0/0 down'],['SNMP GET','2 / 2']])),M('늦게 도착한 Trap 연결','이번 linkDown Trap은 장애 GET 뒤에 관측됐습니다. Syslog와의 31.187초 차이는 이 실험의 값입니다.',['nodeR1','nodeNMS'],'linkDown Trap'),E('같은 사건인지 판단','시각을 강제로 맞추지 않고 장비·인터페이스·상태 전환을 연결합니다.',()=>observed([['대상','Router A E0/0'],['상태','down'],['자료','Packet · Syslog · GET · Trap']])),done()];
- return[start,E('원복 명령과 결과 구분','no shutdown은 복구 행동입니다. 이후 실제 상태를 확인해야 합니다.',()=>observed([['원복 명령','입력'],['복구 판정','확인 중']])),E('인터페이스 확인','데이터와 관리 인터페이스가 up/up으로 확인됐습니다.',()=>{token('r1Token','up/up','ok');observed([['인터페이스','up/up']]);}),M('데이터 통신 확인','복구 Ping은 3/3이었습니다.',['nodeR1','nodeR2','nodeR1'],'ICMP',()=>{token('dataToken','Ping 3/3','ok');observed([['인터페이스','up/up'],['Ping','3/3']]);}),E('현재 상태와 알림 확인','SNMP1/1, Syslog up, linkUp Trap과 최종 poll을 대조합니다.',()=>{token('mgmtToken','GET 1/1 · Syslog up · linkUp','ok');observed([['인터페이스','up/up'],['Ping','3/3'],['SNMP','Admin1 / Oper1'],['사건 기록','Syslog up · linkUp']]);}),done()];
+ const s=lessons[i],E=S.event,M=S.move;
+ const done=()=>E('현재 장면과 관측 이력 정리',s.state==='packet'||s.state==='get'?'그림은 복구 후 정상 상태입니다. 상태표의 정상→장애→복구는 앞서 확인한 이력입니다.':s.reason,()=>applyState(s.state));
+ const start=E('관측 경로 확인','Router A↔B는 데이터 경로, Router A↔PC A는 장애 중에도 유지한 별도 관리 경로입니다.',()=>scene());
+ if(s.state==='packet')return [start,
+  E('정상 대조군','같은 연속 Capture에서 정상 시험 Packet은 Request 3개와 Reply 3개였습니다.',()=>normalScene([['정상 대조','Ping 3/3']])),
+  E('장애 통신 결과','실제 장애 시험의 Ping은 0/3이었고 해당 marker ICMP는 Capture에 없었습니다. 이것만으로 인터페이스 상태를 확정하지 않습니다.',()=>scene({dataText:'Ping 0/3 · 원인 확인 전',routerText:'인터페이스 근거 확인 전',rows:[['정상 대조','Ping 3/3'],['장애 통신','Ping 0/3 · marker 없음'],['원인','다른 근거와 대조 필요']]})),
+  E('다른 근거와 대조','인터페이스 상태·Syslog·SNMP가 같은 Router A E0/0의 down을 가리켰습니다.',()=>failureScene([['통신','Ping 0/3'],['인터페이스','down'],['Syslog','E0/0 down'],['SNMP GET','Admin2 / Oper2']],'Syslog down · GET 2/2')),
+  E('복구 대조군 확인','같은 Capture에서 복구 시험 Packet의 Request 3개와 Reply 3개가 다시 확인됐습니다.',()=>normalScene([['현재 장면','복구 Ping 3/3','ok'],['관측 이력','정상 3/3 → 장애 0/3 → 복구 3/3'],['판단','Ping과 상태 근거를 함께 사용']],'관리 링크 유지 · 복구 상태 확인')),
+  done()];
+ if(s.state==='get')return [start,
+  M('관리 단말이 질문','PC A가 Router A의 같은 OID를 조회합니다.',['nodeNMS','nodeR1'],'SNMP GET',()=>scene({management:'PC A → Router A · GET',rows:[['조회 대상','E0/0 · ifAdminStatus / ifOperStatus']]})),
+  M('정상 상태 응답','GET Response에서 ifAdminStatus=1, ifOperStatus=1을 읽습니다.',['nodeR1','nodeNMS'],'Response',()=>normalScene([['현재 조회','Admin1 / Oper1']],'Router A → PC A · Response'),'return'),
+  E('장애 상태 조회 결과','장애 단계의 같은 OID는 Admin2 / Oper2였습니다.',()=>failureScene([['정상 이력','Admin1 / Oper1'],['현재 조회','Admin2 / Oper2']],'GET Response · 2/2')),
+  E('복구 상태 조회 결과','복구 단계의 GET Response는 다시 Admin1 / Oper1이었습니다. 이 단계의 데이터 통신도 복구된 상태입니다.',()=>normalScene([['현재 조회','Admin1 / Oper1','ok'],['GET 관측 이력','1/1 → 2/2 → 1/1'],['sysUpTime','계속 증가']],'GET Response · 1/1')),
+  done()];
+ if(s.state==='trap')return [start,
+  M('GET은 질문부터 시작','현재 상태를 읽을 때는 PC A가 먼저 Request를 보냅니다.',['nodeNMS','nodeR1'],'SNMP GET',()=>scene({management:'PC A → Router A · GET',rows:[['시작점','PC A · Manager']]})),
+  M('GET Response','Router A는 질문에 대한 상태 응답을 보냅니다.',['nodeR1','nodeNMS'],'Response',()=>scene({management:'Router A → PC A · Response',rows:[['GET','PC A → Router A → PC A']]}),'return'),
+  E('상태 변화 알림의 시작점','Trap은 PC A의 질문을 기다리지 않고 Router A가 시작합니다.',()=>scene({routerText:'알림을 시작하는 Agent',rows:[['GET','관리 단말이 질문'],['Trap','장비가 알림 시작']],focus:['nodeR1']})),
+  M('linkDown 알림 전달','Router A가 PC A로 비동기 linkDown 알림을 보냅니다.',['nodeR1','nodeNMS'],'linkDown Trap',()=>scene({dataText:'이 장면은 알림 방향 관찰',routerText:'SNMP Agent',management:'Router A → PC A · linkDown',rows:[['알림','linkDown'],['방향','Router A → PC A']]})),
+  E('이번 Trap의 범위','이번 Trap에는 Admin/Oper 값이 없었습니다. 그 상태값은 GET으로 확인했습니다.',()=>scene({dataText:'이 장면은 알림 종류 비교',routerText:'Admin/Oper는 별도 조회',management:'관측한 알림 · linkDown / linkUp',rows:[['linkDown / linkUp','Router A → PC A'],['Admin / Oper 값','GET으로 확인']]})),
+  done()];
+ if(s.state==='correlate')return [start,
+  E('장애 통신 관찰','CP-DATA에서 장애 marker가 없었고 Ping 시험은 0/3이었습니다.',()=>scene({dataText:'Ping 0/3 · marker 없음',rows:[['Packet','장애 marker 없음'],['인터페이스 상태','다음 근거에서 확인']]})),
+  E('장비 사건 기록 대조','Syslog는 Router A E0/0 down을 기록했습니다.',()=>scene({data:'down',dataText:'CP-DATA · Ping 0/3',routerText:'E0/0 down · Syslog 근거',management:'Syslog down 수신',rows:[['Packet','장애 marker 없음'],['Syslog','E0/0 down']]})),
+  E('현재 상태 대조','SNMP GET은 같은 인터페이스의 Admin2 / Oper2를 반환했습니다.',()=>failureScene([['Packet','장애 marker 없음'],['Syslog','E0/0 down'],['SNMP GET','Admin2 / Oper2']],'Syslog down · GET 2/2')),
+  M('늦게 도착한 Trap 연결','이번 linkDown Trap은 장애 GET 뒤에 관측됐습니다. Syslog와의 31.187초 차이는 이 실험의 값입니다.',['nodeR1','nodeNMS'],'linkDown Trap',()=>failureScene([['대상','Router A E0/0'],['상태','down'],['Trap','GET 응답 뒤 도착']],'linkDown 알림 수신')),
+  E('같은 사건인지 판단','시각을 강제로 맞추지 않고 장비·인터페이스·상태 전환을 연결합니다.',()=>failureScene([['대상','Router A E0/0'],['상태','down'],['자료','Packet · Syslog · GET · Trap']],'같은 장애 단계의 근거 연결')),
+  done()];
+ return [start,
+  E('원복 명령과 결과 구분','no shutdown은 복구 행동입니다. 이후 실제 상태를 확인해야 합니다.',()=>scene({rows:[['원복 명령','입력'],['복구 판정','확인 중']]})),
+  E('인터페이스 확인','데이터와 관리 인터페이스가 up/up으로 확인됐습니다. 데이터 통신은 다음 단계에서 확인합니다.',()=>scene({data:'up',dataText:'링크 Up · Ping 관찰 전',routerText:'E0/0 up/up',rows:[['인터페이스','up/up']]})),
+  M('데이터 통신 확인','복구 Ping은 3/3이었습니다.',['nodeR1','nodeR2','nodeR1'],'ICMP',()=>scene({data:'up',dataText:'복구 Ping 3/3',routerText:'E0/0 up/up',rows:[['인터페이스','up/up'],['Ping','3/3']]})),
+  E('현재 상태와 알림 확인','SNMP1/1, Syslog up, linkUp Trap과 최종 poll을 대조합니다.',()=>normalScene([['인터페이스','up/up'],['Ping','3/3'],['SNMP GET','Admin1 / Oper1'],['사건 기록','Syslog up · linkUp']],'GET 1/1 · Syslog up · linkUp')),
+  done()];
 };
-
 NetworkSimulator.mount(adapter);
 })();

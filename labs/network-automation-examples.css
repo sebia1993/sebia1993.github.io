@@ -1,0 +1,12 @@
+/* One preserved state fragment followed through the automation pipeline. */
+#simVisual .automation-example{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);min-width:0}
+#simVisual .automation-example[hidden]{display:none}
+#simVisual .automation-example h3{margin:0 0 6px;font-size:1rem}
+#simVisual .automation-example-note{margin:0 0 12px;color:var(--muted);font-size:.78rem;line-height:1.6}
+#simVisual .automation-example-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#simVisual .automation-example-step{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f4f7fb}
+#simVisual .automation-example-step>b{font-size:.8rem;color:#24506e}
+#simVisual .automation-example-step pre{margin:10px 0 0;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.72rem;line-height:1.55;color:#253d52}
+#simVisual .automation-example-step code{font:inherit;white-space:inherit;overflow-wrap:inherit}
+@media(max-width:1000px){#simVisual .automation-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){#simVisual .automation-example-grid{grid-template-columns:1fr}}

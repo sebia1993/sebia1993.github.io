@@ -43,7 +43,7 @@ const presentation={
   {title:'같은 AS의 두 Router는 어떤 관계일까요?',brief:'학습 페이지의 AS 구분을 적용합니다. Router A·D와 Router B·C의 AS 번호를 비교하세요.',hints:['케이블 모양이 아니라 양 끝 장비의 AS 번호를 보세요.','eBGP와 iBGP는 서로 다른 AS인지, 같은 AS인지로 구분합니다.','Router A와 Router D는 모두 AS 65001에 속합니다.']},
   {title:'선호도가 같다면 어떤 후보를 선택할까요?',brief:'같은 목적지 Prefix의 두 후보를 비교합니다. 이번 검증에서는 Weight와 LOCAL_PREF 등 선행 조건을 같게 통제했습니다.',hints:['두 후보는 같은 203.0.113.1/32에 대한 경로입니다.','LOCAL_PREF는 모두 100입니다. AS_PATH를 비교하세요.','AS_PATH의 반복된 AS 번호는 실제 Router 대수를 뜻하지 않습니다.']},
   {title:'선호 정책을 바꾸면 더 긴 경로도 선택될까요?',brief:'학습 페이지의 Router B → Router C 전환을 관찰합니다. LOCAL_PREF 변경, RIB 반영, 정책 제거 후 복구를 구분하세요.',hints:['Router C의 AS_PATH는 정책을 바꿔도 그대로입니다.','바뀌는 값은 Router C 후보의 LOCAL_PREF 100 → 200입니다.','이번 Cisco 비교에서는 LOCAL_PREF가 AS_PATH보다 먼저 고려됐습니다.']},
-  {title:'같은 AS 내부에는 어떤 속성이 전달될까요?',brief:'선택한 경로를 Router D에 광고합니다. AS_PATH와 LOCAL_PREF 전달, 명시적 next-hop-self 설정을 따로 확인하세요.',hints:['Router A와 Router D는 같은 AS입니다.','iBGP 광고 자체가 자신의 AS를 AS_PATH에 추가하는지 생각해 보세요.','NEXT_HOP은 이번 실습에 명시한 next-hop-self 설정과 연결해 보세요.']},
+  {title:'같은 AS 내부에는 어떤 속성이 전달될까요?',brief:'iBGP는 같은 AS 안에서 선택한 경로를 전달합니다. 이 조건에서는 자기 AS를 AS_PATH에 추가하지 않고 LOCAL_PREF를 전달합니다. next-hop-self는 NEXT_HOP을 광고하는 Router A 자신으로 바꾸는 명시적 설정입니다.',hints:['Router A와 Router D는 같은 AS입니다.','iBGP 광고 자체가 자신의 AS를 AS_PATH에 추가하는지 생각해 보세요.','NEXT_HOP은 이번 실습에 명시한 next-hop-self 설정과 연결해 보세요.']},
   {title:'광고 필터를 제거하면 어떤 경로가 보일까요?',brief:'경로 선택과 경로 광고는 다른 판단입니다. Router B가 보유한 두 Prefix 중 Router A에 보이는 범위의 변화를 관찰하세요.',hints:['Router B 자체에는 TARGET과 EXTRA가 모두 있습니다.','Prefix Filter는 데이터 Packet이 아니라 광고할 Route를 고릅니다.','필터를 제거한 장면과 다시 적용한 장면을 비교하세요.']}
  ]
 };

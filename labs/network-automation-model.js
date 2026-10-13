@@ -29,22 +29,46 @@ adapter.presentation={names:S.names,labels:{...S.labels,'PASS':'기준 일치','
 {title:'보고서에는 무엇을 남겨야 할까요?',brief:'장비별 결과를 JSON으로 기록하고 전체 집계와 대조합니다. 실행 기록과 인증정보를 구분합니다.',hints:['보고서는 사람이 읽고 다음 자동화가 재사용합니다.','장비 수와 결과 집계가 맞아야 합니다.','실행 결과에 인증 비밀값이 필요한지 생각하세요.']},
 {title:'다시 실행해도 같은 판정이 나올까요?',brief:'장비 상태와 원본 장비 목록을 복구한 뒤 같은 읽기 전용 수집을 다시 실행합니다.',hints:['실행 시각과 run_id는 달라질 수 있습니다.','같아야 하는 것은 핵심 상태와 판정입니다.','수집 코드와 원본 장비 목록의 hash도 대조합니다.']}
 ]};
-const originalReset=adapter.reset;adapter.reset=i=>{originalReset(i);S.clear();};
+// These cards reuse the state-bearing fragments retained in lessons above.
+// The normalized field names and compact JSON are teaching representations,
+// not a reproduction of an unavailable original CLI or report file.
+function clearExample(){const panel=el('automationExample');if(panel){panel.hidden=true;panel.replaceChildren();}}
+function example(state,through=4){
+ const panel=el('automationExample');if(!panel)return;
+ const failed=state==='error',mismatch=state==='mismatch',device=failed?'R3':'R2';
+ const raw=failed?'수집 실패: 상태 원문 없음':mismatch?'administratively down/down':'up/up';
+ const actual=failed?null:{interface:'Loopback0',ip:failed?'10.255.0.3':'10.255.0.2',admin:mismatch?'down':'up',protocol:mismatch?'down':'up'};
+ const intent={admin:'up',protocol:'up'};
+ const result={device,collection_status:failed?'ERROR':'SUCCESS',actual,intent,comparison:failed?'NOT_EVALUATED':mismatch?'MISMATCH':'PASS'};
+ const context=failed?'수집 오류 실행 · Router C':mismatch?'상태 불일치 실행 · Router B':'정상 실행 · Router B';
+ const heading=document.createElement('h3');heading.textContent=context+' 값 따라가기';
+ const note=document.createElement('p');note.className='automation-example-note';note.textContent='기존 기록의 상태값을 사용합니다. 필드명과 JSON 구조는 이해를 위한 학습용 축약이며 원본 파일 복제가 아닙니다.';
+ const grid=document.createElement('div');grid.className='automation-example-grid';
+ const stages=[['1 · Raw 상태 원문',raw],['2 · 정규화한 Actual',JSON.stringify(actual,null,2)],['3 · Intent와 비교',JSON.stringify(intent,null,2)+'\n→ '+result.comparison],['4 · JSON 기록',JSON.stringify(result,null,2)]];
+ for(const [i,[title,value]]of stages.entries()){
+  const card=document.createElement('div');card.className='automation-example-step';
+  const label=document.createElement('b');label.textContent=title;
+  const pre=document.createElement('pre'),code=document.createElement('code');
+  code.textContent=i<through?value:'다음 관찰에서 확인';pre.append(code);card.append(label,pre);grid.append(card);
+ }
+ panel.replaceChildren(heading,note,grid);panel.hidden=false;
+}
+const originalReset=adapter.reset;adapter.reset=i=>{originalReset(i);S.clear();clearExample();};
 function statuses(items){S.rows('states',items);}
 function device(id,text,tone='ok'){el('token'+id).textContent=text;el('token'+id).setAttribute('class','token-text '+tone);}
 adapter.buildPlan=(i,mode='normal')=>{
  if(mode!=='normal')return null;
- const s=lessons[i],m=s.state,E=S.event,M=S.move,done=()=>S.finish(s,()=>applyState(m));
- const start=E('대상 목록과 정상 기준','PC A가 Router A·B·C를 읽습니다. 정상 기준은 각 Loopback0의 up/up입니다.',()=>{S.clear();statuses([['대상','Router A · Router B · Router C'],['정상 기준','Loopback0 up/up']]);});
+ const s=lessons[i],m=s.state,E=S.event,M=S.move,done=()=>S.finish(s,()=>{applyState(m);example(m);});
+ const start=E('대상 목록과 정상 기준','PC A가 Router A·B·C를 읽습니다. 정상 기준은 각 Loopback0의 up/up입니다.',()=>{S.clear();clearExample();statuses([['대상','Router A · Router B · Router C'],['정상 기준','Loopback0 up/up']]);});
  if(m==='baseline'||m==='final'){
- const steps=[start];for(const [id,name,ip]of [['R1','Router A','10.255.0.1'],['R2','Router B','10.255.0.2'],['R3','Router C','10.255.0.3']])steps.push(M(name+' 상태 수집','같은 읽기 전용 명령으로 상태를 읽고 장비별 원문을 보존합니다.',['nodeNMS','node'+id,'nodeNMS'],'SSH',()=>device(id,'수집 중','')),E(name+' 값 비교',ip+' · Loopback0 up/up이 정상 기준과 같습니다.',()=>{device(id,'수집 성공 · 기준 일치');statuses([[name,'up/up → 기준 일치']]);}));
+ const steps=[start];for(const [id,name,ip]of [['R1','Router A','10.255.0.1'],['R2','Router B','10.255.0.2'],['R3','Router C','10.255.0.3']])steps.push(M(name+' 상태 수집','같은 읽기 전용 명령으로 상태를 읽고 장비별 원문을 보존합니다.',['nodeNMS','node'+id,'nodeNMS'],'SSH',()=>device(id,'수집 중','')),E(name+' 값 비교',ip+' · Loopback0 up/up이 정상 기준과 같습니다.',()=>{device(id,'수집 성공 · 기준 일치');statuses([[name,'up/up → 기준 일치']]);if(id==='R2')example(m,3);}));
  if(m==='final')steps.push(E('핵심 상태와 파일 지문 비교','실행 시각은 달라도 핵심 상태, 수집 코드와 원본 장비 목록 hash가 정상 기준과 같았습니다.',()=>statuses([['장비별 핵심 상태','정상 기준 = 최종 실행'],['수집 코드 hash','변경 없음'],['원본 장비 목록 hash','변경 없음']])));
- else steps.push(E('장비별 결과와 전체 집계','세 장비의 수집 성공과 기준 일치를 각각 기록합니다.',()=>statuses([['수집','3대 성공'],['기준 일치','3'],['기준 불일치 / 수집 오류','0 / 0']])));
+ else steps.push(E('장비별 결과와 전체 집계','세 장비의 수집 성공과 기준 일치를 각각 기록합니다.',()=>{statuses([['수집','3대 성공'],['기준 일치','3'],['기준 불일치 / 수집 오류','0 / 0']]);example(m);}));
  return [...steps,done()];
  }
- if(m==='mismatch')return[start,M('Router B에 정상 접속','SSH로 실제 상태를 읽는 단계는 성공합니다.',['nodeNMS','nodeR2','nodeNMS'],'SSH',()=>device('R2','수집 중','')),E('읽은 값을 정리','실제 Loopback0 상태는 administratively down/down입니다. 실제값은 존재합니다.',()=>{device('R2','수집 성공 · down/down','warn');statuses([['수집','성공'],['관측값','administratively down/down']]);}),E('정상 기준과 비교','기대한 up/up과 읽은 값이 달라 기준 불일치로 분류합니다.',()=>{el('nodeR2').classList.add('mismatch');device('R2','기준 불일치','warn');statuses([['정상 기준','up/up'],['관측값','administratively down/down'],['비교','기준 불일치']]);}),E('다른 장비 결과 보존','Router A와 Router C는 각각 수집 성공·기준 일치였습니다.',()=>{device('R1','수집 성공 · 기준 일치');device('R3','수집 성공 · 기준 일치');}),done()];
- if(m==='error')return[start,E('시험용 접속 설정 확인','Router C 장비를 고장 낸 것이 아닙니다. 복사한 장비 목록의 접속 Port만 22222로 바꿨습니다.',()=>statuses([['Router C 실제 상태','변경하지 않음'],['시험용 SSH Port','22222']])),M('Router C 연결 시도','해당 Port의 연결이 거부돼 실제 상태를 읽지 못했습니다.',['nodeNMS','nodeR3'],'TCP :22222',()=>device('R3','연결 시도',''),'stop'),E('수집 오류와 비교 미실행','관측값을 만들지 않고 수집 오류로 남깁니다. 비교할 값이 없으므로 비교 미실행입니다.',()=>{el('nodeR3').classList.add('error');el('linkR3').setAttribute('class','link error');device('R3','수집 오류 · 비교 미실행','fail');statuses([['수집','오류'],['관측값','없음'],['비교','미실행']]);}),E('정상 장비의 결과 유지','Router A와 Router B의 수집·판정 결과는 그대로 보존합니다.',()=>{device('R1','수집 성공 · 기준 일치');device('R2','수집 성공 · 기준 일치');}),done()];
- return[start,E('장비별 결과 기록','각 장비의 수집 상태, 정상 기준, 관측값, 판정을 구분해 JSON에 기록합니다.',()=>{S.focus(['nodeNMS']);statuses([['장비별 기록','3개'],['필드','수집 상태 · 기준 · 관측값 · 판정']]);}),E('구조와 집계 대조','5개 실행의 JSON을 다시 파싱하고 대상 수와 장비별 결과 집계가 맞는지 확인했습니다.',()=>statuses([['JSON 재파싱','성공'],['장비 수','대상 목록과 일치'],['요약 집계','장비별 결과와 일치']])),E('인증정보 포함 여부 확인','기존 공개 보고서에서는 비밀번호 원문과 인증 비밀값이 없음을 확인했습니다.',()=>statuses([['실행 결과','기록'],['Lab 비밀번호','포함하지 않음'],['password / secret key','포함하지 않음']])),done()];
+ if(m==='mismatch')return[start,M('Router B에 정상 접속','SSH로 실제 상태를 읽는 단계는 성공합니다.',['nodeNMS','nodeR2','nodeNMS'],'SSH',()=>device('R2','수집 중','')),E('상태 원문 보존','기존 기록에 남은 Loopback0 상태 문자열은 administratively down/down입니다.',()=>{device('R2','수집 성공 · down/down','warn');statuses([['수집','성공'],['관측값','administratively down/down']]);example(m,1);}),E('같은 필드로 정리','administratively down은 관리 상태 down, 뒤의 down은 Protocol 상태 down으로 정리합니다. 원문은 그대로 보존합니다.',()=>{statuses([['Admin','down'],['Protocol','down'],['원문','별도 보존']]);example(m,2);}),E('정상 기준과 비교','기대한 up/up과 읽은 값이 달라 기준 불일치로 분류합니다.',()=>{el('nodeR2').classList.add('mismatch');device('R2','기준 불일치','warn');statuses([['정상 기준','up/up'],['관측값','administratively down/down'],['비교','기준 불일치']]);example(m,3);}),E('다른 장비 결과 보존','Router A와 Router C는 각각 수집 성공·기준 일치였습니다.',()=>{device('R1','수집 성공 · 기준 일치');device('R3','수집 성공 · 기준 일치');}),done()];
+ if(m==='error')return[start,E('시험용 접속 설정 확인','Router C 장비를 고장 낸 것이 아닙니다. 복사한 장비 목록의 접속 Port만 22222로 바꿨습니다.',()=>statuses([['Router C 실제 상태','변경하지 않음'],['시험용 SSH Port','22222']])),M('Router C 연결 시도','해당 Port의 연결이 거부돼 실제 상태를 읽지 못했습니다.',['nodeNMS','nodeR3'],'TCP :22222',()=>device('R3','연결 시도',''),'stop'),E('수집 오류와 비교 미실행','관측값을 만들지 않고 수집 오류로 남깁니다. 비교할 값이 없으므로 비교 미실행입니다.',()=>{el('nodeR3').classList.add('error');el('linkR3').setAttribute('class','link error');device('R3','수집 오류 · 비교 미실행','fail');statuses([['수집','오류'],['관측값','없음'],['비교','미실행']]);example(m);}),E('정상 장비의 결과 유지','Router A와 Router B의 수집·판정 결과는 그대로 보존합니다.',()=>{device('R1','수집 성공 · 기준 일치');device('R2','수집 성공 · 기준 일치');}),done()];
+ return[start,E('장비별 결과 기록','각 장비의 수집 상태, 정상 기준, 관측값, 판정을 구분해 JSON에 기록합니다.',()=>{S.focus(['nodeNMS']);statuses([['장비별 기록','3개'],['필드','수집 상태 · 기준 · 관측값 · 판정']]);example('report');}),E('구조와 집계 대조','5개 실행의 JSON을 다시 파싱하고 대상 수와 장비별 결과 집계가 맞는지 확인했습니다.',()=>statuses([['JSON 재파싱','성공'],['장비 수','대상 목록과 일치'],['요약 집계','장비별 결과와 일치']])),E('인증정보 포함 여부 확인','기존 공개 보고서에서는 비밀번호 원문과 인증 비밀값이 없음을 확인했습니다.',()=>statuses([['실행 결과','기록'],['Lab 비밀번호','포함하지 않음'],['password / secret key','포함하지 않음']])),done()];
 };
 
 NetworkSimulator.mount(adapter);

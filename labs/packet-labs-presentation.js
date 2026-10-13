@@ -55,8 +55,10 @@ window.PacketLabPresentation = {attach(adapter, config) {
     for(let i=0;i<lens.length;i++){if(rem<=lens[i]||i===lens.length-1){const t=lens[i]?rem/lens[i]:0;return [path[i][0]+(path[i+1][0]-path[i][0])*t,path[i][1]+(path[i+1][1]-path[i][1])*t];}rem-=lens[i];}return path[0];
   }
   function sync(){
-    for(const n of config.nodes){const original=$(n.id),copy=document.querySelector(`[data-device="${n.id}"]`);if(copy&&original){const s=original.getAttribute('class')||'';copy.setAttribute('class','packet-mobile-device '+(/stop|down|excluded/.test(s)?'is-stop':/reply|control/.test(s)?'is-reply':/active|cache|upstream/.test(s)?'is-active':''));if(n.detailSource&&$(n.detailSource))copy.querySelector('.packet-device-detail').textContent=word($(n.detailSource).textContent).replace(/^Access\s+/, '');}}
-    for(const edge of config.edges){const el=edge[2]?$(edge[2]):null,copy=document.querySelector(`[data-edge="${edge.slice(0,2).join('-')}"]`);if(copy){const s=el?.getAttribute('class')||'';copy.setAttribute('class','packet-mobile-link '+(/blocked|down|stop|isolated/.test(s)?'is-stop':/reply|response/.test(s)?'is-reply':/active|tagged|native|query|upstream|broadcast|relay|icmp|arp|control/.test(s)?'is-active':''));}}
+    for(const n of config.nodes){const original=$(n.id),copy=document.querySelector(`[data-device="${n.id}"]`);if(copy&&original){const s=original.getAttribute('class')||'';copy.setAttribute('class','packet-mobile-device '+(/excluded/.test(s)?'is-excluded':/stop|down/.test(s)?'is-stop':/reply|control/.test(s)?'is-reply':/active|cache|upstream/.test(s)?'is-active':''));if(n.detailSource&&$(n.detailSource))copy.querySelector('.packet-device-detail').textContent=word($(n.detailSource).textContent).replace(/^Access\s+/, '');}}
+    for(const edge of config.edges){const el=edge[2]?$(edge[2]):null,copy=document.querySelector(`[data-edge="${edge.slice(0,2).join('-')}"]`);if(copy){const s=el?.getAttribute('class')||'';let state=/isolated/.test(s)?'is-excluded':/blocked|down|stop/.test(s)?'is-stop':/reply|response/.test(s)?'is-reply':/active|tagged|native|query|upstream|broadcast|relay|icmp|arp|control/.test(s)?'is-active':'';
+      if(config.pathScopedEdges){const path=active?.path||[];const traversed=path.some((id,i)=>i>0&&((path[i-1]===edge[0]&&id===edge[1])||(path[i-1]===edge[1]&&id===edge[0])));state=traversed?(active.reply?'is-reply':'is-active'):'';}
+      copy.setAttribute('class','packet-mobile-link '+state);}}
     config.sync?.();
   }
   function animate(p){
@@ -71,6 +73,6 @@ window.PacketLabPresentation = {attach(adapter, config) {
   adapter.show=function(i){show(i);setup();sync();};
   adapter.buildPlan=function(i,mode='normal'){if(mode!=='normal')return null;return adapter.raw[i].steps.map((s,j)=>{
     const spec=config.steps[adapter.raw[i].id]?.[j]||{},path=spec.path||[],duration=spec.duration||(path.length>1?1050+(path.length-1)*420+180:1230);
-    return {modelStepIndex:j,title:word(spec.title||s.title),detail:word(spec.detail||s.detail),kind:word(s.kind),duration,action(){adapter.show(j);active={path,duration,reply:spec.reply,stop:spec.stop};document.querySelectorAll('.packet-motion-caption').forEach(n=>n.textContent=word(spec.caption||s.marker?.text||s.packet?.decision||s.title));$('simVisual').dataset.reveal='events';animate(0);},animate};
+    return {modelStepIndex:j,title:word(spec.title||s.title),detail:word(spec.detail||s.detail),kind:word(s.kind),duration,action(){active={path,duration,reply:spec.reply,stop:spec.stop};adapter.show(j);document.querySelectorAll('.packet-motion-caption').forEach(n=>n.textContent=word(spec.caption||s.marker?.text||s.packet?.decision||s.title));$('simVisual').dataset.reveal='events';animate(0);},animate};
   });};
 }};

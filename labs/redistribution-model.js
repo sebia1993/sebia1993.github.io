@@ -52,9 +52,9 @@ const presentation={
  labels:{'Baseline':'기본 상태','Before':'변경 전','After':'변경 후','Boundary':'재분배 경계','Source':'경로 출처','Recovery':'복구','Start Metric':'시작 Metric','Fallback':'대체 경로 선택','Candidate':'후보 경로','Session reset':'Session 재시작'},
  lessons:[
   {title:'두 프로토콜을 실행하면 경로가 자동 공유될까요?',brief:'학습 페이지의 Router B → Router A → Router C 구성을 사용합니다. 재분배 전후의 경로 정보를 비교하세요.',hints:['BGP Session이 정상인 것과 특정 Route를 광고하는 것은 별개입니다.','Router A는 OSPF에서 TARGET을 알고 있습니다.','OSPF 정보를 BGP에 넣는 명시적 경계 설정이 있는지 확인하세요.']},
-  {title:'Static Route는 OSPF에서 어떻게 보일까요?',brief:'Route의 출처, 외부 경로 유형, Metric, Tag를 구분합니다. 학습 페이지의 seed 20과 RIB 30을 연결하세요.',hints:['이 Route는 Router B의 Static Null0에서 시작합니다.','재분배 시 OSPF E1과 Tag 65002를 명시했습니다.','E1의 RIB Metric에는 외부 Metric과 내부 경로 Cost가 반영됩니다.']},
+  {title:'Static Route는 OSPF에서 어떻게 보일까요?',brief:'외부 경로는 OSPF 밖의 경로를 재분배한 것입니다. 이 Area 0 실습은 Type 5 LSA와 E1을 사용합니다. E1은 외부 Metric(seed) 20에 내부 Cost 10을 더해 RIB에 30으로 보이며, Tag 65002는 별도 표식입니다.',hints:['이 Route는 Router B의 Static Null0에서 시작합니다.','재분배 시 OSPF E1과 Tag 65002를 명시했습니다.','E1의 RIB Metric에는 외부 Metric과 내부 경로 Cost가 반영됩니다.']},
   {title:'허용한 Prefix만 경계를 넘을까요?',brief:'학습 페이지의 TARGET과 BLOCK을 대조합니다. 임시 Permit 추가, 광고, Permit 제거 후 철회를 순서대로 보세요.',hints:['BLOCK도 Router A의 OSPF에는 있습니다.','Route-map은 데이터 Packet이 아니라 재분배할 경로 정보를 선별합니다.','TARGET Permit은 유지한 채 BLOCK Permit만 바꿉니다.']},
-  {title:'앞선 Tag Deny가 뒤의 Prefix Permit보다 먼저일까요?',brief:'Route-map을 위에서 아래로 읽습니다. Tag 조건과 Prefix 조건이 모두 맞을 때 먼저 적용되는 항목을 보세요.',hints:['TAGGED의 Route Tag는 65002입니다.','seq5는 Tag 65002를 Deny하고 seq15는 TAGGED Prefix를 Permit합니다.','seq5만 제거한 뒤 뒤쪽 항목까지 평가될 수 있는지 생각해 보세요.']},
+  {title:'앞선 Tag Deny가 뒤의 Prefix Permit보다 먼저일까요?',brief:'Route-map은 경계에서 공유할 경로 정보를 Permit(허용)·Deny(제외)로 고릅니다. seq는 항목 순서이며 작은 번호부터 평가합니다. 먼저 일치한 seq5의 Tag Deny가 적용되면 뒤의 seq15 Prefix Permit까지 가지 않습니다.',hints:['TAGGED의 Route Tag는 65002입니다.','seq5는 Tag 65002를 Deny하고 seq15는 TAGGED Prefix를 Permit합니다.','seq5만 제거한 뒤 뒤쪽 항목까지 평가될 수 있는지 생각해 보세요.']},
   {title:'선택한 BGP 경로만 사라지면 무엇을 쓸까요?',brief:'같은 Prefix의 eBGP·OSPF 후보를 비교합니다. Cisco AD, 프로토콜 Metric, BGP Session 상태를 구분하세요.',hints:['같은 10.30.30.0/24를 두 출처에서 알고 있습니다.','철회하는 것은 BGP Prefix이며 Session은 유지됩니다.','OSPF 후보가 남아 있으면 선택 가능한 다른 출처가 있습니다.']}
  ]
 };

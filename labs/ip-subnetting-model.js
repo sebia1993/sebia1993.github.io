@@ -79,7 +79,8 @@ export function addressLesson(ip='192.168.10.70',prefix=26,kind='network'){
   title:kind==='network'?`${ip}/${prefix}은 어느 Network에 속할까요?`:kind==='broadcast'?`${ip}/${prefix}의 Broadcast 주소는 무엇일까요?`:`${ip}/${prefix}에서 장비에 쓸 Host 범위는 어디일까요?`,
   explain:kind==='network'?`${ip}는 ${info.network} ~ ${intToIp(parseIPv4(info.network)+w.size-1)} 안에 있습니다. 이 범위의 시작 주소가 Network입니다.`:kind==='broadcast'?`${w.size}개 주소 중 마지막 주소 ${info.broadcast}가 이 Subnet의 Broadcast입니다.`:`범위의 시작(Network)과 끝(Broadcast)을 제외하면 ${actual}, 총 ${info.hostCount}개입니다.`};
 }
-export const lessons=[addressLesson(),addressLesson('192.168.10.150',27,'broadcast'),addressLesson('192.168.10.65',30,'hosts'),...legacyLessons.map(l=>({...l,type:'network'}))];
+// Follow the guide: compare the network drawing before calculating address ranges.
+export const lessons=[...legacyLessons.map(l=>({...l,type:'network'})),addressLesson(),addressLesson('192.168.10.150',27,'broadcast'),addressLesson('192.168.10.65',30,'hosts')];
 export function eventsFor(l){
  if(l.type==='network'){
   const o=buildObservation(l);

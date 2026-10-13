@@ -100,26 +100,44 @@ const lessons = [
 const $=id=>document.getElementById(id);
 const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
 
-const adapter={raw:lessons,kind:'sequence',reset(i){index=i;$('sequenceList').innerHTML='';},show(i){$('sequenceList').innerHTML=lessons[index].steps.slice(0,i+1).map((s,k)=>'<li class="sequence-event '+s.direction+(k===i?' current':'')+'"><b>'+s.label+'</b><span>'+s.title+'</span></li>').join('');$('sequenceList').scrollTop=$('sequenceList').scrollHeight;}};
+const adapter={raw:lessons,kind:'sequence',reset(i){index=i;$('sequenceList').innerHTML='';},show(i){$('sequenceList').innerHTML=lessons[index].steps.slice(0,i+1).map((s,k)=>{const visible={...s,...displayStep(s,index,k)};return '<li class="sequence-event '+s.direction+(k===i?' current':'')+'"><b>'+visible.label+'</b><span>'+visible.title+'</span></li>';}).join('');$('sequenceList').scrollTop=$('sequenceList').scrollHeight;}};
 adapter.presentation={
  names:{'STA-A':'PC A','AP-A':'AP A'},
- labels:{'STA → AP':'PC A → AP A','AP → STA':'AP A → PC A','STA ↔ AP':'PC A ↔ AP A','AP → 주변 STA':'AP A → 주변 단말','STA 내부':'PC A 내부','AP 내부 로그':'AP A 내부 로그','Discovery':'AP 발견','Protected Data':'보호된 데이터','lab 암호':'실습 암호','lab 설정':'실습 설정','Traffic Key':'Traffic Key'},
+ labels:{'STA → AP':'PC A → AP A','AP → STA':'AP A → PC A','STA ↔ AP':'PC A ↔ AP A','AP → 주변 STA':'AP A → 주변 단말','STA 내부':'PC A 내부','AP 내부 로그':'AP A 내부 로그','Discovery':'AP 발견','Protected Data':'보호된 데이터','lab 암호':'실습 암호','lab 설정':'실습 설정','Traffic Key':'통신용 키'},
  lessons:lessons.map((l,i)=>({title:l.title,brief:[
   '학습 페이지의 PC A(STA)와 AP A를 사용합니다. AP 발견과 이후 인증을 구분해 관찰하세요.',
-  'WPA2-Personal의 최초 접속입니다. 인증·연결 협상·보안 키 확인을 서로 다른 단계로 봅니다.',
+  'WPA2-Personal의 최초 접속이며 Open System Authentication과 Association 응답이 모두 성공한 시점입니다. 아직 보안 키 확인 교환은 시작 전입니다.',
   'PC A와 AP A의 Association이 성공한 직후입니다. M1~M4의 방향과 역할을 확인하세요.',
-  '잘못된 실습 암호를 사용한 교육 모델입니다. 실패 위치를 보고 올바른 설정으로 복구한 새 연결을 관찰합니다.',
+  '잘못된 WPA2 실습 암호를 사용했지만 이 모델에서는 Auth/Assoc가 성공했습니다. 이후 키 확인의 실패 위치와 올바른 설정으로 복구한 새 연결을 관찰합니다.',
   'WPA3-Personal의 새 SAE 접속입니다. PMK 캐시와 FT를 사용하지 않는 조건에서 순서를 확인합니다.',
   'Beacon 광고와 실제 협상을 구분합니다. SAE 성공을 가정한 뒤 PMF와 데이터 암호화의 역할을 봅니다.'
  ][i],hints:[[
   '학습 페이지에서 AP를 발견하는 두 방법을 떠올려 보세요.','발견과 키 준비 완료는 서로 다른 상태입니다.'
  ],['Open System Authentication이 확인하는 범위를 생각해 보세요.','Association 다음에 아직 남아 있는 교환을 확인하세요.'],['PMK는 양측이 먼저 준비한 자료입니다.','M1의 방향과 M2에 등장하는 값을 비교하세요.'],['Association 결과와 키 확인 결과를 나눠 보세요.','관측한 실패 근거와 단순히 보이지 않는 프레임을 구분하세요.'],['새 SAE 접속과 캐시 재접속의 조건을 구분하세요.','기초 키 자료 준비와 실제 통신용 키 준비는 다른 단계입니다.'],['관리 프레임 보호와 데이터 암호화의 역할을 구분하세요.','AP 지원 광고만으로 PC A의 선택을 확정할 수 있는지 생각하세요.']][i]}))
 };
+// Display-only bridge: preserve the original scenario steps and evidence above.
+adapter.presentation.lessons[1].conditions=['WPA2-Personal 최초 접속','Open System 성공','Association 성공'];
+adapter.presentation.lessons[3].conditions=['교육 모델','Auth/Assoc 성공','WPA2 암호 불일치'];
+adapter.presentation.lessons[2].reason='M1은 AP A가 키 도출에 쓰는 ANonce를 PC A에 보내는 메시지입니다. PMK는 이미 양측이 준비한 기초 키 자료이며 M1로 전송하지 않습니다.';
+adapter.presentation.lessons[5].reason='PMF는 연결 해제 통지 같은 일부 관리 프레임을 보호합니다. 데이터 암호화와 역할이 다르며, AP의 지원 광고만으로 PC A가 실제 선택한 보안 방식을 확정하지 않습니다.';
+const wlanActors=[{name:'PC A',role:'무선 단말 · STA',kind:'pc'},{name:'AP A',role:'접속할 AP',kind:'ap'}];
+const displayStep=(s,i,k)=>{
+ if(i===5)return [
+  {title:'AP A의 보안 방식 광고',label:'Beacon · 지원 조건',detail:'AP A가 지원하는 보안 방식을 광고합니다. 이 광고만으로 PC A가 선택한 방식까지 확정할 수는 없습니다.'},
+  {title:'PC A의 SAE / PMF 협상',label:'Association 요청 · 교육 모델',detail:'SAE 성공 뒤 PC A가 연결을 요청합니다. 이 모델에서는 SAE 선택과 관리 프레임 보호 지원을 요청에서 확인한 것으로 가정합니다.'},
+  {label:'AP A → PC A · 협상 결과',detail:'AP A가 연결을 수락합니다. 실제 판단에서는 양측의 협상 결과를 확인하고, 보이지 않은 내용을 추정하지 않습니다.'},
+  {label:'M1 → M2 → M3 → M4 · 요약',detail:'모델에서 키 준비가 완료됐습니다. 보안 조건의 협상만으로 데이터 통신 성공까지 증명하지는 않습니다.'},
+  {label:'관리 보호와 데이터 보호',detail:'PMF는 연결 해제 통지 같은 일부 관리 프레임을 보호합니다. 데이터 암호화나 모든 관리 프레임의 암호화와는 다릅니다.'}
+ ][k];
+ if(s.title==='M3 · 키 설치 정보')return {detail:'AP A가 키 확인 및 설치에 필요한 정보를 보냅니다. 세부 키 종류는 선택 근거에서 확인할 수 있습니다.'};
+ return {};
+};
 const resetSequence=adapter.reset;
-adapter.reset=i=>{resetSequence(i);const list=$('sequenceList');let host=$('wlanFlow');if(!host){host=document.createElement('div');host.id='wlanFlow';list.before(host);}WirelessLab.flow('wlanFlow',[{name:'PC A',role:'STA · Supplicant',kind:'pc'},{name:'AP A',role:'Authenticator',kind:'ap'}],'예상을 선택한 뒤 메시지 흐름을 실행하세요.');};
+adapter.reset=i=>{resetSequence(i);const list=$('sequenceList');let host=$('wlanFlow');if(!host){host=document.createElement('div');host.id='wlanFlow';list.before(host);}WirelessLab.flow('wlanFlow',wlanActors,'예상을 선택한 뒤 메시지 흐름을 실행하세요.');};
 adapter.buildPlan=(i,mode='normal')=>mode!=='normal'?null:lessons[i].steps.map((s,k)=>{
+ const visible={...s,...displayStep(s,i,k)};
  const moving=['to-ap','to-sta','both'].includes(s.direction),duration=moving?(s.direction==='both'?2070:1650):1470;
- return {title:s.title,detail:s.detail,kind:s.label,duration,modelStepIndex:k,action(){index=i;adapter.show(k);WirelessLab.flow('wlanFlow',[{name:'PC A',role:'STA · Supplicant',kind:'pc'},{name:'AP A',role:'Authenticator',kind:'ap'}],s.label.replace(/STA/g,'PC A').replace(/AP(?=\s|$)/g,'AP A'));$('simVisual').dataset.reveal='events';},animate(p){if(p===0||p===1)$('sequenceList').scrollTop=$('sequenceList').scrollHeight;if(!moving)return;const movement=Math.min(1,p*duration/(s.direction==='both'?840:420));if(s.direction==='both'){const back=movement>.5;WirelessLab.motion('wlanFlow',back?1:0,back?0:1,back?(movement-.5)*2:movement*2);}else WirelessLab.motion('wlanFlow',s.direction==='to-ap'?0:1,s.direction==='to-ap'?1:0,movement);}};
+ return {title:visible.title,detail:visible.detail,kind:visible.label,duration,modelStepIndex:k,action(){index=i;adapter.show(k);WirelessLab.flow('wlanFlow',wlanActors,visible.label.replace(/\bSTA\b/g,'PC A').replace(/\bAP\b(?! A)/g,'AP A'));$('simVisual').dataset.reveal='events';},animate(p){if(p===0||p===1)$('sequenceList').scrollTop=$('sequenceList').scrollHeight;if(!moving)return;const movement=Math.min(1,p*duration/(s.direction==='both'?840:420));if(s.direction==='both'){const back=movement>.5;WirelessLab.motion('wlanFlow',back?1:0,back?0:1,back?(movement-.5)*2:movement*2);}else WirelessLab.motion('wlanFlow',s.direction==='to-ap'?0:1,s.direction==='to-ap'?1:0,movement);}};
 });
 
 NetworkSimulator.mount(adapter);

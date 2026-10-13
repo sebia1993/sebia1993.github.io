@@ -71,7 +71,7 @@ jobs:
         env:
           BASE_URL: ${{ inputs.base_url }}
           TOPICS: ${{ matrix.topics }}
-          LAB_UI_VERSION: 20261007-guide-aligned-v2
+          LAB_UI_VERSION: 20261013-audit-v1
           SCREENSHOTS: '1'
           QA_RUN_TAG: guide-aligned-v2-${{ matrix.group }}
       - uses: actions/upload-artifact@v4

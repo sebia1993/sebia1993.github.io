@@ -113,6 +113,7 @@ const $=id=>document.getElementById(id);
 
 const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
 function resetVisual(){
+    $('dhcpState').textContent='관찰 전';$('connectState').textContent='관찰 전';
     ['pc1','sw1','r1','r2'].forEach(id=>$(id).className='device');
     ['l1','l2','l3'].forEach((k,i)=>{$(k+'Svg').setAttribute('class','net-link idle');$('label'+(i+1)).className='link-label';});
     $('label1').textContent='CP1 · Client Edge';$('label2').textContent='CP2 · Client VLAN';$('label3').textContent='CP3 · Routed Transit';$('packetMarker').className='packet-marker';
@@ -130,8 +131,11 @@ function showMarker(m){
   }
 function applyStep(){
     const s=scenarios[lesson],step=s.steps[stepIndex];resetVisual();
-    Object.entries(step.links||{}).forEach(([k,v])=>setLink(k,v));
-    (step.nodes||[]).forEach(id=>$(id).classList.add(step.kind.includes('NO OFFER')||step.kind.includes('STOP')?'stop':step.kind.includes('ACK')?'reply':'active'));
+    // Service/relay/ARP failures leave the physical cables connected.
+    Object.entries(step.links||{}).forEach(([k,v])=>setLink(k,v==='down'?'idle':v));
+    (step.nodes||[]).forEach(id=>$(id).classList.add(step.kind.includes('ACK')?'reply':'active'));
+    const stopNode={'NO OFFER':'r2','RELAY MISSING':'r1','ARP STOP':'pc1'}[step.kind];
+    if(stopNode){$(stopNode).classList.remove('active');$(stopNode).classList.add('stop');}
     showMarker(step.marker);
     $('dhcpState').textContent=step.dhcp||'—';$('connectState').textContent=step.conn||'—';
     $('eventKind').textContent=step.kind;$('eventTitle').textContent=step.title;$('eventDetail').textContent=step.detail;
@@ -166,7 +170,7 @@ adapter.presentation = {
     },
     {
       "title": "Relay는 서버에 단말망을 어떻게 알릴까요?",
-      "brief": "학습 페이지의 선택 자료에 있는 giaddr를 비교합니다. 단말 구간과 Router A → Router B 구간을 나눠 봅니다.",
+      "brief": "학습 페이지에서 배운 giaddr(단말 쪽 중계 인터페이스 주소)를 비교합니다. 단말 구간과 Router A → Router B 구간을 나눠 봅니다.",
       "hints": [
         "서버는 원격 단말이 어느 Subnet에 있는지 알아야 합니다.",
         "giaddr와 단말에 알려주는 Option 3은 목적이 다릅니다."

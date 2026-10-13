@@ -5,18 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethernet / MAC Table — 인터랙티브 실습</title>
 <meta name="description" content="Source MAC 학습, Known/Unknown Unicast, Broadcast, Aging과 재학습을 직접 조작하며 익히는 Ethernet MAC Table 실습 페이지입니다.">
-<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20260921-12">
+<link rel="stylesheet" href="ethernet-mac-simulator.css?v=20261013-audit-v1">
 </head>
 <body data-sim-mode="basic">
-<div class="wrap">
+<div class="wrap" id="macLab" data-state="IDLE">
   <header class="hero">
-    <small>2단계 · INTERACTIVE LAB</small>
+    <small>기초 · 실습</small>
     <h1>Ethernet / MAC Table</h1>
-    <p>1단계 개념서에서 배운 내용을 직접 확인합니다. <b>먼저 결과를 예상하고</b>, 프레임을 실행한 뒤 <b>SW1의 Learning과 Forwarding 판단</b>을 비교하세요.</p>
+    <p>1단계 개념서에서 배운 내용을 직접 확인합니다. <b>먼저 결과를 예상하고</b>, 프레임을 실행한 뒤 <b>Switch A의 Learning과 Forwarding 판단</b>을 비교하세요.</p>
+    <div class="next-lab-actions"><a id="conceptGuideLink" href="ethernet-mac-table.html">← Ethernet / MAC Table 학습 페이지</a><a href="../roadmap.html">학습 로드맵</a></div>
     <div class="start-guide">
       <div class="guide-step"><b>1</b><span><strong>질문 읽기</strong>이번 실습에서 확인할 한 가지를 먼저 봅니다.</span></div>
       <div class="guide-step"><b>2</b><span><strong>먼저 예상하기</strong>프레임을 보내기 전에 결과를 골라보세요.</span></div>
-      <div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>내 예상과 SW1의 실제 판단을 비교합니다.</span></div>
+      <div class="guide-step"><b>3</b><span><strong>실행 후 비교</strong>내 예상과 Switch A의 실제 판단을 비교합니다.</span></div>
     </div>
   </header>
 
@@ -36,7 +37,7 @@
 
   <section class="view-mode-card" aria-label="2단계 학습 안내">
     <div class="view-mode-copy">
-      <strong>2단계 · Interactive Lab</strong>
+      <strong>실습 · 예상 → 관찰 → 비교</strong>
       <span id="viewModeSummary">예상 → 실행 → 비교 순서로 핵심 동작만 확인합니다.</span>
     </div>
     <div class="view-mode-actions">
@@ -52,7 +53,7 @@
   <section class="lab-scope-strip advanced-only" aria-label="시뮬레이터 범위와 가정">
     <b>이 실습의 기본 가정</b>
     <span>하나의 Ethernet L2 Broadcast Domain · port 1/2/3 모두 전달 상태 · VLAN/Trunk·STP·Port-Security·Unknown-Unicast Suppression 없음</span>
-    <span><b>시뮬레이터 Aging 기준 = 300초</b>는 교육용 모델의 값입니다. 실제 Cisco IOL L2 검증에서는 기존 300초를 확인한 뒤 30초로 단축해 Aging/Re-learning을 검증하고 300초로 원복했습니다. 300초를 모든 스위치의 고정값으로 일반화하지 않습니다. 시뮬레이터의 경과 시간은 버튼으로만 진행됩니다.</span>
+    <span><b>시뮬레이터 Aging 기준 = 300초</b>는 교육용 모델의 값입니다. 실제 Cisco IOL L2 검증에서는 기존 300초를 확인한 뒤 30초로 단축해 Aging/Re-learning을 검증하고 300초로 원복했습니다. 300초를 모든 스위치의 고정값으로 일반화하지 않습니다. 기본 실습의 경과 시간은 실행 흐름 안에서 단계적으로 진행됩니다.</span>
   </section>
 
   <section class="card lab-card">
@@ -60,10 +61,10 @@
       <div class="coach-icon" id="coachIcon">1</div>
       <div class="coach-main">
         <div class="coach-title" id="coachTitle">첫 Ping에서 스위치가 언제 MAC을 배우는지 확인하세요.</div>
-        <div class="coach-text" id="coachText">처음에는 FDB와 PC1 ARP 캐시가 비어 있습니다.</div>
+        <div class="coach-text" id="coachText">처음에는 FDB와 PC A ARP 캐시가 비어 있습니다.</div>
         <div class="coach-state" aria-live="polite">
-          <span><b>호스트</b><strong id="startArpState">PC1/PC2 ARP · 비어 있음</strong></span>
-          <span><b>SW1</b><strong id="startFdbState">FDB · 동적 PC 엔트리 없음</strong></span>
+          <span><b>호스트</b><strong id="startArpState">PC A/PC B ARP · 비어 있음</strong></span>
+          <span><b>Switch A</b><strong id="startFdbState">FDB · 동적 PC 엔트리 없음</strong></span>
         </div>
       </div>
       <button class="hint-trigger" id="hintBtn" type="button">막혔나요? 힌트 1/3</button>
@@ -73,15 +74,15 @@
     <section class="prediction-card" id="predictionCard" aria-labelledby="predictionTitle">
       <div class="prediction-copy">
         <small>① 예상하기 · 정답은 실행 후 공개됩니다</small>
-        <h2 id="predictionTitle">SW1은 처음 들어온 프레임에서 무엇을 기억할까요?</h2>
+        <h2 id="predictionTitle" tabindex="-1">Switch A는 처음 들어온 프레임에서 무엇을 기억할까요?</h2>
         <p id="predictionHelp">정답을 몰라도 괜찮습니다. 틀려도 불이익은 없습니다. 먼저 예상한 뒤 실제 동작과 비교하는 것이 이 실습의 목적입니다.</p>
       </div>
       <div class="prediction-options" id="predictionOptions" role="group" aria-label="예상 답 선택"></div>
-      <div class="prediction-feedback" id="predictionFeedback" aria-live="polite" hidden></div>
+      <div class="prediction-feedback" id="predictionFeedback" tabindex="-1" aria-live="polite" hidden></div>
     </section>
 
     <div class="topology-shell" id="topologyShell">
-      <svg id="macTopology" viewBox="0 0 1400 620" role="img" aria-label="PC1, SW1, PC2, PC3이 하나의 Ethernet L2 Broadcast Domain에 연결된 MAC Table 학습 토폴로지">
+      <svg id="macTopology" viewBox="0 0 1400 620" role="img" aria-label="PC A, Switch A, PC B, PC C가 하나의 Ethernet L2 Broadcast Domain에 연결된 MAC Table 학습 토폴로지">
         <defs>
           <pattern id="macGrid" width="24" height="24" patternUnits="userSpaceOnUse">
             <circle cx="1" cy="1" r="1" fill="#21364d"/>
@@ -138,24 +139,24 @@
           <path id="traceSwP3" class="mac-trace trace-out" d="M654 328H795V450H1112"/>
           <path id="traceP3Sw" class="mac-trace trace-in" d="M1112 450H795V328H654"/>
 
-          <!-- PC1 -->
+          <!-- PC A -->
           <use href="#macPcIcon" x="112" y="258" width="112" height="96" filter="url(#macShadow)"/>
-          <text x="168" y="384" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC1</text>
+          <text x="168" y="384" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC A</text>
           <text class="topology-detail" x="168" y="410" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.10/24</text>
           <text class="topology-detail" x="168" y="432" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:00</text>
           <g class="port-chip"><rect x="270" y="275" width="91" height="28" rx="6"/><text x="315.5" y="295" text-anchor="middle">port 1 · 수신</text></g>
 
-          <!-- SW1 -->
+          <!-- Switch A -->
           <use href="#macSwitchIcon" x="480" y="224" width="200" height="120" filter="url(#macShadow)"/>
-          <text x="580" y="378" text-anchor="middle" fill="#172b43" font-size="30" font-weight="900">SW1</text>
+          <text x="580" y="378" text-anchor="middle" fill="#172b43" font-size="30" font-weight="900">Switch A</text>
           <text x="580" y="404" text-anchor="middle" fill="#334a63" font-size="15">Ethernet 스위치</text>
           <g class="port-chip"><rect x="675" y="246" width="91" height="28" rx="6"/><text x="720.5" y="266" text-anchor="middle">port 2</text></g>
           <g class="port-chip"><rect x="675" y="344" width="91" height="28" rx="6"/><text x="720.5" y="364" text-anchor="middle">port 3</text></g>
 
-          <!-- SW1 current decision: beginner-first -->
+          <!-- Switch A current decision: beginner-first -->
           <g id="svgDecisionPanel" class="svg-decision-panel">
             <rect x="405" y="430" width="455" height="120" rx="14"/>
-            <text x="428" y="455" class="svg-decision-title">SW1 · 현재 판단</text>
+            <text x="428" y="455" class="svg-decision-title">Switch A · 현재 판단</text>
             <text id="svgLearnDecision" x="428" y="482" class="svg-decision-row">학습   · —</text>
             <text id="svgLookupDecision" x="428" y="508" class="svg-decision-row">조회   · —</text>
             <text id="svgActionDecision" x="428" y="534" class="svg-decision-action">동작   · 준비</text>
@@ -164,23 +165,23 @@
           <!-- Full FDB: advanced mode only -->
           <g id="svgFdbPanel" class="svg-fdb-panel topology-detail">
             <rect x="870" y="430" width="395" height="126" rx="13"/>
-            <text x="891" y="454" class="svg-fdb-title">SW1 · Dynamic FDB</text>
+            <text x="891" y="454" class="svg-fdb-title">Switch A · Dynamic FDB</text>
             <text id="svgFdbRow1" x="891" y="480" class="svg-fdb-row">—</text>
             <text id="svgFdbRow2" x="891" y="502" class="svg-fdb-row">—</text>
             <text id="svgFdbRow3" x="891" y="524" class="svg-fdb-row">—</text>
             <text id="svgLookupText" x="891" y="548" class="svg-lookup-row">조회 · 준비</text>
           </g>
 
-          <!-- PC2 -->
+          <!-- PC B -->
           <use href="#macPcIcon" x="1130" y="145" width="112" height="96" filter="url(#macShadow)"/>
-          <text x="1186" y="272" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC2</text>
+          <text x="1186" y="272" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC B</text>
           <text class="topology-detail" x="1186" y="298" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.20/24</text>
           <text class="topology-detail" x="1186" y="320" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:01</text>
           <g id="pc2ReceiveBadge" class="receive-badge"><rect x="1010" y="155" width="145" height="27" rx="13"/><text x="1082.5" y="173" text-anchor="middle">목적지</text></g>
 
-          <!-- PC3 -->
+          <!-- PC C -->
           <use href="#macPcIcon" x="1130" y="400" width="112" height="96" filter="url(#macShadow)"/>
-          <text x="1186" y="527" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC3</text>
+          <text x="1186" y="527" text-anchor="middle" fill="#172b43" font-size="25" font-weight="800">PC C</text>
           <text class="topology-detail" x="1186" y="553" text-anchor="middle" fill="#172b43" font-size="17" font-weight="600">192.168.10.30/24</text>
           <text class="topology-detail" x="1186" y="575" text-anchor="middle" fill="#526d82" font-size="12" font-family="Consolas,monospace">00:50:79:66:68:02</text>
           <g id="pc3ReceiveBadge" class="receive-badge muted"><rect x="1010" y="410" width="145" height="27" rx="13"/><text x="1082.5" y="428" text-anchor="middle">관찰 단말</text></g>
@@ -213,9 +214,9 @@
     <div class="mobile-flow" id="mobileFlow" aria-live="polite">
       <div><small>송신 장비</small><strong id="mobileSource">대기</strong></div>
       <i>→</i>
-      <div><small>SW1 동작</small><strong id="mobileSwitch">프레임 대기</strong></div>
+      <div><small>Switch A 동작</small><strong id="mobileSwitch">프레임 대기</strong></div>
       <i>→</i>
-      <div class="mobile-egress"><span><small>PC1 링크</small><b id="mobilePc1">—</b></span><span><small>PC2 링크</small><b id="mobilePc2">—</b></span><span><small>PC3 링크</small><b id="mobilePc3">—</b></span></div>
+      <div class="mobile-egress"><span><small>PC A 링크</small><b id="mobilePc1">—</b></span><span><small>PC B 링크</small><b id="mobilePc2">—</b></span><span><small>PC C 링크</small><b id="mobilePc3">—</b></span></div>
     </div>
 
     <div class="controls">
@@ -225,16 +226,16 @@
 
 
     <div class="link-legend">
-      <span><i class="legend-line ingress"></i>현재 프레임이 SW1으로 들어오는 링크</span>
-      <span><i class="legend-line egress"></i>SW1이 현재 프레임을 내보내는 링크</span>
+      <span><i class="legend-line ingress"></i>현재 프레임이 Switch A으로 들어오는 링크</span>
+      <span><i class="legend-line egress"></i>Switch A가 현재 프레임을 내보내는 링크</span>
       <span><b>색은 프로토콜 종류가 아니라 현재 전달 방향을 표시합니다.</b></span>
     </div>
 
     <div id="liveEventStrip" class="live-event-strip">
       <div id="liveEventIcon" class="live-event-icon">●</div>
       <div class="live-event-main">
-        <b id="liveEventTitle">프레임 이벤트 대기</b>
-        <p id="liveEventDetail">실습을 실행하면 현재 프레임과 SW1의 판단이 여기에 표시됩니다.</p>
+        <b id="liveEventTitle" tabindex="-1">프레임 이벤트 대기</b>
+        <p id="liveEventDetail">실습을 실행하면 현재 프레임과 Switch A의 판단이 여기에 표시됩니다.</p>
       </div>
       <span id="liveEventKind" class="live-event-kind">준비</span>
     </div>
@@ -243,7 +244,7 @@
       <article>
         <small>현재 Source MAC</small>
         <strong id="frameSrc">—</strong>
-        <span>SW1이 수신 포트와 함께 학습</span>
+        <span>Switch A가 수신 포트와 함께 학습</span>
       </article>
       <article>
         <small>현재 Destination MAC</small>
@@ -256,7 +257,7 @@
         <span id="switchLookupDetail">Destination MAC을 받으면 조회합니다.</span>
       </article>
       <article>
-        <small>SW1 동작</small>
+        <small>Switch A 동작</small>
         <strong id="switchAction">대기</strong>
         <span id="switchActionDetail">Known / Flooding / Broadcast 결과가 표시됩니다.</span>
       </article>
@@ -292,7 +293,7 @@
       <span>시뮬레이터의 학습 모델과 2026-10-03 Cisco IOL L2/PCAP 검증 근거를 분리해서 확인합니다.</span>
     </div>
 
-    <div class="lesson-status">
+    <div class="lesson-status" id="lessonStatus">
       <div class="lesson-status-head">
         <strong>현재 실습 완료 조건</strong>
         <span class="status-badge" id="lessonBadge">진행 전</span>
@@ -301,6 +302,8 @@
       <div class="verdict" id="verdictBox">조건을 순서대로 확인하면 이 실습이 완료됩니다.</div>
     </div>
 
+    <div class="playback-controls"><button class="soft-btn" type="button" id="playbackBtn" hidden>⏸ 일시정지</button><span id="playbackStatus" role="status"></span></div>
+    <details class="panel" id="reviewPanel" hidden><summary>한 단계씩 다시 보기</summary><div class="panel-body playback-controls"><button class="soft-btn" type="button" id="prevEvent">← 이전 장면</button><span id="reviewPosition"></span><button class="soft-btn" type="button" id="nextEvent">다음 장면 →</button></div></details>
     <div class="next-row">
       <button class="soft-btn" id="resetBtn" type="button">현재 실습 다시 시작</button>
       <button class="next-btn" id="nextBtn" type="button" disabled>완료 후 다음 실습 →</button>
@@ -315,7 +318,7 @@
     <button class="quick-next-btn" id="quickNextBtn" type="button">계속하기</button>
   </div>
 
-  <section class="course-complete" id="courseComplete">
+  <section class="course-complete" id="courseComplete" tabindex="-1">
     <div class="eyebrow2">2단계 실습 완료</div>
     <h2>Ethernet / MAC Table 실습을 모두 완료했습니다.</h2>
     <p>Source MAC Learning, Known/Unknown Unicast, Broadcast, Aging과 Re-learning의 차이를 직접 확인했습니다.</p>
@@ -336,24 +339,24 @@
     <details class="panel" open>
       <summary>현재 FDB / ARP 상태 <span>실제 상태를 표로 확인</span></summary>
       <div class="panel-body">
-        <div class="table-title"><strong>SW1 · Dynamic FDB</strong><button type="button" id="clearFdbBtn">FDB 전체 비우기</button></div>
+        <div class="table-title"><strong>Switch A · Dynamic FDB</strong><button type="button" id="clearFdbBtn">FDB 전체 비우기</button></div>
         <table class="state-table">
           <thead><tr><th>MAC</th><th>Port</th><th>경과 시간</th></tr></thead>
           <tbody id="fdbBody"></tbody>
         </table>
 
-        <div class="table-title spaced"><strong>PC1 · ARP 캐시</strong><span>IP → MAC</span></div>
+        <div class="table-title spaced"><strong>PC A · ARP 캐시</strong><span>IP → MAC</span></div>
         <table class="state-table">
           <thead><tr><th>IPv4</th><th>MAC</th></tr></thead>
           <tbody id="arpBody"></tbody>
         </table>
 
-        <div class="table-title spaced"><strong>PC2 · ARP 캐시</strong><span>독립된 호스트 상태</span></div>
+        <div class="table-title spaced"><strong>PC B · ARP 캐시</strong><span>독립된 호스트 상태</span></div>
         <table class="state-table">
           <thead><tr><th>IPv4</th><th>MAC</th></tr></thead>
           <tbody id="pc2ArpBody"></tbody>
         </table>
-        <p class="panel-note"><b>중요:</b> PC1 ARP 캐시, PC2 ARP 캐시, SW1 FDB는 서로 다른 장비가 별도로 유지하는 상태입니다. 한 장비가 배운 정보를 다른 장비에 자동으로 복사하지 않습니다.</p>
+        <p class="panel-note"><b>중요:</b> PC A ARP 캐시, PC B ARP 캐시, Switch A FDB는 서로 다른 장비가 별도로 유지하는 상태입니다. 한 장비가 배운 정보를 다른 장비에 자동으로 복사하지 않습니다.</p>
       </div>
     </details>
 
@@ -363,15 +366,15 @@
         <div class="manual-state-warning" id="manualStateWarning">이 조작은 현재 FDB/ARP 상태에 직접 반영됩니다. 표준 실습 흐름으로 돌아가려면 <b>실습 기본 상태로 복원</b>을 누르세요.</div>
         <div class="manual-grid">
           <button type="button" id="resetLabStateBtn">↺ 실습 기본 상태로 복원</button>
-          <button type="button" id="clearPc2Btn">PC2 FDB만 삭제</button>
+          <button type="button" id="clearPc2Btn">PC B FDB만 삭제</button>
           <button type="button" id="manualAgeBtn">+301초 Aging</button>
-          <button type="button" id="manualUnicastBtn">PC1 → PC2 Unicast</button>
-          <button type="button" id="manualReplyBtn">PC2 → PC1 Unicast</button>
-          <button type="button" id="manualBroadcastBtn">PC1 Broadcast</button>
+          <button type="button" id="manualUnicastBtn">PC A → PC B Unicast</button>
+          <button type="button" id="manualReplyBtn">PC B → PC A Unicast</button>
+          <button type="button" id="manualBroadcastBtn">PC A Broadcast</button>
         </div>
         <div class="scope-note">
           <b>시뮬레이터 범위:</b> 단일 Ethernet L2 Broadcast Domain의 Dynamic FDB Learning, Known/Unknown Unicast, Broadcast, 교육용 300초 Aging과 Re-learning을 모델링합니다.
-          Aging 경과 시간은 실제 시간에 자동 증가하지 않고 버튼으로만 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, Same-port Filtering, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 이번 6개 검증 Claim과 기본 학습 범위 밖입니다.
+          Aging 경과 시간은 실제 시계와 무관한 학습용 값이며, 기본 실습 실행 또는 고급 조작으로 진행됩니다. VLAN/Trunk, STP, Port-Security, Static MAC, Unknown-Unicast Suppression, MAC 제한, Same-port Filtering, 실제 장비별 세부 Aging/ASIC 동작, 링크 장애는 이번 6개 검증 Claim과 기본 학습 범위 밖입니다.
         </div>
       </div>
     </details>
@@ -389,6 +392,6 @@
     이 페이지에서는 개념 설명을 반복하지 않고 예상 → 실행 → 비교를 통해 핵심 동작을 확인합니다.
   </div>
 </div>
-<script src="ethernet-mac-simulator.js?v=20261003-1"></script>
+<script src="ethernet-mac-simulator.js?v=20261013-audit-v1"></script>
 </body>
 </html>

@@ -2,11 +2,20 @@ let primaryActionVisible=true;
 
 function renderPrediction(){
   const l=lessons[state.lesson];
-  state.predictionChoice=null;
+  state.predictionChoice=state.experiment?null:state.answers[state.lesson]?.choice||null;
   state.predictionLocked=false;
   document.body.classList.remove("prediction-selected");
   const title=$("#predictionTitle"),help=$("#predictionHelp"),options=$("#predictionOptions"),feedback=$("#predictionFeedback");
   if(!title||!help||!options||!feedback)return;
+  options.hidden=state.experiment;
+  if(state.experiment){
+    title.textContent="자유 실험 · 변경한 조건으로 실행";
+    help.textContent="목적지나 설정이 달라졌습니다. 현재 조건의 실제 결과를 관찰하세요. 기본 문제의 예상 선택과 비교하려면 ‘현재 실습 다시 시작’을 누르세요.";
+    feedback.hidden=true;feedback.textContent="";options.innerHTML="";
+    // The existing shell reveals the run control with this class. A free run needs no prediction.
+    document.body.classList.add("prediction-selected");
+    updatePredictionControls();return;
+  }
   title.textContent=l.prediction.question;
   help.textContent=state.lesson<2
     ?"정답을 몰라도 괜찮습니다. 먼저 예상한 뒤 실제 ARP 대상과 비교해 보세요."
@@ -34,6 +43,14 @@ function renderPrediction(){
     };
     options.appendChild(btn);
   });
+  if(state.predictionChoice){
+    document.body.classList.add("prediction-selected");
+    $$("[data-prediction]").forEach(b=>{
+      const active=b.dataset.prediction===state.predictionChoice;
+      b.classList.toggle("selected",active);b.setAttribute("aria-pressed",String(active));
+    });
+    revealPrediction(true);
+  }
   updatePredictionControls();
 }
 function updatePredictionControls(){
@@ -41,17 +58,18 @@ function updatePredictionControls(){
   if(typeof isAdvancedMode==="function"&&isAdvancedMode()){
     btn.disabled=state.busy;
   }else{
-    btn.disabled=state.busy||!state.predictionChoice;
+    btn.disabled=state.busy||(!state.experiment&&!state.predictionChoice);
   }
   updateQuickActionBar();
 }
-function revealPrediction(){
+function revealPrediction(fromRecord=false){
   const l=lessons[state.lesson];
-  if(!state.predictionChoice||state.predictionLocked)return;
+  if(state.experiment||(!fromRecord&&!state.runIsStandard)||!state.predictionChoice||state.predictionLocked)return;
   state.predictionLocked=true;
   const picked=l.prediction.options.find(x=>x[0]===state.predictionChoice);
   const expected=l.prediction.options.find(x=>x[0]===l.prediction.correct);
   const correct=state.predictionChoice===l.prediction.correct;
+  state.answers[state.lesson]={choice:state.predictionChoice,correct};
   const box=$("#predictionFeedback");
   if(box){
     box.hidden=false;
@@ -76,9 +94,9 @@ function updateQuickActionBar(){
     action="next";
     eyebrow="현재 실습 완료";
     copy=state.lesson===lessons.length-1
-      ?"마지막 실습까지 완료했습니다."
+      ?(state.completed.every(Boolean)?"마지막 실습까지 완료했습니다.":"아직 확인하지 않은 실습을 이어서 진행하세요.")
       :"바로 다음 실습으로 이동할 수 있습니다.";
-    buttonText=state.lesson===lessons.length-1?"전체 완료 보기 →":"다음 실습 →";
+    buttonText=state.lesson===lessons.length-1?(state.completed.every(Boolean)?"전체 완료 보기 →":"아직 안 한 실습으로 →"):"다음 실습 →";
   }else if(basic&&!primaryActionVisible&&state.predictionChoice&&!state.predictionLocked){
     action="run";
     eyebrow="예상 선택 완료";
@@ -107,17 +125,25 @@ function renderLessonStatus(){
       <div><b>${title}</b><span>${desc}</span></div>
     </div>`).join("");
   const badge=$("#lessonBadge"), verdict=$("#verdictBox"), next=$("#nextBtn");
-  if(state.completed[state.lesson]){
+  if(state.experiment){
+    badge.textContent="자유 실험";badge.className="status-badge";
+    verdict.className="verdict";
+    verdict.textContent=state.recovered[state.lesson]
+      ?"기본 장애 재현 후 정상 설정으로 재PING 성공을 확인한 복구 기록이 있습니다."
+      :state.last?"현재 조건의 실행 결과를 관찰했습니다. 기본 문제의 예상 채점에는 반영하지 않습니다.":"조건이 바뀌었습니다. 현재 조건으로 실행해 실제 결과를 확인하세요. 기본 문제 학습 기록은 유지됩니다.";
+    next.disabled=!state.completed[state.lesson];
+    next.textContent="기본 학습 이어가기 →";
+  }else if(state.completed[state.lesson]){
     badge.textContent="완료";badge.className="status-badge success";
     verdict.className="verdict success";
-    const conceptOnly=state.lesson>=2 && state.failureSeen[state.lesson] && !recoveryCorrect();
+    const conceptOnly=state.lesson>=2 && !state.recovered[state.lesson];
     verdict.innerHTML=state.lesson<2
       ?"<b>학습 완료:</b> 예상한 ARP 대상과 실제 패킷 흐름을 비교했습니다."
       :conceptOnly
         ?"<b>개념 확인 완료:</b> 실패 지점과 원인을 확인했습니다. 직접 설정을 고쳐보는 복구 실습은 고급 모드에서 선택적으로 진행할 수 있습니다."
-        :"<b>복구 완료:</b> 장애 원인을 수정하고 재PING 성공까지 확인했습니다.";
+        :"<b>복구 완료 기록:</b> 장애 원인을 수정하고 재PING 성공까지 확인했습니다.";
     next.disabled=false;
-    next.textContent=state.lesson===lessons.length-1?"전체 완료 결과 보기 →":"다음 실습 →";
+    next.textContent=state.lesson===lessons.length-1?(state.completed.every(Boolean)?"전체 완료 결과 보기 →":"아직 안 한 실습으로 →"):"다음 실습 →";
   }else if(state.lesson>=2 && state.failureSeen[state.lesson]){
     badge.textContent=recoveryCorrect()?"복구 후 재검증 필요":"장애 재현 완료";
     badge.className="status-badge failure";
@@ -139,6 +165,12 @@ function renderLessonStatus(){
 }
 function completeCurrentLessonIfReady(){
   const i=state.lesson;
+  if(i>=2 && state.failureSeen[i] && state.last?.ok && recoveryConfigurationCorrect()){
+    state.recovered[i]=true;
+    state.completed[i]=true;
+    renderLessonStatus();return true;
+  }
+  if(!state.runIsStandard){renderLessonStatus();return false;}
   const items=checklistState();
   if(items.every(x=>x[2])){
     state.completed[i]=true;
@@ -149,7 +181,8 @@ function completeCurrentLessonIfReady(){
     }
     renderLessonStatus();
     if(i===lessons.length-1 && state.completed.every(Boolean)){
-      setTimeout(()=>$("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"}),350);
+      const generation=state.runGeneration;
+      setTimeout(()=>{if(generation===state.runGeneration)$("#courseComplete").scrollIntoView({behavior:"smooth",block:"center"})},350);
     }
     return true;
   }
@@ -178,7 +211,7 @@ function resetHint(){
   $("#hintBtn").textContent="막혔나요? 힌트 1/3";
 }
 function recordFailure(){
-  if(state.lesson>=2){
+  if(state.lesson>=2 && state.runIsStandard){
     state.failureSeen[state.lesson]=true;
     revealPrediction();
     if(typeof isAdvancedMode==="function"&&!isAdvancedMode()&&state.predictionChoice){
@@ -198,13 +231,14 @@ function recordFailure(){
   renderLessonStatus();
 }
 
-function chooseDest(dest){
+function chooseDest(dest,{lessonSetup=false}={}){
+  if(!lessonSetup && dest!==state.dest)invalidateExperiment();
   state.dest=dest;renderState();
   $$(".dest-btn").forEach(b=>b.classList.toggle("active",b.dataset.dest===dest));
   $("#clickPc3").classList.toggle("selected",dest==="pc3");$("#clickPc2").classList.toggle("selected",dest==="pc2");
   renderLessonStatus();
   if(state.lesson<2){
-    $("#coachTitle").textContent=dest==="pc3"?"PC3를 선택했습니다":"PC2를 선택했습니다";
+    $("#coachTitle").textContent=dest==="pc3"?"PC C를 선택했습니다":"PC B를 선택했습니다";
     $("#coachText").textContent=dest==="pc3"?"이제 PING 보내기를 눌러 패킷이 어디로 가는지 확인하세요.":"이제 PING 보내기를 눌러 Gateway를 거치는지 확인하세요.";
   }
 }

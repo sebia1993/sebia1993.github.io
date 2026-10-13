@@ -20,6 +20,11 @@ print(json.dumps(cases))
  }
 });
 test('the four original scenario decisions and resolution outcomes are preserved',()=>{
- assert.deepEqual(lessons.slice(3).map(l=>eventsFor(l).at(-1).observation.resolved),[true,true,false,true]);
- assert.deepEqual(lessons.slice(3).map(l=>eventsFor(l).at(-1).observation.arpTarget),['10.77.10.20','10.77.10.1','10.77.10.140','10.77.10.1']);
+ assert.deepEqual(lessons.filter(l=>l.type==='network').map(l=>eventsFor(l).at(-1).observation.resolved),[true,true,false,true]);
+ assert.deepEqual(lessons.filter(l=>l.type==='network').map(l=>eventsFor(l).at(-1).observation.arpTarget),['10.77.10.20','10.77.10.1','10.77.10.140','10.77.10.1']);
+});
+
+test('guide-aligned delivery scenarios precede optional address arithmetic',()=>{
+ assert.deepEqual(lessons.slice(0,4).map(l=>l.scenarioId),['same-subnet','different-subnet','wrong-mask','mask-recovery']);
+ assert.deepEqual(lessons.slice(4).map(l=>l.kind),['network','broadcast','hosts']);
 });

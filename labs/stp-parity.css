@@ -1,6 +1,8 @@
 /* Same verified triangle, compact reflow instead of a panned desktop canvas. */
 #simVisual .topology-scroll{overflow:visible;min-width:0}
 #simVisual .topology-stage{max-width:100%}
+/* ResizeObserver must measure settled node positions when switching layouts. */
+#simVisual .stp-node{transition:border-color .2s,box-shadow .2s,background-color .2s}
 #simVisual .stp-link{stroke:#b4c5d7}
 #simVisual .stp-link.forwarding{stroke:#82ab9e}
 #simVisual .stp-link.active-data{stroke:#287bca}

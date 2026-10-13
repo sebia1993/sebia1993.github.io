@@ -356,6 +356,7 @@ const $ = id => document.getElementById(id);
 
 
 const el=$;const all=s=>Array.from(document.querySelectorAll(s));let index=0,lesson=0,stepIndex=0,recovered=false;
+function presentPortRoles(value){return value.replace(/Et(\d+\/\d+)/g,'포트 $1').replace(/Desg\/FWD/g,'Designated · 전달').replace(/Root\/FWD/g,'Root Port · 전달').replace(/Altn\/BLK/g,'Alternate · 대기').replace(/c(\d+)/g,'Cost $1').replace(/DOWN/g,'인터페이스 Down');}
 function applyRoleMap(mode){
     const map=roleMaps[mode]||roleMaps.baseline;
     ['pc1','pc3'].forEach(id=>$(id).className='stp-node');
@@ -363,9 +364,9 @@ function applyRoleMap(mode){
       $(id).className='stp-node';
       if(id===map.root)$(id).classList.add('root');
     });
-    $('sw1Ports').textContent=map.sw1;
-    $('sw2Ports').textContent=map.sw2;
-    $('sw3Ports').textContent=map.sw3;
+    $('sw1Ports').textContent=presentPortRoles(map.sw1);
+    $('sw2Ports').textContent=presentPortRoles(map.sw2);
+    $('sw3Ports').textContent=presentPortRoles(map.sw3);
   }
 function resetLinks(){
     const defs={

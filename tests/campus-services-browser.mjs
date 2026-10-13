@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';import path from 'node:path';import {createServer} from 'node:http';import {chromium} from 'playwright';
+const root=process.cwd();let server,base=process.env.BASE_URL;
+if(!base){server=createServer((req,res)=>{try{const file=path.resolve(root,'.'+new URL(req.url,'http://x').pathname);if(!file.startsWith(root+path.sep))throw Error('path');res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml'})[path.extname(file)]||'text/plain');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));base='http://127.0.0.1:'+server.address().port;}
+const browser=await chromium.launch({...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{}),args:['--no-sandbox','--disable-gpu']});const out='test-results/audit/campus';fs.mkdirSync(out,{recursive:true});const results=[];
+async function step(page,target){for(let guard=0;guard<30;guard++){const state=await page.locator('#simLab').evaluate(e=>({...e.dataset}));if(Number(state.modelStepIndex)===target)return;assert.equal(state.state,'RUNNING');await page.clock.fastForward(Number(state.eventDurationMs)-Number(state.eventElapsedMs)+40);}throw Error('step not reached');}
+try{for(const width of [360,768,1366,1920])for(const topic of ['vlan-trunk','inter-vlan-routing','stp','lacp','dhcp','dns']){
+ const page=await browser.newPage({viewport:{width,height:width===360?800:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await page.goto(base+'/labs/'+topic+'-simulator.html');
+ const select=async i=>{await page.locator(`[data-lesson="${i}"]`).click();};
+ const start=async()=>{await page.locator('#simOptions button').first().click();await page.locator('#simRun').click();};
+ if(topic==='vlan-trunk'){await select(1);await start();await step(page,2);for(const sel of ['[data-device="pc10b"]','[data-edge="sw2-pc10b"]']){assert.equal(await page.locator(sel).evaluate(e=>e.classList.contains('is-excluded')),true);assert.equal(await page.locator(sel).evaluate(e=>e.classList.contains('is-stop')),false);}}
+ if(topic==='inter-vlan-routing'){await select(1);await start();await step(page,4);assert.equal(await page.locator('[data-edge="sw1-pc20a"]').evaluate(e=>e.classList.contains('is-active')),true);assert.equal(await page.locator('[data-edge="sw1-pc20b"]').evaluate(e=>e.classList.contains('is-active')),false);}
+ if(topic==='lacp'){for(const i of [2,3,4]){await select(i);assert.match(await page.locator('#poBadge').innerText(),/UP/);for(const id of ['labelM1','labelM2'])assert.match(await page.locator('#'+id).textContent(),/Bundled/);}}
+ if(topic==='dhcp'){await select(3);await start();await step(page,1);assert.match(await page.locator('#l3Svg').getAttribute('class'),/idle/);assert.match(await page.locator('#r2').getAttribute('class'),/stop/);await step(page,2);assert.match(await page.locator('#r1').getAttribute('class'),/stop/);}
+ if(topic==='dns'){await select(3);await start();await step(page,0);assert.match(await page.locator('#r2').getAttribute('class'),/stop/);assert.match(await page.locator('#l5Svg').getAttribute('class'),/idle/);}
+ if(topic==='stp'){await start();await step(page,1);}
+ await page.locator('#simVisual').screenshot({path:`${out}/${topic}-${width}.png`});
+ if(topic==='dhcp'||topic==='dns'){await page.locator('#simReset').click();for(const id of topic==='dhcp'?['dhcpState','connectState']:['dnsState','ipState'])assert.match(await page.locator('#'+id).textContent(),/관찰 전/);}
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);results.push({topic,width,status:'PASS'});await page.close();
+}fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2));console.log('PASS',results.length,'campus/services scene checks');}finally{await browser.close();server?.close();}

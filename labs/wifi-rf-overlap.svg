@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="316" viewBox="0 0 400 316" role="img" aria-labelledby="title desc">
+  <title id="title">ch1과 ch3의 명목 채널 구간</title>
+  <desc id="desc">동일한 MHz 축에서 ch1은 2402부터 2422, ch3은 2412부터 2432입니다. 각각 20 MHz이며 중심은 10 MHz 떨어져 있습니다.</desc>
+  <rect width="400" height="316" rx="12" fill="#f4f7fb"/>
+  <g font-family="system-ui, sans-serif" font-size="19" fill="#183951">
+    <text x="18" y="30" font-weight="700">같은 주파수 축 · 명목 점유 구간</text>
+    <g stroke="#a8bed3" stroke-dasharray="4 5"><path d="M28 52V218M142 52V218M256 52V218M370 52V218"/></g>
+    <rect data-channel="1" x="28" y="68" width="228" height="40" rx="4" fill="#dceeff" stroke="#41769c"/>
+    <rect data-channel="3" x="142" y="143" width="228" height="40" rx="4" fill="#fff0d7" stroke="#967144"/>
+    <path d="M142 60V116M256 135V191" stroke="#264b77" stroke-width="2"/>
+    <text x="43" y="95">ch1 · 20 MHz</text><text x="157" y="170">ch3 · 20 MHz</text>
+    <path d="M28 215H370" stroke="#617e97"/>
+    <g text-anchor="middle" font-size="18"><text x="28" y="242">2402</text><text x="142" y="242">2412</text><text x="256" y="242">2422</text><text x="370" y="242">2432</text></g>
+    <text x="315" y="270" font-size="18">MHz</text>
+    <text x="18" y="298" font-size="18">중심: ch1 = 2412 · ch3 = 2422 MHz</text>
+  </g>
+</svg>

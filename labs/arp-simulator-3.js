@@ -7,6 +7,7 @@ function applyDeviceConfig(){
     }
     if(!isUsableInterfaceIp(gw,prefix)){alert("Gateway는 해당 Prefix 형식에서 Network/Broadcast가 아닌 사용 가능한 unicast host 주소여야 합니다.");return}
     if(duplicateInterfaceIp(ip,d)){alert("같은 토폴로지에서 중복된 인터페이스 IP는 지원하지 않습니다.");return}
+    invalidateExperiment();
     if(d==="pc1"){state.pc1Ip=ip;state.mask=prefix;state.gw=gw}
     if(d==="pc3"){state.pc3Ip=ip;state.pc3Mask=prefix;state.pc3Gw=gw}
     if(d==="pc2"){state.pc2Ip=ip;state.pc2Mask=prefix;state.pc2Gw=gw}
@@ -14,12 +15,13 @@ function applyDeviceConfig(){
     const e0=$("#cfgR2e0Ip").value.trim(),e1=$("#cfgR2e1Ip").value.trim();
     const m0=+$("#cfgR2e0Mask").value,m1=+$("#cfgR2e1Mask").value;
     if(!isUsableInterfaceIp(e0,m0)||!isUsableInterfaceIp(e1,m1)){
-      alert("R2 인터페이스 IP는 각 Prefix에서 사용 가능한 unicast 주소여야 합니다.");return;
+      alert("Router B 인터페이스 IP는 각 Prefix에서 사용 가능한 unicast 주소여야 합니다.");return;
     }
     const hostIps=[state.pc1Ip,state.pc2Ip,state.pc3Ip];
     if(e0===e1||hostIps.includes(e0)||hostIps.includes(e1)){
-      alert("R2/Host 간 중복 인터페이스 IP는 지원하지 않습니다.");return;
+      alert("Router B/Host 간 중복 인터페이스 IP는 지원하지 않습니다.");return;
     }
+    invalidateExperiment();
     state.r2e0Ip=e0;state.r2e0Mask=m0;
     state.r2e1Ip=e1;state.r2e1Mask=m1;
   }
@@ -111,7 +113,7 @@ function renderComparison(){
   const box=$("#compareBox");
   if(!a||!b){box.classList.remove("show");return}
   box.classList.add("show");
-  $("#cmpHopB").textContent=b.compareLabel||"R2 → 목적지";
+  $("#cmpHopB").textContent=b.compareLabel||"Router B → 목적지";
   $("#cmpSrcIpA").textContent=a.srcIp;$("#cmpSrcIpB").textContent=b.srcIp;
   $("#cmpDstIpA").textContent=a.dstIp;$("#cmpDstIpB").textContent=b.dstIp;
   $("#cmpSrcMacA").textContent=a.srcMac;$("#cmpSrcMacB").textContent=b.srcMac;
@@ -156,42 +158,42 @@ function addArpReplyDetail({key,short,responderName,responderIp,responderMac,req
 function addArpSnapshot(target,local){
   const dest=selectedDestination();
   addArpRequestDetail({
-    key:"arp-request",short:"PC1의 MAC 질문",sourceName:"PC1",sourceIp:state.pc1Ip,sourceMac:MAC.pc1,
+    key:"arp-request",short:"PC A의 MAC 질문",sourceName:"PC A",sourceIp:state.pc1Ip,sourceMac:MAC.pc1,
     targetIp:target,segment:"A",
     oneLine:local
-      ?`PC1이 on-link로 판단한 ${dest.name}(${target})의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`
-      :`PC1이 remote 목적지로 보내기 전에 next-hop ${target}의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`,
-    nextHopMeaning:local?"PC1이 목적지를 on-link로 판단했으므로 최종 목적지 자신이 next-hop입니다.":"목적지가 on-link가 아니므로 설정된 Default Gateway가 현재 LAN의 next-hop입니다.",
+      ?`PC A가 on-link로 판단한 ${dest.name}(${target})의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`
+      :`PC A가 remote 목적지로 보내기 전에 next-hop ${target}의 MAC을 알아내기 위해 LAN A에 Broadcast합니다.`,
+    nextHopMeaning:local?"PC A가 목적지를 on-link로 판단했으므로 최종 목적지 자신이 next-hop입니다.":"목적지가 on-link가 아니므로 설정된 Default Gateway가 현재 LAN의 next-hop입니다.",
     why:local
-      ?`PC1은 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})을 <b>on-link</b>로 판단했습니다.`
-      :`PC1은 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})이 <b>on-link가 아니라고</b> 판단해 Default Gateway ${target}을 ARP합니다.`
+      ?`PC A는 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})을 <b>on-link</b>로 판단했습니다.`
+      :`PC A는 ${state.pc1Ip}/${state.mask} 기준으로 ${dest.name}(${dest.ip})이 <b>on-link가 아니라고</b> 판단해 Default Gateway ${target}을 ARP합니다.`
   });
 }
 function addArpReplySnapshot(target,local,responderName,responderMac){
   addArpReplyDetail({
-    key:"arp-reply",short:"PC1이 받는 ARP Reply",
+    key:"arp-reply",short:"PC A가 받는 ARP Reply",
     responderName,responderIp:target,responderMac,
-    requesterName:"PC1",requesterIp:state.pc1Ip,requesterMac:MAC.pc1,
-    nextHopMeaning:local?"PC1이 on-link 목적지의 MAC을 확인했습니다.":"PC1이 Default Gateway의 MAC을 확인했습니다.",
-    why:"PC1은 ARP Reply를 받은 뒤 해당 IPv4→MAC 매핑을 자신의 Neighbor(ARP) Table에 저장합니다."
+    requesterName:"PC A",requesterIp:state.pc1Ip,requesterMac:MAC.pc1,
+    nextHopMeaning:local?"PC A가 on-link 목적지의 MAC을 확인했습니다.":"PC A가 Default Gateway의 MAC을 확인했습니다.",
+    why:"PC A는 ARP Reply를 받은 뒤 해당 IPv4→MAC 매핑을 자신의 Neighbor(ARP) Table에 저장합니다."
   });
 }
 function addRouterArpRequestSnapshot(dest,route){
   addArpRequestDetail({
-    key:"r2-arp-request",short:"R2의 MAC 질문",
-    sourceName:`R2 ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
+    key:"r2-arp-request",short:"Router B의 MAC 질문",
+    sourceName:`Router B ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
     targetIp:dest.ip,segment:route.segment,
-    nextHopMeaning:`R2의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 출력 Ethernet 구간에서 ${dest.ip}의 MAC이 필요합니다.`,
-    why:`PC1이 Gateway MAC을 알고 있어도 R2가 ${dest.name} MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자신의 next-hop MAC을 확인합니다.`
+    nextHopMeaning:`Router B의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 출력 Ethernet 구간에서 ${dest.ip}의 MAC이 필요합니다.`,
+    why:`PC A가 Gateway MAC을 알고 있어도 Router B가 ${dest.name} MAC까지 자동으로 아는 것은 아닙니다. 각 L2 Segment에서 송신 장비가 자신의 next-hop MAC을 확인합니다.`
   });
 }
 function addRouterArpReplySnapshot(dest,route){
   addArpReplyDetail({
     key:"r2-arp-reply",short:`${dest.name}의 ARP Reply`,
     responderName:dest.name,responderIp:dest.ip,responderMac:dest.mac,
-    requesterName:`R2 ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
-    nextHopMeaning:`R2가 ${dest.ip} → ${dest.mac} 매핑을 확인했습니다.`,
-    why:"이 Reply 후 R2는 원래 IPv4 Packet을 출력 링크용 Ethernet Frame으로 재캡슐화할 수 있습니다."
+    requesterName:`Router B ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
+    nextHopMeaning:`Router B가 ${dest.ip} → ${dest.mac} 매핑을 확인했습니다.`,
+    why:"이 Reply 후 Router B는 원래 IPv4 Packet을 출력 링크용 Ethernet Frame으로 재캡슐화할 수 있습니다."
   });
 }
 function addHostArpRequestSnapshot(host,targetIp,targetName,purpose){
@@ -213,53 +215,53 @@ function addHostArpReplySnapshot(responder,requester,purpose){
 }
 function addR2ReturnArpRequestSnapshot(host,route){
   addArpRequestDetail({
-    key:"return-r2-arp-request",short:"R2의 Return ARP",
-    sourceName:`R2 ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
+    key:"return-r2-arp-request",short:"Router B의 Return ARP",
+    sourceName:`Router B ${route.egress}`,sourceIp:route.routerIp,sourceMac:route.routerMac,
     targetIp:host.ip,segment:route.segment,
-    nextHopMeaning:`Echo Reply를 PC1로 전달하려면 R2도 출력 LAN ${route.segment}에서 PC1 MAC이 필요합니다.`,
+    nextHopMeaning:`Echo Reply를 PC A로 전달하려면 Router B도 출력 LAN ${route.segment}에서 PC A MAC이 필요합니다.`,
     why:"Return Route가 존재하는 것과 Ethernet Destination MAC을 이미 알고 있는 것은 별개입니다."
   });
 }
 function addR2ReturnArpReplySnapshot(host,route){
   addArpReplyDetail({
-    key:"return-r2-arp-reply",short:"PC1의 Return ARP Reply",
+    key:"return-r2-arp-reply",short:"PC A의 Return ARP Reply",
     responderName:host.name,responderIp:host.ip,responderMac:host.mac,
-    requesterName:`R2 ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
-    nextHopMeaning:"R2가 Return Path에서 사용할 PC1 MAC을 확인했습니다.",
-    why:"R2는 이제 Echo Reply를 LAN A용 새 Ethernet Frame으로 만들어 PC1에 전달할 수 있습니다."
+    requesterName:`Router B ${route.egress}`,requesterIp:route.routerIp,requesterMac:route.routerMac,
+    nextHopMeaning:"Router B가 Return Path에서 사용할 PC A MAC을 확인했습니다.",
+    why:"Router B는 이제 Echo Reply를 LAN A용 새 Ethernet Frame으로 만들어 PC A에 전달할 수 있습니다."
   });
 }
 function addLocalIcmpSnapshot(dest,mac){
   addSnapshot({
     key:"icmp-pc1-local",protocol:"ICMP",short:`${dest.name}로 실제 PING`,
-    hop:`PC1 → ${dest.name}`,title:`ICMP Echo Request · PC1 → ${dest.name}`,
-    oneLine:`${dest.name}가 PC1 기준 on-link이고 실제 LAN A에 있으므로 IPv4 최종 목적지와 Ethernet 현재 수신자가 모두 ${dest.name}입니다.`,
+    hop:`PC A → ${dest.name}`,title:`ICMP Echo Request · PC A → ${dest.name}`,
+    oneLine:`${dest.name}가 PC A 기준 on-link이고 실제 LAN A에 있으므로 IPv4 최종 목적지와 Ethernet 현재 수신자가 모두 ${dest.name}입니다.`,
     srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:dest.ip,ttl:String(SIM_INITIAL_TTL),
-    ipMeaning:`Source/Destination IP는 PC1 → ${dest.name}입니다.`,
+    ipMeaning:`Source/Destination IP는 PC A → ${dest.name}입니다.`,
     macMeaning:`같은 Ethernet Segment에서 직접 전달하므로 Destination MAC도 ${dest.name} MAC입니다.`,
     nextHopMeaning:`on-link 목적지에서는 최종 목적지 ${dest.name} 자체가 next-hop입니다.`,
     ttlMeaning:`이 Simulator의 초기 IPv4 TTL은 ${SIM_INITIAL_TTL}입니다. 이 경로에서는 Router forwarding이 없으므로 감소하지 않습니다.`,
-    why:"같은 L2 Segment에서 SW1이 Frame을 전달해도 Source/Destination MAC pair를 라우터처럼 다시 작성하지 않습니다."
+    why:"같은 L2 Segment에서 Switch A가 Frame을 전달해도 Source/Destination MAC pair를 라우터처럼 다시 작성하지 않습니다."
   });
 }
 function addPc1ToR2Snapshot(dest,mac){
   addSnapshot({
-    key:"icmp-pc1-r2",protocol:"ICMP",short:"PC1에서 R2로",
-    hop:"LAN A · PC1 → R2",title:"ICMP Echo Request · PC1 → R2",
-    oneLine:`최종 목적지는 ${dest.ip}(${dest.name})이지만, LAN A에서 현재 Frame을 받을 next-hop은 R2 eth0(${state.r2e0Ip})입니다.`,
+    key:"icmp-pc1-r2",protocol:"ICMP",short:"PC A에서 Router B로",
+    hop:"LAN A · PC A → Router B",title:"ICMP Echo Request · PC A → Router B",
+    oneLine:`최종 목적지는 ${dest.ip}(${dest.name})이지만, LAN A에서 현재 Frame을 받을 next-hop은 Router B eth0(${state.r2e0Ip})입니다.`,
     srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:mac,nextHop:state.r2e0Ip,ttl:String(SIM_INITIAL_TTL),
-    ipMeaning:`Destination IP ${dest.ip}은 최종 목적지 ${dest.name}을 계속 가리킵니다. NAT 없는 이 Lab에서는 R2 주소로 바뀌지 않습니다.`,
-    macMeaning:"LAN A에서 Ethernet Destination은 R2 eth0 MAC입니다. SW1을 통과할 때 이 MAC pair가 바뀌지는 않습니다.",
-    nextHopMeaning:`PC1의 현재 next-hop은 Default Gateway ${state.gw}입니다.`,
-    ttlMeaning:`PC1이 만든 IPv4 Packet의 초기 TTL은 ${SIM_INITIAL_TTL}이며, R2가 forwarding할 때 1 감소합니다.`,
+    ipMeaning:`Destination IP ${dest.ip}은 최종 목적지 ${dest.name}을 계속 가리킵니다. NAT 없는 이 Lab에서는 Router B 주소로 바뀌지 않습니다.`,
+    macMeaning:"LAN A에서 Ethernet Destination은 Router B eth0 MAC입니다. Switch A를 통과할 때 이 MAC pair가 바뀌지는 않습니다.",
+    nextHopMeaning:`PC A의 현재 next-hop은 Default Gateway ${state.gw}입니다.`,
+    ttlMeaning:`PC A가 만든 IPv4 Packet의 초기 TTL은 ${SIM_INITIAL_TTL}이며, Router B가 forwarding할 때 1 감소합니다.`,
     why:"IP Destination은 end-to-end 목적지를, Ethernet Destination MAC은 현재 L2 Segment의 next-hop을 나타냅니다."
   });
 }
 function addPc1ToWrongGatewaySnapshot(dest,gatewayHost){
   addSnapshot({
     key:"icmp-pc1-wrong-gateway-host",protocol:"ICMP",short:"잘못된 Gateway Host로 전달",
-    hop:`PC1 → ${gatewayHost.name}`,title:`ICMP Echo Request · Ethernet은 ${gatewayHost.name}, IP는 ${dest.name}`,
-    oneLine:`PC1은 Default Gateway로 설정된 ${gatewayHost.name}의 MAC을 알아냈기 때문에 Frame은 ${gatewayHost.name}에게 전달하지만 IPv4 Destination은 여전히 ${dest.ip}입니다.`,
+    hop:`PC A → ${gatewayHost.name}`,title:`ICMP Echo Request · Ethernet은 ${gatewayHost.name}, IP는 ${dest.name}`,
+    oneLine:`PC A는 Default Gateway로 설정된 ${gatewayHost.name}의 MAC을 알아냈기 때문에 Frame은 ${gatewayHost.name}에게 전달하지만 IPv4 Destination은 여전히 ${dest.ip}입니다.`,
     srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:MAC.pc1,dstMac:gatewayHost.mac,nextHop:gatewayHost.ip,ttl:String(SIM_INITIAL_TTL),
     ipMeaning:`IPv4 Destination은 최종 목적지 ${dest.name}(${dest.ip})을 유지합니다.`,
     macMeaning:`Ethernet Destination은 잘못 설정된 Gateway ${gatewayHost.name} MAC입니다.`,
@@ -270,15 +272,15 @@ function addPc1ToWrongGatewaySnapshot(dest,gatewayHost){
 }
 function addR2ToDestinationSnapshot(dest,route){
   addSnapshot({
-    key:"icmp-r2-dest",protocol:"ICMP",short:`R2에서 ${dest.name}로`,
-    hop:`LAN ${route.segment} · R2 → ${dest.name}`,compareLabel:`R2 → ${dest.name}`,
-    title:`라우팅 후 새 Ethernet Frame · R2 → ${dest.name}`,
-    oneLine:`R2는 IPv4 Packet을 ${route.egress}으로 forwarding하면서 출력 링크용 새 Ethernet Frame으로 재캡슐화하고 TTL을 1 감소시킵니다.`,
+    key:"icmp-r2-dest",protocol:"ICMP",short:`Router B에서 ${dest.name}로`,
+    hop:`LAN ${route.segment} · Router B → ${dest.name}`,compareLabel:`Router B → ${dest.name}`,
+    title:`라우팅 후 새 Ethernet Frame · Router B → ${dest.name}`,
+    oneLine:`Router B는 IPv4 Packet을 ${route.egress}으로 forwarding하면서 출력 링크용 새 Ethernet Frame으로 재캡슐화하고 TTL을 1 감소시킵니다.`,
     srcIp:state.pc1Ip,dstIp:dest.ip,srcMac:route.routerMac,dstMac:dest.mac,nextHop:dest.ip,ttl:String(SIM_INITIAL_TTL-1),
-    ipMeaning:`Source/Destination IP 주소는 여전히 ${state.pc1Ip} → ${dest.ip}입니다. NAT 없는 일반 라우팅에서는 최종 목적지 IP가 R2로 바뀌지 않습니다.`,
-    macMeaning:`출력 LAN ${route.segment}에서는 Source MAC이 R2 ${route.egress}, Destination MAC이 ${dest.name} MAC입니다.`,
-    nextHopMeaning:`R2의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 링크에서는 ${dest.name}이 직접 next-hop입니다.`,
-    ttlMeaning:`이 Simulator는 초기 TTL ${SIM_INITIAL_TTL}을 사용하며 R2가 한 번 forwarding했으므로 ${SIM_INITIAL_TTL-1}이 되었습니다.`,
+    ipMeaning:`Source/Destination IP 주소는 여전히 ${state.pc1Ip} → ${dest.ip}입니다. NAT 없는 일반 라우팅에서는 최종 목적지 IP가 Router B로 바뀌지 않습니다.`,
+    macMeaning:`출력 LAN ${route.segment}에서는 Source MAC이 Router B ${route.egress}, Destination MAC이 ${dest.name} MAC입니다.`,
+    nextHopMeaning:`Router B의 Connected Route ${route.network}가 ${route.egress}을 선택했고, 이 링크에서는 ${dest.name}이 직접 next-hop입니다.`,
+    ttlMeaning:`이 Simulator는 초기 TTL ${SIM_INITIAL_TTL}을 사용하며 Router B가 한 번 forwarding했으므로 ${SIM_INITIAL_TTL-1}이 되었습니다.`,
     why:"라우터는 수신 Ethernet Frame의 L2 Header를 제거하고 routing 후 출력 링크용 새 Ethernet Frame을 생성합니다. 같은 L2 Segment의 Switch forwarding만으로 MAC pair가 바뀌는 것은 아닙니다."
   });
 }
@@ -290,39 +292,39 @@ function recoveryCorrect(i=state.lesson){
   if(t==="link")return state.eth0===true;
   return true;
 }
+function recoveryConfigurationCorrect(){
+  const aliases={pc1Mask:"mask",pc1Gw:"gw"};
+  return state.dest==="pc2" && state.eth0 && state.eth1 && Object.values(state.cables).every(Boolean)
+    && Object.entries(GOOD).every(([key,value])=>state[aliases[key]||key]===value);
+}
 function checklistState(){
   const i=state.lesson,l=lessons[i];
-  if(state.completed[i]){
+  if(state.completed[i] && i<2){
     if(i===0)return [
-      ["PC3 선택","같은 LAN의 목적지 선택",true],
-      ["PING 성공","PC1 ↔ PC3 통신 확인",true],
-      ["ARP 학습","PC3 MAC을 직접 학습",true]
+      ["PC C 선택","같은 LAN의 목적지 선택",true],
+      ["PING 성공","PC A ↔ PC C 통신 확인",true],
+      ["ARP 학습","PC C MAC을 직접 학습",true]
     ];
     if(i===1)return [
-      ["PC2 통신","원격 LAN으로 PING 성공",true],
+      ["PC B 통신","원격 LAN으로 PING 성공",true],
       ["Gateway ARP","192.168.10.1 MAC 학습",true],
       ["Router 비교","라우터 전/후 헤더 차이 확인",true]
     ];
-    return [
-      ["장애 재현","정상 상태가 아님을 PING으로 확인",true],
-      ["원인 복구","잘못된 설정/상태를 정상화",true],
-      ["재PING 성공","복구 후 End-to-End 통신 확인",true]
-    ];
   }
   if(i===0)return [
-    ["PC3 선택","같은 LAN의 목적지 선택",state.dest==="pc3"],
-    ["PING 성공","PC1 ↔ PC3 통신 확인",!!state.last?.ok && state.dest==="pc3"],
-    ["ARP 학습","PC3 MAC을 직접 학습",!!state.arp[state.pc3Ip]]
+    ["PC C 선택","같은 LAN의 목적지 선택",state.dest==="pc3"],
+    ["PING 성공","PC A ↔ PC C 통신 확인",!!state.last?.ok && state.dest==="pc3"],
+    ["ARP 학습","PC C MAC을 직접 학습",!!state.arp[state.pc3Ip]]
   ];
   if(i===1)return [
-    ["PC2 통신","원격 LAN으로 PING 성공",!!state.last?.ok && state.dest==="pc2"],
+    ["PC B 통신","원격 LAN으로 PING 성공",!!state.last?.ok && state.dest==="pc2"],
     ["Gateway ARP","192.168.10.1 MAC 학습",!!state.arp[state.r2e0Ip]],
     ["Router 비교","라우터 전/후 헤더 차이 확인",state.snapshots.some(x=>x.key==="icmp-pc1-r2") && state.snapshots.some(x=>x.key==="icmp-r2-dest")]
   ];
   return [
     ["장애 재현","정상 상태가 아님을 PING으로 확인",state.failureSeen[i]],
-    ["원인 복구","잘못된 설정/상태를 정상화",recoveryCorrect(i)],
-    ["재PING 성공","복구 후 End-to-End 통신 확인",state.failureSeen[i] && !!state.last?.ok && state.dest==="pc2" && recoveryCorrect(i)]
+    ["원인 복구",state.recovered[i]?"정상 설정으로 복구한 기록":"잘못된 설정/상태를 정상화",state.recovered[i] || recoveryCorrect(i)],
+    ["재PING 성공","복구 후 End-to-End 통신을 확인한 기록",state.recovered[i]]
   ];
 }
 function renderCourseProgress(){
@@ -331,4 +333,6 @@ function renderCourseProgress(){
   $("#courseBar").style.width=`${done/lessons.length*100}%`;
   $$(".lesson-tab").forEach((b,i)=>b.classList.toggle("completed",state.completed[i]));
   $("#courseComplete").classList.toggle("show",done===lessons.length);
+  const summary=$("#completionSummary");
+  if(summary)summary.textContent=`5개 기본 흐름을 실행하고 확인했습니다. 선택 복구 실습: ${state.recovered.slice(2).filter(Boolean).length} / 3개에서 설정 수정 후 재PING 성공을 확인했습니다.`;
 }

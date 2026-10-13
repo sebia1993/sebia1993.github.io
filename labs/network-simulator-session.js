@@ -3,10 +3,14 @@ window.NetworkSimulator = {mount(adapter) {
   'use strict';
   const $ = id => document.getElementById(id);
   const root = $('simLab'), visual = $('simVisual'), presentation = adapter.presentation || {};
-  const list = adapter.raw.map((s, index) => ({...s, index,
-    choices:s.options.map((o,j) => Array.isArray(o) ? o : [j,o]), correctKey:s.correct,
-    conditions:s.start || s.states || [], description:s.text || s.description || '',
-    answer:s.actual || s.answer || s.conclusion || '', steps:s.steps || null}));
+  const list = adapter.raw.map((s, index) => {
+    const ui=presentation.lessons?.[index] || {};
+    return {...s, index, question:ui.question ?? s.question,
+      choices:ui.choices ?? s.options.map((o,j) => Array.isArray(o) ? o : [j,o]),
+      correctKey:ui.correctKey ?? s.correct, reason:ui.reason ?? s.reason,
+      conditions:ui.conditions ?? s.start ?? s.states ?? [], description:s.text || s.description || '',
+      answer:s.actual || s.answer || s.conclusion || '', steps:s.steps || null};
+  });
   const commonLabels = {
     'STABLE TOPOLOGY':'실습 토폴로지','Stable Topology':'실습 토폴로지',
     'Learning Topology':'학습 토폴로지','Observed State':'관찰한 상태','Evidence State':'관찰 근거',
@@ -20,9 +24,11 @@ window.NetworkSimulator = {mount(adapter) {
   };
   const replacements = {...commonLabels, ...(presentation.names || {}), ...(presentation.labels || {})};
   const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const keys = Object.keys(replacements).filter(Boolean).sort((a,b) => b.length-a.length);
+  // Whole display labels are terminal: a label containing a raw key must not expand on every frame.
+  const renderedLabels=new Set(Object.values(replacements).filter(Boolean));
+  const keys = [...new Set([...Object.keys(replacements),...renderedLabels])].filter(Boolean).sort((a,b) => b.length-a.length);
   const expression = keys.length ? new RegExp('(?<![A-Za-z0-9_])(?:'+keys.map(escape).join('|')+')(?![A-Za-z0-9_])','g') : null;
-  const present = value => expression ? String(value ?? '').replace(expression, key => replacements[key]) : String(value ?? '');
+  const present = value => expression ? String(value ?? '').replace(expression, key => renderedLabels.has(key)?key:replacements[key]) : String(value ?? '');
   const protectedText = 'script,style,pre,code,[data-preserve-original],.sim-evidence';
   function presentDOM(scope = root) {
     const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
@@ -87,11 +93,25 @@ window.NetworkSimulator = {mount(adapter) {
     visual.getAnimations({subtree:true}).forEach(a => value==='PAUSED'?a.pause():a.play());
   }
   const scoreRecords=() => adapter.kind==='sequence'?firstRecords:records;
+  const scorePrefix=() => adapter.kind==='sequence'?'최초 제출 · ':'';
+  const nextPending=() => {
+    for(let offset=1;offset<=list.length;offset++) {
+      const index=(current+offset)%list.length;
+      if(!records[index])return index;
+    }
+    return -1;
+  };
+  function focusOn(element,{reveal=false}={}) {
+    if(!element)return;
+    if(!element.matches('button,a,input,select,textarea,[tabindex]'))element.tabIndex=-1;
+    element.focus({preventScroll:true});
+    if(reveal)element.scrollIntoView({block:'center',behavior:'instant'});
+  }
   function progress() {
-    const scores=scoreRecords(), count=scores.filter(Boolean).length, correct=scores.filter(r=>r?.correct).length;
+    const scores=scoreRecords(), count=records.filter(Boolean).length, submitted=scores.filter(Boolean).length, correct=scores.filter(r=>r?.correct).length;
     $('simBar').style.width=`${count/list.length*100}%`;
     $('simCount').textContent=`${count} / ${list.length} 완료`;
-    $('simScore').textContent=`정답 ${correct} · 오답 ${count-correct} · 미응답 ${list.length-count}`;
+    $('simScore').textContent=`${scorePrefix()}정답 ${correct} · 오답 ${submitted-correct} · 미응답 ${list.length-submitted}`;
     $('simTabs').replaceChildren(...list.map((s,i) => {
       const b=document.createElement('button'); b.type='button';
       b.className=`lesson-tab ${i===current?'active':''} ${records[i]?'done':''}`;
@@ -100,7 +120,7 @@ window.NetworkSimulator = {mount(adapter) {
     }));
   }
   function options() {
-    const s=list[current], done=phase==='COMPLETED';
+    const s=list[current], done=phase==='COMPLETED'&&step===plan.length-1;
     $('simOptions').replaceChildren(...s.choices.map(([key,text]) => {
       const b=document.createElement('button'); b.type='button';
       b.className='prediction-option'+(selected===key?' selected':'')+(done&&key===s.correctKey?' correct-answer':'')+(done&&selected===key&&key!==s.correctKey?' wrong-answer':'');
@@ -119,8 +139,9 @@ window.NetworkSimulator = {mount(adapter) {
     $('simPlayback').hidden=!(running||paused||complete);
     $('simPlayback').textContent=running?'⏸ 일시정지':paused?'▶ 이어서 보기':'↻ 흐름 다시 보기';
     $('simNext').disabled=!complete;
-    $('simNext').textContent=current===list.length-1?'학습 결과 보기 →':'다음 문제 →';
-    $('simResult').hidden=!complete; $('simReview').hidden=!complete; $('simExtras').hidden=!complete;
+    $('simNext').textContent=nextPending()<0?'학습 결과 보기 →':'다음 미완료 문제 →';
+    const finalScene=complete&&step===plan.length-1;
+    $('simResult').hidden=!finalScene; $('simReview').hidden=!complete; $('simExtras').hidden=!finalScene;
     $('simCompare').hidden=!(adapter.compare&&s.compare&&!compared);
     $('simCompare').textContent=present(s.compare||'조건 바꿔 비교하기');
     $('simRecover').hidden=!(adapter.recover&&(s.recover||s.completeOnRecover||(s.mode==='oneway'&&compared))&&!recovered);
@@ -149,7 +170,7 @@ window.NetworkSimulator = {mount(adapter) {
       eventElapsedMs:String(Math.round(elapsed)),eventDurationMs:String(item?.duration||0),
       playbackMode:mode,modelStepIndex:String(item?.modelStepIndex??-1)});
   }
-  function load(i,{reuse=true}={}) {
+  function load(i,{reuse=true,focus=false}={}) {
     stop(); current=i; selected=reuse&&records[i]?records[i].selected:null;
     step=-1; plan=[]; elapsed=0; mode='normal'; compared=false; recovered=false;
     adapter.reset(i); neutral(); const s=list[i];
@@ -163,7 +184,8 @@ window.NetworkSimulator = {mount(adapter) {
     $('simEvidence').replaceChildren();
     const provenance=document.createElement('p'); provenance.textContent='아래 기록은 기존 검증 당시의 원문입니다. 장비 표기는 위 학습 화면과 다를 수 있습니다.';
     $('simEvidence').append(provenance);
-    for (const value of [s.description,...(s.evidence||[]),s.standard,s.scope].filter(Boolean)) {
+    const raw=adapter.raw[i];
+    for (const value of [s.description,...(raw.start||raw.states||[]),...(s.evidence||[]),s.standard,s.scope].filter(Boolean)) {
       const p=document.createElement('p'); p.textContent=value; $('simEvidence').append(p);
     }
     const pairs=Object.entries(presentation.names||{});
@@ -173,7 +195,18 @@ window.NetworkSimulator = {mount(adapter) {
       if(!mapping){mapping=document.createElement('p');mapping.className='sim-name-map';note.prepend(mapping);}
       mapping.textContent=pairs.length?'학습 화면 명칭 대응: '+pairs.map(([a,b])=>`${a} → ${b}`).join(' · '):'';
     }
+    if(reuse&&records[i]) {
+      plan=buildPlan();
+      for(const item of plan){item.action?.();item.animate?.(1);}
+      step=plan.length-1;elapsed=plan[step].duration;adapter.finish?.();
+      setPhase('COMPLETED');visual.dataset.reveal='all';
+      event(plan[step].title,plan[step].detail,plan[step].kind);
+      $('simPosition').textContent=`${plan.length} / ${plan.length} 단계`;
+      $('stepCount').textContent=`${plan.length} / ${plan.length}`;
+      feedback();
+    }
     options(); progress(); resetHint(); controls(); presentDOM(); datasets();
+    if(focus)focusOn($('simQuestion'),{reveal:true});
   }
   function defaultDuration(item) {
     if(item.duration) return item.duration;
@@ -212,6 +245,7 @@ window.NetworkSimulator = {mount(adapter) {
     controls(); datasets();
   }
   function complete() {
+    const active=document.activeElement,moveFocus=active===$('simPlayback')||active===$('simRun')||$('simOptions').contains(active);
     stop(); elapsed=plan[step]?.duration||0; setPhase('COMPLETED');
     const s=list[current];
     if(mode==='compare') compared=true;
@@ -221,13 +255,17 @@ window.NetworkSimulator = {mount(adapter) {
       if(!firstRecords[current]) firstRecords[current]={...records[current]};
       adapter.finish?.();
     }
-    const r=records[current]; visual.dataset.reveal='all';
+    visual.dataset.reveal='all';feedback();
+    options(); progress(); controls(); presentDOM(); datasets();
+    if(moveFocus)focusOn($('simVerdict'));
+  }
+  function feedback() {
+    const s=list[current],r=records[current];
     $('simVerdict').textContent=r.correct?'✓ 정답입니다':'✕ 예상과 달랐습니다';
     $('simVerdict').className=r.correct?'correct':'incorrect';
     $('simChosen').textContent='내 예상 · '+label(s,r.selected);
     $('simCorrect').textContent='실제 결과 · '+label(s,s.correctKey);
     $('simReason').textContent=present(s.reason);
-    options(); progress(); controls(); presentDOM(); datasets();
   }
   function tick(token) {
     if(token!==generation||phase!=='RUNNING')return;
@@ -244,10 +282,12 @@ window.NetworkSimulator = {mount(adapter) {
   function start(which='normal') {
     if(which==='normal'&&!['PREDICTED','COMPLETED'].includes(phase))return;
     if(which!=='normal'&&phase!=='COMPLETED')return;
+    const moveFocus=[$('simRun'),$('simPlayback'),$('simCompare'),$('simRecover')].includes(document.activeElement);
     stop(); mode=which;
     if(which==='normal'){adapter.reset(current);neutral();compared=false;recovered=false;}
     setPhase('RUNNING'); options(); plan=buildPlan(); step=0; elapsed=0; started=performance.now();
     renderStep(); const token=generation; frame=requestAnimationFrame(()=>tick(token)); controls();
+    if(moveFocus)focusOn($('simPlayback'));
   }
   function playback() {
     if(phase==='RUNNING') {
@@ -267,33 +307,34 @@ window.NetworkSimulator = {mount(adapter) {
       adapter.finish?.();
     }
     for(let i=0;i<target;i++){plan[i].action?.();plan[i].animate?.(1);}
-    step=target; elapsed=plan[step].duration; renderStep({review:true});
+    step=target; elapsed=plan[step].duration; renderStep({review:true});options();
     if(target===plan.length-1){if(mode==='normal')adapter.finish?.();visual.dataset.reveal='all';presentDOM();}
   }
-  function next() {if(phase!=='COMPLETED')return;current<list.length-1?load(current+1):summary();}
+  function next() {if(phase!=='COMPLETED')return;const pending=nextPending();pending<0?summary():load(pending,{focus:true});}
   function summary() {
+    if(records.some(r=>!r))return;
     stop(); $('simMain').hidden=true; $('simSummary').hidden=false;
     const scores=scoreRecords(),count=scores.filter(Boolean).length,correct=scores.filter(r=>r?.correct).length;
-    $('simSummaryScore').textContent=`${list.length}문제 중 관찰 ${count} · 정답 ${correct} · 오답 ${count-correct} · 미응답 ${list.length-count}`;
+    $('simSummaryScore').textContent=`${list.length}문제 관찰 완료 · ${scorePrefix()}정답 ${correct} · 오답 ${count-correct}`;
     $('simSummaryList').replaceChildren(...list.map((s,i)=>{
       const r=scores[i],a=document.createElement('article');a.className='sim-summary-card '+(!r?'pending':r.correct?'correct':'incorrect');
       const b=document.createElement('b');b.textContent=`${i+1}. ${present(s.question)}`;
       const p=document.createElement('p');p.textContent=!r?'미응답':r.correct?'✓ 정답':'✕ 오답';
-      const bt=document.createElement('button');bt.className='soft-btn';bt.textContent=r?'이 문제 다시 보기':'문제 풀기';bt.onclick=()=>load(i);
+      const bt=document.createElement('button');bt.className='soft-btn';bt.textContent=r?'이 문제 다시 보기':'문제 풀기';bt.onclick=()=>load(i,{focus:true});
       a.append(b,p,bt);return a;
     }));
-    $('simWrong').disabled=!scores.some(r=>r&&!r.correct);controls();
+    $('simWrong').disabled=!scores.some(r=>r&&!r.correct);controls();focusOn($('simSummaryScore'),{reveal:true});
   }
   $('simRun').onclick=()=>start(); $('simPlayback').onclick=playback;
-  $('simReset').onclick=()=>{records[current]=null;load(current,{reuse:false});};
+  $('simReset').onclick=()=>{records[current]=null;load(current,{reuse:false,focus:true});};
   $('simNext').onclick=next;
   $('simQuickBtn').onclick=()=>phase==='PREDICTED'?start():phase==='COMPLETED'?next():playback();
-  $('simTabs').onclick=e=>{const b=e.target.closest('[data-lesson]');if(b)load(+b.dataset.lesson);};
+  $('simTabs').onclick=e=>{const b=e.target.closest('[data-lesson]');if(b)load(+b.dataset.lesson,{focus:true});};
   $('prevStepBtn').onclick=()=>review(step-1);
   $('nextStepBtn').onclick=()=>review(step+1);
   $('simCompare').onclick=()=>start('compare'); $('simRecover').onclick=()=>start('recover');
-  $('simRestart').onclick=()=>{firstRecords=list.map(()=>null);records=list.map(()=>null);load(0);};
-  $('simWrong').onclick=()=>{const i=scoreRecords().findIndex(r=>r&&!r.correct);if(i>=0)load(i);};
+  $('simRestart').onclick=()=>{firstRecords=list.map(()=>null);records=list.map(()=>null);load(0,{focus:true});};
+  $('simWrong').onclick=()=>{const i=scoreRecords().findIndex(r=>r&&!r.correct);if(i>=0)load(i,{focus:true});};
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&phase==='RUNNING')playback();});
   window.addEventListener('pagehide',stop);
   window.addEventListener('pageshow',e=>{if(e.persisted){firstRecords=list.map(()=>null);records=list.map(()=>null);load(0);}});

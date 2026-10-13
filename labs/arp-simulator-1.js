@@ -10,62 +10,62 @@ const lessons=[
   {
     dest:"pc3",
     title:"같은 네트워크면 누구를 ARP할까요?",
-    text:"PC3는 PC1과 같은 192.168.10.0/24에 있습니다. 이번 실습에서는 PC1이 누구의 MAC 주소를 알아내는지만 확인합니다.",
+    text:"PC C는 PC A와 같은 192.168.10.0/24에 있습니다. 이번 실습에서는 PC A가 누구의 MAC 주소를 알아내는지만 확인합니다.",
     type:"normal",
     prediction:{
-      question:"PC3가 PC1과 같은 네트워크(on-link)에 있다면 PC1은 누구의 MAC 주소를 ARP로 알아낼까요?",
+      question:"PC C가 PC A와 같은 네트워크(on-link)에 있다면 PC A는 누구의 MAC 주소를 ARP로 알아낼까요?",
       options:[
-        ["pc3","PC3의 MAC 주소"],
+        ["pc3","PC C의 MAC 주소"],
         ["gw","Default Gateway의 MAC 주소"],
-        ["pc2","PC2의 MAC 주소"]
+        ["pc2","PC B의 MAC 주소"]
       ],
       correct:"pc3",
-      explain:"같은 네트워크(on-link) 목적지는 Gateway를 거치지 않습니다. PC1은 최종 목적지 PC3의 MAC 주소를 직접 ARP로 알아냅니다."
+      explain:"같은 네트워크(on-link) 목적지는 Gateway를 거치지 않습니다. PC A는 최종 목적지 PC C의 MAC 주소를 직접 ARP로 알아냅니다."
     },
     hints:[
-      "PC1과 PC3는 모두 192.168.10.0/24에 있습니다.",
+      "PC A와 PC C는 모두 192.168.10.0/24에 있습니다.",
       "같은 네트워크(on-link)라면 Default Gateway를 거치지 않습니다.",
-      "따라서 PC1은 PC3의 IPv4 주소 192.168.10.20에 대한 MAC 주소를 ARP로 확인합니다."
+      "따라서 PC A는 PC C의 IPv4 주소 192.168.10.20에 대한 MAC 주소를 ARP로 확인합니다."
     ]
   },
   {
     dest:"pc2",
     title:"다른 네트워크면 누구를 ARP할까요?",
-    text:"PC2는 192.168.20.0/24에 있습니다. 이번에는 최종 목적지 PC2가 아니라 현재 LAN에서 누구에게 먼저 프레임을 넘기는지 확인합니다.",
+    text:"PC B는 192.168.20.0/24에 있습니다. 이번에는 최종 목적지 PC B가 아니라 현재 LAN에서 누구에게 먼저 프레임을 넘기는지 확인합니다.",
     type:"normal",
     prediction:{
-      question:"PC2가 다른 네트워크에 있다면 PC1은 누구의 MAC 주소를 먼저 ARP로 알아낼까요?",
+      question:"PC B가 다른 네트워크에 있다면 PC A는 누구의 MAC 주소를 먼저 ARP로 알아낼까요?",
       options:[
-        ["pc2","최종 목적지 PC2의 MAC 주소"],
+        ["pc2","최종 목적지 PC B의 MAC 주소"],
         ["gw","Default Gateway 192.168.10.1의 MAC 주소"],
-        ["r2e1","R2 eth1 192.168.20.1의 MAC 주소"]
+        ["r2e1","Router B eth1 192.168.20.1의 MAC 주소"]
       ],
       correct:"gw",
-      explain:"원격 목적지는 PC1의 현재 Ethernet 구간에 직접 있지 않습니다. PC1은 next-hop인 Default Gateway 192.168.10.1의 MAC 주소를 ARP로 확인합니다."
+      explain:"원격 목적지는 PC A의 현재 Ethernet 구간에 직접 있지 않습니다. PC A는 next-hop인 Default Gateway 192.168.10.1의 MAC 주소를 ARP로 확인합니다."
     },
     hints:[
-      "PC1은 192.168.10.0/24, PC2는 192.168.20.0/24입니다.",
+      "PC A는 192.168.10.0/24, PC B는 192.168.20.0/24입니다.",
       "원격 목적지로 갈 때 현재 LAN에서의 next-hop은 Default Gateway입니다.",
-      "PC1이 ARP하는 주소는 PC2가 아니라 192.168.10.1입니다."
+      "PC A가 ARP하는 주소는 PC B가 아니라 192.168.10.1입니다."
     ]
   },
   {
     dest:"pc2",
     title:"Gateway 주소가 틀리면 어디서 실패할까요?",
-    text:"PC1의 Default Gateway가 192.168.10.254로 잘못 설정되어 있습니다. 이 주소는 같은 LAN에 있지만 실제 장비가 사용하지 않습니다.",
+    text:"PC A의 Default Gateway가 192.168.10.254로 잘못 설정되어 있습니다. 이 주소는 같은 LAN에 있지만 실제 장비가 사용하지 않습니다.",
     type:"gw",
     prediction:{
-      question:"PC1이 원격 PC2로 보내려 할 때, 잘못 설정된 Gateway 192.168.10.254 때문에 어떤 일이 먼저 일어날까요?",
+      question:"PC A가 원격 PC B로 보내려 할 때, 잘못 설정된 Gateway 192.168.10.254 때문에 어떤 일이 먼저 일어날까요?",
       options:[
         ["badgw","192.168.10.254를 ARP하지만 Reply가 없어 실패"],
-        ["pc2","PC2 192.168.20.10을 직접 ARP"],
-        ["route","ARP 없이 R2가 자동으로 전달"]
+        ["pc2","PC B 192.168.20.10을 직접 ARP"],
+        ["route","ARP 없이 Router B가 자동으로 전달"]
       ],
       correct:"badgw",
-      explain:"PC1은 설정된 Default Gateway를 next-hop으로 믿습니다. 192.168.10.254를 ARP하지만 그 주소의 소유자가 없으므로 ARP Reply를 받지 못하고 전송이 중단됩니다."
+      explain:"PC A는 설정된 Default Gateway를 next-hop으로 믿습니다. 192.168.10.254를 ARP하지만 그 주소의 소유자가 없으므로 ARP Reply를 받지 못하고 전송이 중단됩니다."
     },
     hints:[
-      "원격 목적지이면 PC1은 설정된 Default Gateway를 next-hop으로 사용합니다.",
+      "원격 목적지이면 PC A는 설정된 Default Gateway를 next-hop으로 사용합니다.",
       "현재 Gateway 값은 192.168.10.254입니다.",
       "LAN A에 그 주소를 가진 장비가 없으므로 ARP Reply를 받을 수 없습니다."
     ]
@@ -73,34 +73,34 @@ const lessons=[
   {
     dest:"pc2",
     title:"Subnet Mask가 틀리면 판단이 어떻게 달라질까요?",
-    text:"PC1의 Prefix가 /16으로 잘못 설정되어 PC2를 같은 네트워크라고 착각합니다. 이번 실습은 잘못된 on-link 판단이 ARP 대상까지 바꾸는 과정을 봅니다.",
+    text:"PC A의 Prefix가 /16으로 잘못 설정되어 PC B를 같은 네트워크라고 착각합니다. 이번 실습은 잘못된 on-link 판단이 ARP 대상까지 바꾸는 과정을 봅니다.",
     type:"mask",
     prediction:{
-      question:"PC1이 /16 때문에 PC2를 on-link로 잘못 판단하면 누구를 ARP할까요?",
+      question:"PC A가 /16 때문에 PC B를 on-link로 잘못 판단하면 누구를 ARP할까요?",
       options:[
-        ["pc2","PC2 192.168.20.10을 직접 ARP"],
+        ["pc2","PC B 192.168.20.10을 직접 ARP"],
         ["gw","Default Gateway 192.168.10.1을 ARP"],
         ["none","ARP를 하지 않고 즉시 실패"]
       ],
       correct:"pc2",
-      explain:"잘못된 /16은 PC2를 같은 네트워크(on-link)로 보이게 합니다. 그래서 PC1은 Gateway가 아니라 PC2의 IPv4 주소를 LAN A에서 직접 ARP하고 Reply를 받지 못합니다."
+      explain:"잘못된 /16은 PC B를 같은 네트워크(on-link)로 보이게 합니다. 그래서 PC A는 Gateway가 아니라 PC B의 IPv4 주소를 LAN A에서 직접 ARP하고 Reply를 받지 못합니다."
     },
     hints:[
-      "PC1의 현재 Prefix는 /16입니다.",
+      "PC A의 현재 Prefix는 /16입니다.",
       "/16 기준에서는 192.168.10.10과 192.168.20.10이 같은 네트워크로 판단됩니다.",
-      "그래서 PC1은 Gateway가 아니라 PC2를 직접 ARP합니다."
+      "그래서 PC A는 Gateway가 아니라 PC B를 직접 ARP합니다."
     ]
   },
   {
     dest:"pc2",
     title:"Gateway가 응답하지 않으면 무엇이 달라질까요?",
-    text:"주소와 Gateway 설정은 정상이고 ARP 대상도 맞습니다. 하지만 R2 eth0가 Down이라 Gateway가 ARP Reply를 보낼 수 없습니다.",
+    text:"주소와 Gateway 설정은 정상이고 ARP 대상도 맞습니다. 하지만 Router B eth0가 Down이라 Gateway가 ARP Reply를 보낼 수 없습니다.",
     type:"link",
     prediction:{
-      question:"ARP 대상 192.168.10.1은 맞지만 R2 eth0가 Down이면 결과는 어떻게 될까요?",
+      question:"ARP 대상 192.168.10.1은 맞지만 Router B eth0가 Down이면 결과는 어떻게 될까요?",
       options:[
         ["noreply","Gateway를 ARP하지만 Reply가 없어 실패"],
-        ["pc2","PC2를 대신 직접 ARP"],
+        ["pc2","PC B를 대신 직접 ARP"],
         ["success","기존 설정만으로 정상 통신"]
       ],
       correct:"noreply",
@@ -108,7 +108,7 @@ const lessons=[
     },
     hints:[
       "이번 실습의 ARP Target은 정상적으로 192.168.10.1입니다.",
-      "문제는 주소가 아니라 R2 eth0의 상태입니다.",
+      "문제는 주소가 아니라 Router B eth0의 상태입니다.",
       "Gateway 인터페이스가 Down이면 ARP Reply를 보낼 수 없습니다."
     ]
   }
@@ -121,19 +121,50 @@ const state={
   r2e0Ip:GOOD.r2e0Ip,r2e0Mask:GOOD.r2e0Mask,eth0:true,
   r2e1Ip:GOOD.r2e1Ip,r2e1Mask:GOOD.r2e1Mask,eth1:true,
   arp:{},pc2Arp:{},pc3Arp:{},r2Arp:{},busy:false,last:null,snapshots:[],snapshotIndex:-1,
-  completed:Array(5).fill(false),failureSeen:Array(5).fill(false),hintLevel:0,openDevice:null,
+  completed:Array(5).fill(false),failureSeen:Array(5).fill(false),recovered:Array(5).fill(false),answers:Array(5).fill(null),hintLevel:0,openDevice:null,
+  runGeneration:0,experiment:false,runIsStandard:false,lessonBaseline:null,
   predictionChoice:null,predictionLocked:false,
   cables:{pc1sw1:true,sw1pc3:true,sw1r2:true,r2sw2:true,sw2pc2:true}
 };
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Every animation wait belongs to the current run. Cancelling rejects all branches,
+// so an old ARP/ICMP continuation cannot write into a newly selected lesson.
+const pendingRunWaits=new Set();
+const sleep=ms=>new Promise((resolve,reject)=>{
+  const wait={timer:null,reject};
+  wait.timer=setTimeout(()=>{pendingRunWaits.delete(wait);resolve()},ms);
+  pendingRunWaits.add(wait);
+});
+function cancelCurrentRun(){
+  state.runGeneration++;
+  for(const wait of pendingRunWaits){
+    clearTimeout(wait.timer);
+    wait.reject(Object.assign(new Error("Simulation cancelled"),{name:"AbortError"}));
+  }
+  pendingRunWaits.clear();
+  state.busy=false;
+}
+function configurationSignature(){
+  const keys=["dest","pc1Ip","mask","gw","pc3Ip","pc3Mask","pc3Gw","pc2Ip","pc2Mask","pc2Gw","r2e0Ip","r2e0Mask","r2e1Ip","r2e1Mask","eth0","eth1"];
+  return JSON.stringify([...keys.map(key=>state[key]),...Object.values(state.cables)]);
+}
+function invalidateExperiment(){
+  cancelCurrentRun();
+  state.experiment=true;
+  state.runIsStandard=false;
+  state.last=null;
+  resetFlow();resetPacket();resetPacketStudy();renderArp();
+  setExplain("조건이 변경되었습니다. 자유 실험을 실행하면 현재 목적지와 설정의 실제 결과를 확인할 수 있습니다.");
+  $("#recoveryNudge").classList.remove("show");
+  renderPrediction();renderLessonStatus();
+}
 
 function ipToInt(ip){return ip.split(".").reduce((a,o)=>(a<<8)+(+o),0)>>>0}
 function maskInt(p){return p===0?0:(0xffffffff<<(32-p))>>>0}
 function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join(".")}
 function networkAddress(ip,p){return `${intToIp((ipToInt(ip)&maskInt(p))>>>0)}/${p}`}
 function sameSubnet(a,b,p){const m=maskInt(p);return (ipToInt(a)&m)===(ipToInt(b)&m)}
-function log(t){const o=$("#termOut");o.textContent+=(o.textContent?"\n":"")+t;o.scrollTop=o.scrollHeight}
+function log(t){t=String(t).replace(/PC A|PC B|PC C|Router B|Switch A|Switch B/g,name=>({"PC A":"PC1","PC B":"PC2","PC C":"PC3","Router B":"R2","Switch A":"SW1","Switch B":"SW2"})[name]);const o=$("#termOut");o.textContent+=(o.textContent?"\n":"")+t;o.scrollTop=o.scrollHeight}
 function isValidIp(ip){
   const p=String(ip).trim().split(".");
   return p.length===4 && p.every(x=>/^\d+$/.test(x) && +x>=0 && +x<=255);
@@ -162,9 +193,9 @@ function gatewayLooksValid(ip,prefix,gw,routerIp){
   return isUnicastIpv4(gw) && sameSubnet(ip,gw,prefix) && gw===routerIp;
 }
 function hostByKey(key){
-  if(key==="pc1")return {key:"pc1",name:"PC1",ip:state.pc1Ip,prefix:state.mask,gw:state.gw,mac:MAC.pc1,segment:"A",accessLink:"pc1sw1"};
-  if(key==="pc3")return {key:"pc3",name:"PC3",ip:state.pc3Ip,prefix:state.pc3Mask,gw:state.pc3Gw,mac:MAC.pc3,segment:"A",accessLink:"sw1pc3"};
-  if(key==="pc2")return {key:"pc2",name:"PC2",ip:state.pc2Ip,prefix:state.pc2Mask,gw:state.pc2Gw,mac:MAC.pc2,segment:"B",accessLink:"sw2pc2"};
+  if(key==="pc1")return {key:"pc1",name:"PC A",ip:state.pc1Ip,prefix:state.mask,gw:state.gw,mac:MAC.pc1,segment:"A",accessLink:"pc1sw1"};
+  if(key==="pc3")return {key:"pc3",name:"PC C",ip:state.pc3Ip,prefix:state.pc3Mask,gw:state.pc3Gw,mac:MAC.pc3,segment:"A",accessLink:"sw1pc3"};
+  if(key==="pc2")return {key:"pc2",name:"PC B",ip:state.pc2Ip,prefix:state.pc2Mask,gw:state.pc2Gw,mac:MAC.pc2,segment:"B",accessLink:"sw2pc2"};
   return null;
 }
 function selectedDestination(){return hostByKey(state.dest)}
@@ -190,7 +221,7 @@ function physicalHostByIp(ip,segment){
   return ["pc1","pc3","pc2"].map(hostByKey).find(h=>h&&h.segment===segment&&h.ip===ip)||null;
 }
 function lanAEndpointByIp(ip){
-  if(ip===state.r2e0Ip)return {key:"r2",name:"R2 eth0",ip:state.r2e0Ip,mac:MAC.r2e0,segment:"A",accessLink:"sw1r2",up:state.eth0};
+  if(ip===state.r2e0Ip)return {key:"r2",name:"Router B eth0",ip:state.r2e0Ip,mac:MAC.r2e0,segment:"A",accessLink:"sw1r2",up:state.eth0};
   return physicalHostByIp(ip,"A");
 }
 function routerInterfaceForSegment(segment){
@@ -242,31 +273,31 @@ function renderArp(){
     body.innerHTML=rows.length?rows.map(([ip,mac])=>`<tr><td>${ip}</td><td style="font-family:monospace">${mac}</td><td>${meaningFn(ip)}</td></tr>`).join("")
       :`<tr><td colspan="3" style="color:#7a90a3">${emptyText}</td></tr>`;
   };
-  renderBody("#arpBody",Object.entries(state.arp),"아직 PC1이 학습한 ARP 항목이 없습니다.",ip=>
-    ip===state.r2e0Ip?"원격 목적지로 보낼 때 PC1이 사용할 R2 eth0":
-    ip===state.pc3Ip?"LAN A의 PC3":
-    "PC1이 LAN A에서 학습한 이웃");
-  renderBody("#pc3ArpBody",Object.entries(state.pc3Arp),"아직 PC3가 학습한 ARP 항목이 없습니다.",ip=>
-    ip===state.pc1Ip?"LAN A의 PC1":
-    ip===state.r2e0Ip?"PC3가 remote Reply에 사용할 R2 eth0":
-    "PC3가 LAN A에서 학습한 이웃");
-  renderBody("#pc2ArpBody",Object.entries(state.pc2Arp),"아직 PC2가 학습한 ARP 항목이 없습니다.",ip=>
-    ip===state.r2e1Ip?"PC2가 remote Reply에 사용할 R2 eth1":
-    ip===state.pc1Ip?"PC2가 on-link로 판단한 PC1":
-    "PC2가 LAN B에서 학습한 이웃");
-  renderBody("#r2ArpBody",Object.entries(state.r2Arp),"아직 R2가 학습한 ARP 항목이 없습니다.",ip=>
-    ip===state.pc1Ip?"LAN A의 PC1":
-    ip===state.pc2Ip?"LAN B의 PC2":
-    ip===state.pc3Ip?"LAN A의 PC3":
-    "R2가 출력 링크에서 학습한 이웃");
+  renderBody("#arpBody",Object.entries(state.arp),"아직 PC A가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.r2e0Ip?"원격 목적지로 보낼 때 PC A가 사용할 Router B eth0":
+    ip===state.pc3Ip?"LAN A의 PC C":
+    "PC A가 LAN A에서 학습한 이웃");
+  renderBody("#pc3ArpBody",Object.entries(state.pc3Arp),"아직 PC C가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.pc1Ip?"LAN A의 PC A":
+    ip===state.r2e0Ip?"PC C가 remote Reply에 사용할 Router B eth0":
+    "PC C가 LAN A에서 학습한 이웃");
+  renderBody("#pc2ArpBody",Object.entries(state.pc2Arp),"아직 PC B가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.r2e1Ip?"PC B가 remote Reply에 사용할 Router B eth1":
+    ip===state.pc1Ip?"PC B가 on-link로 판단한 PC A":
+    "PC B가 LAN B에서 학습한 이웃");
+  renderBody("#r2ArpBody",Object.entries(state.r2Arp),"아직 Router B가 학습한 ARP 항목이 없습니다.",ip=>
+    ip===state.pc1Ip?"LAN A의 PC A":
+    ip===state.pc2Ip?"LAN B의 PC B":
+    ip===state.pc3Ip?"LAN A의 PC C":
+    "Router B가 출력 링크에서 학습한 이웃");
 }
 
 const LINK_UI={
-  pc1sw1:{path:"pathPc1Sw1",badge:"badgePc1Sw1",text:"badgePc1Sw1Text",brk:"breakPc1Sw1",label:"PC1↔SW1",stop:[292,239]},
-  sw1pc3:{path:"pathPc3Sw1",badge:"badgePc3Sw1",text:"badgePc3Sw1Text",brk:"breakPc3Sw1",label:"SW1↔PC3",stop:[292,379]},
-  sw1r2:{path:"pathSw1R2",badge:"badgeSw1R2",text:"badgeSw1R2Text",brk:"breakSw1R2",label:"SW1↔R2",stop:[566,308]},
-  r2sw2:{path:"pathR2Sw2",badge:"badgeR2Sw2",text:"badgeR2Sw2Text",brk:"breakR2Sw2",label:"R2↔SW2",stop:[852,308]},
-  sw2pc2:{path:"pathSw2Pc2",badge:"badgeSw2Pc2",text:"badgeSw2Pc2Text",brk:"breakSw2Pc2",label:"SW2↔PC2",stop:[1126,308]}
+  pc1sw1:{path:"pathPc1Sw1",badge:"badgePc1Sw1",text:"badgePc1Sw1Text",brk:"breakPc1Sw1",label:"PC A↔Switch A",stop:[292,239]},
+  sw1pc3:{path:"pathPc3Sw1",badge:"badgePc3Sw1",text:"badgePc3Sw1Text",brk:"breakPc3Sw1",label:"Switch A↔PC C",stop:[292,379]},
+  sw1r2:{path:"pathSw1R2",badge:"badgeSw1R2",text:"badgeSw1R2Text",brk:"breakSw1R2",label:"Switch A↔Router B",stop:[566,308]},
+  r2sw2:{path:"pathR2Sw2",badge:"badgeR2Sw2",text:"badgeR2Sw2Text",brk:"breakR2Sw2",label:"Router B↔Switch B",stop:[852,308]},
+  sw2pc2:{path:"pathSw2Pc2",badge:"badgeSw2Pc2",text:"badgeSw2Pc2Text",brk:"breakSw2Pc2",label:"Switch B↔PC B",stop:[1126,308]}
 };
 function effectiveLinkUp(key){
   if(!state.cables[key])return false;
@@ -305,6 +336,7 @@ function renderLinks(){
   });
 }
 function toggleCable(key){
+  invalidateExperiment();
   state.cables[key]=!state.cables[key];
   state.last=null;resetPacketStudy();renderArp();renderLinks();renderLessonStatus();
   log(`${LINK_UI[key].label} Cable → ${state.cables[key]?"UP":"DOWN"}`);

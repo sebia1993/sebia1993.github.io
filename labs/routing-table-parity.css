@@ -1,5 +1,6 @@
 #simVisual .topology-scroll{overflow:visible;min-width:0}
 #simVisual .topology-stage{max-width:100%}
+#simVisual .route-interface-state{position:absolute;left:50%;top:-25px;transform:translateX(-50%);padding:3px 7px;border:1px solid #bd853b;border-radius:6px;background:#fff4df;color:#79501d;font-size:11px;font-weight:800;white-space:nowrap}
 #simVisual .route-packet{position:absolute;z-index:12;transform:translate(-50%,-50%);padding:5px 9px;border-radius:99px;background:#287bca;color:#fff;font-size:12px;font-weight:800;box-shadow:0 0 0 5px #287bca20}
 #simVisual .route-row.route-pending{opacity:.18}
 #simVisual .route-row.route-candidate,#simVisual .route-row.route-current{outline:2px solid #bc8b39;outline-offset:-2px;background:#fff7e7}
@@ -10,8 +11,11 @@
  #simVisual .node small{font-size:11px}
  #simVisual .node.pc1{left:50%;top:14%}
  #simVisual .node.r1{left:50%;top:45%}
+ #simVisual .node.pc1 b,#simVisual .node.r1 b,#simVisual .node.pc1 small,#simVisual .node.r1 small{position:absolute;left:calc(50% + 39px);width:95px;margin:0;text-align:left}
+ #simVisual .node.pc1 b,#simVisual .node.r1 b{top:0}
+ #simVisual .node.pc1 small,#simVisual .node.r1 small{top:23px}
  #simVisual .node.r2{left:24%;top:83%}
  #simVisual .node.r3{left:76%;top:83%}
- #simVisual .stop-marker{left:50%;top:59%;transform:translateX(-50%);max-width:90%;white-space:normal}
+ #simVisual .stop-marker{left:50%;top:59%;transform:translateX(-50%);width:max-content;max-width:90%;white-space:normal;word-break:keep-all;text-align:center}
  #simVisual .route-overlay{margin-top:12px}
 }

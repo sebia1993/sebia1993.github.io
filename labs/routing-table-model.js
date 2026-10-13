@@ -112,6 +112,7 @@ function resetTopology(){
   ["link-pc-r1","link-r1-r2","link-r1-r3"].forEach(id=>$(id).setAttribute("class","net-link"));
   ["node-pc1","node-r1","node-r2","node-r3"].forEach(id=>$(id).className="node "+id.replace("node-",""));
   $("stopMarker").style.display="none";
+  $("routeInterfaceState").hidden=true;
   $("eventKind").textContent="IDLE";
   $("eventText").textContent="예상을 선택한 뒤 실행하면 현재 Route 판단과 Packet Path를 보여줍니다.";
   $("lookupDest").textContent="대기";
@@ -119,6 +120,11 @@ function resetTopology(){
 }
 function renderRouteTable(){
   $("routeTable").innerHTML=routeRows(lessons[index].routeMode).map(r=>`<div class="route-row ${r.chosen?"chosen":""} ${r.removed?"removed":""}"><strong>${r.p}</strong><span>${r.n}</span></div>`).join("");
+}
+function showRouteInterfaceDown(){
+  // The recorded fault is Router A's local E0/2 state, not Router C's health.
+  $("link-r1-r3").setAttribute("class","net-link");
+  $("routeInterfaceState").hidden=false;
 }
 function applyTopology(l){
   $("lookupDest").textContent="Destination: "+l.dest;
@@ -139,7 +145,7 @@ function applyTopology(l){
       $("eventKind").textContent="RECOVERY";$("eventText").textContent="E0/2가 복구되면서 Connected/Default Route가 다시 설치되고 R3 방향 3/3 통신이 복구됩니다.";
       $("lookupDecision").textContent="Default restored → R3";
     }else{
-      $("link-r1-r3").setAttribute("class","net-link down");$("node-r3").classList.add("down");$("stopMarker").style.display="block";
+      showRouteInterfaceDown();$("stopMarker").style.display="block";
     }
   }
 }
@@ -153,7 +159,8 @@ adapter.presentation={names:{R1:'Router A',R2:'Router B',R3:'Router C',PC1:'PC A
 ]};
 const routeStage=$('topologyStage');
 const routeMarker=document.createElement('span');routeMarker.className='route-packet';routeMarker.textContent='IPv4';routeMarker.hidden=true;routeStage.append(routeMarker);
-function routeCenter(id){const a=routeStage.getBoundingClientRect(),b=$(id).getBoundingClientRect();return{x:b.left-a.left+b.width/2,y:b.top-a.top+b.height/2,w:b.width,h:b.height};}
+const routeInterfaceState=document.createElement('span');routeInterfaceState.id='routeInterfaceState';routeInterfaceState.className='route-interface-state';routeInterfaceState.textContent='E0/2 · DOWN';routeInterfaceState.hidden=true;$('node-r1').append(routeInterfaceState);
+function routeCenter(id){const a=routeStage.getBoundingClientRect(),node=$(id),b=(node.querySelector('.node-icon')||node).getBoundingClientRect();return{x:b.left-a.left-routeStage.clientLeft+b.width/2,y:b.top-a.top-routeStage.clientTop+b.height/2,w:b.width,h:b.height};}
 function routeLayout(){if(!routeStage.clientWidth)return;routeStage.querySelector('svg').setAttribute('viewBox',`0 0 ${routeStage.clientWidth} ${routeStage.clientHeight}`);[['link-pc-r1','node-pc1','node-r1'],['link-r1-r2','node-r1','node-r2'],['link-r1-r3','node-r1','node-r3']].forEach(([id,a,b])=>{const p=routeCenter(a),q=routeCenter(b),dx=q.x-p.x,dy=q.y-p.y;const edge=(r,z)=>{const t=Math.min(r.w/2/(Math.abs(dx)||1),r.h/2/(Math.abs(dy)||1));return{x:r.x+z*dx*t,y:r.y+z*dy*t};};const f=edge(p,1),t=edge(q,-1);Object.entries({x1:f.x,y1:f.y,x2:t.x,y2:t.y}).forEach(([k,v])=>$(id).setAttribute(k,v));});}
 function routeMove(a,b,p){routeLayout();const f=routeCenter(a),t=routeCenter(b);routeMarker.hidden=false;routeMarker.style.left=(f.x+(t.x-f.x)*p)+'px';routeMarker.style.top=(f.y+(t.y-f.y)*p)+'px';}
 function routeNeutral(){resetTopology();routeMarker.hidden=true;renderRouteTable();all('#routeTable .route-row').forEach(n=>n.classList.remove('chosen'));$('lookupDest').textContent='목적지: '+lessons[index].dest;$('lookupDecision').textContent='경로 비교 대기';routeLayout();}
@@ -172,12 +179,13 @@ adapter.buildPlan=function(i,mode='normal'){
  ...['10.10.10.0/24 · E0/0','192.0.2.0/30 · E0/1','192.0.2.4/30 · E0/2'].map((prefix,n)=>event(prefix+' Connected Route','활성 Interface 주소에서 해당 네트워크의 Connected Route를 확인합니다.',1230,()=>{rows()[n].classList.remove('route-pending');rows()[n].classList.add('chosen');$('node-r1').classList.add('active');$('lookupDecision').textContent=prefix;})),
  event('Interface 세 개와 Connected 경로를 대조합니다',l.reason,1230,()=>{rows().forEach(r=>r.classList.remove('route-pending'));routeDisplay();})];
  const plan=[event('PC A의 목적지 IP를 확인합니다','목적지 '+l.dest+'인 패킷이 Router A로 들어옵니다. 아직 출력 방향은 정하지 않습니다.',1650,()=>{routeNeutral();$('link-pc-r1').setAttribute('class','net-link ingress');},p=>routeMove('node-pc1','node-r1',Math.max(0,Math.min(1,(p*1650-1050)/420))))];
- if(l.routeMode==='failure')plan.push(event('장애로 제거된 경로를 확인합니다','E0/2 장애로 192.0.2.4/30과 Default Route가 제거됐습니다. 나머지 경로는 그대로입니다.',1470,()=>{routeMarker.hidden=true;renderRouteTable();$('link-r1-r3').setAttribute('class','net-link down');rows()[2].classList.add('route-current');rows()[4].classList.add('route-current');}));
+ if(l.routeMode==='failure')plan.push(event('장애로 제거된 경로를 확인합니다','Router A의 E0/2 장애로 192.0.2.4/30과 Default Route가 제거됐습니다. Router C 전체의 장애를 뜻하지 않습니다.',1470,()=>{routeMarker.hidden=true;renderRouteTable();showRouteInterfaceDown();rows()[2].classList.add('route-current');rows()[4].classList.add('route-current');}));
  plan.push(event('목적지에 일치하는 Prefix를 찾습니다',l.routeMode==='r3'||l.routeMode==='failure'?'203.0.113.0/24는 이 목적지와 일치하지 않습니다. Default Route의 사용 가능 여부를 확인합니다.':'203.0.113.0/24와 0.0.0.0/0이 모두 목적지에 일치합니다.',1470,()=>{routeMarker.hidden=true;rows().forEach(r=>r.classList.remove('chosen','route-current'));if(l.routeMode==='r2'||l.routeMode==='lpm'){rows()[3].classList.add('route-candidate');rows()[4].classList.add('route-candidate');}else rows()[4].classList.add('route-candidate');$('lookupDecision').textContent='목적지와 Prefix를 비교합니다';}));
  plan.push(event(l.routeMode==='failure'?'사용 가능한 일치 경로가 없습니다':'가장 긴 일치 Prefix를 선택합니다',l.routeMode==='failure'?'남아 있는 /24는 일치하지 않고 /0은 제거됐습니다. 다른 Router로 임의 전달하지 않습니다.':l.routeMode==='r3'?'더 구체적인 일치 경로가 없으므로 사용 가능한 /0이 선택됩니다.':'/24가 /0보다 구체적입니다. Router B 방향의 Next Hop 192.0.2.2를 선택합니다.',1050,()=>{rows().forEach(r=>r.classList.remove('route-candidate'));const n=l.routeMode==='failure'?-1:l.routeMode==='r3'?4:3;if(n>=0)rows()[n].classList.add('chosen');$('lookupDecision').textContent=l.routeMode==='failure'?'사용 가능한 경로 없음':l.routeMode==='r3'?'Default /0 선택':'Longest Prefix Match: /24 선택';}));
  const dest=l.routeMode==='r3'?'node-r3':'node-r2';plan.push(event(l.routeMode==='failure'?'Router A에서 전달을 중단합니다':'선택한 Next Hop으로 전달합니다',l.eventText,1650,()=>{routeDisplay();routeMarker.hidden=true;},l.routeMode==='failure'?undefined:p=>routeMove('node-r1',dest,Math.max(0,Math.min(1,(p*1650-1050)/420)))));return plan;
 };
-new ResizeObserver(routeLayout).observe(routeStage);
+const routeResizeObserver=new ResizeObserver(routeLayout);routeResizeObserver.observe(routeStage);routeStage.querySelectorAll('.node').forEach(node=>routeResizeObserver.observe(node));
+if(document.fonts)document.fonts.ready.then(routeLayout);
 
 NetworkSimulator.mount(adapter);
 })();

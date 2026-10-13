@@ -259,7 +259,7 @@ adapter.presentation = {
     },
     {
       "title": "Native VLAN 99는 Trunk에서 어떻게 보일까요?",
-      "brief": "학습 페이지의 선택 자료와 같은 Cisco 기본 조건입니다. native tagging은 비활성입니다.",
+      "brief": "학습 페이지와 같은 Cisco 기본 조건입니다. native tagging은 비활성입니다.",
       "hints": [
         "Non-native VLAN과 Native VLAN의 조건을 구분하세요.",
         "이번 구성에서 실제 Tag 유무를 관찰합니다."

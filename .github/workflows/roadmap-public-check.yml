@@ -69,7 +69,7 @@ jobs:
                 "$PUBLIC_ORIGIN/labs/icmp-troubleshooting-simulator.html?qa=$GITHUB_SHA-$attempt" \
                 --output /tmp/roadmap-public-page.html; then
               actual=$(sha256sum /tmp/roadmap-public-session.js | cut -d ' ' -f 1)
-              if [ "$actual" = "$expected" ] && grep -q '20261007-guide-aligned-v2' /tmp/roadmap-public-page.html; then
+              if [ "$actual" = "$expected" ] && grep -q '20261013-audit-v1' /tmp/roadmap-public-page.html; then
                 echo 'Pages is serving the expected shared controller and page version.'
                 exit 0
               fi
@@ -84,12 +84,12 @@ jobs:
         env:
           BASE_URL: https://sebia1993.github.io
           TOPICS: ${{ matrix.topics }}
-          LAB_UI_VERSION: 20261007-guide-aligned-v2
+          LAB_UI_VERSION: 20261013-audit-v1
           SCREENSHOTS: '0'
-          QA_RUN_TAG: guide-aligned-v2-public-${{ matrix.group }}
+          QA_RUN_TAG: audit-v1-public-${{ matrix.group }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: roadmap-public-acceptance-report-${{ matrix.group }}
-          path: test-results/roadmap-simulators/guide-aligned-v2-public-${{ matrix.group }}/report.json
+          path: test-results/roadmap-simulators/audit-v1-public-${{ matrix.group }}/report.json
           retention-days: 7

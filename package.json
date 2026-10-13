@@ -5,7 +5,9 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:site": "python3 tests/check_site.py",
-    "test:browser": "node tests/ip-network-sim.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ethernet-mac-final.mjs && node tests/roadmap-simulators.mjs && node tests/physical-network-browser.mjs && node tests/physical-network-accessibility.mjs && node tests/physical-network-sync-browser.mjs"
+    "test:browser": "node tests/ip-network-sim.mjs && node tests/ip-concept-visual.mjs && node tests/browser.mjs && node tests/ethernet-mac-final.mjs && node tests/roadmap-simulators.mjs && node tests/physical-network-browser.mjs && node tests/physical-network-accessibility.mjs && node tests/physical-network-sync-browser.mjs && npm run test:audit-browser",
+    "test:audit-browser": "node tests/session-regressions.mjs && node tests/stage0-standalone.mjs && node tests/arp-audit-browser.mjs && node tests/campus-services-browser.mjs && node tests/stage3-4-browser.mjs && node tests/stage5-browser.mjs && node tests/stage67-browser.mjs",
+    "test:public-audit": "node tests/public-roadmap-audit.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

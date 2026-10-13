@@ -78,7 +78,7 @@ adapter.presentation={guideDifferences:[{name:'Switch A',reason:'가상 Gateway�
  {title:'어떤 조건으로 Active를 확인할까요?',brief:'Router A의 Priority 110과 Router B의 100을 비교합니다. 이번 HSRPv2의 Hello 관측과 안정화 후 역할을 확인하세요.',hints:['단말이 두 Router 중 하나를 직접 고르는 모델이 아닙니다.','이번 실습은 양쪽 Preemption이 활성화돼 있습니다.','Priority와 Hello 관측을 역할 상태와 함께 봅니다.']},
  {title:'Active 장애 때 단말의 Gateway도 바뀔까요?',brief:'Router A의 LAN/FHRP 참여만 중단합니다. 같은 VIP·Virtual MAC과 바뀌는 전달 담당을 구분하세요.',hints:['가상 Gateway와 물리 Router는 다른 개념입니다.','Router B는 같은 HSRP 그룹에 참여합니다.','Echo Request가 나가는 상위 링크를 확인하세요.']},
  {title:'Router A가 돌아오면 역할을 되찾을까요?',brief:'Router B가 Active인 장애 후 상태에서 시작합니다. Router A의 Priority와 Preemption 조건을 보고 복구를 관찰합니다.',hints:['복구됐다는 사실만으로 역할 복귀를 단정하지 않습니다.','이번 조건은 Router A의 더 높은 Priority와 Preemption 활성화입니다.','PC A의 Gateway를 수동 변경하는 과정은 없습니다.']},
- {title:'LAN은 Up인데 상위 링크만 끊기면?',brief:'Router A의 단말 LAN은 유지하고 상위 링크만 끊습니다. Track 상태 → Priority 변화 → 역할 전환 순서로 확인합니다.',hints:['단말 쪽 Interface는 계속 Up입니다.','Track에 연결된 감소값은 20입니다.','110에서 20을 뺀 값과 Router B의 100을 비교하세요.']},
+ {title:'LAN은 Up인데 상위 링크만 끊기면?',brief:'Tracking은 상위 링크 상태를 Priority에 반영하는 기능입니다. 단말 LAN은 유지한 채 Router A의 상위 링크만 끊고, 110에서 감소값 20을 뺀 90을 Router B의 100과 비교합니다. 양쪽 Preemption은 활성화돼 있습니다.',hints:['단말 쪽 Interface는 계속 Up입니다.','Track에 연결된 감소값은 20입니다.','110에서 20을 뺀 값과 Router B의 100을 비교하세요.']},
  {title:'VRRPv2에서도 가상 Gateway는 유지될까요?',brief:'기존 HSRP를 제거하고 VRRPv2로 따로 검증한 조건입니다. VRRP의 VIP·MAC과 Master 전환을 확인합니다.',hints:['이번 실제 검증은 VRRPv2입니다.','HSRP와 VRRP의 Virtual MAC을 서로 같다고 가정하지 마세요.','학습 페이지의 현행 VRRPv3 설명과 기존 VRRPv2 실측을 구분합니다.']}
 ]};
 const fhrpTopology=document.querySelector('#simVisual .topology');
