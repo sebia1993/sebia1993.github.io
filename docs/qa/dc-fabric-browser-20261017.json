@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0",
+  "topicId": "dc-fabric",
+  "qaScope": "Concept Guide browser rendering and interaction only",
+  "qaStatus": "PASS",
+  "actualNetworkValidation": "NOT_RUN",
+  "windowsRuntimeValidation": "NOT_RUN",
+  "hostPlatform": "macOS",
+  "browser": "Chromium 151.0.7922.34",
+  "baseline": {
+    "commit": "2aa01da3c8a1a9e14c74e1db09e0d6c390448858",
+    "startedAt": "2026-10-16T14:59:48.397Z",
+    "finishedAt": "2026-10-16T15:01:04.180Z",
+    "htmlSha256": "29de8181cecef0c2755b4c584a76176373ed1cb7b446c082cee7b23ff808b519",
+    "localAndPublicHtmlIdentical": true,
+    "cases": [
+      {
+        "target": "local",
+        "viewport": {
+          "width": 360,
+          "height": 800
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "public",
+        "viewport": {
+          "width": 360,
+          "height": 800
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "public",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "public",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "public",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      }
+    ]
+  },
+  "statusNoteRevision": {
+    "revision": "working tree after browser QA status note addition",
+    "startedAt": "2026-10-16T15:12:07.117Z",
+    "finishedAt": "2026-10-16T15:12:41.091Z",
+    "htmlSha256": "edd0174b5fec307f5f942ba23e577154da138ebaa52066eb819ee4c358bc7685",
+    "cases": [
+      {
+        "target": "local",
+        "viewport": {
+          "width": 360,
+          "height": 800
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      },
+      {
+        "target": "local",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "result": "PASS",
+        "horizontalOverflow": false,
+        "consoleOrPageErrorCount": 0,
+        "failedRequestCount": 0
+      }
+    ],
+    "publicDeploymentVerification": "NOT_RUN"
+  },
+  "checks": [
+    "Explanation and source disclosure mouse and keyboard operation",
+    "Skip link and main focus",
+    "Section anchor navigation",
+    "Concept to roadmap and back",
+    "No horizontal overflow with disclosures closed or expanded",
+    "No console errors, page errors or failed requests",
+    "Single h1 and draft status retained",
+    "Screenshot review of mobile and desktop key sections"
+  ],
+  "supplementalReflow": {
+    "viewport": {
+      "width": 683,
+      "height": 384
+    },
+    "result": "PASS",
+    "scope": "CSS reflow approximation of 200 percent at 1366x768; browser zoom UI not operated"
+  },
+  "limitations": [
+    "Browser QA does not validate DC-01 through DC-06 CLI or packet behavior.",
+    "This browser run did not perform Windows runtime verification.",
+    "The page retains draft status and the actual claims remain NOT_RUN.",
+    "Public verification of the new status note is separate from the baseline public page check."
+  ]
+}
