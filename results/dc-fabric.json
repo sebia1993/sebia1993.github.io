@@ -14,19 +14,20 @@
   "runId": null,
   "startedAt": null,
   "finishedAt": null,
-  "runtime_model": null,
-  "runtime_reasoning_effort": null,
-  "runtime_gate": "UNVERIFIED",
-  "runtime_gate_reason": "RUNTIME_UNVERIFIED: 승인된 실제 검증 Runtime의 Model/Reasoning Effort를 확인할 수 없으며 연결된 PNETLab 세션도 없다.",
+  "runtime_model": "gpt-6-astra",
+  "runtime_reasoning_effort": "ultra",
+  "runtime_gate": "PASS",
+  "runtime_gate_reason": "현재 Codex turn_context에서 GPT-6 Astra / Ultra를 확인했다. Runtime Gate 통과와 실제 Lab 실행 가능 여부는 별개다.",
   "runtimeRequirement": {
     "model": "GPT-6 Astra",
     "minimumReasoningEffort": "High",
     "source": "Network-Lab-Validation-Standard-SKILL.md §0"
   },
   "blockedReasons": [
-    "RUNTIME_UNVERIFIED",
-    "NO_CONNECTED_APPROVED_LAB_SESSION",
-    "NO_REUSABLE_DC_CLI_PCAP_EVIDENCE"
+    "CISCO_VXLAN_EVPN_PLATFORM_NOT_READY",
+    "PNET_KVM_UNAVAILABLE",
+    "PNET_MEMORY_INSUFFICIENT_FOR_NEXUS_LITE_CANDIDATE",
+    "NO_DC_CLI_PCAP_EVIDENCE"
   ],
   "validationMode": "CONCEPT_VALIDATION",
   "failureRecoveryRequired": false,
@@ -35,7 +36,7 @@
   "conceptDraft": "labs/dc-fabric.html",
   "environment": {
     "kind": "planned-isolated-pnetlab",
-    "executionHost": null,
+    "executionHost": "Windows PNETLab via Windows App / VMware console (preflight only)",
     "platform": null,
     "version": null,
     "verified": false,
@@ -271,13 +272,71 @@
     "status": "NOT_RUN",
     "evidencePrivacyReviewed": false,
     "learnerExplanationReviewed": false,
-    "contentQaReviewed": false
+    "contentQaReviewed": true
   },
   "limitations": [
     "실제 네트워크 검증을 수행하지 않았다. Expected는 사전 계획이며 Actual이나 Evidence가 아니다.",
     "HTML·브라우저 QA는 Runtime Gate나 실제 CLI/PCAP 검증을 대체하지 않는다.",
-    "승인 Runtime과 연결된 Lab, 지원 Cisco 플랫폼·버전 및 실제 명령/Interface 계획이 필요하다.",
+    "Runtime과 Windows/PNET 콘솔 접근은 확인했다. 지원 Cisco VXLAN/EVPN 이미지, KVM 및 충분한 메모리를 확보한 뒤 Node Boot와 Capture를 확인해야 한다.",
     "단일 VNI·같은 서브넷·Known unicast 범위이며 BUM, IRB, Multihoming, 보안 격리, 장애 수렴 및 처리 성능은 검증하지 않는다.",
     "실제 Claim 검증과 Evidence 검토 전 콘텐츠를 최종 검증본으로 승격하지 않는다."
-  ]
+  ],
+  "preflight": {
+    "checkedAt": "2026-10-16T15:09:25Z",
+    "timezone": "Asia/Seoul",
+    "status": "BLOCKED",
+    "networkRunStarted": false,
+    "observationMethod": "Commands executed in the PNETLab guest console through Windows App; output read from the remote screen.",
+    "runtimeGate": "PASS",
+    "runtimeCheckedAt": "2026-10-16T15:02:00.639170+00:00",
+    "windowsSession": "ACCESSIBLE",
+    "pnetVm": "RESUMED_AND_CONSOLE_LOGIN_VERIFIED",
+    "resources": {
+      "vcpus": 4,
+      "memoryMiB": 7965,
+      "availableMemoryMiB": 4421,
+      "kvmDevicePresent": false,
+      "cpuVmxSvmMatchingLines": 0
+    },
+    "imageInventory": {
+      "qemuDirectoryCount": 9,
+      "qemuVendors": [
+        "Aruba"
+      ],
+      "nexusImageInstalled": false,
+      "ciscoIolImagesPresent": true,
+      "ciscoIolVxlanEvpnCapability": "UNVERIFIED"
+    },
+    "candidateResourceComparison": {
+      "platform": "Nexus 9300v Lite, NX-OS 10.5(x) documentation only",
+      "selectedOrBooted": false,
+      "minimumBootRamPerNodeGB": 4.5,
+      "minimumVcpusPerNode": 2,
+      "twoLeafMinimumBootRamGB": 9,
+      "note": "Two Leaf nodes alone exceed the current PNET RAM allocation; Spine/hosts/PNET overhead is additional. Basic boot minimum is not a proven running-lab requirement."
+    },
+    "report": "docs/qa/dc-fabric-preflight-20261017.md",
+    "evidenceBoundary": "Guest preflight commands and screen observations only. No Cisco DC scenario, topology, EVPN route, VXLAN packet, or network PCAP was produced.",
+    "resumeRequirements": [
+      "Prepare a licensed Cisco image/version supporting VXLAN, BGP EVPN and ECMP.",
+      "Expose nested virtualization/KVM to the PNET guest.",
+      "Allocate sufficient RAM for the chosen Leaf/Spine platform and PNET overhead.",
+      "Verify node boot, console, interface mapping and all link capture points before starting DC-01~06."
+    ]
+  },
+  "contentQa": {
+    "status": "PASS",
+    "layout": "PASS",
+    "interaction": "PASS",
+    "javascript": "PASS",
+    "environment": "macOS Chromium 151.0.7922.34",
+    "viewports": [
+      "360x800",
+      "768x1024",
+      "1366x768",
+      "1920x1080"
+    ],
+    "report": "docs/qa/dc-fabric-browser-20261017.md",
+    "note": "Page QA only; does not validate DC-01~06 or Windows/PNET packet forwarding."
+  }
 }
